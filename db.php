@@ -1,10 +1,10 @@
 <?php
 $servername = "127.0.0.1";
-$username = "root";  // 使用你自己的数据库用户名
-$password = "";      // 使用你自己的数据库密码
-$dbname = "profile"; // 使用你的数据库名称
+$username = "root";  // use database username
+$password = "";      // use database password
+$dbname = "profile"; // use databse name
 
-// 创建连接
+// create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
