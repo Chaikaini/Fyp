@@ -577,7 +577,7 @@
 
         // 购物车功能
         document.getElementById("addToCart").addEventListener("click", function() {
-    let selectedChild = document.getElementById("childrenSelect").value;
+    let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
     let subjectName = document.getElementById("subjectName").innerText;
     let subjectPrice = document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim();
     let teacher = document.getElementById("teacher").innerText.replace('Teacher: ', '').trim();
@@ -585,6 +585,7 @@
     let price = parseFloat(subjectPrice);
 
     let subjectImage = document.getElementById("subjectImage").src; // 获取img标签的src属性
+    
 
     if (isNaN(price)) {
         alert("Invalid price value");
@@ -596,8 +597,8 @@
         price: price,
         child: selectedChild,
         image: subjectImage, // 将图片路径添加到cartItem中
-        teacher: teacher,
-        time: time
+        teacher:teacher,
+        time:time
     };
 
     const data = {
@@ -612,23 +613,18 @@
         },
         body: JSON.stringify(data)  // 发送 JSON 格式数据
     })
-    .then(response => response.json())  // 解析服务器返回的 JSON 响应
+    .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            // 仅在成功时显示弹窗
             alert("Item added to cart!");
         } else {
-            // 显示错误信息，不会再有 "localhost says"
             alert("Error: " + data.message);
         }
     })
     .catch(error => {
-        // 这里捕获的是网络错误或其他请求失败情况，不会显示 "localhost says"
         console.error('Error:', error);
-        alert("Network error. Please try again later.");
     });
 });
-
 
 
 
