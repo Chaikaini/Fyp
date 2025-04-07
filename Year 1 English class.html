@@ -363,22 +363,6 @@
     width: 150px;
 }
 
-.toast-message {
-            position: fixed;
-            top: 10%; 
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgb(171, 241, 187); 
-            color: white;
-            padding: 15px 20px;
-            border-radius: 5px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-            font-weight: bold;
-            z-index: 1000;
-            text-align: center;
-            transition: opacity 0.5s ease-in-out;
-        }
 
 
  </style>
@@ -495,8 +479,6 @@
             </div>
     
             <button id="addToCart">Add to Cart</button>
-
-            <div id="successToast" class="toast-message" style="display: none;"></div>
         </div>
     </div>
 
@@ -593,8 +575,8 @@
 });
 
 
-    // 购物车功能
-document.getElementById("addToCart").addEventListener("click", function() {
+        // 购物车功能
+        document.getElementById("addToCart").addEventListener("click", function() {
     let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
     let subjectName = document.getElementById("subjectName").innerText;
     let subjectPrice = document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim();
@@ -603,6 +585,7 @@ document.getElementById("addToCart").addEventListener("click", function() {
     let price = parseFloat(subjectPrice);
 
     let subjectImage = document.getElementById("subjectImage").src; // 获取img标签的src属性
+    
 
     if (isNaN(price)) {
         alert("Invalid price value");
@@ -614,8 +597,8 @@ document.getElementById("addToCart").addEventListener("click", function() {
         price: price,
         child: selectedChild,
         image: subjectImage, // 将图片路径添加到cartItem中
-        teacher: teacher,
-        time: time
+        teacher:teacher,
+        time:time
     };
 
     const data = {
@@ -624,39 +607,26 @@ document.getElementById("addToCart").addEventListener("click", function() {
 
     // 发送 POST 请求到 save_cart.php
     fetch('save_cart.php', {
-    method: 'POST',
-    headers: { 
-        'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-    },
-    body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
-})
-.then(response => response.json())
-.then(data => {
-    if (data.status === "success") {
-        showToast("Item added to cart!");
-    } else {
-        showToast(data.message, true); // 显示错误消息
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    showToast("An error occurred. Please try again.", true);  // 请求错误提示
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
+        },
+        body: JSON.stringify(data)  // 发送 JSON 格式数据
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert("Item added to cart!");
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 });
 
 
-// Toast Notification Function
-function showToast(message, isError = false) {
-    let toast = document.getElementById("successToast");
-    toast.innerText = message;
-    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745"; // 错误时为红色，成功时为绿色
-    toast.style.display = "block";
-    toast.style.opacity = "1";
-
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => { toast.style.display = "none"; }, 500);
-    }, 3000);
-}
 
 
 
