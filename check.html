@@ -533,7 +533,7 @@ button:hover {
                 totalAmount += parseFloat(item.price);
     
                 const courseItem = `
-                    <div class="course-item">
+                    <div class="course-item" data-class-id="${item.class_id}">
                         <img src="${item.image}" alt="${item.subject}">
                         <div>
                             <p><b>${item.subject}</b></p>
@@ -601,7 +601,9 @@ button:hover {
             phone: tngSelected ? phoneNumber : null
         };
         
-
+        const classIds = Array.from(document.querySelectorAll(".course-item"))
+       .map(item => item.getAttribute("data-class-id"))
+       .join(",");
         var totalAmount = document.getElementById("total-amount").innerText.replace("RM", "").trim();
 
         var studentName = document.querySelector(".course-item p:nth-of-type(5)") ? 
@@ -628,6 +630,7 @@ var orderData = {
     total_amount: totalAmount,
     payment_method: paymentMethod,
     time: courseTime,
+    class_id: classIds,
    
 };
 
