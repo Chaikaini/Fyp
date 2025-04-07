@@ -872,12 +872,12 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector("#children-info-content").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
             selectedKidNumber = event.target.getAttribute("data-kidNumber");
-            document.getElementById("deleteConfirmModal").style.display = "flex"; // 显示 Modal
+            document.getElementById("deleteConfirmModal").style.display = "flex"; // show modal
         }
     });
 
     document.getElementById("cancelDeleteBtn").addEventListener("click", function () {
-        document.getElementById("deleteConfirmModal").style.display = "none"; // 取消删除
+        document.getElementById("deleteConfirmModal").style.display = "none"; // cancel delete
     });
 
     document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
@@ -889,7 +889,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("deleteConfirmModal").style.display = "none"; // 关闭 Modal
+                document.getElementById("deleteConfirmModal").style.display = "none"; // close modal
                 if (data.success) {
                     showToast("Children Information deleted successfully!");
                     setTimeout(() => { location.reload(); }, 2000);
