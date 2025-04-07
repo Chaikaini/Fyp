@@ -640,8 +640,8 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="kidNumber">My kid number</label>
-                <input type="text" id="kidNumber" name="kidNumber" required>
+                <label for="editkidNumber">My kid number</label>
+                <input type="text" id="editkidNumber" name="kidNumber" required>
             </div>
             <div class="form-group">
                 <label for="childBirthday">Birthday</label>
@@ -956,7 +956,7 @@ function showToast(message, isError = false) {
 function openEditModal(name, gender, kidNumber, birthday, school, year) {
     document.getElementById("childName").value = name;
     document.getElementById("childGender").value = gender;
-    document.getElementById("kidNumber").value = kidNumber;
+    document.getElementById("editkidNumber").value = kidNumber;
     document.getElementById("childBirthday").value = birthday;
     document.getElementById("childSchool").value = school;
     document.getElementById("childYear").value = year;
