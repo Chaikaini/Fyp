@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `orders` (
   `id` int(11) NOT NULL,
   `order_id` varchar(20) NOT NULL,
+  `class_id` varchar(20) NOT NULL,
   `email` varchar(255) NOT NULL,
   `student_name` varchar(255) DEFAULT NULL,
   `course_name` varchar(255) DEFAULT NULL,

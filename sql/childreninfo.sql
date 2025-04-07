@@ -31,7 +31,7 @@ CREATE TABLE `childreninfo` (
   `email` varchar(255) NOT NULL,
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `gender` enum('boy','girl') DEFAULT NULL,
+  `gender` enum('Male','Female') DEFAULT NULL,
   `kidNumber` varchar(20) NOT NULL,
   `birthday` date DEFAULT NULL,
   `school` varchar(100) DEFAULT NULL,
@@ -43,8 +43,8 @@ CREATE TABLE `childreninfo` (
 --
 
 INSERT INTO `childreninfo` (`email`, `id`, `name`, `gender`, `kidNumber`, `birthday`, `school`, `year`) VALUES
-('12345@gmail.com', 1, 'Yuna', 'girl', '170909-01-7788', '2017-09-09', 'SJKC Kulai 2', 'Year 1'),
-('12345@gmail.com', 2, 'John Doe', 'boy', '170115-01-2634', '2017-01-15', 'SJKC Kulai 2', 'Year 1');
+('12345@gmail.com', 1, 'Yuna', 'Female', '170909-01-7788', '2017-09-09', 'SJKC Kulai 2', 'Year 1'),
+('12345@gmail.com', 2, 'John Doe', 'Male', '170115-01-2634', '2017-01-15', 'SJKC Kulai 2', 'Year 1');
 
 --
 -- Indexes for dumped tables

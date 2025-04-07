@@ -44,10 +44,10 @@ CREATE TABLE `admin_class` (
 INSERT INTO `admin_class` (`class_id`, `subject_id`, `year`, `day`, `time`, `teacher`, `capacity`) VALUES
 ('Eng0001', 11245, 'Year 1', 'Monday', '2:30pm - 4:30pm', 'Mr. John', '0/30'),
 ('Eng2001', 22534, 'Year 2', 'Monday', '5:00pm - 7:00pm', 'Mr. John', '0/30'),
-('Mat0003', 11132, 'Year 1', 'Wednesday', '2:30pm - 4:30pm', 'Mr. David', '3/30'),
-('Mat2003', 22134, 'Year 2', 'Wednesday', '5:00pm - 7:00pm', 'Mr. David', '0/30'),
-('Mly0002', 11351, 'Year 1', 'Tuesday', '2:30pm - 4:30pm', 'Ms. Lily', '0/30'),
-('Mly2002', 22345, 'Year 2', 'Tuesday', '5:00pm - 7:00pm', 'Ms. Lily', '1/30');
+('Mat0001', 11132, 'Year 1', 'Wednesday', '2:30pm - 4:30pm', 'Mr. David', '3/30'),
+('Mat2001', 22134, 'Year 2', 'Wednesday', '5:00pm - 7:00pm', 'Mr. David', '0/30'),
+('Mly0001', 11351, 'Year 1', 'Tuesday', '2:30pm - 4:30pm', 'Ms. Lily', '0/30'),
+('Mly2001', 22345, 'Year 2', 'Tuesday', '5:00pm - 7:00pm', 'Ms. Lily', '1/30');
 
 --
 -- Triggers `admin_class`
