@@ -295,25 +295,9 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Yuna</td>
-                        <td>Girl</td>
-                        <td>
-                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn ms-2"></i>
-                        </td>
-                    </tr>
-                    <tr>
-                      <td>2</td>
-                      <td>John Doe</td>
-                      <td>Boy</td>
-                      <td>
-                          <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn ms-2"></i>
-                      </td>
-                  </tr>
-                  
-                    
+                <tbody id="student-list">
+               <!-- 学生列表将通过 AJAX 动态加载 -->
+ 
                 </tbody>
             </table>
         </div>
@@ -406,6 +390,43 @@ document.getElementById("search-btn").addEventListener("click", function() {
         })
         .catch(error => console.error("Error:", error));
 });
+
+
+function updateCapacityAndShowStudents(classId) {
+    fetch('adminclass_update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'class_id=' + encodeURIComponent(classId)
+    })
+    .then(response => response.json())
+    .then(data => {
+        const studentList = document.getElementById('student-list');
+        studentList.innerHTML = '';
+
+        data.students.forEach((student, index) => {
+            const row = `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${student.student_name}</td>
+                    <td>${student.gender}</td>
+                    <td>
+                        <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn ms-2"></i>
+                    </td>
+                </tr>
+            `;
+            studentList.innerHTML += row;
+        });
+
+        // 动态更新页面中容量信息
+        const capacityElement = document.getElementById('capacity-' + classId);
+        if (capacityElement) {
+            capacityElement.textContent = data.capacity;
+        }
+
+        openModal(); // 打开模态框
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 </script>
 
