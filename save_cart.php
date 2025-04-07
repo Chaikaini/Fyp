@@ -38,6 +38,18 @@ if (!empty($cart)) {
         $teacher = $item['teacher'] ?? ''; // 获取教师名称
         $time = $item['time'] ?? ''; // 获取课程时间
         
+        // 检查该商品是否已经存在于购物车中
+        $stmt = $conn->prepare("SELECT id FROM cart_items WHERE subject = ? AND child = ? AND teacher = ? AND time = ?");
+        $stmt->bind_param("ssss", $subject, $child, $teacher, $time);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            // 商品已经存在
+            echo json_encode(['status' => 'error', 'message' => 'This item is already in the cart.']);
+            exit;
+        }
+        
         // 插入数据到数据库
         $stmt = $conn->prepare("INSERT INTO cart_items (subject, price, child, image, teacher, time) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sdssss", $subject, $price, $child, $image, $teacher, $time);

@@ -624,25 +624,25 @@ document.getElementById("addToCart").addEventListener("click", function() {
 
     // 发送 POST 请求到 save_cart.php
     fetch('save_cart.php', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-        },
-        body: JSON.stringify(data)  // 发送 JSON 格式数据
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            showToast("Item added to cart!");  // 显示成功的Toast消息
-        } else {
-            showToast("Error: " + data.message, true);  // 显示错误的Toast消息
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast("An error occurred. Please try again.", true);  // 显示请求错误的Toast消息
-    });
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
+    },
+    body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
+})
+.then(response => response.json())
+.then(data => {
+    if (data.status === "success") {
+        showToast("Item added to cart!");
+    } else {
+        showToast(data.message, true); // 显示错误消息
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    showToast("An error occurred. Please try again.", true);  // 请求错误提示
 });
+
 
 // Toast Notification Function
 function showToast(message, isError = false) {
