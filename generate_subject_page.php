@@ -1,8 +1,15 @@
 <?php
-include('db_connect.php'); // 您的数据库连接文件
+include('db_connect.php');
 
-// 1. 获取传入的科目ID
-$subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
+// 1. 获取传入的科目ID（支持 CLI 和 HTTP 请求）
+if (php_sapi_name() === 'cli') {
+    // 命令行调用方式
+    $subject_id = isset($argv[1]) ? (int)$argv[1] : 0;
+} else {
+    // HTTP 请求方式
+    $subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
+}
+
 if (!$subject_id) die("Error: Missing subject_id");
 
 // 2. 从数据库读取科目数据
@@ -12,10 +19,10 @@ $stmt->bind_param("i", $subject_id);
 $stmt->execute();
 $subject = $stmt->get_result()->fetch_assoc();
 
-if (!$subject) die("Error: Subject not found");
+if (!$subject) die("Error: Subject not found (ID: $subject_id)");
 
-// 3. 动态生成 HTML（保留PHP功能）
-ob_start(); // 开启输出缓冲
+// 3. 动态生成 HTML
+ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -431,25 +438,70 @@ ob_start(); // 开启输出缓冲
     </div>
 
     <!-- 动态替换的部分 -->
+
+    <!-- 面包屑导航 -->
     <div class="breadcrumb-container">
         <h2><?= htmlspecialchars($subject['subject']) ?></h2>
-        <!-- 面包屑导航 -->
+        <ul class="breadcrumb">
+            <li><a href="member.html">Home</a></li>
+            <li>&gt;</li>
+            <li><a href="subject.html">Subject</a></li>
+            <li>&gt;</li>
+            <li><?= htmlspecialchars($subject['subject']) ?></li>
+        </ul>
     </div>
 
-    <div class="container">
-        <!-- 科目图片和基本信息 -->
-        <div class="subject-image">
-            <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image">
+ <!-- 主要内容 -->
+    <div class="container my-5">
+        <div class="class-details-container">
+            <div class="subject-image">
+                <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image" id="subjectImage">
+            </div>
+            <div class="class-details">
+                <h2 id="subjectName"><?= htmlspecialchars($subject['subject']) ?></h2>
+                
+                <div class="rating-container">
+                    <div class="stars-container">
+                        <!-- 评分星星 -->
+                    </div>
+                    <div class="rating-text">
+                        <span class="rating-number"><?= htmlspecialchars($subject['rating']) ?></span>
+                    </div>
+                </div>
+                
+                <div class="class-info">
+                    <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($subject['teacher']) ?></p>
+                    <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['price']) ?></p>
+                </div>
+
+                <!-- 时间选择部分 -->
+                <div class="time-slot-container">
+                    <div class="time-slot green" id="partA">
+                        <strong>Part A</strong> (January - June)
+                    </div>
+                    <div class="time-slot gray" id="partB">
+                        <strong>Part B</strong> (July - December) (No open)
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- 从数据库读取的 Subject Overview -->
+        <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
             <p><?= nl2br(htmlspecialchars($subject['description'])) ?></p>
         </div>
 
-        <!-- 保留原有的 PHP 动态功能（如评论） -->
-        <?php include('fetch_reviews.php'); ?>
+        <!-- 评论部分 -->
+        <div class="review-section">
+            <h2>Parent Reviews</h2>
+            <div id="review-list"></div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn">
+        <!-- 页脚内容 -->
     </div>
 
     <!-- 其他部分保持不变 -->
@@ -812,7 +864,7 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 </body>
 </html>
 <?php
-$html = ob_get_clean(); // 获取生成的HTML
+$html = ob_get_clean();
 
 // 4. 保存为静态文件
 $filename = str_replace(' ', '_', $subject['subject']) . '_class.html';
@@ -824,5 +876,5 @@ $stmt = $conn->prepare($update);
 $stmt->bind_param("si", $filename, $subject_id);
 $stmt->execute();
 
-echo "Generated: " . $filename;
+echo "Page generated: $filename";
 ?>
