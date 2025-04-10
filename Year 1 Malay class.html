@@ -363,7 +363,22 @@
     width: 150px;
 }
 
-
+.toast-message {
+            position: fixed;
+            top: 10%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgb(171, 241, 187); 
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
 
  </style>
 </head>
@@ -479,6 +494,8 @@
             </div>
     
             <button id="addToCart">Add to Cart</button>
+
+            <div id="successToast" class="toast-message" style="display: none;"></div>
         </div>
     </div>
     
@@ -593,47 +610,72 @@
     let price = parseFloat(subjectPrice);
 
     let subjectImage = document.getElementById("subjectImage").src; // 获取img标签的src属性
-    
 
     if (isNaN(price)) {
         alert("Invalid price value");
         return;
     }
 
+    // 创建一个购物车商品对象
     const cartItem = {
         subject: subjectName,
         price: price,
         child: selectedChild,
-        image: subjectImage, // 将图片路径添加到cartItem中
-        teacher:teacher,
-        time:time
+        image: subjectImage,
+        teacher: teacher,
+        time: time
     };
 
-    const data = {
-        cart: [cartItem]  // 确保发送的结构包含 cart 数组
-    };
+    // 获取购物车中的现有商品
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // 发送 POST 请求到 save_cart.php
-    fetch('save_cart.php', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-        },
-        body: JSON.stringify(data)  // 发送 JSON 格式数据
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            alert("Item added to cart!");
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    // 检查当前商品是否已在购物车中
+    let itemExists = cart.some(item => item.subject === cartItem.subject && item.child === cartItem.child && item.teacher === cartItem.teacher && item.time === cartItem.time);
+
+    if (itemExists) {
+        showToast("This item is already in your cart!", true); // 如果已存在，显示提示消息
+    } else {
+        // 如果不存在，将商品添加到购物车
+        cart.push(cartItem);
+        localStorage.setItem("cart", JSON.stringify(cart)); // 将购物车更新到 localStorage
+
+        // 发送 POST 请求到 save_cart.php
+        fetch('save_cart.php', {
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
+    },
+    body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
+})
+.then(response => response.json())
+.then(data => {
+    if (data.status === "success") {
+        showToast("Item added to cart!");
+    } else {
+        showToast(data.message, true); // 显示错误消息
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    showToast("An error occurred. Please try again.", true);  // 请求错误提示
 });
 
+    }
+});
+
+// Toast Notification Function
+function showToast(message, isError = false) {
+    let toast = document.getElementById("successToast");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745"; // 错误时为红色，成功时为绿色
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3000);
+}
 
 
         
