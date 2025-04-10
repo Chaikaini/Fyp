@@ -3,30 +3,38 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 1. 引入数据库连接
-include('db1.php');
+// 1. 引入数据库连接文件
+include('db1.php');  // 确保数据库连接成功
 
-// 2. 查询所有未生成页面的科目
-$query = "SELECT * FROM admin_subject WHERE page_generated = 0";
-$result = $conn->query($query);
-
-// 检查是否有科目需要处理
-if ($result->num_rows === 0) {
-    die("✅ 所有科目页面都已经生成，无需重复生成。");
+// 2. 获取科目ID（支持 CLI 和 HTTP 请求）
+$subject_id = 0;
+if (php_sapi_name() === 'cli') {
+    // 从命令行参数中获取科目ID
+    $subject_id = isset($argv[1]) ? (int)$argv[1] : 0;
+} else {
+    // 从 URL 参数中获取科目ID
+    $subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
 }
 
-// 3. 遍历每一个未生成页面的科目
-while ($subject = $result->fetch_assoc()) {
-    $subject_id = $subject['subject_ID'];
-    $subject_name = $subject['subject'];
+if (!$subject_id) {
+    die("Error: 必须提供科目ID");
+}
 
-    echo "🔄 正在生成科目：$subject_name (ID: $subject_id)<br>";
+// 3. 从数据库读取科目信息
+$query = "SELECT * FROM admin_subject WHERE subject_ID = ?";
+$stmt = $conn->prepare($query);  // 使用 $conn 执行查询
+$stmt->bind_param("i", $subject_id);  // 绑定参数
+$stmt->execute();
+$subject = $stmt->get_result()->fetch_assoc();  // 获取查询结果
 
-    // 4. 启动缓冲区开始捕捉 HTML 内容
-    ob_start();
+if (!$subject) {
+    die("Error: 找不到ID为 $subject_id 的科目");
+}
 
-    // ========== 这里是你要输出的 HTML 内容，可以根据实际需要修改 ==========
-    ?>
+// 4. 动态生成 HTML 内容
+ob_start();  // 启动输出缓冲区
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -870,26 +878,22 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 </body>
 </html>
 <?php
-    // ==========================================================
 
-    // 5. 获取 HTML 内容并保存为文件
-    $html_content = ob_get_clean();
-    $filename = str_replace(' ', '_', $subject_name) . '_class.html';
+// 5. 保存为静态 HTML 文件
+$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';  // 文件名
+$html_content = ob_get_clean();  // 获取输出缓冲区中的内容
 
-    if (file_put_contents($filename, $html_content)) {
-        echo "✅ 页面已生成: <a href='$filename' target='_blank'>$filename</a><br>";
+if (file_put_contents($filename, $html_content)) {
+    // 页面生成成功
+    echo "Page can run : <a href='$filename'>$filename</a>";
 
-        // 6. 更新数据库标记为已生成
-        $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
-        $stmt = $conn->prepare($update);
-        $stmt->bind_param("si", $filename, $subject_id);
-        $stmt->execute();
-    } else {
-        echo "❌ 页面生成失败: $filename<br>";
-    }
-
-    echo "<hr>";
+    // 6. 更新数据库标记，记录页面生成路径
+    $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
+    $stmt = $conn->prepare($update);
+    $stmt->bind_param("si", $filename, $subject_id);
+    $stmt->execute();  // 执行更新
+} else {
+    // 页面生成失败
+    die("Error: Can not write page");
 }
-
-echo "🎉 所有未生成页面的科目处理完成！";
 ?>
