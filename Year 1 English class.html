@@ -530,6 +530,8 @@
     </div>
 
     <script>
+let selectedClassInfo = null;
+
 document.addEventListener("DOMContentLoaded", function () {
     fetch('get_classes.php')
         .then(response => response.json())
@@ -548,8 +550,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('partB').classList.remove('disabled');
             }
 
+            // 点击 Part A
             document.getElementById('partA').addEventListener('click', function () {
                 if (!partA) return;
+                selectedClassInfo = {
+                    class_id: partA.class_id,
+                    capacity: partA.capacity
+                };
                 document.getElementById('popupMonth').innerText = partA.month;
                 document.getElementById('popupTime').innerText = partA.time;
                 const [enrolled, total] = partA.capacity.split('/');
@@ -557,8 +564,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('popup').style.display = 'flex';
             });
 
+            // 点击 Part B
             document.getElementById('partB').addEventListener('click', function () {
                 if (!partB || partB.status !== 'available') return;
+                selectedClassInfo = {
+                    class_id: partB.class_id,
+                    capacity: partB.capacity
+                };
                 document.getElementById('popupMonth').innerText = partB.month;
                 document.getElementById('popupTime').innerText = partB.time;
                 const [enrolled, total] = partB.capacity.split('/');
@@ -572,6 +584,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error('Error:', error));
 });
+
 
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -609,13 +622,16 @@ document.getElementById("addToCart").addEventListener("click", function() {
 
     // 创建一个购物车商品对象
     const cartItem = {
-        subject: subjectName,
-        price: price,
-        child: selectedChild,
-        image: subjectImage,
-        teacher: teacher,
-        time: time
-    };
+    subject: subjectName,
+    price: price,
+    child: selectedChild,
+    image: subjectImage,
+    teacher: teacher,
+    time: time,
+    class_id: selectedClassInfo?.class_id || null,
+    capacity: selectedClassInfo?.capacity || null
+};
+
 
     // 获取购物车中的现有商品
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
