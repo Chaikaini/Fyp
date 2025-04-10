@@ -369,23 +369,32 @@ function loadCartData() {
 }
 
 function removeFromCart(itemId) {
+    // 获取当前 localStorage 中的 cart
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // 移除本地存储中对应 ID 的项
+    cart = cart.filter(item => item.id !== itemId); // 注意需要每个 cartItem 有 id
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // 发请求删除数据库里的那条记录
     fetch('remove_cart.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: itemId }) // 发送删除项的 id
+        body: JSON.stringify({ id: itemId })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            loadCartData(); // 重新加载购物车数据
+            loadCartData(); // 重新加载页面上的购物车
         } else {
             alert("Error: " + data.message);
         }
     })
     .catch(error => console.error('Error:', error));
 }
+
 
 document.getElementById("checkoutButton").addEventListener("click", function() {
     window.location.href = "check.html";  // 跳转到 check.html 页面
