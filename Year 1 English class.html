@@ -591,6 +591,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
        // 购物车功能
+// 购物车功能
 document.getElementById("addToCart").addEventListener("click", function() {
     let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
     let subjectName = document.getElementById("subjectName").innerText;
@@ -625,31 +626,35 @@ document.getElementById("addToCart").addEventListener("click", function() {
     if (itemExists) {
         showToast("This item is already in your cart!", true); // 如果已存在，显示提示消息
     } else {
-        // 如果不存在，将商品添加到购物车
-        cart.push(cartItem);
-        localStorage.setItem("cart", JSON.stringify(cart)); // 将购物车更新到 localStorage
-
-        // 发送 POST 请求到 save_cart.php
+        // 如果不存在，发送 POST 请求到 save_cart.php
         fetch('save_cart.php', {
-    method: 'POST',
-    headers: { 
-        'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-    },
-    body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
-})
-.then(response => response.json())
-.then(data => {
-    if (data.status === "success") {
-        showToast("Item added to cart!");
-    } else {
-        showToast(data.message, true); // 显示错误消息
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    showToast("An error occurred. Please try again.", true);  // 请求错误提示
-});
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
+            },
+            body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // 👉 如果服务器返回了数据库中的 id，就添加到 cartItem 上
+                if (data.id) {
+                    cartItem.id = data.id;
+                }
 
+                // ✅ 将商品添加到购物车并更新 localStorage
+                cart.push(cartItem);
+                localStorage.setItem("cart", JSON.stringify(cart)); // 更新购物车
+
+                showToast("Item added to cart!");
+            } else {
+                showToast(data.message, true); // 显示错误消息
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast("An error occurred. Please try again.", true);  // 请求错误提示
+        });
     }
 });
 
