@@ -369,17 +369,25 @@ function loadCartData() {
 }
 
 function removeFromCart(itemId) {
+    // 获取当前 localStorage 中的 cart
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // 移除本地存储中对应 ID 的项
+    cart = cart.filter(item => item.id !== itemId); // 注意需要每个 cartItem 有 id
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // 发请求删除数据库里的那条记录
     fetch('remove_cart.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: itemId }) // 发送删除项的 id
+        body: JSON.stringify({ id: itemId })
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            loadCartData(); // 重新加载购物车数据
+            loadCartData(); // 重新加载页面上的购物车
         } else {
             alert("Error: " + data.message);
         }
@@ -387,64 +395,10 @@ function removeFromCart(itemId) {
     .catch(error => console.error('Error:', error));
 }
 
+
 document.getElementById("checkoutButton").addEventListener("click", function() {
     window.location.href = "check.html";  // 跳转到 check.html 页面
 });
-
-
-
-/* function calculatePrice(course) {
-    const currentMonth = new Date().getMonth();
-    const monthsPassed = (currentMonth - course.startMonth + 12) % 12; 
-    const remainingMonths = Math.max(6 - monthsPassed, 0); 
-    return remainingMonths * course.price;
-}
-
-
-function updateTotalPrice() {
-    const selectedItems = document.querySelectorAll('.select-item:checked');
-    let total = 0;
-
-    selectedItems.forEach(item => {
-        const index = item.dataset.index;
-        total += calculatePrice(cartItems[index]);
-    });
-
-    document.getElementById("total-price").textContent = total;
-}
-
-
-function toggleSelection(index) {
-    updateTotalPrice();
-}
-
-
-function editItem(index) {
-    const selectedCourse = cartItems[index];
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    document.getElementById("popupMonth").textContent = monthNames[selectedCourse.startMonth];
-    document.getElementById("popupTime").textContent = selectedCourse.time;
-    document.getElementById("popupCapacity").textContent = selectedCourse.capacity;
-    document.querySelector(".popup-info").style.display = "block";
-}
-
-
-function removeFromCart(index) {
-    cartItems.splice(index, 1); 
-    updateCartDisplay();  // 这里改为 updateCartDisplay()
-    updateTotalPrice(); 
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateCartDisplay();  // 改成 updateCartDisplay()
-});
-
-
-
-document.querySelector(".popup-close").addEventListener("click", () => {
-    document.querySelector(".popup-info").style.display = "none";
-});   */
 
 
 </script>

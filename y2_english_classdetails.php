@@ -1,9 +1,9 @@
 <?php
-// 连接到数据库
+// 连接到新的数据库
 $servername = "localhost";
 $username = "root"; // 替换为你的数据库用户名
 $password = "";     // 替换为你的数据库密码
-$dbname = "tuition_centre"; // 替换为你的数据库名
+$dbname = "admin";  // 新的数据库名
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -12,9 +12,16 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 获取课程数据，根据 class_name 和 part 来过滤
-$class_name = 'Year 2 English'; // 你可以根据需要修改这个值
-$sql = "SELECT * FROM classdetail WHERE class_name = '$class_name'";  // 查询指定课程的 Part A 和 Part B
+// 设置要查询的课程条件
+$year = 'Year 2';
+$subject_id = 22534; // 例如 English 的 subject_id
+
+// 查询符合条件的课程 Part A 和 Part B
+$sql = "SELECT * FROM admin_class 
+        WHERE year = '$year' 
+        AND subject_id = $subject_id 
+        AND part IN ('Part A', 'Part B')";
+
 $result = $conn->query($sql);
 
 // 返回数据
