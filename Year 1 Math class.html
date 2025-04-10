@@ -541,7 +541,7 @@
 
   // 页面加载时获取课程状态（你可以从后台获取数据）
   document.addEventListener("DOMContentLoaded", function () {
-    fetch('y1_math_classdetails.php')
+    fetch('get_classes.php')
         .then(response => response.json())
         .then(data => {
             const partA = data.find(c => c.part === 'Part A');
