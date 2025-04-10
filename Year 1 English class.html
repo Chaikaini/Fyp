@@ -531,7 +531,7 @@
 
     <script>
 document.addEventListener("DOMContentLoaded", function () {
-    fetch('y1_english_classdetails.php')
+    fetch('get_classes.php')
         .then(response => response.json())
         .then(data => {
             const partA = data.find(c => c.part === 'Part A');
