@@ -11,10 +11,8 @@ $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
 // 检查连接是否成功
 if ($conn->connect_error) {
-    die("Connection Fail: " . $conn->connect_error);
-}
-
+    die("Connection Fail: " . $conn->connect_error);  // 如果连接失败，显示错误信息
 } else {
-    echo "Connection  Successful！";  // 显示连接成功的消息
+    echo "Connection Successful！";  // 显示连接成功的消息
 }
 ?>
