@@ -873,7 +873,7 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 <?php
 // 5. 保存为静态文件
 $filename = str_replace(' ', '_', $subject['subject']) . '_class.html';
-if (file_put_contents($filename, ob_get_clean()) {
+if (file_put_contents($filename, ob_get_clean())) {
     // 6. 更新数据库标记
     $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
     $stmt = $conn->prepare($update);
