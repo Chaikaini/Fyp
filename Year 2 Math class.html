@@ -363,6 +363,22 @@
     width: 150px;
 }
 
+.toast-message {
+            position: fixed;
+            top: 10%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgb(171, 241, 187); 
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
 
  </style>
 </head>
@@ -478,6 +494,8 @@
             </div>
     
             <button id="addToCart">Add to Cart</button>
+
+            <div id="successToast" class="toast-message" style="display: none;"></div>
         </div>
     </div>
 
@@ -503,7 +521,7 @@
                 <label for="yearFilter">Filter by Year: </label>
                 <select id="yearFilter">
                     <option value="All">All</option>
-                    <option value="2024">2025</option>
+                    <option value="2025">2025</option>
                     <option value="2024">2024</option>
                     <option value="2023">2023</option>
                 </select>
@@ -519,50 +537,47 @@
     <script>
 
             // 页面加载时获取课程状态（你可以从后台获取数据）
-            document.addEventListener("DOMContentLoaded", function() {
-            fetch('y2_math_classdetails.php')  // PHP 查询返回课程数据
-                .then(response => response.json())
-                .then(data => {
-                    // 假设我们获取的是 Year 2 Math 类别
-                    const partA = data.find(classDetail => classDetail.part === 'Part A');
-                    const partB = data.find(classDetail => classDetail.part === 'Part B');
+            fetch('y2_math_classdetails.php')
+        .then(response => response.json())
+        .then(data => {
+            const partA = data.find(c => c.part === 'Part A');
+            const partB = data.find(c => c.part === 'Part B');
 
-                    // 更新 Part A 和 Part B 的状态
-                    if (partA && partA.status === 'available') {
-                        document.getElementById('partA').classList.remove('gray');
-                        document.getElementById('partA').classList.add('green');
-                    }
+            if (partA && partA.status === 'available') {
+                document.getElementById('partA').classList.remove('gray');
+                document.getElementById('partA').classList.add('green');
+            }
 
-                    if (partB && partB.status === 'unavailable') {
-                        document.getElementById('partB').classList.add('disabled');
-                    } else {
-                        document.getElementById('partB').classList.remove('disabled');
-                    }
+            if (partB && partB.status === 'unavailable') {
+                document.getElementById('partB').classList.add('disabled');
+            } else if (partB) {
+                document.getElementById('partB').classList.remove('disabled');
+            }
 
-                    // 点击 Part A 和 Part B 处理弹出内容
-                    document.getElementById('partA').addEventListener('click', function() {
-                        document.getElementById('popupMonth').innerText = partA.month;
-                        document.getElementById('popupTime').innerText = partA.time;
-                        document.getElementById('popupchildren').innerText = `${partA.enrolled} / ${partA.capacity}`;
-                        document.getElementById('popup').style.display = 'flex';
-                    });
+            document.getElementById('partA').addEventListener('click', function () {
+                if (!partA) return;
+                document.getElementById('popupMonth').innerText = partA.month;
+                document.getElementById('popupTime').innerText = partA.time;
+                const [enrolled, total] = partA.capacity.split('/');
+                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
+                document.getElementById('popup').style.display = 'flex';
+            });
 
-                    document.getElementById('partB').addEventListener('click', function() {
-                        if (partB.status === 'available') {
-                            document.getElementById('popupMonth').innerText = partB.month;
-                            document.getElementById('popupTime').innerText = partB.time;
-                            document.getElementById('popupchildren').innerText = `${partB.enrolled} / ${partB.capacity}`;
-                            document.getElementById('popup').style.display = 'flex';
-                        }
-                    });
+            document.getElementById('partB').addEventListener('click', function () {
+                if (!partB || partB.status !== 'available') return;
+                document.getElementById('popupMonth').innerText = partB.month;
+                document.getElementById('popupTime').innerText = partB.time;
+                const [enrolled, total] = partB.capacity.split('/');
+                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
+                document.getElementById('popup').style.display = 'flex';
+            });
 
-                    // 关闭弹窗
-                    document.getElementById('closePopup').addEventListener('click', function() {
-                        document.getElementById('popup').style.display = 'none';
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        });
+            document.getElementById('closePopup').addEventListener('click', function () {
+                document.getElementById('popup').style.display = 'none';
+            });
+        })
+        .catch(error => console.error('Error:', error));
+});
 
         document.addEventListener("DOMContentLoaded", function() {
     let addToCartButton = document.getElementById("addToCart");
@@ -590,46 +605,73 @@
     let price = parseFloat(subjectPrice);
 
     let subjectImage = document.getElementById("subjectImage").src; // 获取img标签的src属性
-    
 
     if (isNaN(price)) {
         alert("Invalid price value");
         return;
     }
 
+    // 创建一个购物车商品对象
     const cartItem = {
         subject: subjectName,
         price: price,
         child: selectedChild,
-        image: subjectImage, // 将图片路径添加到cartItem中
-        teacher:teacher,
-        time:time
+        image: subjectImage,
+        teacher: teacher,
+        time: time
     };
 
-    const data = {
-        cart: [cartItem]  // 确保发送的结构包含 cart 数组
-    };
+    // 获取购物车中的现有商品
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // 发送 POST 请求到 save_cart.php
-    fetch('save_cart.php', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-        },
-        body: JSON.stringify(data)  // 发送 JSON 格式数据
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            alert("Item added to cart!");
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+    // 检查当前商品是否已在购物车中
+    let itemExists = cart.some(item => item.subject === cartItem.subject && item.child === cartItem.child && item.teacher === cartItem.teacher && item.time === cartItem.time);
+
+    if (itemExists) {
+        showToast("This item is already in your cart!", true); // 如果已存在，显示提示消息
+    } else {
+        // 如果不存在，将商品添加到购物车
+        cart.push(cartItem);
+        localStorage.setItem("cart", JSON.stringify(cart)); // 将购物车更新到 localStorage
+
+        // 发送 POST 请求到 save_cart.php
+        fetch('save_cart.php', {
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
+    },
+    body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
+})
+.then(response => response.json())
+.then(data => {
+    if (data.status === "success") {
+        showToast("Item added to cart!");
+    } else {
+        showToast(data.message, true); // 显示错误消息
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    showToast("An error occurred. Please try again.", true);  // 请求错误提示
 });
+
+    }
+});
+
+// Toast Notification Function
+function showToast(message, isError = false) {
+    let toast = document.getElementById("successToast");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745"; // 错误时为红色，成功时为绿色
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3000);
+}
+
 
         
 document.addEventListener("DOMContentLoaded", function() {
