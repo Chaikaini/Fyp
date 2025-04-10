@@ -938,19 +938,7 @@ document.getElementById("childForm").addEventListener("submit", function (event)
     .catch(error => console.error("Error:", error));
 });
 
-// Toast Notification Function
-function showToast(message, isError = false) {
-    let toast = document.getElementById("successToast");
-    toast.innerText = message;
-    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-    toast.style.display = "block";
-    toast.style.opacity = "1";
 
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => { toast.style.display = "none"; }, 500);
-    }, 3000);
-}
 
 
 function openEditModal(name, gender, kidNumber, birthday, school, year) {
@@ -997,19 +985,7 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     .catch(error => console.error("Error:", error));
 });
 
-// Toast Notification 
-function showToast(message, isError = false) {
-    let toast = document.getElementById("successToast");
-    toast.innerText = message;
-    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-    toast.style.display = "block";
-    toast.style.opacity = "1";
 
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => { toast.style.display = "none"; }, 500);
-    }, 3000);
-}
 
 
 document.addEventListener("DOMContentLoaded", function () {

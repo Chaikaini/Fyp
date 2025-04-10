@@ -171,6 +171,51 @@
           cursor:pointer !important;
            
         }
+        .success-message {
+        background-color: #d4edda;
+        color:rgb(41, 172, 220)；
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        }
+
+        .toast-message {
+        position: fixed;
+        top: 10%; 
+        left: 50%;
+        transform: translateX(-50%);
+        background-color:rgb(171, 241, 187); 
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        font-weight: bold;
+        z-index: 1000;
+        text-align: center;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+        .modal-d {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+       }
+       .modal-dcontent {
+       background-color: white;
+       padding: 20px;
+       border-radius: 8px;
+       text-align: center;
+       width: 300px;
+       }
    
   </style>
 </head>
@@ -281,6 +326,19 @@
         </form>
     </div>
 </div>
+ <div id="successToast" class="toast-message" style="display: none;"></div>
+
+
+ <!-- Delete Class Confirm Modal -->
+<div id="deleteClassConfirmModal" class="modal-d">
+    <div class="modal-dcontent">
+        <h4>Confirm Deletion</h4>
+        <p>Are you sure you want to delete this class?</p>
+        <button id="confirmDeleteClassBtn" class="btn btn-danger">Delete</button>
+        <button id="cancelDeleteClassBtn" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
 
   <!-- Edit Modal -->
   <div id="editModal" class="modal">
@@ -348,10 +406,36 @@
     });
   }
 
-  document.getElementById("addClassForm").onsubmit = function() {
-    
-    document.getElementById("addClassModal").style.display = "none";
-  }
+ 
+
+  document.getElementById("addClassForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    let formData = new FormData(this);
+
+    fetch("admin_addclass.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message);
+            document.getElementById("addClassModal").style.display = "none";
+            document.getElementById("addClassForm").reset();
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showToast(data.message, true);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("An error occurred. Please try again.", true);
+    });
+});
+
+
+
 
   function openModal() {
     document.getElementById('editModal').style.display = 'block';
@@ -361,27 +445,48 @@
     document.getElementById('editModal').style.display = 'none';
   }
 
-  document.addEventListener("DOMContentLoaded", function() {
-   
-    document.querySelectorAll(".delete-btn").forEach(button => {
-        button.addEventListener("click", function() {
-            let classId = this.getAttribute("data-classid"); 
-            if (confirm("Are you sure you want to delete this class?")) {
-                fetch("admin_deleteclass.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: "class_id=" + classId
-                })
-                .then(response => response.text())
-                .then(data => {
-                    alert(data); 
-                    location.reload(); 
-                })
-                .catch(error => console.error("Error:", error));
-            }
-        });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let selectedClassId = null;
+
+    // delete function
+    document.querySelector("tbody").addEventListener("click", function (event) {
+        if (event.target.classList.contains("delete-btn")) {
+            selectedClassId = event.target.getAttribute("data-classid");
+            document.getElementById("deleteClassConfirmModal").style.display = "flex";
+        }
+    });
+
+    document.getElementById("cancelDeleteClassBtn").addEventListener("click", function () {
+        document.getElementById("deleteClassConfirmModal").style.display = "none";
+    });
+
+    document.getElementById("confirmDeleteClassBtn").addEventListener("click", function () {
+        if (selectedClassId) {
+            fetch("admin_deleteclass.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "class_id=" + encodeURIComponent(selectedClassId)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("deleteClassConfirmModal").style.display = "none";
+                if (data.success) {
+                    showToast("Class deleted successfully!");
+                    setTimeout(() => { location.reload(); }, 2000);
+                } else {
+                    showToast("Error: " + data.error, true);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("An error occurred while deleting the class.", true);
+            });
+        }
     });
 });
+
 
 
 document.getElementById("search-btn").addEventListener("click", function() {
@@ -394,6 +499,20 @@ document.getElementById("search-btn").addEventListener("click", function() {
         })
         .catch(error => console.error("Error:", error));
 });
+
+// Toast Notification Function
+function showToast(message, isError = false) {
+    let toast = document.getElementById("successToast");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? "#dc3545" : "#007bff";
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3000);
+}
 
 
 function updateCapacityAndShowStudents(classId) {

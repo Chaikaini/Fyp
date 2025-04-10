@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json'); // 告诉浏览器返回的是 JSON
 
 $servername = "localhost";
 $username = "root"; 
@@ -7,14 +8,12 @@ $dbname = "admin";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo json_encode(["success" => false, "message" => "Database connection failed: " . $conn->connect_error]);
+    exit;
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  
     $subjectid = $_POST["subjectid"];
     $classid = $_POST["classid"];
     $year = $_POST["year"];
@@ -25,15 +24,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $enrollment = $_POST["enrollment"];
     $status = $_POST["status"];
 
-   
-$sql = "INSERT INTO admin_class (subject_id, class_id, year, part, month, time, teacher, capacity, status) 
-        VALUES ('$subjectid', '$classid', '$year', '$part', '$month', '$time', '$teacher', '$enrollment', '$status')";
+    $sql = "INSERT INTO admin_class (subject_id, class_id, year, part, month, time, teacher, capacity, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-    if ($conn->query($sql) === TRUE) {
-        echo "<script>alert('Class added successfully!'); window.location.href='admin class.php';</script>";
-      
+    $stmt = $conn->prepare($sql);
+    if ($stmt === false) {
+        echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
     } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+        $stmt->bind_param("sssssssss", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $status);
+
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true, "message" => "Class added successfully!"]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Execution failed: " . $stmt->error]);
+        }
+
+        $stmt->close();
     }
 }
 
