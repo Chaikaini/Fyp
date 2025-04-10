@@ -3,30 +3,37 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 1. 使用您的数据库连接文件
-include('db1.php');
+// 1. 引入数据库连接文件
+include('db1.php');  // 确保数据库连接成功
 
 // 2. 获取科目ID（支持 CLI 和 HTTP 请求）
 $subject_id = 0;
 if (php_sapi_name() === 'cli') {
+    // 从命令行参数中获取科目ID
     $subject_id = isset($argv[1]) ? (int)$argv[1] : 0;
 } else {
+    // 从 URL 参数中获取科目ID
     $subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
 }
 
-if (!$subject_id) die("Error: 必须提供科目ID");
+if (!$subject_id) {
+    die("Error: 必须提供科目ID");
+}
 
-// 3. 从数据库读取科目数据
+// 3. 从数据库读取科目信息
 $query = "SELECT * FROM admin_subject WHERE subject_ID = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $subject_id);
+$stmt = $conn->prepare($query);  // 使用 $conn 执行查询
+$stmt->bind_param("i", $subject_id);  // 绑定参数
 $stmt->execute();
-$subject = $stmt->get_result()->fetch_assoc();
+$subject = $stmt->get_result()->fetch_assoc();  // 获取查询结果
 
-if (!$subject) die("Error: 找不到ID为 $subject_id 的科目");
+if (!$subject) {
+    die("Error: 找不到ID为 $subject_id 的科目");
+}
 
-// 4. 动态生成 HTML
-ob_start();
+// 4. 动态生成 HTML 内容
+ob_start();  // 启动输出缓冲区
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -871,17 +878,22 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 </body>
 </html>
 <?php
-// 5. 保存为静态文件
-$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';
-if (file_put_contents($filename, ob_get_clean())) {
-    // 6. 更新数据库标记
+
+// 5. 保存为静态 HTML 文件
+$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';  // 文件名
+$html_content = ob_get_clean();  // 获取输出缓冲区中的内容
+
+if (file_put_contents($filename, $html_content)) {
+    // 页面生成成功
+    echo "Page can run : <a href='$filename'>$filename</a>";
+
+    // 6. 更新数据库标记，记录页面生成路径
     $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
     $stmt = $conn->prepare($update);
     $stmt->bind_param("si", $filename, $subject_id);
-    $stmt->execute();
-    
-    echo "页面生成成功: <a href='$filename'>$filename</a>";
+    $stmt->execute();  // 执行更新
 } else {
-    die("Error: can not write file");
+    // 页面生成失败
+    die("Error: Can not write page");
 }
 ?>
