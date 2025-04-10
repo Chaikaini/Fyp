@@ -392,61 +392,6 @@ document.getElementById("checkoutButton").addEventListener("click", function() {
 });
 
 
-
-/* function calculatePrice(course) {
-    const currentMonth = new Date().getMonth();
-    const monthsPassed = (currentMonth - course.startMonth + 12) % 12; 
-    const remainingMonths = Math.max(6 - monthsPassed, 0); 
-    return remainingMonths * course.price;
-}
-
-
-function updateTotalPrice() {
-    const selectedItems = document.querySelectorAll('.select-item:checked');
-    let total = 0;
-
-    selectedItems.forEach(item => {
-        const index = item.dataset.index;
-        total += calculatePrice(cartItems[index]);
-    });
-
-    document.getElementById("total-price").textContent = total;
-}
-
-
-function toggleSelection(index) {
-    updateTotalPrice();
-}
-
-
-function editItem(index) {
-    const selectedCourse = cartItems[index];
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    document.getElementById("popupMonth").textContent = monthNames[selectedCourse.startMonth];
-    document.getElementById("popupTime").textContent = selectedCourse.time;
-    document.getElementById("popupCapacity").textContent = selectedCourse.capacity;
-    document.querySelector(".popup-info").style.display = "block";
-}
-
-
-function removeFromCart(index) {
-    cartItems.splice(index, 1); 
-    updateCartDisplay();  // 这里改为 updateCartDisplay()
-    updateTotalPrice(); 
-}
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    updateCartDisplay();  // 改成 updateCartDisplay()
-});
-
-
-
-document.querySelector(".popup-close").addEventListener("click", () => {
-    document.querySelector(".popup-info").style.display = "none";
-});   */
-
-
 </script>
 
 
