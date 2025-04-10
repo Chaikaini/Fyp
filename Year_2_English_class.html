@@ -1,37 +1,8 @@
-<?php
-// 开启错误报告（调试完成后可移除）
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-// 1. 引入数据库连接
-include('db1.php');
-
-// 2. 查询所有未生成页面的科目
-$query = "SELECT * FROM admin_subject WHERE page_generated = 0";
-$result = $conn->query($query);
-
-// 检查是否有科目需要处理
-if ($result->num_rows === 0) {
-    die("✅ 所有科目页面都已经生成，无需重复生成。");
-}
-
-// 3. 遍历每一个未生成页面的科目
-while ($subject = $result->fetch_assoc()) {
-    $subject_id = $subject['subject_ID'];
-    $subject_name = $subject['subject'];
-
-    echo "🔄 正在生成科目：$subject_name (ID: $subject_id)<br>";
-
-    // 4. 启动缓冲区开始捕捉 HTML 内容
-    ob_start();
-
-    // ========== 这里是你要输出的 HTML 内容，可以根据实际需要修改 ==========
-    ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?= htmlspecialchars($subject['subject']) ?> Class</title>
+    <title>Year 2 English Class</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre" name="keywords">
     <meta content="The Seeds Learning Centre" name="description">
@@ -430,13 +401,13 @@ while ($subject = $result->fetch_assoc()) {
 
     <!-- 面包屑导航 -->
     <div class="breadcrumb-container">
-        <h2><?= htmlspecialchars($subject['subject']) ?></h2>
+        <h2>Year 2 English</h2>
         <ul class="breadcrumb">
             <li><a href="member.html">Home</a></li>
             <li>&gt;</li>
             <li><a href="subject.html">Subject</a></li>
             <li>&gt;</li>
-            <li><?= htmlspecialchars($subject['subject']) ?></li>
+            <li>Year 2 English</li>
         </ul>
     </div>
 
@@ -444,38 +415,23 @@ while ($subject = $result->fetch_assoc()) {
  <div class="container my-5">
         <div class="class-details-container">
             <div class="subject-image">
-                <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image" id="subjectImage">
+                <img src="img/english.jpg" alt="Subject Image" id="subjectImage">
             </div>
             <div class="class-details">
-                <h2 id="subjectName"><?= htmlspecialchars($subject['subject']) ?></h2>
+                <h2 id="subjectName">Year 2 English</h2>
                 
                 <div class="rating-container">
                     <div class="stars-container">
                         <!-- 动态生成评分星星 -->
-                        <?php
-                        $rating = $subject['rating'] ?? 0;
-                        $fullStars = floor($rating);
-                        $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                        
-                        for ($i = 0; $i < $fullStars; $i++) {
-                            echo '<span class="star yellow"></span>';
-                        }
-                        if ($hasHalfStar) {
-                            echo '<span class="star half"></span>';
-                        }
-                        for ($i = $fullStars + ($hasHalfStar ? 1 : 0); $i < 5; $i++) {
-                            echo '<span class="star"></span>';
-                        }
-                        ?>
-                    </div>
+                        <span class="star yellow"></span><span class="star yellow"></span><span class="star yellow"></span><span class="star yellow"></span><span class="star half"></span>                    </div>
                     <div class="rating-text">
-                        <span class="rating-number"><?= number_format($rating, 1) ?></span>
+                        <span class="rating-number">4.8</span>
                     </div>
                 </div>
                 
                 <div class="class-info">
-                    <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($subject['teacher']) ?></p>
-                    <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['price']) ?></p>
+                    <p id="teacher"><strong>Teacher: </strong> Mr. John</p>
+                    <p id="subjectPrice"><strong>Price: RM</strong> 510.00</p>
                 </div>
 
                 <!-- 时间选择部分 -->
@@ -493,7 +449,9 @@ while ($subject = $result->fetch_assoc()) {
         <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
-            <p><?= nl2br(htmlspecialchars($subject['description'])) ?></p>
+            <p><br />
+<b>Deprecated</b>:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in <b>C:\xampp2\htdocs\Fyp\TWP-Project\generate_subject_page.php</b> on line <b>504</b><br />
+</p>
         </div>
 
         <!-- 评论部分（直接嵌入，不使用fetch_reviews.php） -->
@@ -869,27 +827,3 @@ document.getElementById("yearFilter").addEventListener("change", function() {
     </script>
 </body>
 </html>
-<?php
-    // ==========================================================
-
-    // 5. 获取 HTML 内容并保存为文件
-    $html_content = ob_get_clean();
-    $filename = str_replace(' ', '_', $subject_name) . '_class.html';
-
-    if (file_put_contents($filename, $html_content)) {
-        echo "✅ 页面已生成: <a href='$filename' target='_blank'>$filename</a><br>";
-
-        // 6. 更新数据库标记为已生成
-        $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
-        $stmt = $conn->prepare($update);
-        $stmt->bind_param("si", $filename, $subject_id);
-        $stmt->execute();
-    } else {
-        echo "❌ 页面生成失败: $filename<br>";
-    }
-
-    echo "<hr>";
-}
-
-echo "🎉 所有未生成页面的科目处理完成！";
-?>
