@@ -265,14 +265,18 @@
             <input type="text" id="classid" name="classid">
             <label for="classid">Year:</label>
             <input type="text" id="year" name="year">
-            <label for="day">Day:</label>
-            <input type="text" id="day" name="day">
+            <label for="day">Part:</label>
+            <input type="text" id="part" name="part">
+            <label for="day">Month:</label>
+            <input type="text" id="month" name="month">
             <label for="time">Time:</label>
             <input type="text" id="time" name="time">
             <label for="teacher">Teacher:</label>
             <input type="text" id="teacher" name="teacher">
             <label for="enrollment">Capasity:</label>
             <input type="text" id="enrollment" name="enrollment">
+            <label for="day">Status:</label>
+            <input type="text" id="status" name="status">
             <input type="submit" value="Add Class">
         </form>
     </div>

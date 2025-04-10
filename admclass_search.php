@@ -28,19 +28,23 @@ if ($result->num_rows > 0) {
         echo "<td>" . $row["subject_id"] . "</td>";
         echo "<td>" . $row["class_id"] . "</td>";
         echo "<td>" . $row["year"] . "</td>";
-        echo "<td>" . $row["day"] . "</td>";
+        echo "<td>" . $row["part"] . "</td>";
+        echo "<td>" . $row["month"] . "</td>";
         echo "<td>" . $row["time"] . "</td>";
         echo "<td>" . $row["teacher"] . "</td>";
         echo "<td>" . $row["capacity"] . "</td>";
+        echo "<td>" . $row["status"] . "</td>";
         echo "<td>
                 <i class='pointer-cursor fas fa-edit text-warning edit-btn' 
                 onclick='openEditModal(
                 \"" . $row["subject_id"] . "\", 
                     \"" . $row["class_id"] . "\", 
                     \"" . addslashes($row["year"]) . "\", 
-                    \"" . $row["day"] . "\", 
+                    \"" . $row["part"] . "\", 
+                    \"" . $row["month"] . "\", 
                     \"" . $row["time"] . "\", 
                     \"" . $row["teacher"] . "\", 
+                    \"" . $row["status"] . "\", 
                     \"" . addslashes($row["capacity"]) . "\"
                 )'></i>
                 <i class='pointer-cursor fas fa-trash-alt text-danger delete-btn' data-subject_id='" . $row['subject_id'] . "'></i>
