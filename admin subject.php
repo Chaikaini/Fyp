@@ -177,7 +177,52 @@
            
         }
 
-        
+        .success-message {
+        background-color: #d4edda;
+        color:rgb(41, 172, 220)；
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        font-weight: bold;
+        }
+
+        .toast-message {
+        position: fixed;
+        top: 10%; 
+        left: 50%;
+        transform: translateX(-50%);
+        background-color:rgb(171, 241, 187); 
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        font-weight: bold;
+        z-index: 1000;
+        text-align: center;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+        .modal-d {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+       }
+       .modal-dcontent {
+       background-color: white;
+       padding: 20px;
+       border-radius: 8px;
+       text-align: center;
+       width: 300px;
+       }
+   
 
    
   </style>
@@ -286,6 +331,19 @@
         </form>
     </div>
 </div>
+<div id="successToast" class="toast-message" style="display: none;"></div>
+
+
+<!-- Subject Delete Modal -->
+<div id="deleteSubjectModal" class="modal-d">
+    <div class="modal-dcontent">
+        <h4>Confirm Deletion</h4>
+        <p>Are you sure you want to delete this subject?</p>
+        <button id="confirmDeleteSubjectBtn" class="btn btn-danger">Delete</button>
+        <button id="cancelDeleteSubjectBtn" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
 
   <!-- Edit Modal -->
   <div id="editModal" class="modal">
@@ -320,6 +378,8 @@
         </form>
     </div>
 </div>
+<div id="successToast" class="toast-message" style="display: none;"></div>
+
 
 
 
@@ -359,16 +419,108 @@
         }
     }
 
-    // form sumit
-    document.getElementById("addSubjectForm").onsubmit = function() {
+    // add subject form submit
+    document.getElementById("addSubjectForm").addEventListener("submit", function(event) {
+    event.preventDefault(); 
 
-      document.getElementById("addSubjectModal").style.display = "none";
-        
-    }
+    let formData = new FormData(this);
+
+    fetch("admin_addsubject.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("addSubjectModal").style.display = "none";
+        if (data.success) {
+            showToast(data.message || "Subject added successfully!");
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showToast("Error: " + (data.error || "Something went wrong."), true);
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("An unexpected error occurred.", true);
+    });
+});
+
     
 
-    function openEditModal(subjectID, subject, year, price, image, description) {
-    document.getElementById("editSubjectID").value = subjectID;
+        
+        
+        document.addEventListener("DOMContentLoaded", function () {
+        let selectedSubjectID = null;
+
+    // when click delete button open modal
+    document.querySelector("tbody").addEventListener("click", function (event) {
+        if (event.target.classList.contains("delete-btn")) {
+            selectedSubjectID = event.target.getAttribute("data-subjectID");
+            document.getElementById("deleteSubjectModal").style.display = "flex";
+        }
+    });
+
+    // cancel delete
+    document.getElementById("cancelDeleteSubjectBtn").addEventListener("click", function () {
+        document.getElementById("deleteSubjectModal").style.display = "none";
+    });
+
+    // confirm delete
+    document.getElementById("confirmDeleteSubjectBtn").addEventListener("click", function () {
+        if (selectedSubjectID) {
+            fetch("admin_deletesubject.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "subject_ID=" + encodeURIComponent(selectedSubjectID)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("deleteSubjectModal").style.display = "none";
+                if (data.success) {
+                    showToast("Subject deleted successfully!");
+                    setTimeout(() => { location.reload(); }, 2000);
+                } else {
+                    showToast("Error: " + data.error, true);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("An unexpected error occurred.", true);
+            });
+        }
+    });
+});
+
+// edit subject form submit
+document.getElementById("editSubjectForm").addEventListener("submit", function (event) {
+    event.preventDefault();  // 阻止表单的默认提交
+
+    let formData = new FormData(this);  // 获取表单数据
+
+    // 发送数据到后台
+    fetch("admin_editsubject.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())  // 解析 JSON 响应
+    .then(data => {
+        if (data.success) {
+            showToast("Subject updated successfully!");  // 显示成功的 toast
+            setTimeout(() => { location.reload(); }, 2000);  // 2秒后刷新页面
+        } else {
+            showToast("Error: " + data.error, true);  // 显示错误的 toast
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("An unexpected error occurred.", true);  // 显示意外错误的 toast
+    });
+});
+
+
+// Edit modal open function
+function openEditModal(subject_ID, subject, year, price, image, description) {
+    document.getElementById("editSubjectID").value = subject_ID;
     document.getElementById("editSubject").value = subject;
     document.getElementById("editYear").value = year;
     document.getElementById("editPrice").value = price;
@@ -376,61 +528,18 @@
     document.getElementById("editDescription").value = description;
     document.getElementById("editModal").style.display = "block";
 }
-        function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
 
-        window.onclick = function(event) {
-            var modal = document.getElementById('editModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
+// Close modal
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
 
-        document.getElementById('editSubjectForm').onsubmit = function(event) {
-            event.preventDefault();
-            alert("Changes saved!");
-            closeModal();
-        }
-
-
-   document.addEventListener("DOMContentLoaded", function() { 
-   document.querySelectorAll(".delete-btn").forEach(button => {
-       button.addEventListener("click", function() {
-           let subjectId = this.getAttribute("data-subjectID"); 
-           if (confirm("Are you sure you want to delete this subject?")) {
-               fetch("admin_deletesubject.php", {
-                   method: "POST",
-                   headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                   body: "subject_ID=" + subjectId
-               })
-               .then(response => response.text())
-               .then(data => {
-                   alert(data); 
-                   location.reload(); 
-               })
-               .catch(error => console.error("Error:", error));
-           }
-       });
-   });
-});
-
-document.getElementById("editSubjectForm").addEventListener("submit", function(event) {
-    event.preventDefault(); 
-
-    let formData = new FormData(this);
-
-    fetch("admin_editsubject.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        alert(data); 
-        location.reload(); 
-    })
-    .catch(error => console.error("Error:", error));
-});
+window.onclick = function (event) {
+    var modal = document.getElementById('editModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+};
 
 
 document.getElementById("search-btn").addEventListener("click", function() {
@@ -444,6 +553,21 @@ document.getElementById("search-btn").addEventListener("click", function() {
         .catch(error => console.error("Error:", error));
 });
 
+
+
+// Toast Notification Function
+function showToast(message, isError = false) {
+    let toast = document.getElementById("successToast");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? "#dc3545" : "#007bff";
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3000);
+}
 </script>
 
 
