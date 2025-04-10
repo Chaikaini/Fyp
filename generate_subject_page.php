@@ -1,5 +1,5 @@
 <?php
-include('db_connect.php');
+include('db1.php');
 
 // 1. 获取传入的科目ID（支持 CLI 和 HTTP 请求）
 if (php_sapi_name() === 'cli') {
