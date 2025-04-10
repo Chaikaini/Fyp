@@ -1,48 +1,52 @@
 <?php
-include('db_connect.php'); // 您的数据库连接文件
+// 开启错误报告（调试完成后可移除）
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// 1. 获取传入的科目ID
-$subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
-if (!$subject_id) die("Error: Missing subject_id");
+// 1. 引入数据库连接文件
+include('db1.php');  // 确保数据库连接成功
 
-// 2. 从数据库读取科目数据
+// 2. 获取科目ID（支持 CLI 和 HTTP 请求）
+$subject_id = 0;
+if (php_sapi_name() === 'cli') {
+    // 从命令行参数中获取科目ID
+    $subject_id = isset($argv[1]) ? (int)$argv[1] : 0;
+} else {
+    // 从 URL 参数中获取科目ID
+    $subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
+}
+
+if (!$subject_id) {
+    die("Error: 必须提供科目ID");
+}
+
+// 3. 从数据库读取科目信息
 $query = "SELECT * FROM admin_subject WHERE subject_ID = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $subject_id);
+$stmt = $conn->prepare($query);  // 使用 $conn 执行查询
+$stmt->bind_param("i", $subject_id);  // 绑定参数
 $stmt->execute();
-$subject = $stmt->get_result()->fetch_assoc();
+$subject = $stmt->get_result()->fetch_assoc();  // 获取查询结果
 
-if (!$subject) die("Error: Subject not found");
+if (!$subject) {
+    die("Error: 找不到ID为 $subject_id 的科目");
+}
 
-// 3. 动态生成 HTML（保留PHP功能）
-ob_start(); // 开启输出缓冲
+// 4. 动态生成 HTML 内容
+ob_start();  // 启动输出缓冲区
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <title><?= htmlspecialchars($subject['subject']) ?> Class</title>
-    <!-- 其他 head 内容保持不变 -->
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="The Seeds Learning Centre, Year 1 class " name="keywords">
-    <meta content="The Seeds Learning Centre | Year 1 Class " name="description">
-
-    <!-- Favicon -->
+    <meta content="The Seeds Learning Centre" name="keywords">
+    <meta content="The Seeds Learning Centre" name="description">
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
-
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
 
     <style>
@@ -431,25 +435,87 @@ ob_start(); // 开启输出缓冲
     </div>
 
     <!-- 动态替换的部分 -->
+
+    <!-- 面包屑导航 -->
     <div class="breadcrumb-container">
         <h2><?= htmlspecialchars($subject['subject']) ?></h2>
-        <!-- 面包屑导航 -->
+        <ul class="breadcrumb">
+            <li><a href="member.html">Home</a></li>
+            <li>&gt;</li>
+            <li><a href="subject.html">Subject</a></li>
+            <li>&gt;</li>
+            <li><?= htmlspecialchars($subject['subject']) ?></li>
+        </ul>
     </div>
 
-    <div class="container">
-        <!-- 科目图片和基本信息 -->
-        <div class="subject-image">
-            <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image">
+ <!-- 主要内容 -->
+ <div class="container my-5">
+        <div class="class-details-container">
+            <div class="subject-image">
+                <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image" id="subjectImage">
+            </div>
+            <div class="class-details">
+                <h2 id="subjectName"><?= htmlspecialchars($subject['subject']) ?></h2>
+                
+                <div class="rating-container">
+                    <div class="stars-container">
+                        <!-- 动态生成评分星星 -->
+                        <?php
+                        $rating = $subject['rating'] ?? 0;
+                        $fullStars = floor($rating);
+                        $hasHalfStar = ($rating - $fullStars) >= 0.5;
+                        
+                        for ($i = 0; $i < $fullStars; $i++) {
+                            echo '<span class="star yellow"></span>';
+                        }
+                        if ($hasHalfStar) {
+                            echo '<span class="star half"></span>';
+                        }
+                        for ($i = $fullStars + ($hasHalfStar ? 1 : 0); $i < 5; $i++) {
+                            echo '<span class="star"></span>';
+                        }
+                        ?>
+                    </div>
+                    <div class="rating-text">
+                        <span class="rating-number"><?= number_format($rating, 1) ?></span>
+                    </div>
+                </div>
+                
+                <div class="class-info">
+                    <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($subject['teacher']) ?></p>
+                    <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['price']) ?></p>
+                </div>
+
+                <!-- 时间选择部分 -->
+                <div class="time-slot-container">
+                    <div class="time-slot green" id="partA">
+                        <strong>Part A</strong> (January - June)
+                    </div>
+                    <div class="time-slot gray" id="partB">
+                        <strong>Part B</strong> (July - December) (No open)
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- 从数据库读取的 Subject Overview -->
+        <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
             <p><?= nl2br(htmlspecialchars($subject['description'])) ?></p>
         </div>
 
-        <!-- 保留原有的 PHP 动态功能（如评论） -->
-        <?php include('fetch_reviews.php'); ?>
+        <!-- 评论部分（直接嵌入，不使用fetch_reviews.php） -->
+        <div class="review-section">
+            <h2>Parent Reviews</h2>
+            <div id="review-list">
+                <!-- 评论将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn">
+        <!-- 页脚内容保持不变 -->
     </div>
 
     <!-- 其他部分保持不变 -->
@@ -812,17 +878,22 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 </body>
 </html>
 <?php
-$html = ob_get_clean(); // 获取生成的HTML
 
-// 4. 保存为静态文件
-$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';
-file_put_contents($filename, $html);
+// 5. 保存为静态 HTML 文件
+$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';  // 文件名
+$html_content = ob_get_clean();  // 获取输出缓冲区中的内容
 
-// 5. 更新数据库标记
-$update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
-$stmt = $conn->prepare($update);
-$stmt->bind_param("si", $filename, $subject_id);
-$stmt->execute();
+if (file_put_contents($filename, $html_content)) {
+    // 页面生成成功
+    echo "Page can run : <a href='$filename'>$filename</a>";
 
-echo "Generated: " . $filename;
+    // 6. 更新数据库标记，记录页面生成路径
+    $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
+    $stmt = $conn->prepare($update);
+    $stmt->bind_param("si", $filename, $subject_id);
+    $stmt->execute();  // 执行更新
+} else {
+    // 页面生成失败
+    die("Error: Can not write page");
+}
 ?>
