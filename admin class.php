@@ -177,7 +177,8 @@
         padding: 10px;
         border-radius: 5px;
         margin-bottom: 10px;
-        font-weight: bold;
+        font-weight: normal;
+        
         }
 
         .toast-message {
@@ -191,7 +192,7 @@
         border-radius: 5px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         font-size: 16px;
-        font-weight: bold;
+        font-weight: normal;
         z-index: 1000;
         text-align: center;
         transition: opacity 0.5s ease-in-out;
@@ -300,32 +301,35 @@
     </div>
   </div>
   <!-- The Modal -->
-<div id="addClassModal" class="modal">
+   <div id="addClassModal" class="modal">
     <div class="modal-content pointer-cursor">
         <span class="close ">&times;</span>
         <form id="addClassForm" method="POST" action="admin_addclass.php">
-            <label for="subjectid">Subject ID:</label>
-            <input type="text" id="subjectid" name="subjectid">
-            <label for="classid">Class ID:</label>
-            <input type="text" id="classid" name="classid">
-            <label for="classid">Year:</label>
-            <input type="text" id="year" name="year">
-            <label for="day">Part:</label>
-            <input type="text" id="part" name="part">
-            <label for="day">Month:</label>
-            <input type="text" id="month" name="month">
-            <label for="time">Time:</label>
-            <input type="text" id="time" name="time">
-            <label for="teacher">Teacher:</label>
-            <input type="text" id="teacher" name="teacher">
-            <label for="enrollment">Capasity:</label>
-            <input type="text" id="enrollment" name="enrollment">
-            <label for="day">Status:</label>
-            <input type="text" id="status" name="status">
-            <input type="submit" value="Add Class">
+        <label for="subjectid">Subject ID:</label>
+        <input type="text" id="subjectid" name="subjectid" required>
+        <label for="classid">Class ID:</label>
+        <input type="text" id="classid" name="classid" required>
+        <label for="year">Year:</label>
+        <input type="text" id="year" name="year" required>
+        <label for="part">Part:</label>
+        <input type="text" id="part" name="part" required>
+        <label for="month">Month:</label>
+        <input type="text" id="month" name="month" required>
+        <label for="time">Time:</label>
+        <input type="text" id="time" name="time" required>
+        <label for="teacher">Teacher:</label>
+        <input type="text" id="teacher" name="teacher" required>
+        <label for="capacity">Maximum Capacity:</label>
+        <input type="number" id="capacity" name="capacity" required>
+        <label for="status">Status:</label>
+           <select id="status" name="status" required>
+             <option value="available">Available</option>
+             <option value="unavailable">Unavailable</option>
+           </select>
+        <input type="submit" value="Add Class">
         </form>
+        </div>
     </div>
-</div>
  <div id="successToast" class="toast-message" style="display: none;"></div>
 
 

@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json'); // 告诉浏览器返回的是 JSON
+header('Content-Type: application/json'); 
 
 $servername = "localhost";
 $username = "root"; 
@@ -21,17 +21,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $month = $_POST["month"];
     $time = $_POST["time"];
     $teacher = $_POST["teacher"];
-    $enrollment = $_POST["enrollment"];
-    $status = $_POST["status"];
+    $capacity = (int)$_POST["capacity"]; //Maximum Capacity
+    $status = $_POST["status"]; //  Status
+    $enrollment = 0; 
 
-    $sql = "INSERT INTO admin_class (subject_id, class_id, year, part, month, time, teacher, capacity, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    // check capacity is a positive integer
+    if ($capacity <= 0) {
+        echo json_encode(["success" => false, "message" => "Capacity must be a positive number."]);
+        exit;
+    }
+
+    // check status 
+    if (!in_array($status, ["available", "unavailable"])) {
+        echo json_encode(["success" => false, "message" => "Invalid status value."]);
+        exit;
+    }
+
+    $sql = "INSERT INTO admin_class (subject_id, class_id, year, part, month, time, teacher, enrolled, capacity, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
     } else {
-        $stmt->bind_param("sssssssss", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $status);
+        $stmt->bind_param("sssssssiii", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $capacity, $status);
 
         if ($stmt->execute()) {
             echo json_encode(["success" => true, "message" => "Class added successfully!"]);
