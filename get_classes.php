@@ -1,40 +1,81 @@
 <?php
-session_start();
+// 设置响应头
+header('Content-Type: application/json');
 
+// 数据库配置
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "admin"; // 或你使用的数据库名称
+$dbname = "admin";
 
+// 创建数据库连接
 $conn = new mysqli($servername, $username, $password, $dbname);
+
+// 检查连接
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo json_encode([
+        "success" => false,
+        "error" => "Connection failed: " . $conn->connect_error
+    ]);
+    exit;
 }
 
-// 获取 session 中保存的选定年级和科目
-$year = $_SESSION['selected_year'] ?? 'Year 1';  // 默认为 'Year 1'
-$subject_id = $_SESSION['selected_subject_id'] ?? 11245;  // 默认科目 ID
+// 完整的科目ID映射表（根据您的数据库实际情况调整）
+$subject_map = [
+    // Year 1 科目
+    'year1english' => ['subject_id' => 11245, 'year' => 'Year 1'],
+    'year1malay' => ['subject_id' => 11351, 'year' => 'Year 1'],
+    'year1math' => ['subject_id' => 11132, 'year' => 'Year 1'],
+    
+    // Year 2 科目
+    'year2english' => ['subject_id' => 22534, 'year' => 'Year 2'],
+    'year2malay' => ['subject_id' => 22345, 'year' => 'Year 2'], 
+    'year2math' => ['subject_id' => 22134, 'year' => 'Year 2'],
+    
+    // 默认值（找不到匹配时使用）
+    'default' => ['subject_id' => 11245, 'year' => 'Year 1']
+];
 
-// SQL 查询，获取 Part A 和 Part B
-$sql = "SELECT * FROM admin_class 
-        WHERE year = ? 
-        AND subject_id = ? 
-        AND part IN ('Part A', 'Part B')";
+// 方法1：优先从URL参数获取页面标识
+$page_identifier = $_GET['page'] ?? '';
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("si", $year, $subject_id);
+// 方法2：如果无URL参数，尝试从Referer自动识别
+if (empty($page_identifier)) {
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    
+    // 检查所有可能的页面标识
+    foreach ($subject_map as $key => $value) {
+        if ($key !== 'default' && strpos($referer, $key) !== false) {
+            $page_identifier = $key;
+            break;
+        }
+    }
+}
+
+// 获取对应的科目配置
+$subject_config = $subject_map[$page_identifier] ?? $subject_map['default'];
+
+// 查询数据库
+$stmt = $conn->prepare("SELECT * FROM admin_class 
+                       WHERE subject_id = ? 
+                       AND year = ?
+                       AND part IN ('Part A', 'Part B')");
+$stmt->bind_param("is", $subject_config['subject_id'], $subject_config['year']);
 $stmt->execute();
+
 $result = $stmt->get_result();
+$classes = $result->fetch_all(MYSQLI_ASSOC);
 
-// 存储查询结果
-$classes = [];
-while ($row = $result->fetch_assoc()) {
-    $classes[] = $row;
-}
+// 返回JSON结果
+echo json_encode([
+    "success" => true,
+    "page_identifier" => $page_identifier,  // 调试用，显示当前匹配的页面标识
+    "subject_id" => $subject_config['subject_id'],
+    "year" => $subject_config['year'],
+    "data" => $classes
+]);
 
-// 返回查询到的课程信息
-echo json_encode($classes);
-
+// 关闭连接
 $stmt->close();
 $conn->close();
 ?>
