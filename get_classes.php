@@ -2,20 +2,27 @@
 // 连接数据库
 $conn = new mysqli("localhost", "root", "", "admin");
 
-// 智能识别文件名（兼容带空格和特殊字符）
-$referer = $_SERVER['HTTP_REFERER'] ?? '';
-preg_match('/(Year 1 English class|Year 1 Malay class)/', $referer, $matches);
-$page = $matches[1] ?? '';
+// 方法1：通过URL参数强制指定科目（最可靠）
+$subject = $_GET['subject'] ?? '';  // 从URL获取参数
 
-// 科目映射表（根据你的实际文件名配置）
+// 方法2：如果未传参，尝试从Referer判断（备用方案）
+if(empty($subject)) {
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (strpos($referer, 'year1english') !== false) {
+        $subject = 'english';
+    } elseif (strpos($referer, 'year1malay') !== false) {
+        $subject = 'malay';
+    }
+}
+
+// 科目ID映射
 $subject_ids = [
-    'Year 1 English class' => 11245,  // 对应英语
-    'Year 1 Malay class' => 11351,
-    'Year 1 Math class' => 11132    
+    'english' => 11245,
+    'malay' => 11351
 ];
 
 // 设置查询参数
-$subject_id = $subject_ids[$page] ?? 11245; // 默认英语
+$subject_id = $subject_ids[strtolower($subject)] ?? 11245; // 默认英语
 $year = "Year 1";
 
 // 查询数据库
@@ -29,7 +36,7 @@ $stmt->execute();
 header('Content-Type: application/json');
 echo json_encode([
     "success" => true,
-    "subject" => str_replace('Year 1 ', '', $page), // 返回"English class"/"Malay class"
+    "subject" => $subject,  // 返回当前科目
     "data" => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)
 ]);
 
