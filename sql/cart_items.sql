@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `cart_items` (
   `id` int(11) NOT NULL,
+  `class_id` varchar(20) NOT NULL,
   `subject` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `child` varchar(255) NOT NULL,
@@ -41,9 +42,9 @@ CREATE TABLE `cart_items` (
 -- Dumping data for table `cart_items`
 --
 
-INSERT INTO `cart_items` (`id`, `subject`, `price`, `child`, `image`, `teacher`, `time`) VALUES
-(1, 'Year 1 English', 510.00, 'John Doe', 'http://localhost/Fyp/TWP-Project/img/english.jpg', 'Mr. John', 'Monday 2.30pm-4.30pm'),
-(2, 'Year 1 Malay', 510.00, 'John Doe', 'http://localhost/Fyp/TWP-Project/img/malay.jpg', 'Ms. Lily', 'Tuesday 2.30pm-4.30pm');
+INSERT INTO `cart_items` (`id`,`class_id`, `subject`, `price`, `child`, `image`, `teacher`, `time`) VALUES
+(1, 'Eng001', 'Year 1 English', 510.00, 'John Doe', 'http://localhost/Fyp/TWP-Project/img/english.jpg', 'Mr. John', 'Monday 2.30pm-4.30pm'),
+(2, 'Mly0001','Year 1 Malay', 510.00, 'John Doe', 'http://localhost/Fyp/TWP-Project/img/malay.jpg', 'Ms. Lily', 'Tuesday 2.30pm-4.30pm');
 
 --
 -- Indexes for dumped tables

@@ -352,7 +352,7 @@
         <form id="editSubjectForm" method="POST" action="admin_editsubject.php">
             <div class="form-group">
                 <label for="editSubjectID">Subject ID:</label>
-                <input type="text" id="editSubjectID" name="subjectID">
+                <input type="text" id="editSubjectID" name="subjectID" readonly>
             </div>
             <div class="form-group">
                 <label for="editSubject">Subject:</label>
@@ -493,27 +493,27 @@
 
 // edit subject form submit
 document.getElementById("editSubjectForm").addEventListener("submit", function (event) {
-    event.preventDefault();  // 阻止表单的默认提交
+    event.preventDefault();  
 
-    let formData = new FormData(this);  // 获取表单数据
+    let formData = new FormData(this);
 
-    // 发送数据到后台
+    
     fetch("admin_editsubject.php", {
         method: "POST",
         body: formData
     })
-    .then(response => response.json())  // 解析 JSON 响应
+    .then(response => response.json())  
     .then(data => {
         if (data.success) {
-            showToast("Subject updated successfully!");  // 显示成功的 toast
-            setTimeout(() => { location.reload(); }, 2000);  // 2秒后刷新页面
+            showToast("Subject updated successfully!"); 
+            setTimeout(() => { location.reload(); }, 2000); 
         } else {
-            showToast("Error: " + data.error, true);  // 显示错误的 toast
+            showToast("Error: " + data.error, true); 
         }
     })
     .catch(error => {
         console.error("Error:", error);
-        showToast("An unexpected error occurred.", true);  // 显示意外错误的 toast
+        showToast("An unexpected error occurred.", true);  
     });
 });
 
