@@ -10,7 +10,8 @@ $page = $matches[1] ?? '';
 // 科目映射表（根据你的实际文件名配置）
 $subject_ids = [
     'Year 1 English class' => 11245,  // 对应英语
-    'Year 1 Malay class' => 11351     // 对应马来语
+    'Year 1 Malay class' => 11351,
+    'Year 1 Math class' => 11132    
 ];
 
 // 设置查询参数
