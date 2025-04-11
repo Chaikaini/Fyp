@@ -498,6 +498,41 @@ ob_start();  // 启动输出缓冲区
             </div>
         </div>
 
+        <div class="popup" id="popup">
+        <div class="popup-content">
+            <span class="close-btn" id="closePopup">&times;</span>
+            <h4>Class Time Details</h4>
+            
+            <!-- Information section with flex layout -->
+            <div class="popup-info">
+                <div class="popup-row">
+                    <span class="popup-label">Month:</span>
+                    <span class="popup-value" id="popupMonth"></span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label" id="classTime">Time:</span>
+                    <span class="popup-value" id="popupTime"></span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label" id="currentCapacity">Capacity:</span>
+                    <span class="popup-value" id="popupchildren"></span>
+                </div>
+                <div class="popup-row">
+                    <span class="popup-label" id="selectedChildren">Children:</span>
+                    <span class="popup-value">
+                        <select id="childrenSelect">
+                            <option value="">Choose </option>
+                        </select>
+                    </span>
+                </div>
+            </div>
+    
+            <button id="addToCart">Add to Cart</button>
+
+            <div id="successToast" class="toast-message" style="display: none;"></div>
+        </div>
+    </div>
+    
         <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
