@@ -532,7 +532,7 @@ ob_start();  // 启动输出缓冲区
             <div id="successToast" class="toast-message" style="display: none;"></div>
         </div>
     </div>
-    
+
         <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
@@ -544,6 +544,15 @@ ob_start();  // 启动输出缓冲区
             <h2>Parent Reviews</h2>
             <div id="review-list">
                 <!-- 评论将通过JavaScript动态加载 -->
+                <div class="review-filter">
+                <label for="yearFilter">Filter by Year: </label>
+                <select id="yearFilter">
+                    <option value="All">All</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
             </div>
         </div>
     </div>
@@ -555,48 +564,99 @@ ob_start();  // 启动输出缓冲区
 
     <!-- 其他部分保持不变 -->
     <script>
+let selectedClassInfo = null;
+
 document.addEventListener("DOMContentLoaded", function () {
     fetch('get_classes.php')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            const partA = data.find(c => c.part === 'Part A');
-            const partB = data.find(c => c.part === 'Part B');
-
-            if (partA && partA.status === 'available') {
-                document.getElementById('partA').classList.remove('gray');
-                document.getElementById('partA').classList.add('green');
+            if (!data.success) {
+                console.error('Server error:', data.error);
+                return;
             }
 
-            if (partB && partB.status === 'unavailable') {
-                document.getElementById('partB').classList.add('disabled');
-            } else if (partB) {
-                document.getElementById('partB').classList.remove('disabled');
+            const courses = data.data;
+            const partA = courses.find(c => c.part === 'Part A');
+            const partB = courses.find(c => c.part === 'Part B');
+
+            // 处理 Part A
+            if (partA) {
+                const partAElement = document.getElementById('partA');
+                if (partA.status === 'available') {
+                    partAElement.classList.remove('gray');
+                    partAElement.classList.add('green');
+                } else {
+                    partAElement.classList.add('disabled');
+                }
             }
 
+            // 处理 Part B
+            if (partB) {
+                const partBElement = document.getElementById('partB');
+                if (partB.status === 'available') {
+                    partBElement.classList.remove('gray', 'disabled');
+                    partBElement.classList.add('green');
+                } else {
+                    partBElement.classList.add('disabled');
+                }
+            }
+
+            // 点击 Part A
             document.getElementById('partA').addEventListener('click', function () {
-                if (!partA) return;
-                document.getElementById('popupMonth').innerText = partA.month;
-                document.getElementById('popupTime').innerText = partA.time;
-                const [enrolled, total] = partA.capacity.split('/');
-                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
-                document.getElementById('popup').style.display = 'flex';
+                if (!partA || partA.status !== 'available') return;
+                
+                selectedClassInfo = {
+                    class_id: partA.class_id || 'N/A',  // 处理空 class_id
+                    capacity: partA.capacity
+                };
+                
+                updatePopup(partA);
             });
 
+            // 点击 Part B
             document.getElementById('partB').addEventListener('click', function () {
                 if (!partB || partB.status !== 'available') return;
-                document.getElementById('popupMonth').innerText = partB.month;
-                document.getElementById('popupTime').innerText = partB.time;
-                const [enrolled, total] = partB.capacity.split('/');
-                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
-                document.getElementById('popup').style.display = 'flex';
+                
+                selectedClassInfo = {
+                    class_id: partB.class_id || 'N/A',  // 处理空 class_id
+                    capacity: partB.capacity
+                };
+                
+                updatePopup(partB);
             });
 
+            // 关闭弹窗
             document.getElementById('closePopup').addEventListener('click', function () {
                 document.getElementById('popup').style.display = 'none';
             });
+
+            // 更新弹窗内容的公共函数
+            function updatePopup(course) {
+                document.getElementById('popupMonth').textContent = course.month;
+                document.getElementById('popupTime').textContent = course.time;
+                
+                // 处理 capacity 显示
+                if (course.capacity && course.capacity.includes('/')) {
+                    const [enrolled, total] = course.capacity.split('/');
+                    document.getElementById('popupchildren').textContent = `${enrolled} / ${total}`;
+                } else {
+                    document.getElementById('popupchildren').textContent = '0 / 0';
+                }
+                
+                document.getElementById('popup').style.display = 'flex';
+            }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('加载课程数据失败，请刷新页面重试');
+        });
 });
+
 
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -616,8 +676,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
        // 购物车功能
-// 购物车功能
-document.getElementById("addToCart").addEventListener("click", function() {
+
+       document.getElementById("addToCart").addEventListener("click", function() {
     let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
     let subjectName = document.getElementById("subjectName").innerText;
     let subjectPrice = document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim();
@@ -634,13 +694,16 @@ document.getElementById("addToCart").addEventListener("click", function() {
 
     // 创建一个购物车商品对象
     const cartItem = {
-        subject: subjectName,
-        price: price,
-        child: selectedChild,
-        image: subjectImage,
-        teacher: teacher,
-        time: time
-    };
+    subject: subjectName,
+    price: price,
+    child: selectedChild,
+    image: subjectImage,
+    teacher: teacher,
+    time: time,
+    class_id: selectedClassInfo?.class_id || null,
+    capacity: selectedClassInfo?.capacity || null
+};
+
 
     // 获取购物车中的现有商品
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -696,6 +759,8 @@ function showToast(message, isError = false) {
         setTimeout(() => { toast.style.display = "none"; }, 500);
     }, 3000);
 }
+
+
 
 
 
@@ -847,7 +912,7 @@ document.getElementById("yearFilter").addEventListener("change", function() {
     <script>
         // 获取并显示评论的函数
         function fetchReviews() {
-            const url = 'y1_eng_comments.php';  // 获取固定条件下的评论
+            const url = 'get_comments.php';  // 获取固定条件下的评论
             fetch(url)
                 .then(response => response.json())
                 .then(comments => {
