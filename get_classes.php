@@ -1,40 +1,35 @@
 <?php
-session_start();
-
-// 数据库配置
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "admin";
-
 // 连接数据库
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));
-}
+$conn = new mysqli("localhost", "root", "", "admin");
 
-// 获取参数
-$year = $_SESSION['selected_year'] ?? 'Year 1';
-$subject_id = $_SESSION['selected_subject_id'] ?? 11245;
+// 智能识别文件名（兼容带空格和特殊字符）
+$referer = $_SERVER['HTTP_REFERER'] ?? '';
+preg_match('/(Year 1 English class|Year 1 Malay class)/', $referer, $matches);
+$page = $matches[1] ?? '';
 
-// 查询课程数据（包括空 class_id 的记录）
-$sql = "SELECT * FROM admin_class 
-        WHERE year = ? 
-        AND subject_id = ? 
-        AND part IN ('Part A', 'Part B')";
+// 科目映射表（根据你的实际文件名配置）
+$subject_ids = [
+    'Year 1 English class' => 11245,  // 对应英语
+    'Year 1 Malay class' => 11351     // 对应马来语
+];
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("si", $year, $subject_id);
+// 设置查询参数
+$subject_id = $subject_ids[$page] ?? 11245; // 默认英语
+$year = "Year 1";
+
+// 查询数据库
+$stmt = $conn->prepare("SELECT * FROM admin_class 
+                       WHERE subject_id=? AND year=?
+                       AND part IN ('Part A','Part B')");
+$stmt->bind_param("is", $subject_id, $year);
 $stmt->execute();
 
-$result = $stmt->get_result();
-$classes = $result->fetch_all(MYSQLI_ASSOC);
-
-// 返回JSON数据
+// 返回结果
 header('Content-Type: application/json');
 echo json_encode([
     "success" => true,
-    "data" => $classes
+    "subject" => str_replace('Year 1 ', '', $page), // 返回"English class"/"Malay class"
+    "data" => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)
 ]);
 
 $stmt->close();
