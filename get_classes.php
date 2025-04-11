@@ -17,18 +17,13 @@ if ($conn->connect_error) {
 $year = $_SESSION['selected_year'] ?? 'Year 1';
 $subject_id = $_SESSION['selected_subject_id'] ?? 11245;
 
-// 查询有 class_id 的课程（非空）
+// 查询课程数据（包括空 class_id 的记录）
 $sql = "SELECT * FROM admin_class 
         WHERE year = ? 
         AND subject_id = ? 
-        AND class_id != '' 
         AND part IN ('Part A', 'Part B')";
 
 $stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die(json_encode(["error" => "Prepare failed: " . $conn->error]));
-}
-
 $stmt->bind_param("si", $year, $subject_id);
 $stmt->execute();
 
@@ -39,8 +34,7 @@ $classes = $result->fetch_all(MYSQLI_ASSOC);
 header('Content-Type: application/json');
 echo json_encode([
     "success" => true,
-    "data" => $classes,
-    "count" => count($classes)
+    "data" => $classes
 ]);
 
 $stmt->close();

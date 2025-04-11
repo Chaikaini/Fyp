@@ -534,55 +534,93 @@ let selectedClassInfo = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     fetch('get_classes.php')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            const partA = data.find(c => c.part === 'Part A');
-            const partB = data.find(c => c.part === 'Part B');
-
-            if (partA && partA.status === 'available') {
-                document.getElementById('partA').classList.remove('gray');
-                document.getElementById('partA').classList.add('green');
+            if (!data.success) {
+                console.error('Server error:', data.error);
+                return;
             }
 
-            if (partB && partB.status === 'unavailable') {
-                document.getElementById('partB').classList.add('disabled');
-            } else if (partB) {
-                document.getElementById('partB').classList.remove('disabled');
+            const courses = data.data;
+            const partA = courses.find(c => c.part === 'Part A');
+            const partB = courses.find(c => c.part === 'Part B');
+
+            // 处理 Part A
+            if (partA) {
+                const partAElement = document.getElementById('partA');
+                if (partA.status === 'available') {
+                    partAElement.classList.remove('gray');
+                    partAElement.classList.add('green');
+                } else {
+                    partAElement.classList.add('disabled');
+                }
+            }
+
+            // 处理 Part B
+            if (partB) {
+                const partBElement = document.getElementById('partB');
+                if (partB.status === 'available') {
+                    partBElement.classList.remove('gray', 'disabled');
+                    partBElement.classList.add('green');
+                } else {
+                    partBElement.classList.add('disabled');
+                }
             }
 
             // 点击 Part A
             document.getElementById('partA').addEventListener('click', function () {
-                if (!partA) return;
+                if (!partA || partA.status !== 'available') return;
+                
                 selectedClassInfo = {
-                    class_id: partA.class_id,
+                    class_id: partA.class_id || 'N/A',  // 处理空 class_id
                     capacity: partA.capacity
                 };
-                document.getElementById('popupMonth').innerText = partA.month;
-                document.getElementById('popupTime').innerText = partA.time;
-                const [enrolled, total] = partA.capacity.split('/');
-                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
-                document.getElementById('popup').style.display = 'flex';
+                
+                updatePopup(partA);
             });
 
             // 点击 Part B
             document.getElementById('partB').addEventListener('click', function () {
                 if (!partB || partB.status !== 'available') return;
+                
                 selectedClassInfo = {
-                    class_id: partB.class_id,
+                    class_id: partB.class_id || 'N/A',  // 处理空 class_id
                     capacity: partB.capacity
                 };
-                document.getElementById('popupMonth').innerText = partB.month;
-                document.getElementById('popupTime').innerText = partB.time;
-                const [enrolled, total] = partB.capacity.split('/');
-                document.getElementById('popupchildren').innerText = `${enrolled} / ${total}`;
-                document.getElementById('popup').style.display = 'flex';
+                
+                updatePopup(partB);
             });
 
+            // 关闭弹窗
             document.getElementById('closePopup').addEventListener('click', function () {
                 document.getElementById('popup').style.display = 'none';
             });
+
+            // 更新弹窗内容的公共函数
+            function updatePopup(course) {
+                document.getElementById('popupMonth').textContent = course.month;
+                document.getElementById('popupTime').textContent = course.time;
+                
+                // 处理 capacity 显示
+                if (course.capacity && course.capacity.includes('/')) {
+                    const [enrolled, total] = course.capacity.split('/');
+                    document.getElementById('popupchildren').textContent = `${enrolled} / ${total}`;
+                } else {
+                    document.getElementById('popupchildren').textContent = '0 / 0';
+                }
+                
+                document.getElementById('popup').style.display = 'flex';
+            }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('加载课程数据失败，请刷新页面重试');
+        });
 });
 
 
