@@ -6,6 +6,7 @@ $username = "root";
 $password = ""; 
 $dbname = "admin"; 
 
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
@@ -44,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt === false) {
         echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
     } else {
-        $stmt->bind_param("sssssssiii", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $capacity, $status);
+        $stmt->bind_param("sssssssiis", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $capacity, $status);
 
         if ($stmt->execute()) {
             echo json_encode(["success" => true, "message" => "Class added successfully!"]);

@@ -183,7 +183,7 @@
         padding: 10px;
         border-radius: 5px;
         margin-bottom: 10px;
-        font-weight: bold;
+        font-weight: normal;
         }
 
         .toast-message {
@@ -197,7 +197,7 @@
         border-radius: 5px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         font-size: 16px;
-        font-weight: bold;
+        font-weight: normal;
         z-index: 1000;
         text-align: center;
         transition: opacity 0.5s ease-in-out;
