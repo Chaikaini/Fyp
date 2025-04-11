@@ -50,35 +50,35 @@ $result = $conn->query($sql);
             </tr>
         </thead>
         <tbody>
-            <?php
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $row["subject_id"] . "</td>";
-                    echo "<td>" . $row["class_id"] . "</td>";
-                    echo "<td>" . $row["year"] . "</td>";
-                    echo "<td>" . $row["part"] . "</td>";
-                    echo "<td>" . $row["month"] . "</td>";
-                    echo "<td>" . $row["time"] . "</td>";
-                    echo "<td>" . $row["teacher"] . "</td>";
-                    echo "<td><span id='capacity-" . $row["class_id"] . "'>" . $row["enrolled"] . "/" . $row["capacity"] . "</span></td>";
-                    echo "<td>";
-                    if ($row["status"] === "available") {
-                        echo "<span class='badge status-badge bg-success'>Available</span>";
-                    } else {
-                        echo "<span class='badge status-badge bg-secondary'>Unavailable</span>";
-                    }
-                    echo "</td>";
-                    echo "<td>
-                        <i class='pointer-cursor fas fa-edit text-warning edit-btn' onclick='updateCapacityAndShowStudents(\"" . $row["class_id"] . "\")'></i>
-                        <i class='pointer-cursor fas fa-trash-alt text-danger delete-btn' data-classid='" . $row['class_id'] . "'></i>
-                    </td>";
-                    echo "</tr>";
-                }
-            } else {
-                echo "<tr><td colspan='10'>No classes found</td></tr>";
-            }
-            ?>
+        <?php
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . $row["subject_id"] . "</td>";
+        echo "<td>" . $row["class_id"] . "</td>";
+        echo "<td>" . $row["year"] . "</td>";
+        echo "<td>" . $row["part"] . "</td>";
+        echo "<td>" . $row["month"] . "</td>";
+        echo "<td>" . $row["time"] . "</td>";
+        echo "<td>" . $row["teacher"] . "</td>";
+        echo "<td><span id='enrolled-" . $row["class_id"] . "' data-capacity='" . $row["capacity"] . "'>" . $row["enrolled"] . "/" . $row["capacity"] . "</span></td>";
+        echo "<td>";
+        if ($row["status"] === "available") {
+            echo "<span class='badge status-badge bg-success'>Available</span>";
+        } else {
+            echo "<span class='badge status-badge bg-secondary'>Unavailable</span>";
+        }
+        echo "</td>";
+        echo "<td>
+            <i class='pointer-cursor fas fa-edit text-warning edit-btn' onclick='updateEnrollment(\"" . $row["class_id"] . "\")'></i>
+            <i class='pointer-cursor fas fa-trash-alt text-danger delete-btn' data-classid='" . $row['class_id'] . "'></i>
+        </td>";
+        echo "</tr>";
+    }
+} else {
+    echo "<tr><td colspan='10'>No classes found</td></tr>";
+}
+?>
         </tbody>
     </table>
 </div>

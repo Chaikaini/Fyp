@@ -519,41 +519,36 @@ function showToast(message, isError = false) {
 }
 
 
-function updateCapacityAndShowStudents(classId) {
-    fetch('adminclass_update.php', {
+document.addEventListener("DOMContentLoaded", function () {
+    // find all class_id element，and use updateEnrollment
+    const enrolledSpans = document.querySelectorAll("[id^='enrolled-']");
+    enrolledSpans.forEach(span => {
+        const classId = span.id.replace("enrolled-", "");
+        updateEnrollment(classId); 
+    });
+});
+
+function updateEnrollment(classId) {
+    if (!classId) return;
+
+    fetch('adminclass_update.php?timestamp=' + new Date().getTime(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'class_id=' + encodeURIComponent(classId)
     })
     .then(response => response.json())
     .then(data => {
-        const studentList = document.getElementById('student-list');
-        studentList.innerHTML = '';
-
-        data.students.forEach((student, index) => {
-            const row = `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${student.student_name}</td>
-                    <td>${student.gender}</td>
-                    <td>
-                        <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn ms-2"></i>
-                    </td>
-                </tr>
-            `;
-            studentList.innerHTML += row;
-        });
-
-        // 动态更新页面中容量信息
-        const capacityElement = document.getElementById('capacity-' + classId);
-        if (capacityElement) {
-            capacityElement.textContent = data.capacity;
+        if (data.success) {
+            const enrolledElement = document.getElementById('enrolled-' + classId);
+            if (enrolledElement) {
+                const capacity = enrolledElement.getAttribute('data-capacity');
+                enrolledElement.textContent = `${data.enrolled}/${capacity}`;
+            }
         }
-
-        openModal(); // 打开模态框
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => console.error('Error updating enrollment:', error));
 }
+
 
 </script>
 
