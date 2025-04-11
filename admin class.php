@@ -229,7 +229,7 @@
     <ul class="nav flex-column">
       <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
       <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Staff List</span></a></li>
-      <li class="nav-item"><a href="children list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
+      <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Order List</span></a></li>
       <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
@@ -344,32 +344,29 @@
 </div>
 
 
-  <!-- Edit Modal -->
-  <div id="editModal" class="modal">
+  <!-- Modal to view students -->
+<div id="studentModal" class="modal">
     <div class="modal-content pointer-cursor">
-        <span class="close" onclick="closeModal()">&times;</span>
+        <span class="close" onclick="closeStudentModal()">&times;</span>
         <div class="modal-header">
-            <h5>Students List - Eng5710</h5>
+            <h5>Students List - <span id="class-id-title"></span></h5>
         </div>
         <div class="card-body">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Number</th>
-                        <th>Student name</th>
+                        <th>Student Name</th>
                         <th>Gender</th>
-                        <th>Actions</th>
+                        <th>Email</th>
                     </tr>
                 </thead>
                 <tbody id="student-list">
-               <!-- 学生列表将通过 AJAX 动态加载 -->
- 
+                    <!-- Student list will be dynamically added here -->
                 </tbody>
             </table>
         </div>
         <div class="modal-footer pointer-cursor">
-            <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
-            <button type="button" class="btn btn-primary" onclick="closeModal()">Save changes</button>
+            <button type="button" class="btn btn-secondary" onclick="closeStudentModal()">Close</button>
         </div>
     </div>
 </div>
@@ -550,6 +547,45 @@ function updateEnrollment(classId) {
 }
 
 
+
+function viewStudents(classId) {
+        // Display class id in modal header
+        document.getElementById("class-id-title").textContent = classId;
+
+        // Fetch the student information via AJAX
+        fetch('adminclass_students.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'class_id=' + classId
+        })
+        .then(response => response.json())
+        .then(data => {
+            const studentList = document.getElementById("student-list");
+            studentList.innerHTML = ''; // Clear previous list
+
+            if (data.success) {
+                // Dynamically populate the student list
+                data.students.forEach(student => {
+                    const row = `<tr>
+                        <td>${student.name}</td>
+                        <td>${student.gender}</td>
+                        <td>${student.email}</td>
+                    </tr>`;
+                    studentList.innerHTML += row;
+                });
+
+                // Open the modal to view students
+                document.getElementById("studentModal").style.display = "block";
+            } else {
+                alert(data.message || 'Failed to load students.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function closeStudentModal() {
+        document.getElementById("studentModal").style.display = "none";
+    }
 </script>
 
 

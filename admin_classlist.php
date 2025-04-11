@@ -72,6 +72,7 @@ if ($result->num_rows > 0) {
         echo "<td>
             <i class='pointer-cursor fas fa-edit text-warning edit-btn' onclick='updateEnrollment(\"" . $row["class_id"] . "\")'></i>
             <i class='pointer-cursor fas fa-trash-alt text-danger delete-btn' data-classid='" . $row['class_id'] . "'></i>
+            <i class='pointer-cursor fas fa-eye text-info view-icon' onclick='viewStudents(\"" . $row["class_id"] . "\")'></i>
         </td>";
         echo "</tr>";
     }
