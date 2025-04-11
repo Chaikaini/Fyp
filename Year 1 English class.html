@@ -533,7 +533,7 @@
 let selectedClassInfo = null;
 
 document.addEventListener("DOMContentLoaded", function () {
-    fetch('get_classes.php')
+    fetch('get_classes.php?page=year1english')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -642,7 +642,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
        // 购物车功能
-
+// 购物车功能
 document.getElementById("addToCart").addEventListener("click", function() {
     let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
     let subjectName = document.getElementById("subjectName").innerText;
