@@ -52,6 +52,22 @@ CREATE TABLE `attendance` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL,
+   `parent_id` int(11) NOT NULL,
+  `comment_year` varchar(10) DEFAULT NULL,
+  `comment_subject` varchar(50) DEFAULT NULL,
+  `comment_rating` int(11) DEFAULT NULL,
+  `comment_text` text DEFAULT NULL,
+  `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `child`
 --
 
