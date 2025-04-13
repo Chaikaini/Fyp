@@ -163,70 +163,82 @@
     <!-- JavaScript -->
     <script>
         document.getElementById('submitComment').addEventListener('click', function () {
-    const year = document.getElementById('year').value;
-    const subject = document.getElementById('subject').value;
-    const rating = document.querySelector('input[name="rating"]:checked');
-    const comment = document.getElementById('comment').value;
-
-    if (!rating) {
-        alert('Please select a rating!');
-        return;
-    }
-
-    if (!comment.trim()) {
-        alert('Please enter a comment!');
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('year', year);
-    formData.append('subject', subject);
-    formData.append('rating', rating.value);
-    formData.append('comment', comment);
-
-    fetch('submit_comment.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        alert(data); 
-        document.getElementById('year').value = 'Year 1';
-        document.getElementById('subject').value = '';
-        document.getElementById('comment').value = '';
-        document.querySelector('input[name="rating"]:checked').checked = false;
-
-        loadComments();
-    })
-    .catch(error => console.error('Error submitting comment:', error));
-});
-
-function loadComments() {
-    fetch('get_comments.php')
-        .then(response => response.json())
-        .then(data => {
-            const commentsContainer = document.getElementById('comments');
-            commentsContainer.innerHTML = ''; 
-
-            data.forEach(comment => {
-                const commentElement = document.createElement('div');
-                commentElement.classList.add('comment-box');
-                commentElement.innerHTML = `
-                    <p class="comment-subject">${comment.subject} (${comment.year})</p>
-                    <p>Rating: ${'⭐'.repeat(comment.rating)}</p>
-                    <p>${comment.comment}</p>
-                    <small>${comment.created_at}</small>
-                `;
-                commentsContainer.appendChild(commentElement);
-            });
-        })
-        .catch(error => console.error('Error loading comments:', error));
-}
-
-window.onload = loadComments;
-
-
-    </script>
+            const year = document.getElementById('year').value;
+            const subject = document.getElementById('subject').value;
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('comment').value;
+    
+            let valid = true;
+            // 清除之前的错误消息
+            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+    
+            if (!rating) {
+                valid = false;
+                const ratingError = document.createElement('div');
+                ratingError.classList.add('error-message');
+                ratingError.style.color = 'red';
+                ratingError.textContent = 'Please select a rating!';
+                document.querySelector('.star-rating').appendChild(ratingError);
+            }
+    
+            if (!comment.trim()) {
+                valid = false;
+                const commentError = document.createElement('div');
+                commentError.classList.add('error-message');
+                commentError.style.color = 'red';
+                commentError.textContent = 'Please enter a comment!';
+                document.getElementById('comment').after(commentError);
+            }
+    
+            if (!valid) {
+                return;
+            }
+    
+            const formData = new FormData();
+            formData.append('comment_year', year);
+            formData.append('comment_subject', subject);
+            formData.append('comment_rating', rating.value);
+            formData.append('comment_text', comment);
+    
+            fetch('submit_comment.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                loadComments(); 
+                document.getElementById('year').value = 'Year 1';
+                document.getElementById('subject').value = '';
+                document.getElementById('comment').value = '';
+                document.querySelector('input[name="rating"]:checked').checked = false;
+            })
+            .catch(error => console.error('Error submitting comment:', error));
+        });
+    
+        function loadComments() {
+            fetch('get_comments.php')
+                .then(response => response.json())
+                .then(data => {
+                    const commentsContainer = document.getElementById('comments');
+                    commentsContainer.innerHTML = '';
+    
+                    data.forEach(comment => {
+                        const commentElement = document.createElement('div');
+                        commentElement.classList.add('comment-box');
+                        commentElement.innerHTML = `
+                            <p class="comment-subject">${comment.comment_subject} (${comment.comment_year})</p>
+                            <p>Rating: ${'⭐'.repeat(comment.comment_rating)}</p>
+                            <p>${comment.comment_text}</p>
+                            <small>${comment.comment_created_at}</small>
+                        `;
+                        commentsContainer.appendChild(commentElement);
+                    });
+                })
+                .catch(error => console.error('Error loading comments:', error));
+        }
+    
+        window.onload = loadComments;
+    </script>    
     <!-- Footer Start -->
 <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
     <div class="container py-5">
