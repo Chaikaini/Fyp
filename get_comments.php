@@ -10,7 +10,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT comment_year, comment_subject, comment_rating, comment_text, comment_created_at FROM comments ORDER BY comment_created_at DESC";
+$sql = "SELECT class_id, subject_id, comment_rating, comment_text, comment_created_at FROM comments ORDER BY comment_created_at DESC";
 $result = $conn->query($sql);
 
 $comments = [];

@@ -57,13 +57,14 @@ CREATE TABLE `attendance` (
 
 CREATE TABLE `comments` (
   `comment_id` int(11) NOT NULL,
-   `parent_id` int(11) NOT NULL,
-  `comment_year` varchar(10) DEFAULT NULL,
-  `comment_subject` varchar(50) DEFAULT NULL,
+  `parent_id` int(11) NOT NULL,
+  `class_id` varchar(10) DEFAULT NULL,
+  `subject_id` varchar(50) DEFAULT NULL,
   `comment_rating` int(11) DEFAULT NULL,
   `comment_text` text DEFAULT NULL,
   `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
 
 -- --------------------------------------------------------
 
@@ -230,6 +231,15 @@ ALTER TABLE `child`
   ADD KEY `parent_id` (`parent_id`);
 
 --
+-- Indexes for table `comments`
+--
+  ALTER TABLE `comments`
+  ADD PRIMARY KEY (`comment_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `subject_id` (`subject_id`),
+  ADD KEY `parent_id` (`parent_id`);
+
+--
 -- Indexes for table `class`
 --
 ALTER TABLE `class`
@@ -315,6 +325,12 @@ ALTER TABLE `child`
   MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `comments`
+--
+ALTER TABLE `comments`
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
@@ -365,6 +381,11 @@ ALTER TABLE `attendance`
 --
 ALTER TABLE `child`
   ADD CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
+
+--
+-- Constraints for table `comments`
+--
+
 
 --
 -- Constraints for table `class`
