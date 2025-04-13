@@ -161,7 +161,7 @@
 
     let form = this;
     let formData = new FormData(form);
-    let password = document.getElementById("password").value;
+    let parent_password = document.getElementById("password").value;
     let confirm_password = document.getElementById("confirm_password").value;
     let confirmPasswordField = document.getElementById("confirm_password");
 
@@ -170,7 +170,7 @@
         errorMsg.remove();
     }
 
-    if (password !== confirm_password) {
+    if (parent_password !== confirm_password) {
         let errorSpan = document.createElement("span");
         errorSpan.id = "passwordError";
         errorSpan.style.color = "red";

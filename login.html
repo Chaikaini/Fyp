@@ -158,8 +158,9 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            localStorage.setItem("username", data.username);
-                            localStorage.setItem("email", data.email);
+                            localStorage.setItem("parent_id", data.parent_id);
+                            localStorage.setItem("parent_name", data.parent_name);
+                            localStorage.setItem("parent_email", data.parent_email);
                             window.location.href = "member.html"; 
                         } else {
                             let errorMessage = document.getElementById("errorMessage");
