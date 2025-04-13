@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("s", $class_id);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
-    $enrolled = $result['total'];
+    $class_enrolled = $result['total'];
 
     // back to admin database，update enrolled
     $conn->select_db($admin_dbname);
