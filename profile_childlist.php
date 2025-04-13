@@ -4,25 +4,26 @@ session_start();
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "profile";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
+
 if ($conn->connect_error) {
     die(json_encode(['status' => 'error', 'message' => 'Database connection failed']));
 }
 
 // check parent login
-if (!isset($_SESSION['email'])) {
+if (!isset($_SESSION['parent_id'])) { 
     echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
     exit;
 }
 
-$email = $_SESSION['email']; // get parent email
+$parent_id = $_SESSION['parent_id']; 
 
 // check parent child information
-$sql = "SELECT name, gender, kidNumber, birthday, school, year FROM childreninfo WHERE email = ?";
+$sql = "SELECT child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year FROM child WHERE parent_id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $email);
+$stmt->bind_param("i", $parent_id); 
 $stmt->execute();
 $result = $stmt->get_result();
 

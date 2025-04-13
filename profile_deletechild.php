@@ -3,7 +3,7 @@ header("Content-Type: application/json");
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "profile";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -11,11 +11,11 @@ if ($conn->connect_error) {
     exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["kidNumber"])) {
-    $kidNumber = $_POST["kidNumber"];
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["child_kidNumber"])) {
+    $kidNumber = $_POST["child_kidNumber"];
 
-    $stmt = $conn->prepare("DELETE FROM childreninfo WHERE kidNumber = ?");
-    $stmt->bind_param("s", $kidNumber); 
+    $stmt = $conn->prepare("DELETE FROM child WHERE child_kidNumber = ?");
+    $stmt->bind_param("s", $child_kidNumber); 
 
     if ($stmt->execute()) {
         echo json_encode(["success" => true]);
