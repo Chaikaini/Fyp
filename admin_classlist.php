@@ -4,14 +4,14 @@ include 'dbadmin_connection.php';
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "admin";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM admin_class";
+$sql = "SELECT * FROM class";
 $result = $conn->query($sql);
 ?>
 
@@ -61,7 +61,7 @@ if ($result->num_rows > 0) {
         echo "<td>" . $row["month"] . "</td>";
         echo "<td>" . $row["time"] . "</td>";
         echo "<td>" . $row["teacher"] . "</td>";
-        echo "<td><span id='enrolled-" . $row["class_id"] . "' data-capacity='" . $row["capacity"] . "'>" . $row["enrolled"] . "/" . $row["capacity"] . "</span></td>";
+        echo "<td><span id='enrolled-" . $row["class_id"] . "' data-capacity='" . $row["class_capacity"] . "'>" . $row["class_enrolled"] . "/" . $row["class_capacity"] . "</span></td>";
         echo "<td>";
         if ($row["status"] === "available") {
             echo "<span class='badge status-badge bg-success'>Available</span>";
