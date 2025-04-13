@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "user_information";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -11,24 +11,24 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $address = $_POST['address'];
+    $parent_name = $_POST['parent_name'];
+    $parent_email = $_POST['parent_email'];
+    $parent_address = $_POST['parent_address'];
     $phone_number = $_POST['phone_number'];
-    $gender = $_POST['gender'];
-    $relationship = $_POST['relationship'];
-    $password = $_POST['password'];
+    $parent_gender = $_POST['parent_gender'];
+    $parent_relationship = $_POST['parent_relationship'];
+    $parent_password = $_POST['parent_password'];
     $confirm_password = $_POST['confirm_password']; 
 
-    if ($password !== $confirm_password) {
+    if ($parent_password !== $confirm_password) {
         echo "Error: Passwords do not match!";
         exit();
     }
 
-    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+    $hashed_password = password_hash($parent_password, PASSWORD_BCRYPT);
 
-    $sql = "INSERT INTO users (username, email, address, phone_number, gender, relationship, password) 
-            VALUES ('$username', '$email', '$address', '$phone_number', '$gender', '$relationship', '$hashed_password')";
+    $sql = "INSERT INTO parent (parent_name, parent_email, parent_address, phone_number, parent_gender, parent_relationship, parent_password) 
+            VALUES ('$parent_name', '$parent_email', '$parent_address', '$phone_number', '$parent_gender', '$parent_relationship', '$hashed_password')";
 
     if ($conn->query($sql) === TRUE) {
         echo "Registration successful!";
