@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root"; 
 $password = ""; 
-$dbname = "admin"; 
+$dbname = "the seeds"; 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -16,21 +16,20 @@ if ($conn->connect_error) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // get data
-    $subjectID = $_POST['subjectID'];
-    $subject = htmlspecialchars($_POST['subject'], ENT_QUOTES, 'UTF-8');
-    $year = htmlspecialchars($_POST['year'], ENT_QUOTES, 'UTF-8');
-    $price = floatval($_POST['price']);
-    $image = htmlspecialchars($_POST['image'], ENT_QUOTES, 'UTF-8');
-    $description = htmlspecialchars($_POST['description'], ENT_QUOTES, 'UTF-8');
+    $subject_id = $_POST['subject_id'];
+    $subject_name = htmlspecialchars($_POST['subject_name'], ENT_QUOTES, 'UTF-8');
+    $subject_price = floatval($_POST['subject_price']);
+    $subject_image = htmlspecialchars($_POST['subject_image'], ENT_QUOTES, 'UTF-8');
+    $subject_description = htmlspecialchars($_POST['subject_description'], ENT_QUOTES, 'UTF-8');
 
    
-    if (empty($subjectID) || empty($subject) || empty($year) || empty($price) || empty($image) || empty($description)) {
+    if (empty($subject_id) || empty($subject_name) || empty($subject_price) || empty($subject_image) || empty($subject_description)) {
         echo json_encode(['success' => false, 'error' => 'All fields are required.']);
         exit;
     }
 
     // update
-    $sql = "UPDATE admin_subject SET subject = ?, year = ?, price = ?, image = ?, description = ? WHERE subject_ID = ?";
+    $sql = "UPDATE subject SET subject_name = ?, subject_price = ?, subject_image = ?, subject_description = ? WHERE subject_id = ?";
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
@@ -38,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt->bind_param("sssdsi", $subject, $year, $price, $image, $description, $subjectID);
+    $stmt->bind_param("ssdsi", $subject_name, $subject_price, $subject_image, $subject_description, $subject_id);
 
     if ($stmt->execute()) {
         echo json_encode(['success' => true]);

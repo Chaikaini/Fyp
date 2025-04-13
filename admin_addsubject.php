@@ -1,10 +1,11 @@
 <?php
+session_start(); 
 header('Content-Type: application/json'); 
 
 $servername = "localhost";
 $username = "root"; 
 $password = ""; 
-$dbname = "admin"; 
+$dbname = "the seeds"; 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -15,16 +16,21 @@ if ($conn->connect_error) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    $subjectID = $_POST["subjectID"];
-    $subject = $_POST["subject"];
-    $year = $_POST["year"];
-    $price = $_POST["price"];
-    $image = $_POST["image"];
-    $description = $_POST["description"];
+    // get the admin_id from session
+    if (!isset($_SESSION["admin_id"])) {
+        echo json_encode(["success" => false, "error" => "Admin not logged in."]);
+        exit;
+    }
 
-   
-    $stmt = $conn->prepare("INSERT INTO admin_subject (subject_ID, subject, year, price, image, description) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $subjectID, $subject, $year, $price, $image, $description);
+    $admin_id = $_SESSION["admin_id"];
+    $subject_id = $_POST["subject_id"];
+    $subject_name = $_POST["subject_name"]; 
+    $subject_price = $_POST["subject_price"];
+    $subject_image = $_POST["subject_image"];
+    $subject_description = $_POST["subject_description"];
+
+    $stmt = $conn->prepare("INSERT INTO subject (admin_id, subject_id, subject_name, subject_price, subject_image, subject_description) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $admin_id, $subject_id, $subject_name, $subject_price, $subject_image, $subject_description);
 
     if ($stmt->execute()) {
         echo json_encode(["success" => true, "message" => "Subject added successfully!"]);

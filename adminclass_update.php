@@ -4,10 +4,9 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root";
 $password = "";
-$order_dbname = "order";
-$admin_dbname = "admin";
+$dbname = "the seeds";
 
-$conn = new mysqli($servername, $username, $password, $admin_dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
     exit;
@@ -17,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $class_id = filter_var($_POST['class_id'], FILTER_SANITIZE_STRING);
 
     // check class_id exist or not
-    $checkClassQuery = "SELECT capacity FROM admin_class WHERE class_id = ?";
+    $checkClassQuery = "SELECT class_capacity FROM class WHERE class_id = ?";
     $stmt = $conn->prepare($checkClassQuery);
     $stmt->bind_param("s", $class_id);
     $stmt->execute();
@@ -28,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $classData = $result->fetch_assoc();
-    $capacity = $classData['capacity'];
+    $class_capacity = $classData['class_capacity'];
 
     // go oredrs database to get the new enrolled 
     $conn->select_db($order_dbname);
@@ -41,11 +40,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // back to admin database，update enrolled
     $conn->select_db($admin_dbname);
-    $updateQuery = "UPDATE admin_class SET enrolled = ? WHERE class_id = ?";
+    $updateQuery = "UPDATE class SET class_enrolled = ? WHERE class_id = ?";
     $stmt = $conn->prepare($updateQuery);
-    $stmt->bind_param("is", $enrolled, $class_id);
+    $stmt->bind_param("is", $class_enrolled, $class_id);
     if ($stmt->execute()) {
-        echo json_encode(["success" => true, "enrolled" => $enrolled]);
+        echo json_encode(["success" => true, "class_enrolled" => $class_enrolled]);
     } else {
         echo json_encode(["success" => false, "message" => "Update failed: " . $stmt->error]);
     }

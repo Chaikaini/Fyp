@@ -312,19 +312,17 @@
     <div class="modal-content pointer-cursor">
         <span class="close ">&times;</span>
         <form id="addSubjectForm" method="POST" action="admin_addsubject.php">
-            <label for="subjectID">Subject ID:</label>
-            <input type="text" id="subjectID" name="subjectID">
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject">
-            <label for="year">Year:</label>
-            <input type="text" id="year" name="year">
-            <label for="price">Price:</label>
-            <input type="text" id="price" name="price">
-            <label for="image">Image:</label>
-            <input type="text" id="image" name="image">
+            <label for="subject_id">Subject ID:</label>
+            <input type="text" id="subject_id" name="subject_id">
+            <label for="subject_name">Subject:</label>
+            <input type="text" id="subject_name" name="subject_name">
+            <label for="subject_price">Price:</label>
+            <input type="text" id="subject_price" name="subject_price">
+            <label for="subject_image">Image:</label>
+            <input type="text" id="subject_image" name="subject_image">
             <div class="form-group">
-              <label for="description">Subject description:</label>
-              <textarea id="description" name="description"></textarea>
+              <label for="subject_description">Subject description:</label>
+              <textarea id="subject_description" name="subject_description"></textarea>
             </div>
             <input type="submit" value="Add Subject">
             
@@ -351,28 +349,24 @@
         <span class="close" onclick="closeModal()">&times;</span>
         <form id="editSubjectForm" method="POST" action="admin_editsubject.php">
             <div class="form-group">
-                <label for="editSubjectID">Subject ID:</label>
-                <input type="text" id="editSubjectID" name="subjectID" readonly>
+                <label for="editsubject_id">Subject ID:</label>
+                <input type="text" id="editSubject_id" name="subject_id" readonly>
             </div>
             <div class="form-group">
-                <label for="editSubject">Subject:</label>
-                <input type="text" id="editSubject" name="subject">
+                <label for="editsubject_name">Subject:</label>
+                <input type="text" id="editsubject_name" name="subject_name">
             </div>
             <div class="form-group">
-                <label for="editYear">Year:</label>
-                <input type="text" id="editYear" name="year">
-            </div>
-            <div class="form-group">
-                <label for="editPrice">Price:</label>
-                <input type="text" id="editPrice" name="price">
+                <label for="editsubject_price">Price:</label>
+                <input type="text" id="editsubject_price" name="subject_price">
             </div>
             <div class="form-group">
                 <label for="editImage">Image:</label>
-                <input type="text" id="editImage" name="image">
+                <input type="text" id="editsubject_image" name="subject_image">
             </div>
             <div class="form-group">
-                <label for="editDescription">Subject description:</label>
-                <textarea id="editDescription" name="description"></textarea>
+                <label for="editsubject_description">Subject description:</label>
+                <textarea id="editsubject_description" name="subject_description"></textarea>
             </div>
             <input type="submit" value="Save changes" class="btn btn-primary">
         </form>
@@ -450,12 +444,12 @@
         
         
         document.addEventListener("DOMContentLoaded", function () {
-        let selectedSubjectID = null;
+        let selectedsubject_id = null;
 
     // when click delete button open modal
     document.querySelector("tbody").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
-            selectedSubjectID = event.target.getAttribute("data-subjectID");
+            selectedsubject_id = event.target.getAttribute("data-subject_id");
             document.getElementById("deleteSubjectModal").style.display = "flex";
         }
     });
@@ -467,11 +461,11 @@
 
     // confirm delete
     document.getElementById("confirmDeleteSubjectBtn").addEventListener("click", function () {
-        if (selectedSubjectID) {
+        if (selectedsubject_id) {
             fetch("admin_deletesubject.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "subject_ID=" + encodeURIComponent(selectedSubjectID)
+                body: "subject_id=" + encodeURIComponent(selectedsubject_id)
             })
             .then(response => response.json())
             .then(data => {
@@ -519,13 +513,12 @@ document.getElementById("editSubjectForm").addEventListener("submit", function (
 
 
 // Edit modal open function
-function openEditModal(subject_ID, subject, year, price, image, description) {
-    document.getElementById("editSubjectID").value = subject_ID;
-    document.getElementById("editSubject").value = subject;
-    document.getElementById("editYear").value = year;
-    document.getElementById("editPrice").value = price;
-    document.getElementById("editImage").value = image;
-    document.getElementById("editDescription").value = description;
+function openEditModal(subject_id, subject_name, subject_price, subject_image, subject_description) {
+    document.getElementById("editsubject_id").value = subject_id;
+    document.getElementById("editsubject_name").value = subject_name;
+    document.getElementById("editsubject_price").value = subject_price;
+    document.getElementById("editsubject_image").value = subject_image;
+    document.getElementById("editsubject_description").value = subject_description;
     document.getElementById("editModal").style.display = "block";
 }
 

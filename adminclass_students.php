@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root";
 $password = "";
-$order_dbname = "order";  // 订单数据库
+$order_dbname = "the seeds";  // 订单数据库
 
 $conn = new mysqli($servername, $username, $password, $order_dbname);
 if ($conn->connect_error) {
@@ -27,8 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['class_id'])) {
         $students = [];
         while ($row = $result->fetch_assoc()) {
             $students[] = [
-                'name' => $row['child_name'],
-                'gender' => $row['child_gender'],
+                'child_name' => $row['child_name'],
+                'child_gender' => $row['child_gender'],
                 'email' => $row['child_email']
             ];
         }

@@ -95,6 +95,7 @@ CREATE TABLE `class` (
   `year` year(4) NOT NULL,
   `class_time` time NOT NULL,
   `class_capacity` int(11) NOT NULL,
+  `class_enrolled` int(11) NOT NULL,
   `class_status` enum('Available','Unavailable','Full') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
