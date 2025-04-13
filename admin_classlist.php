@@ -59,11 +59,11 @@ if ($result->num_rows > 0) {
         echo "<td>" . $row["year"] . "</td>";
         echo "<td>" . $row["part"] . "</td>";
         echo "<td>" . $row["month"] . "</td>";
-        echo "<td>" . $row["time"] . "</td>";
+        echo "<td>" . $row["class_time"] . "</td>";
         echo "<td>" . $row["teacher"] . "</td>";
         echo "<td><span id='enrolled-" . $row["class_id"] . "' data-capacity='" . $row["class_capacity"] . "'>" . $row["class_enrolled"] . "/" . $row["class_capacity"] . "</span></td>";
         echo "<td>";
-        if ($row["status"] === "available") {
+        if ($row["class_status"] === "available") {
             echo "<span class='badge status-badge bg-success'>Available</span>";
         } else {
             echo "<span class='badge status-badge bg-secondary'>Unavailable</span>";

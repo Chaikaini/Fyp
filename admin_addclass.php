@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root"; 
 $password = ""; 
-$dbname = "admin"; 
+$dbname = "the seeds"; 
 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -15,37 +15,37 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $subjectid = $_POST["subjectid"];
-    $classid = $_POST["classid"];
+    $subject_id = $_POST["subject_id"];
+    $class_id = $_POST["class_id"];
     $year = $_POST["year"];
     $part = $_POST["part"];
     $month = $_POST["month"];
-    $time = $_POST["time"];
+    $class_time = $_POST["class_time"];
     $teacher = $_POST["teacher"];
-    $capacity = (int)$_POST["capacity"]; //Maximum Capacity
-    $status = $_POST["status"]; //  Status
+    $class_capacity = (int)$_POST["class_capacity"]; //Maximum Capacity
+    $class_status = $_POST["class_status"]; //  Status
     $enrollment = 0; 
 
     // check capacity is a positive integer
-    if ($capacity <= 0) {
+    if ($class_capacity <= 0) {
         echo json_encode(["success" => false, "message" => "Capacity must be a positive number."]);
         exit;
     }
 
     // check status 
-    if (!in_array($status, ["available", "unavailable"])) {
+    if (!in_array($class_status, ["available", "unavailable"])) {
         echo json_encode(["success" => false, "message" => "Invalid status value."]);
         exit;
     }
 
-    $sql = "INSERT INTO admin_class (subject_id, class_id, year, part, month, time, teacher, enrolled, capacity, status) 
+    $sql = "INSERT INTO class (subject_id, class_id, year, part, month, class_time, teacher, class_enrolled, class_capacity, class_status) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
         echo json_encode(["success" => false, "message" => "Prepare failed: " . $conn->error]);
     } else {
-        $stmt->bind_param("sssssssiis", $subjectid, $classid, $year, $part, $month, $time, $teacher, $enrollment, $capacity, $status);
+        $stmt->bind_param("sssssssiis", $subject_id, $class_id, $year, $part, $month, $class_time, $teacher, $class_enrolled, $class_capacity, $class_status);
 
         if ($stmt->execute()) {
             echo json_encode(["success" => true, "message" => "Class added successfully!"]);
