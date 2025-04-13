@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "user_information";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -14,73 +14,57 @@ if ($conn->connect_error) {
     exit;
 }
 
-// check is user login
-if (!isset($_SESSION['email'])) {
+if (!isset($_SESSION['parent_id'])) {
     echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
     exit;
 }
 
+$parent_id = $_SESSION['parent_id'];
 $data = json_decode(file_get_contents("php://input"), true);
-$email = $_SESSION['email'];
 
-// get form data
-$username = $data['username'];
-$gender = $data['gender'];
-$ic_num = $data['ic_num'];
-$phone_num_1 = $data['phone_num_1'];
-$phone_num_2 = $data['phone_num_2'];
-$relationship = $data['relationship'];
-$address = $data['address'];
-$current_password = $data['current_password'] ?? '';
+
+$parent_name = $data['parent_name'];
+$parent_gender = $data['parent_gender'];
+$ic_number = $data['ic_number'];
+$phone_number = $data['phone_number'];
+$phone_number2 = $data['phone_number2'];
+$parent_relationship = $data['parent_relationship'];
+$parent_address = $data['parent_address'];
+$current_password = $data['current_password'];
 $new_password = $data['new_password'] ?? '';
 
 $conn->begin_transaction();
 
 try {
-    // if want to update password need to check current password is corect 
     if (!empty($current_password) && !empty($new_password)) {
-        $stmt = $conn->prepare("SELECT password FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
+        $stmt = $conn->prepare("SELECT parent_password FROM parent WHERE parent_id = ?");
+        $stmt->bind_param("i", $parent_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         $stmt->close();
 
-        if (!$user) {
-            throw new Exception('User not found');
-        }
-
-        if (!password_verify($current_password, $user['password'])) {
+        if (!$user || !password_verify($current_password, $user['parent_password'])) {
             throw new Exception('Current password is incorrect');
         }
 
-        // get the hide password
         $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
-
-        // update password
-        $stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
-        $stmt->bind_param("ss", $hashed_password, $email);
-        if (!$stmt->execute()) {
-            throw new Exception('Failed to update password');
-        }
+        $stmt = $conn->prepare("UPDATE parent SET parent_password = ? WHERE parent_id = ?");
+        $stmt->bind_param("si", $hashed_password, $parent_id);
+        $stmt->execute();
         $stmt->close();
     }
 
-    // update user information
+   
     $stmt = $conn->prepare("
-    UPDATE users 
-    SET username=?, gender=?, ic_number=?, phone_number=?, phone_number2=?, relationship=?, address=? 
-    WHERE email=?
-");
-$stmt->bind_param("ssssssss", $username, $gender, $ic_num, $phone_num_1, $phone_num_2, $relationship, $address, $email);
-
-    
-    if (!$stmt->execute()) {
-        throw new Exception('Profile update failed');
-    }
+        UPDATE parent 
+        SET parent_name=?, parent_gender=?, ic_number=?, phone_number=?, phone_number2=?, parent_relationship=?, parent_address=? 
+        WHERE parent_id=?
+    ");
+    $stmt->bind_param("sssssssi", $parent_name, $parent_gender, $ic_number, $phone_number, $phone_number2, $parent_relationship, $parent_address, $parent_id);
+    $stmt->execute();
     $stmt->close();
 
-    // submit
     $conn->commit();
     echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
 

@@ -993,20 +993,21 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                document.getElementById("username").value = data.data.username;
-                document.getElementById("gender").value = data.data.gender;
+                document.getElementById("username").value = data.data.parent_name;
+                document.getElementById("gender").value = data.data.parent_gender;
                 document.getElementById("ic-num").value = data.data.ic_number;
-                document.getElementById("email").value = data.data.email;
-                document.getElementById("address").value = data.data.address;
+                document.getElementById("email").value = data.data.parent_email;
+                document.getElementById("address").value = data.data.parent_address;
                 document.getElementById("phone-num-1").value = data.data.phone_number;
                 document.getElementById("phone-num-2").value = data.data.phone_number2;
-                document.getElementById("relationship").value = data.data.relationship;
+                document.getElementById("relationship").value = data.data.parent_relationship;
             } else {
                 alert("Failed to load profile: " + data.message);
             }
         })
         .catch(error => console.error("Error fetching profile:", error));
 });
+
 
 document.querySelector("form").addEventListener("submit", async function (event) {
     event.preventDefault();
@@ -1016,17 +1017,18 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
     // get data
     const formData = {
-        username: document.getElementById("username").value,
-        gender: document.getElementById("gender").value,
-        ic_num: document.getElementById("ic-num").value,
-        phone_num_1: document.getElementById("phone-num-1").value,
-        phone_num_2: document.getElementById("phone-num-2").value,
-        relationship: document.getElementById("relationship").value,
-        address: document.getElementById("address").value,
-        current_password: document.getElementById("current-password").value.trim(),
-        new_password: document.getElementById("new-password").value.trim(),
-        confirm_password: document.getElementById("confirm-password").value.trim(),
+    parent_name: document.getElementById("username").value,
+    parent_gender: document.getElementById("gender").value,
+    ic_number: document.getElementById("ic-num").value,
+    phone_number: document.getElementById("phone-num-1").value,
+    phone_number2: document.getElementById("phone-num-2").value,
+    parent_relationship: document.getElementById("relationship").value,
+    parent_address: document.getElementById("address").value,
+    current_password: document.getElementById("current-password").value.trim(),
+    new_password: document.getElementById("new-password").value.trim(),
+    confirm_password: document.getElementById("confirm-password").value.trim(),
     };
+
 
     document.getElementById("current-password-error").textContent = "";
     document.getElementById("new-password-error").textContent = "";
