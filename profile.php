@@ -555,57 +555,44 @@
     </div>
 
    <!-- Add Child Modal -->
-<div id="addChildModal" class="modal">
-    <div class="modal-content pointer-cursor">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h3>Add Child Information</h3>
+   <form id="addChildForm" method="post" action="profile_addchild.php">
+    <div class="form-group">
+        <label for="child_name">Name</label>
+        <input type="text" id="child_name" name="child_name">
+    </div>
+    <div class="form-group">
+        <label for="child_gender">Gender</label>
+        <select id="child_gender" name="child_gender">
+            <option value="" disabled selected>Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>   
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="child_kidNumber">My Kid Number</label>
+        <input type="text" id="child_kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
+    </div>
+    <div class="form-group">
+        <label for="child_birthday">Birthday</label>
+        <input type="date" id="child_birthday" name="child_birthday" readonly>
+    </div>
+    <div class="form-group">
+        <label for="child_school">School</label>
+        <input type="text" id="child_school" name="child_school">
+    </div>
+    <div class="form-group">
+        <label for="child_year">Year</label>
+        <select id="child_year" name="child_year">
+            <option value="" disabled selected>Year</option>
+            <option value="1">Year 1</option>
+            <option value="2">Year 2</option>   
+        </select>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+</form>
 
-        <div class="avatar-section">
-            <label for="avatar-upload">
-                <div class="avatar-container">
-                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar">
-                </div>
-            </label>
-            <input type="file" id="avatar-upload" accept="image/*">
-        </div>
-
-        <form id="addChildForm" method="post" action="profile_addchild.php">
-            <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name">
-            </div>
-            <div class="form-group">
-                <label for="gender">Gender</label>
-                <select id="gender" name="gender">
-                    <option value="" disabled selected>Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>   
-                </select>
-            </div>
-            <div class="form-group">
-            <label for="kidNumber">My Kid Number</label>
-            <input type="text" id="kidNumber" name="kidNumber" placeholder="000000-00-0000">
-        </div>
-        <div class="form-group">
-            <label for="birthday">Birthday</label>
-            <input type="date" id="birthday" name="birthday" readonly>
-        </div>
-            <div class="form-group">
-                <label for="school">School</label>
-                <input type="text" id="school" name="school">
-            </div>
-            <div class="form-group">
-                <label for="year">Year</label>
-                <select id="year" name="year">
-                    <option value="" disabled selected>Year</option>
-                    <option value="Year 1">Year 1</option>
-                    <option value="Year 2">Year 2</option>   
-                </select>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </form>
         <div id="successToast" class="toast">Add child information successfully!</div>
     </div>
 </div>
@@ -626,47 +613,42 @@
         </div>
 
         <form id="childForm" method="post" action="profile_editchild.php">
-           
-
-            <div class="form-group">
-                <label for="childName">Child Name</label>
-                <input type="text" id="childName" name="name" required>
-            </div>
-            <div class="form-group">
-                <label for="childGender">Gender</label>
-                <select id="childGender" name="gender" required>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="editkidNumber">My kid number</label>
-                <input type="text" id="editkidNumber" name="kidNumber" required>
-            </div>
-            <div class="form-group">
-                <label for="childBirthday">Birthday</label>
-                <input type="date" id="childBirthday" name="birthday" required>
-            </div>
-            <div class="form-group">
-                <label for="childSchool">School</label>
-                <input type="text" id="childSchool" name="school" required>
-            </div>
-            <div class="form-group">
-                <label for="childYear">Year</label>
-                <select id="childYear" name="year">
-                    <option value="Year 1">Year 1</option>
-                    <option value="Year 2">Year 2</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                
-            </div>
-            <div id="successToast" class="toast">Child information updated successfully!</div>
-        </form>
-        
-        
-    </div>
+           <div class="form-group">
+             <label for="child_name">Child Name</label>
+             <input type="text" id="child_name" name="child_name" required>
+           </div>
+           <div class="form-group">
+             <label for="child_gender">Gender</label>
+             <select id="child_gender" name="child_gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+             </select>
+           </div>
+           <div class="form-group">
+             <label for="child_kidNumber">My kid number</label>
+             <input type="text" id="child_kidNumber" name="child_kidNumber" required>
+         </div>
+           <div class="form-group">
+              <label for="child_birthday">Birthday</label>
+              <input type="date" id="child_birthday" name="child_birthday" required>
+          </div>
+              <div class="form-group">
+                <label for="child_school">School</label>
+                <input type="text" id="child_school" name="child_school" required>
+          </div>
+             <div class="form-group">
+               <label for="child_year">Year</label>
+               <select id="child_year" name="child_year">
+                  <option value="1">Year 1</option>
+                  <option value="2">Year 2</option>
+              </select>
+             </div>
+          <div class="form-group">
+             <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+          <div id="successToast" class="toast">Child information updated successfully!</div>
+          </form>
+     </div>
 </div>
 
     <!-- Child Delete Modal -->
@@ -741,25 +723,22 @@
     fetchUserEmail();
 });
 
-
-//  get name from the childreninfo based on email
+//select child 
 document.addEventListener("DOMContentLoaded", function() {
-    
+    const select = document.getElementById("childSelect");
+
     fetch('profile_select.php') 
         .then(response => response.json())
         .then(data => {
-            let select = document.getElementById("childSelect");
             select.innerHTML = '<option value="">--Select--</option>'; 
 
-            
             const children = data.children;
 
             if (Array.isArray(children) && children.length > 0) {
-               
                 children.forEach(child => {
                     let option = document.createElement("option");
-                    option.value = child.name;
-                    option.textContent = child.name;
+                    option.value = child.child_name;  
+                    option.textContent = child.child_name;  
                     select.appendChild(option);
                 });
             } else {
@@ -773,16 +752,14 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error fetching children:', error);
         });
 
-
-// based on the selected name display learning status
-select.addEventListener("change", displayLearningStatus);
+    select.addEventListener("change", displayLearningStatus);
 });
 
 function displayLearningStatus() {
-    var select = document.getElementById("childSelect");
-    var selectedChild = select.value.trim();
-    var statusContent = document.getElementById("statusContent");
-    var learningStatus = document.getElementById("learningStatus");
+    const select = document.getElementById("childSelect");
+    const selectedChild = select.value.trim();
+    const statusContent = document.getElementById("statusContent");
+    const learningStatus = document.getElementById("learningStatus");
 
     if (!selectedChild) {
         console.warn("No child selected");
@@ -791,8 +768,7 @@ function displayLearningStatus() {
         return;
     }
 
-    fetch(`http://localhost/TWP-Project/profile_learning.php?student_name=${encodeURIComponent(selectedChild)}`)
-
+    fetch(`http://localhost/TWP-Project/profile_learning.php?child_name=${encodeURIComponent(selectedChild)}`)
         .then(response => response.json())
         .then(data => {
             console.log("Fetching learning status for:", selectedChild);
@@ -821,27 +797,28 @@ function displayLearningStatus() {
 }
 
 
-    function openModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear) {
-    document.getElementById('childName').value = childName;
-    document.getElementById('childGender').value = childGender;
-    document.getElementById('kidNumber').value = kidNumber;
-    document.getElementById('childBirthday').value = childBirthday;
-    document.getElementById('childSchool').value = childSchool;
-    document.getElementById('childYear').value = childYear;
+
+    function openModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) {
+    document.getElementById('child_name').value = child_name;
+    document.getElementById('child_gender').value = child_gender;
+    document.getElementById('child_kidNumber').value = child_kidNumber;
+    document.getElementById('child_birthday').value = child_birthday;
+    document.getElementById('child_school').value = child_school;
+    document.getElementById('child_year').value = child_year;
     document.getElementById('childFormModal').style.display = "block";
    }
 
    document.querySelectorAll('.edit-btn').forEach(button => {
     button.addEventListener('click', function() {
         const row = this.closest('tr');
-        const childName = row.querySelector('td:nth-child(1)').textContent.trim();
-        const childGender = row.querySelector('td:nth-child(2)').textContent.trim();
-        const kidNumber = row.querySelector('td:nth-child(3)').textContent.trim(); 
-        const childBirthday = row.querySelector('td:nth-child(4)').textContent.trim();
-        const childSchool = row.querySelector('td:nth-child(5)').textContent.trim();
-        const childYear = row.querySelector('td:nth-child(6)').textContent.trim();
+        const child_name = row.querySelector('td:nth-child(1)').textContent.trim();
+        const child_gender = row.querySelector('td:nth-child(2)').textContent.trim();
+        const child_kidNumber = row.querySelector('td:nth-child(3)').textContent.trim(); 
+        const child_birthday = row.querySelector('td:nth-child(4)').textContent.trim();
+        const child_school = row.querySelector('td:nth-child(5)').textContent.trim();
+        const child_year = row.querySelector('td:nth-child(6)').textContent.trim();
         
-        openEditModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear);
+        openEditModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year);
     });
 });
 
@@ -871,7 +848,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector("#children-info-content").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
-            selectedKidNumber = event.target.getAttribute("data-kidNumber");
+            selectedKidNumber = event.target.getAttribute("data-kid-Number");
             document.getElementById("deleteConfirmModal").style.display = "flex"; // show modal
         }
     });
@@ -885,7 +862,7 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch("profile_deletechild.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "kidNumber=" + encodeURIComponent(selectedKidNumber)
+                body: "child_kidNumber=" + encodeURIComponent(selectedKidNumber)
             })
             .then(response => response.json())
             .then(data => {
@@ -941,16 +918,16 @@ document.getElementById("childForm").addEventListener("submit", function (event)
 
 
 
-function openEditModal(name, gender, kidNumber, birthday, school, year) {
-    document.getElementById("childName").value = name;
-    document.getElementById("childGender").value = gender;
-    document.getElementById("editkidNumber").value = kidNumber;
-    document.getElementById("childBirthday").value = birthday;
-    document.getElementById("childSchool").value = school;
-    document.getElementById("childYear").value = year;
+function openEditModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) {
+    document.getElementById("child_name").value = child_name;
+    document.getElementById("child_gender").value = child_gender;
+    document.getElementById("child_kidNumber").value = child_kidNumber;
+    document.getElementById("child_birthday").value = child_birthday;
+    document.getElementById("child_school").value = child_school;
+    document.getElementById("child_year").value = child_year;
 
     
-    let genderSelect = document.getElementById("childGender");
+    let genderSelect = document.getElementById("child_gender");
     for (let i = 0; i < genderSelect.options.length; i++) {
         if (genderSelect.options[i].value.toUpperCase() === gender.toUpperCase()) {
             genderSelect.options[i].selected = true;
@@ -1095,17 +1072,17 @@ function fetchChildrenInfo() {
                 data.data.forEach(child => {
                     const row = document.createElement("tr");
                     row.innerHTML = `
-                        <td>${child.name}</td>
-                        <td>${child.gender}</td>
-                        <td>${child.kidNumber}</td>
-                        <td>${child.birthday}</td>
-                        <td>${child.school}</td>
-                        <td>${child.year}</td>
+                        <td>${child.child_name}</td>
+                        <td>${child.child_gender}</td>
+                        <td>${child.child_kidNumber}</td>
+                        <td>${child.child_birthday}</td>
+                        <td>${child.child_school}</td>
+                        <td>${child.child_year}</td>
                         <td>
                             <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
-                               onclick="openEditModal('${child.name}', '${child.gender}', '${child.kidNumber}','${child.birthday}', '${child.school}', '${child.year}')"></i>
+                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}')"></i>
                             <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
-                               data-kidNumber="${child.kidNumber}"></i>
+                               data-kid-number="${child.child_kidNumber}"></i>
                         </td>
                     `;
                     tbody.appendChild(row);
@@ -1116,6 +1093,7 @@ function fetchChildrenInfo() {
         })
         .catch(error => console.error("Error fetching child information:", error));
 }
+
 
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -1144,24 +1122,24 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching payment history:", error.message));
 });
 
-document.getElementById("kidNumber").addEventListener("input", function () {
-            let kidNumber = this.value.trim();
-            let birthdayInput = document.getElementById("birthday");
+document.getElementById("child_kidNumber").addEventListener("input", function () {
+            let child_kidNumber = this.value.trim();
+            let child_birthdayInput = document.getElementById("child_birthday");
 
-            if (kidNumber.length >= 6) { // atleast 6 num
-                let yearPrefix = kidNumber.substring(0, 2) >= "50" ? "19" : "20"; 
-                let year = yearPrefix + kidNumber.substring(0, 2);
-                let month = kidNumber.substring(2, 4);
-                let day = kidNumber.substring(4, 6);
+            if (child_kidNumber.length >= 6) { // atleast 6 num
+                let yearPrefix = child_kidNumber.substring(0, 2) >= "50" ? "19" : "20"; 
+                let year = yearPrefix + child_kidNumber.substring(0, 2);
+                let month = child_kidNumber.substring(2, 4);
+                let day = child_kidNumber.substring(4, 6);
 
                 
                 if (month >= "01" && month <= "12" && day >= "01" && day <= "31") {
-                    birthdayInput.value = `${year}-${month}-${day}`;
+                    child_birthdayInput.value = `${year}-${month}-${day}`;
                 } else {
-                    birthdayInput.value = ""; 
+                    child_birthdayInput.value = ""; 
                 }
             } else {
-                birthdayInput.value = ""; 
+                child_birthdayInput.value = ""; 
             }
         });
 
