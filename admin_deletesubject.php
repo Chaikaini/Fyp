@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "admin";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -12,9 +12,9 @@ if ($conn->connect_error) {
     exit;
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["subject_ID"])) {
-    $subject_ID = $_POST["subject_ID"];
-    $sql = "DELETE FROM admin_subject WHERE subject_ID = '$subject_ID'";
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["subject_id"])) {
+    $subject_id = $_POST["subject_id"];
+    $sql = "DELETE FROM subject WHERE subject_id = '$subject_id'";
 
     if ($conn->query($sql) === TRUE) {
         echo json_encode(["success" => true]);
