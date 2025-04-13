@@ -13,26 +13,27 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $parent_email = $_POST['email'];
+    $parent_password = $_POST['password'];
 
-    $email = $conn->real_escape_string($email);
-    $sql = "SELECT * FROM parent WHERE email = '$email'";
+    $parent_email = $conn->real_escape_string($parent_email);
+    $sql = "SELECT * FROM parent WHERE parent_email = '$parent_email'";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $hashed_password = $row['password'];
+        $hashed_password = $row['parent_password'];
 
-        if (password_verify($password, $hashed_password)) {
+        if (password_verify($parent_password, $hashed_password)) {
             $_SESSION['parent_id'] = $row['parent_id'];
             $_SESSION['parent_name'] = $row['parent_name'];
             $_SESSION['parent_email'] = $row['parent_email'];
 
             echo json_encode([
                 "success" => true,
-                "username" => $row['parent_name'],
-                "email" => $row['parent_email']
+                "parent_id" => $row['parent_id'],
+                "parent_name" => $row['parent_name'],
+                "parent_email" => $row['parent_email']
             ]);
             exit();
         } else {

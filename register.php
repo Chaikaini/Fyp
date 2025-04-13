@@ -11,13 +11,13 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $parent_name = $_POST['parent_name'];
-    $parent_email = $_POST['parent_email'];
-    $parent_address = $_POST['parent_address'];
+    $parent_name = $_POST['username'];
+    $parent_email = $_POST['email'];
+    $parent_address = $_POST['address'];
     $phone_number = $_POST['phone_number'];
-    $parent_gender = $_POST['parent_gender'];
-    $parent_relationship = $_POST['parent_relationship'];
-    $parent_password = $_POST['parent_password'];
+    $parent_gender = $_POST['gender'];
+    $parent_relationship = $_POST['relationship'];
+    $parent_password = $_POST['password'];
     $confirm_password = $_POST['confirm_password']; 
 
     if ($parent_password !== $confirm_password) {
