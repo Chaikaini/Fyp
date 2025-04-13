@@ -305,24 +305,24 @@
     <div class="modal-content pointer-cursor">
         <span class="close ">&times;</span>
         <form id="addClassForm" method="POST" action="admin_addclass.php">
-        <label for="subjectid">Subject ID:</label>
-        <input type="text" id="subjectid" name="subjectid" required>
-        <label for="classid">Class ID:</label>
-        <input type="text" id="classid" name="classid" required>
+        <label for="subject_id">Subject ID:</label>
+        <input type="text" id="subject_id" name="subject_id" required>
+        <label for="class_id">Class ID:</label>
+        <input type="text" id="class_id" name="class_id" required>
         <label for="year">Year:</label>
         <input type="text" id="year" name="year" required>
         <label for="part">Part:</label>
         <input type="text" id="part" name="part" required>
         <label for="month">Month:</label>
         <input type="text" id="month" name="month" required>
-        <label for="time">Time:</label>
-        <input type="text" id="time" name="time" required>
+        <label for="class_time">Time:</label>
+        <input type="text" id="class_time" name="class_time" required>
         <label for="teacher">Teacher:</label>
         <input type="text" id="teacher" name="teacher" required>
-        <label for="capacity">Maximum Capacity:</label>
-        <input type="number" id="capacity" name="capacity" required>
-        <label for="status">Status:</label>
-           <select id="status" name="status" required>
+        <label for="class_capacity">Maximum Capacity:</label>
+        <input type="number" id="class_capacity" name="class_capacity" required>
+        <label for="class_status">Status:</label>
+           <select id="class_status" name="class_status" required>
              <option value="available">Available</option>
              <option value="unavailable">Unavailable</option>
            </select>
