@@ -57,13 +57,14 @@ CREATE TABLE `attendance` (
 
 CREATE TABLE `comments` (
   `comment_id` int(11) NOT NULL,
-   `parent_id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
   `class_id` varchar(10) DEFAULT NULL,
   `subject_id` varchar(50) DEFAULT NULL,
   `comment_rating` int(11) DEFAULT NULL,
   `comment_text` text DEFAULT NULL,
   `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+
 
 -- --------------------------------------------------------
 
@@ -384,10 +385,7 @@ ALTER TABLE `child`
 --
 -- Constraints for table `comments`
 --
-ALTER TABLE `comments`
-  ADD CONSTRAINT `fk_comments_parent` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`comment_id`),
-  ADD CONSTRAINT `fk_comments_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `fk_comments_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
+
 
 --
 -- Constraints for table `class`

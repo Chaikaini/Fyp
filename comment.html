@@ -169,7 +169,6 @@
             const comment = document.getElementById('comment').value;
     
             let valid = true;
-            // 清除之前的错误消息
             document.querySelectorAll('.error-message').forEach(msg => msg.remove());
     
             if (!rating) {
@@ -195,8 +194,8 @@
             }
     
             const formData = new FormData();
-            formData.append('comment_year', year);
-            formData.append('comment_subject', subject);
+            formData.append('class_id', year);
+            formData.append('subject_id', subject);
             formData.append('comment_rating', rating.value);
             formData.append('comment_text', comment);
     
@@ -226,7 +225,7 @@
                         const commentElement = document.createElement('div');
                         commentElement.classList.add('comment-box');
                         commentElement.innerHTML = `
-                            <p class="comment-subject">${comment.comment_subject} (${comment.comment_year})</p>
+                            <p class="comment-subject">${comment.subject_id} (${comment.class_id})</p>
                             <p>Rating: ${'⭐'.repeat(comment.comment_rating)}</p>
                             <p>${comment.comment_text}</p>
                             <small>${comment.comment_created_at}</small>
