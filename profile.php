@@ -572,11 +572,11 @@
         <form id="addChildForm" method="post" action="profile_addchild.php">
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name">
+                <input type="text" id="name" name="child_name">
             </div>
             <div class="form-group">
                 <label for="gender">Gender</label>
-                <select id="gender" name="gender">
+                <select id="gender" name="child_gender">
                     <option value="" disabled selected>Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>   
@@ -584,19 +584,19 @@
             </div>
             <div class="form-group">
             <label for="kidNumber">My Kid Number</label>
-            <input type="text" id="kidNumber" name="kidNumber" placeholder="000000-00-0000">
+            <input type="text" id="kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
         </div>
         <div class="form-group">
             <label for="birthday">Birthday</label>
-            <input type="date" id="birthday" name="birthday" readonly>
+            <input type="date" id="birthday" name="child_birthday" readonly>
         </div>
             <div class="form-group">
                 <label for="school">School</label>
-                <input type="text" id="school" name="school">
+                <input type="text" id="school" name="child_school">
             </div>
             <div class="form-group">
                 <label for="year">Year</label>
-                <select id="year" name="year">
+                <select id="year" name="child_year">
                     <option value="" disabled selected>Year</option>
                     <option value="Year 1">Year 1</option>
                     <option value="Year 2">Year 2</option>   
@@ -610,7 +610,7 @@
     </div>
 </div>
    
-   <!-- Child Modal -->
+   <!-- Child Edit Modal -->
 <div id="childFormModal" class="modal">
     <div class="modal-content pointer-cursor">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -630,30 +630,30 @@
 
             <div class="form-group">
                 <label for="childName">Child Name</label>
-                <input type="text" id="childName" name="name" required>
+                <input type="text" id="childName" name="child_name" required>
             </div>
             <div class="form-group">
                 <label for="childGender">Gender</label>
-                <select id="childGender" name="gender" required>
+                <select id="childGender" name="child_gender" required>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="editkidNumber">My kid number</label>
-                <input type="text" id="editkidNumber" name="kidNumber" required>
+                <input type="text" id="editkidNumber" name="child_kidNumber" required>
             </div>
             <div class="form-group">
                 <label for="childBirthday">Birthday</label>
-                <input type="date" id="childBirthday" name="birthday" required>
+                <input type="date" id="childBirthday" name="child_birthday" required>
             </div>
             <div class="form-group">
                 <label for="childSchool">School</label>
-                <input type="text" id="childSchool" name="school" required>
+                <input type="text" id="childSchool" name="child_school" required>
             </div>
             <div class="form-group">
                 <label for="childYear">Year</label>
-                <select id="childYear" name="year">
+                <select id="childYear" name="child_year">
                     <option value="Year 1">Year 1</option>
                     <option value="Year 2">Year 2</option>
                 </select>
@@ -821,15 +821,16 @@ function displayLearningStatus() {
 }
 
 
-    function openModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear) {
-    document.getElementById('childName').value = childName;
-    document.getElementById('childGender').value = childGender;
-    document.getElementById('editkidNumber').value = kidNumber;
-    document.getElementById('childBirthday').value = childBirthday;
-    document.getElementById('childSchool').value = childSchool;
-    document.getElementById('childYear').value = childYear;
-    document.getElementById('childFormModal').style.display = "block";
-   }
+function openModal(name, gender, kidNumber, birthday, school, year) {
+    document.getElementById("childName").value = name;
+    document.getElementById("childGender").value = gender;
+    document.getElementById("editkidNumber").value = kidNumber;
+    document.getElementById("childBirthday").value = birthday;
+    document.getElementById("childSchool").value = school;
+    document.getElementById("childYear").value = year;
+
+    document.getElementById("childFormModal").style.display = "block";
+}
 
    document.querySelectorAll('.edit-btn').forEach(button => {
     button.addEventListener('click', function() {
@@ -941,13 +942,13 @@ document.getElementById("childForm").addEventListener("submit", function (event)
 
 
 
-function openEditModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) {
-    document.getElementById("childName").value = child_name;
-    document.getElementById("childGender").value = child_gender;
-    document.getElementById("editkidNumber").value = child_kidNumber;
-    document.getElementById("childBirthday").value = child_birthday;
-    document.getElementById("childSchool").value = child_school;
-    document.getElementById("childYear").value = child_year;
+function openEditModal(name, gender, kidNumber, birthday, school, year) {
+    document.getElementById("childName").value = name;
+    document.getElementById("childGender").value = gender;
+    document.getElementById("editkidNumber").value = kidNumber;
+    document.getElementById("childBirthday").value = birthday;
+    document.getElementById("childSchool").value = school;
+    document.getElementById("childYear").value = year;
 
     
     let genderSelect = document.getElementById("childGender");
@@ -993,9 +994,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                document.getElementById("username").value = data.data.parent;
+                document.getElementById("username").value = data.data.parent_name;
                 document.getElementById("gender").value = data.data.parent_gender;
-                document.getElementById("ic-num").value = data.data.parent_ic_number;
+                document.getElementById("ic-num").value = data.data.ic_number;
                 document.getElementById("email").value = data.data.parent_email;
                 document.getElementById("address").value = data.data.parent_address;
                 document.getElementById("phone-num-1").value = data.data.phone_number;
@@ -1016,13 +1017,13 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
     // get data
     const formData = {
-        parent_name: document.getElementById("username").value,
-        parent_gender: document.getElementById("gender").value,
+        username: document.getElementById("username").value,
+        gender: document.getElementById("gender").value,
         ic_num: document.getElementById("ic-num").value,
         phone_num_1: document.getElementById("phone-num-1").value,
         phone_num_2: document.getElementById("phone-num-2").value,
-        parent_relationship: document.getElementById("relationship").value,
-        parent_address: document.getElementById("address").value,
+        relationship: document.getElementById("relationship").value,
+        address: document.getElementById("address").value,
         current_password: document.getElementById("current-password").value.trim(),
         new_password: document.getElementById("new-password").value.trim(),
         confirm_password: document.getElementById("confirm-password").value.trim(),
