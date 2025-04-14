@@ -63,7 +63,7 @@ CREATE TABLE `comments` (
   `comment_rating` int(11) DEFAULT NULL,
   `comment_text` text DEFAULT NULL,
   `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- --------------------------------------------------------

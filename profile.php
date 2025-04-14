@@ -555,45 +555,62 @@
     </div>
 
    <!-- Add Child Modal -->
-   <form id="addChildForm" method="post" action="profile_addchild.php">
-    <div class="form-group">
-        <label for="add_child_name">Name</label>
-        <input type="text" id="add_child_name" name="add_child_name">
+<div id="addChildModal" class="modal">
+    <div class="modal-content pointer-cursor">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Add Child Information</h3>
+
+        <div class="avatar-section">
+            <label for="avatar-upload">
+                <div class="avatar-container">
+                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar">
+                </div>
+            </label>
+            <input type="file" id="avatar-upload" accept="image/*">
+        </div>
+
+        <form id="addChildForm" method="post" action="profile_addchild.php">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="" disabled selected>Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>   
+                </select>
+            </div>
+            <div class="form-group">
+            <label for="kidNumber">My Kid Number</label>
+            <input type="text" id="kidNumber" name="kidNumber" placeholder="000000-00-0000">
+        </div>
+        <div class="form-group">
+            <label for="birthday">Birthday</label>
+            <input type="date" id="birthday" name="birthday" readonly>
+        </div>
+            <div class="form-group">
+                <label for="school">School</label>
+                <input type="text" id="school" name="school">
+            </div>
+            <div class="form-group">
+                <label for="year">Year</label>
+                <select id="year" name="year">
+                    <option value="" disabled selected>Year</option>
+                    <option value="Year 1">Year 1</option>
+                    <option value="Year 2">Year 2</option>   
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+        <div id="successToast" class="toast">Add child information successfully!</div>
     </div>
-    <div class="form-group">
-        <label for="add_child_gender">Gender</label>
-        <select id="add_child_gender" name="add_child_gender">
-            <option value="" disabled selected>Gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>   
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="add_child_kidNumber">My Kid Number</label>
-        <input type="text" id="add_child_kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
-    </div>
-    <div class="form-group">
-        <label for="add_child_birthday">Birthday</label>
-        <input type="date" id="add_child_birthday" name="child_birthday" readonly>
-    </div>
-    <div class="form-group">
-        <label for="add_child_school">School</label>
-        <input type="text" id="add_child_school" name="child_school">
-    </div>
-    <div class="form-group">
-        <label for="add_child_year">Year</label>
-        <select id="add_child_year" name="child_year">
-            <option value="" disabled selected>Year</option>
-            <option value="1">Year 1</option>
-            <option value="2">Year 2</option>   
-        </select>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </div>
-</form>
+</div>
    
-   <!-- Edit Child Modal -->
+   <!-- Child Modal -->
 <div id="childFormModal" class="modal">
     <div class="modal-content pointer-cursor">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -609,42 +626,47 @@
         </div>
 
         <form id="childForm" method="post" action="profile_editchild.php">
-           <div class="form-group">
-             <label for="edit_child_name">Child Name</label>
-             <input type="text" id="edit_child_name" name="edit_child_name" required>
-           </div>
-           <div class="form-group">
-             <label for="edit_child_gender">Gender</label>
-             <select id="edit_child_gender" name="edit_child_gender" required>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-             </select>
-           </div>
-           <div class="form-group">
-             <label for="edit_child_kidNumber">My kid number</label>
-             <input type="text" id="edit_child_kidNumber" name="edit_child_kidNumber" required>
-         </div>
-           <div class="form-group">
-              <label for="edit_child_birthday">Birthday</label>
-              <input type="date" id="edit_child_birthday" name="edit_child_birthday" required>
-          </div>
-              <div class="form-group">
-                <label for="edit_child_school">School</label>
-                <input type="text" id="edit_child_school" name="edit_child_school" required>
-          </div>
-             <div class="form-group">
-               <label for="edit_child_year">Year</label>
-               <select id="edit_child_year" name="edit_child_year">
-                  <option value="1">Year 1</option>
-                  <option value="2">Year 2</option>
-              </select>
-             </div>
-          <div class="form-group">
-             <button type="submit" class="btn btn-primary">Save Changes</button>
-          </div>
-          <div id="successToast" class="toast">Child information updated successfully!</div>
-          </form>
-     </div>
+           
+
+            <div class="form-group">
+                <label for="childName">Child Name</label>
+                <input type="text" id="childName" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="childGender">Gender</label>
+                <select id="childGender" name="gender" required>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editkidNumber">My kid number</label>
+                <input type="text" id="editkidNumber" name="kidNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="childBirthday">Birthday</label>
+                <input type="date" id="childBirthday" name="birthday" required>
+            </div>
+            <div class="form-group">
+                <label for="childSchool">School</label>
+                <input type="text" id="childSchool" name="school" required>
+            </div>
+            <div class="form-group">
+                <label for="childYear">Year</label>
+                <select id="childYear" name="year">
+                    <option value="Year 1">Year 1</option>
+                    <option value="Year 2">Year 2</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                
+            </div>
+            <div id="successToast" class="toast">Child information updated successfully!</div>
+        </form>
+        
+        
+    </div>
 </div>
 
     <!-- Child Delete Modal -->
@@ -719,22 +741,25 @@
     fetchUserEmail();
 });
 
-//select child 
-document.addEventListener("DOMContentLoaded", function() {
-    const select = document.getElementById("childSelect");
 
+//  get name from the childreninfo based on email
+document.addEventListener("DOMContentLoaded", function() {
+    
     fetch('profile_select.php') 
         .then(response => response.json())
         .then(data => {
+            let select = document.getElementById("childSelect");
             select.innerHTML = '<option value="">--Select--</option>'; 
 
+            
             const children = data.children;
 
             if (Array.isArray(children) && children.length > 0) {
+               
                 children.forEach(child => {
                     let option = document.createElement("option");
-                    option.value = child.child_name;  
-                    option.textContent = child.child_name;  
+                    option.value = child.name;
+                    option.textContent = child.name;
                     select.appendChild(option);
                 });
             } else {
@@ -748,14 +773,16 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error fetching children:', error);
         });
 
-    select.addEventListener("change", displayLearningStatus);
+
+// based on the selected name display learning status
+select.addEventListener("change", displayLearningStatus);
 });
 
 function displayLearningStatus() {
-    const select = document.getElementById("childSelect");
-    const selectedChild = select.value.trim();
-    const statusContent = document.getElementById("statusContent");
-    const learningStatus = document.getElementById("learningStatus");
+    var select = document.getElementById("childSelect");
+    var selectedChild = select.value.trim();
+    var statusContent = document.getElementById("statusContent");
+    var learningStatus = document.getElementById("learningStatus");
 
     if (!selectedChild) {
         console.warn("No child selected");
@@ -764,7 +791,8 @@ function displayLearningStatus() {
         return;
     }
 
-    fetch(`http://localhost/TWP-Project/profile_learning.php?child_name=${encodeURIComponent(selectedChild)}`)
+    fetch(`http://localhost/TWP-Project/profile_learning.php?student_name=${encodeURIComponent(selectedChild)}`)
+
         .then(response => response.json())
         .then(data => {
             console.log("Fetching learning status for:", selectedChild);
@@ -793,28 +821,27 @@ function displayLearningStatus() {
 }
 
 
-
-    function openModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) {
-    document.getElementById('edit_child_name').value = child_name;
-    document.getElementById('edit_child_gender').value = child_gender;
-    document.getElementById('edit_child_kidNumber').value = child_kidNumber;
-    document.getElementById('edit_child_birthday').value = child_birthday;
-    document.getElementById('edit_child_school').value = child_school;
-    document.getElementById('edit_child_year').value = child_year;
+    function openModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear) {
+    document.getElementById('childName').value = childName;
+    document.getElementById('childGender').value = childGender;
+    document.getElementById('editkidNumber').value = kidNumber;
+    document.getElementById('childBirthday').value = childBirthday;
+    document.getElementById('childSchool').value = childSchool;
+    document.getElementById('childYear').value = childYear;
     document.getElementById('childFormModal').style.display = "block";
    }
 
    document.querySelectorAll('.edit-btn').forEach(button => {
     button.addEventListener('click', function() {
         const row = this.closest('tr');
-        const child_name = row.querySelector('td:nth-child(1)').textContent.trim();
-        const child_gender = row.querySelector('td:nth-child(2)').textContent.trim();
-        const child_kidNumber = row.querySelector('td:nth-child(3)').textContent.trim(); 
-        const child_birthday = row.querySelector('td:nth-child(4)').textContent.trim();
-        const child_school = row.querySelector('td:nth-child(5)').textContent.trim();
-        const child_year = row.querySelector('td:nth-child(6)').textContent.trim();
+        const childName = row.querySelector('td:nth-child(1)').textContent.trim();
+        const childGender = row.querySelector('td:nth-child(2)').textContent.trim();
+        const kidNumber = row.querySelector('td:nth-child(3)').textContent.trim(); 
+        const childBirthday = row.querySelector('td:nth-child(4)').textContent.trim();
+        const childSchool = row.querySelector('td:nth-child(5)').textContent.trim();
+        const childYear = row.querySelector('td:nth-child(6)').textContent.trim();
         
-        openEditModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year);
+        openEditModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear);
     });
 });
 
@@ -844,7 +871,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.querySelector("#children-info-content").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
-            selectedKidNumber = event.target.getAttribute("data-kid-Number");
+            selectedKidNumber = event.target.getAttribute("data-kidNumber");
             document.getElementById("deleteConfirmModal").style.display = "flex"; // show modal
         }
     });
@@ -858,7 +885,7 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch("profile_deletechild.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "child_kidNumber=" + encodeURIComponent(selectedKidNumber)
+                body: "kidNumber=" + encodeURIComponent(selectedKidNumber)
             })
             .then(response => response.json())
             .then(data => {
@@ -915,15 +942,15 @@ document.getElementById("childForm").addEventListener("submit", function (event)
 
 
 function openEditModal(child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) {
-    document.getElementById("edit_child_name").value = child_name;
-    document.getElementById("edit_child_gender").value = child_gender;
-    document.getElementById("edit_child_kidNumber").value = child_kidNumber;
-    document.getElementById("edit_child_birthday").value = child_birthday;
-    document.getElementById("edit_child_school").value = child_school;
-    document.getElementById("edit_child_year").value = child_year;
+    document.getElementById("childName").value = child_name;
+    document.getElementById("childGender").value = child_gender;
+    document.getElementById("editkidNumber").value = child_kidNumber;
+    document.getElementById("childBirthday").value = child_birthday;
+    document.getElementById("childSchool").value = child_school;
+    document.getElementById("childYear").value = child_year;
 
     
-    let genderSelect = document.getElementById("child_gender");
+    let genderSelect = document.getElementById("childGender");
     for (let i = 0; i < genderSelect.options.length; i++) {
         if (genderSelect.options[i].value.toUpperCase() === gender.toUpperCase()) {
             genderSelect.options[i].selected = true;
@@ -966,9 +993,9 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                document.getElementById("username").value = data.data.parent_name;
+                document.getElementById("username").value = data.data.parent;
                 document.getElementById("gender").value = data.data.parent_gender;
-                document.getElementById("ic-num").value = data.data.ic_number;
+                document.getElementById("ic-num").value = data.data.parent_ic_number;
                 document.getElementById("email").value = data.data.parent_email;
                 document.getElementById("address").value = data.data.parent_address;
                 document.getElementById("phone-num-1").value = data.data.phone_number;
@@ -981,7 +1008,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching profile:", error));
 });
 
-
 document.querySelector("form").addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -990,18 +1016,17 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
     // get data
     const formData = {
-    parent_name: document.getElementById("username").value,
-    parent_gender: document.getElementById("gender").value,
-    ic_number: document.getElementById("ic-num").value,
-    phone_number: document.getElementById("phone-num-1").value,
-    phone_number2: document.getElementById("phone-num-2").value,
-    parent_relationship: document.getElementById("relationship").value,
-    parent_address: document.getElementById("address").value,
-    current_password: document.getElementById("current-password").value.trim(),
-    new_password: document.getElementById("new-password").value.trim(),
-    confirm_password: document.getElementById("confirm-password").value.trim(),
+        parent_name: document.getElementById("username").value,
+        parent_gender: document.getElementById("gender").value,
+        ic_num: document.getElementById("ic-num").value,
+        phone_num_1: document.getElementById("phone-num-1").value,
+        phone_num_2: document.getElementById("phone-num-2").value,
+        parent_relationship: document.getElementById("relationship").value,
+        parent_address: document.getElementById("address").value,
+        current_password: document.getElementById("current-password").value.trim(),
+        new_password: document.getElementById("new-password").value.trim(),
+        confirm_password: document.getElementById("confirm-password").value.trim(),
     };
-
 
     document.getElementById("current-password-error").textContent = "";
     document.getElementById("new-password-error").textContent = "";
@@ -1059,39 +1084,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function fetchChildrenInfo() {
     fetch("profile_childlist.php")
-    .then(response => response.json())
-    .then(data => {
-        const tbody = document.querySelector("#children-info-content tbody");
-        tbody.innerHTML = "";
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.querySelector("#children-info-content tbody");
+            tbody.innerHTML = ""; 
 
-        if (data && data.status === "success" && Array.isArray(data.data)) {
-            data.data.forEach(child => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${child.child_name}</td>
-                    <td>${child.child_gender}</td>
-                    <td>${child.child_kidNumber}</td>
-                    <td>${child.child_birthday}</td>
-                    <td>${child.child_school}</td>
-                    <td>${child.child_year}</td>
-                    <td>
-                        <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
-                           onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}')"></i>
-                        <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
-                           data-kid-number="${child.child_kidNumber}"></i>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        } else {
-            tbody.innerHTML = `<tr><td colspan='7'>No children found.</td></tr>`;
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching child information:", error);
-        const tbody = document.querySelector("#children-info-content tbody");
-        tbody.innerHTML = `<tr><td colspan='7'>Failed to load children information.</td></tr>`;
-    });
+            if (data.status === "success") {
+                data.data.forEach(child => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${child.child_name}</td>
+                        <td>${child.child_gender}</td>
+                        <td>${child.child_kidNumber}</td>
+                        <td>${child.child_birthday}</td>
+                        <td>${child.child_school}</td>
+                        <td>${child.child_year}</td>
+                        <td>
+                            <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
+                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}')"></i>
+                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
+                               data-kidNumber="${child.child_kidNumber}"></i>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan='7'>${data.message}</td></tr>`;
+            }
+        })
+        .catch(error => console.error("Error fetching child information:", error));
 }
 
 
@@ -1121,24 +1142,24 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching payment history:", error.message));
 });
 
-document.getElementById("child_kidNumber").addEventListener("input", function () {
-            let child_kidNumber = this.value.trim();
-            let child_birthdayInput = document.getElementById("child_birthday");
+document.getElementById("kidNumber").addEventListener("input", function () {
+            let kidNumber = this.value.trim();
+            let birthdayInput = document.getElementById("birthday");
 
-            if (child_kidNumber.length >= 6) { // atleast 6 num
-                let yearPrefix = child_kidNumber.substring(0, 2) >= "50" ? "19" : "20"; 
-                let year = yearPrefix + child_kidNumber.substring(0, 2);
-                let month = child_kidNumber.substring(2, 4);
-                let day = child_kidNumber.substring(4, 6);
+            if (kidNumber.length >= 6) { // atleast 6 num
+                let yearPrefix = kidNumber.substring(0, 2) >= "50" ? "19" : "20"; 
+                let year = yearPrefix + kidNumber.substring(0, 2);
+                let month = kidNumber.substring(2, 4);
+                let day = kidNumber.substring(4, 6);
 
                 
                 if (month >= "01" && month <= "12" && day >= "01" && day <= "31") {
-                    child_birthdayInput.value = `${year}-${month}-${day}`;
+                    birthdayInput.value = `${year}-${month}-${day}`;
                 } else {
-                    child_birthdayInput.value = ""; 
+                    birthdayInput.value = ""; 
                 }
             } else {
-                child_birthdayInput.value = ""; 
+                birthdayInput.value = ""; 
             }
         });
 
