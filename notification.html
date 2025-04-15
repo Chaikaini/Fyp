@@ -233,19 +233,35 @@
 
 // 使用 fetch 获取 notification.php 中的消息
 fetch('notification.php')
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) throw new Error('网络响应异常');
+        return response.json();
+    })
     .then(data => {
         const welcomeMessage = document.getElementById('welcomeMessage');
         
+        // 错误处理优先
         if (data.error) {
-            welcomeMessage.innerHTML = `<div class="error">${data.error}</div>`;
+            welcomeMessage.innerHTML = `
+                <div class="error">${data.error}</div>
+            `;
             return;
         }
-        
+
+        // 安全访问属性
+        const userName = data.name || '尊贵的用户';
+        const joinDate = data.date || '未知日期';
+
         welcomeMessage.innerHTML = `
-            <div class="title">欢迎${data.parent_name}！</div>
+            <div class="title">欢迎${userName}！</div>
             <div class="content">感谢加入The Seeds学习中心</div>
-            <div class="date">加入日期：${data.display_date}</div>
+            <div class="date">加入日期：${joinDate}</div>
+        `;
+    })
+    .catch(error => {
+        console.error('获取通知失败:', error);
+        document.getElementById('welcomeMessage').innerHTML = `
+            <div class="error">通知加载失败，请刷新重试</div>
         `;
     });
 
