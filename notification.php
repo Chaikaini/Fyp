@@ -17,9 +17,9 @@ if ($conn->connect_error) {
 
 $parent_id = (int)$_SESSION['parent_id'];
 
-// 检查是否是首次登录
-$check_sql = "SELECT first_login_date FROM parent WHERE parent_id = ?";
-$stmt = $conn->prepare($check_sql);
+// 获取用户信息
+$sql = "SELECT parent_name, first_login_date FROM parent WHERE parent_id = ?";
+$stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $parent_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -31,34 +31,33 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-// 如果是首次登录
+// 如果是首次登录，更新日期
 if (empty($user['first_login_date'])) {
     $current_date = date('Y-m-d');
-    
-    // 1. 更新首次登录日期
     $update_sql = "UPDATE parent SET first_login_date = ? WHERE parent_id = ?";
     $update_stmt = $conn->prepare($update_sql);
     $update_stmt->bind_param("si", $current_date, $parent_id);
     $update_stmt->execute();
-    
-    // 2. 创建永久通知记录
-    $notification_sql = "INSERT INTO notification 
-                        (admin_id, class_id, notification_category, notification_content, notification_created_at)
-                        VALUES
-                        (1, NULL, 'welcome', CONCAT('Welcome, ', (SELECT parent_name FROM parent WHERE parent_id = ?), '!'), NOW())";
-    $notification_stmt = $conn->prepare($notification_sql);
-    $notification_stmt->bind_param("i", $parent_id);
-    $notification_stmt->execute();
+    $is_first_login = true;
+} else {
+    $is_first_login = false;
 }
 
-// 获取所有通知（包括欢迎通知）
-$notifications = $conn->query("SELECT * FROM notification WHERE notification_category = 'welcome' ORDER BY notification_created_at DESC")
+// 获取真实通知（不包括欢迎通知）
+$notifications = $conn->query("SELECT * FROM notification WHERE parent_id = $parent_id AND notification_category != 'welcome' ORDER BY notification_created_at DESC")
                      ->fetch_all(MYSQLI_ASSOC);
 
-echo json_encode([
+// 准备响应数据
+$response = [
     'success' => true,
-    'notifications' => $notifications
-]);
+    'notifications' => $notifications,
+    'user_info' => [
+        'name' => $user['parent_name'],
+        'first_login_date' => $user['first_login_date'] ?? date('Y-m-d'),
+        'is_first_login' => $is_first_login
+    ]
+];
 
+echo json_encode($response);
 $conn->close();
 ?>

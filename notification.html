@@ -252,7 +252,7 @@
         });
 
 // 使用 fetch 获取 notification.php 中的消息
-// 替换原来的fetch代码
+
 fetch('notification.php')
     .then(response => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -274,17 +274,29 @@ fetch('notification.php')
         // 清空容器
         container.innerHTML = '';
         
-        // 添加所有通知
-        data.notifications.forEach(notif => {
-            const notificationItem = document.createElement('div');
-            notificationItem.className = 'notification-item';
-            notificationItem.innerHTML = `
-                <div class="title">${notif.notification_category === 'welcome' ? 'Welcome Notification' : notif.notification_category}</div>
-                <div class="content">${notif.notification_content}</div>
-                <div class="date">${new Date(notif.notification_created_at).toLocaleDateString()}</div>
-            `;
-            container.appendChild(notificationItem);
-        });
+        // 1. 首先添加欢迎通知（固定显示）
+        const welcomeItem = document.createElement('div');
+        welcomeItem.className = 'notification-item';
+        welcomeItem.innerHTML = `
+            <div class="title">Welcome Notification</div>
+            <div class="content">Welcome, ${data.user_info.name}! We are happy to have you at The Seeds Learning Centre.</div>
+            <div class="date">Member since: ${data.user_info.first_login_date}</div>
+        `;
+        container.appendChild(welcomeItem);
+        
+        // 2. 添加其他通知（按时间倒序）
+        if (data.notifications && data.notifications.length > 0) {
+            data.notifications.forEach(notif => {
+                const notificationItem = document.createElement('div');
+                notificationItem.className = 'notification-item';
+                notificationItem.innerHTML = `
+                    <div class="title">${notif.notification_category}</div>
+                    <div class="content">${notif.notification_content}</div>
+                    <div class="date">${new Date(notif.notification_created_at).toLocaleString()}</div>
+                `;
+                container.appendChild(notificationItem);
+            });
+        }
     })
     .catch(error => {
         console.error('Fetch error:', error);
