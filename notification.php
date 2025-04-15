@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-// 检查登录状态和parent_id
+// 检查登录状态
 if (!isset($_SESSION['parent_id'])) {
     echo json_encode(['error' => 'User not logged in', 'code' => 401]);
     exit();
@@ -17,18 +17,9 @@ if ($conn->connect_error) {
 
 $parent_id = (int)$_SESSION['parent_id'];
 
-// 安全查询（只查询必要字段）
-$sql = "SELECT 
-          parent_name, 
-          welcome_notification_shown
-        FROM parent 
-        WHERE parent_id = ?";
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    echo json_encode(['error' => 'SQL prepare failed', 'code' => 500]);
-    exit();
-}
-
+// 检查是否是首次登录
+$check_sql = "SELECT first_login_date FROM parent WHERE parent_id = ?";
+$stmt = $conn->prepare($check_sql);
 $stmt->bind_param("i", $parent_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -40,34 +31,34 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-// 处理欢迎信息
-$response = [
-    'success' => true,
-    'name' => $user['parent_name'],
-    'message' => "Welcome back, {$user['parent_name']}!"
-];
-
 // 如果是首次登录
-if (!$user['welcome_notification_shown']) {
+if (empty($user['first_login_date'])) {
     $current_date = date('Y-m-d');
     
-    // 更新数据库
-    $update_sql = "UPDATE parent 
-                  SET welcome_notification_shown = 1,
-                      first_login_date = ?
-                  WHERE parent_id = ?";
+    // 1. 更新首次登录日期
+    $update_sql = "UPDATE parent SET first_login_date = ? WHERE parent_id = ?";
     $update_stmt = $conn->prepare($update_sql);
     $update_stmt->bind_param("si", $current_date, $parent_id);
+    $update_stmt->execute();
     
-    if ($update_stmt->execute()) {
-        $response['message'] = "Welcome, {$user['parent_name']}!";
-        $response['date'] = $current_date;
-    }
+    // 2. 创建永久通知记录
+    $notification_sql = "INSERT INTO notification 
+                        (admin_id, class_id, notification_category, notification_content, notification_created_at)
+                        VALUES
+                        (1, NULL, 'welcome', CONCAT('Welcome, ', (SELECT parent_name FROM parent WHERE parent_id = ?), '!'), NOW())";
+    $notification_stmt = $conn->prepare($notification_sql);
+    $notification_stmt->bind_param("i", $parent_id);
+    $notification_stmt->execute();
 }
 
-echo json_encode($response);
+// 获取所有通知（包括欢迎通知）
+$notifications = $conn->query("SELECT * FROM notification WHERE notification_category = 'welcome' ORDER BY notification_created_at DESC")
+                     ->fetch_all(MYSQLI_ASSOC);
 
-$stmt->close();
-if (isset($update_stmt)) $update_stmt->close();
+echo json_encode([
+    'success' => true,
+    'notifications' => $notifications
+]);
+
 $conn->close();
 ?>

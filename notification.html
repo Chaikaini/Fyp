@@ -146,6 +146,26 @@
         .icon-bar a.fa-bell {
             display: none;
         }
+
+
+        .alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+.alert button {
+    margin-left: 15px;
+    float: right;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
     </style>
 </head>
 
@@ -232,6 +252,7 @@
         });
 
 // 使用 fetch 获取 notification.php 中的消息
+// 替换原来的fetch代码
 fetch('notification.php')
     .then(response => {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -250,13 +271,20 @@ fetch('notification.php')
             return;
         }
 
-        container.innerHTML = `
-            <div class="welcome-card">
-                <h3>${data.message}</h3>
-                <p>We are happy to have you at The Seeds Learning Centre</p>
-                ${data.date ? `<small>Member since: ${data.date}</small>` : ''}
-            </div>
-        `;
+        // 清空容器
+        container.innerHTML = '';
+        
+        // 添加所有通知
+        data.notifications.forEach(notif => {
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            notificationItem.innerHTML = `
+                <div class="title">${notif.notification_category === 'welcome' ? 'Welcome Notification' : notif.notification_category}</div>
+                <div class="content">${notif.notification_content}</div>
+                <div class="date">${new Date(notif.notification_created_at).toLocaleDateString()}</div>
+            `;
+            container.appendChild(notificationItem);
+        });
     })
     .catch(error => {
         console.error('Fetch error:', error);
