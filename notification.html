@@ -233,23 +233,31 @@
 
 // 使用 fetch 获取 notification.php 中的消息
 fetch('notification.php')
-    .then(response => response.json())  // 解析 JSON 响应
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
     .then(data => {
-        const welcomeMessage = document.getElementById('welcomeMessage');  // 获取到显示消息的容器
+        const welcomeMessage = document.getElementById('welcomeMessage');
 
         if (data.error) {
-            // 如果有错误，显示错误信息
-            welcomeMessage.innerHTML = `<div class="title">Error: ${data.error}</div>`;
-        } else {
-            // 如果没有错误，显示欢迎消息
-            welcomeMessage.innerHTML = `
-                <div class="title">${data.message}</div>
-                <div class="content">We are happy to have you at The Seeds Learning Centre. Let's get started with your first class!</div>
-                <div class="date">${new Date().toLocaleDateString()}</div>
-            `;
+            welcomeMessage.innerHTML = `<div class="error-alert">${data.error}</div>`;
+            return;
         }
+
+        // 使用data.message作为标题，保持原有格式
+        welcomeMessage.innerHTML = `
+            <div class="title">${data.message || 'Welcome!'}</div>
+            <div class="content">We are happy to have you at The Seeds Learning Centre.</div>
+            <div class="date">${data.date || 'Unknown date'}</div>
+        `;
     })
-    .catch(error => console.error('Error fetching welcome message:', error));
+    .catch(error => {
+        console.error('Fetch error:', error);
+        document.getElementById('welcomeMessage').innerHTML = `
+            <div class="error-alert">Failed to load notifications. Please refresh.</div>
+        `;
+    });
 
     </script>
 
