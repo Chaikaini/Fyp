@@ -233,37 +233,23 @@
 
 // 使用 fetch 获取 notification.php 中的消息
 fetch('notification.php')
-    .then(response => {
-        if (!response.ok) throw new Error('网络响应异常');
-        return response.json();
-    })
+    .then(response => response.json())  // 解析 JSON 响应
     .then(data => {
-        const welcomeMessage = document.getElementById('welcomeMessage');
-        
-        // 错误处理优先
+        const welcomeMessage = document.getElementById('welcomeMessage');  // 获取到显示消息的容器
+
         if (data.error) {
+            // 如果有错误，显示错误信息
+            welcomeMessage.innerHTML = `<div class="title">Error: ${data.error}</div>`;
+        } else {
+            // 如果没有错误，显示欢迎消息
             welcomeMessage.innerHTML = `
-                <div class="error">${data.error}</div>
+                <div class="title">${data.message}</div>
+                <div class="content">We are happy to have you at The Seeds Learning Centre. Let's get started with your first class!</div>
+                <div class="date">${new Date().toLocaleDateString()}</div>
             `;
-            return;
         }
-
-        // 安全访问属性
-        const userName = data.name || '尊贵的用户';
-        const joinDate = data.date || '未知日期';
-
-        welcomeMessage.innerHTML = `
-            <div class="title">欢迎${userName}！</div>
-            <div class="content">感谢加入The Seeds学习中心</div>
-            <div class="date">加入日期：${joinDate}</div>
-        `;
     })
-    .catch(error => {
-        console.error('获取通知失败:', error);
-        document.getElementById('welcomeMessage').innerHTML = `
-            <div class="error">通知加载失败，请刷新重试</div>
-        `;
-    });
+    .catch(error => console.error('Error fetching welcome message:', error));
 
     </script>
 
