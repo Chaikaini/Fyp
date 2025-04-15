@@ -89,38 +89,41 @@
             font-size: 12px;
             color: #aaa;
         }
-
         .breadcrumb-container {
-            padding: 20px;
-            background-color: #f1f1f1;
-            border-radius: 8px;
-            margin-bottom: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-direction: column; /* 让内容垂直排列 */
+    align-items: flex-start; /* 左对齐 */
+}
+
+.breadcrumb-container h2 {
+    margin-bottom: 10px; /* 增加与面包屑导航的间距 */
+}
+
+.breadcrumb-container .breadcrumb {
+    display: flex;
+    gap: 5px;
+    font-size: 14px;
+}
+
+
+
+
+        .breadcrumb-container .breadcrumb li {
+            color: #555;
         }
 
-        .breadcrumb-container h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .breadcrumb {
-            list-style: none;
-            padding: 0;
-            font-size: 14px;
-        }
-
-        .breadcrumb li {
-            display: inline;
-            margin-right: 5px;
-        }
-
-        .breadcrumb li a {
+        .breadcrumb-container .breadcrumb li a {
+            color: #007bff;
             text-decoration: none;
-            color: #2962ff;
         }
 
-        .breadcrumb li a:hover {
+        .breadcrumb-container .breadcrumb li a:hover {
             text-decoration: underline;
         }
+
 
         /* Navbar icon bar styles */
         .icon-bar {
