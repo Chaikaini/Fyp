@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 13, 2025 at 08:21 AM
+-- Generation Time: Apr 15, 2025 at 01:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -52,19 +52,17 @@ CREATE TABLE `attendance` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `comments`
+-- Table structure for table `cart`
 --
 
-CREATE TABLE `comments` (
-  `comment_id` int(11) NOT NULL,
+CREATE TABLE `cart` (
+  `cart_id` int(11) NOT NULL,
   `parent_id` int(11) NOT NULL,
-  `class_id` varchar(10) DEFAULT NULL,
-  `subject_id` varchar(50) DEFAULT NULL,
-  `comment_rating` int(11) DEFAULT NULL,
-  `comment_text` text DEFAULT NULL,
-  `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `class_id` varchar(20) NOT NULL,
+  `child_id` int(11) NOT NULL,
+  `subject_id` varchar(20) NOT NULL,
+  `teacher_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 -- --------------------------------------------------------
 
@@ -76,7 +74,7 @@ CREATE TABLE `child` (
   `child_id` int(11) NOT NULL,
   `parent_id` int(11) NOT NULL,
   `child_name` varchar(100) NOT NULL,
-  `child_gender` enum('Male','Female','Other') NOT NULL,
+  `child_gender` enum('Male','Female') NOT NULL,
   `child_kidNumber` varchar(50) NOT NULL,
   `child_birthday` date NOT NULL,
   `child_school` varchar(100) NOT NULL,
@@ -103,6 +101,22 @@ CREATE TABLE `class` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `class_id` varchar(10) DEFAULT NULL,
+  `subject_id` varchar(50) DEFAULT NULL,
+  `comment_rating` int(11) DEFAULT NULL,
+  `comment_text` text DEFAULT NULL,
+  `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `notification`
 --
 
@@ -111,21 +125,8 @@ CREATE TABLE `notification` (
   `admin_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `notification_category` varchar(100) NOT NULL,
-  `notification_content` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order`
---
-
-CREATE TABLE `order` (
-  `order_id` int(11) NOT NULL,
-  `total_amount` decimal(10,2) NOT NULL,
-  `payment_method` enum('Credit Card','Cash','Bank Transfer','Other') NOT NULL,
-  `order_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `registration_id` int(11) NOT NULL
+  `notification_content` text NOT NULL,
+  `notification_created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -162,6 +163,22 @@ CREATE TABLE `part` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payment`
+--
+
+CREATE TABLE `payment` (
+  `payment_id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `payment_total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `master_card_number` varchar(16) DEFAULT NULL,
+  `payment_status` enum('Pending','Completed','Failed') NOT NULL,
+  `payment_time` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `registration_class`
 --
 
@@ -171,7 +188,8 @@ CREATE TABLE `registration_class` (
   `class_id` varchar(20) NOT NULL,
   `child_id` int(11) NOT NULL,
   `subject_id` varchar(20) NOT NULL,
-  `teacher_id` int(11) NOT NULL
+  `teacher_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -212,8 +230,7 @@ CREATE TABLE `teacher` (
 -- Indexes for table `admin`
 --
 ALTER TABLE `admin`
-  ADD PRIMARY KEY (`admin_id`),
-  ADD UNIQUE KEY `admin_email` (`admin_email`);
+  ADD PRIMARY KEY (`admin_id`);
 
 --
 -- Indexes for table `attendance`
@@ -223,20 +240,21 @@ ALTER TABLE `attendance`
   ADD KEY `registration_id` (`registration_id`);
 
 --
+-- Indexes for table `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`cart_id`),
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `child_id` (`child_id`),
+  ADD KEY `subject_id` (`subject_id`),
+  ADD KEY `teacher_id` (`teacher_id`);
+
+--
 -- Indexes for table `child`
 --
 ALTER TABLE `child`
   ADD PRIMARY KEY (`child_id`),
-  ADD UNIQUE KEY `child_kidNumber` (`child_kidNumber`),
-  ADD KEY `parent_id` (`parent_id`);
-
---
--- Indexes for table `comments`
---
-  ALTER TABLE `comments`
-  ADD PRIMARY KEY (`comment_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `subject_id` (`subject_id`),
   ADD KEY `parent_id` (`parent_id`);
 
 --
@@ -248,6 +266,15 @@ ALTER TABLE `class`
   ADD KEY `part_id` (`part_id`);
 
 --
+-- Indexes for table `comments`
+--
+ALTER TABLE `comments`
+  ADD PRIMARY KEY (`comment_id`),
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `subject_id` (`subject_id`);
+
+--
 -- Indexes for table `notification`
 --
 ALTER TABLE `notification`
@@ -256,25 +283,23 @@ ALTER TABLE `notification`
   ADD KEY `class_id` (`class_id`);
 
 --
--- Indexes for table `order`
---
-ALTER TABLE `order`
-  ADD PRIMARY KEY (`order_id`),
-  ADD KEY `registration_id` (`registration_id`);
-
---
 -- Indexes for table `parent`
 --
 ALTER TABLE `parent`
-  ADD PRIMARY KEY (`parent_id`),
-  ADD UNIQUE KEY `ic_number` (`ic_number`),
-  ADD UNIQUE KEY `parent_email` (`parent_email`);
+  ADD PRIMARY KEY (`parent_id`);
 
 --
 -- Indexes for table `part`
 --
 ALTER TABLE `part`
   ADD PRIMARY KEY (`part_id`);
+
+--
+-- Indexes for table `payment`
+--
+ALTER TABLE `payment`
+  ADD PRIMARY KEY (`payment_id`),
+  ADD KEY `parent_id` (`parent_id`);
 
 --
 -- Indexes for table `registration_class`
@@ -285,7 +310,8 @@ ALTER TABLE `registration_class`
   ADD KEY `class_id` (`class_id`),
   ADD KEY `child_id` (`child_id`),
   ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
+  ADD KEY `teacher_id` (`teacher_id`),
+  ADD KEY `payment_id` (`payment_id`);
 
 --
 -- Indexes for table `subject`
@@ -299,24 +325,23 @@ ALTER TABLE `subject`
 -- Indexes for table `teacher`
 --
 ALTER TABLE `teacher`
-  ADD PRIMARY KEY (`teacher_id`),
-  ADD UNIQUE KEY `teacher_email` (`teacher_email`);
+  ADD PRIMARY KEY (`teacher_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `admin`
---
-ALTER TABLE `admin`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
   MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `child`
@@ -337,12 +362,6 @@ ALTER TABLE `notification`
   MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `order`
---
-ALTER TABLE `order`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `parent`
 --
 ALTER TABLE `parent`
@@ -355,16 +374,16 @@ ALTER TABLE `part`
   MODIFY `part_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `payment`
+--
+ALTER TABLE `payment`
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
   MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `teacher`
---
-ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -377,15 +396,20 @@ ALTER TABLE `attendance`
   ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registration_class` (`registration_id`);
 
 --
+-- Constraints for table `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
+  ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
+  ADD CONSTRAINT `cart_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
+  ADD CONSTRAINT `cart_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+
+--
 -- Constraints for table `child`
 --
 ALTER TABLE `child`
-  ADD CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
-
---
--- Constraints for table `comments`
---
-
+  ADD CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `class`
@@ -395,6 +419,14 @@ ALTER TABLE `class`
   ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`);
 
 --
+-- Constraints for table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
+  ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
+
+--
 -- Constraints for table `notification`
 --
 ALTER TABLE `notification`
@@ -402,10 +434,10 @@ ALTER TABLE `notification`
   ADD CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
 
 --
--- Constraints for table `order`
+-- Constraints for table `payment`
 --
-ALTER TABLE `order`
-  ADD CONSTRAINT `order_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registration_class` (`registration_id`);
+ALTER TABLE `payment`
+  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
 
 --
 -- Constraints for table `registration_class`
@@ -415,7 +447,8 @@ ALTER TABLE `registration_class`
   ADD CONSTRAINT `registration_class_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
   ADD CONSTRAINT `registration_class_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
   ADD CONSTRAINT `registration_class_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
+  ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
 
 --
 -- Constraints for table `subject`
