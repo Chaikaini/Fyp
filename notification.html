@@ -262,48 +262,40 @@ fetch('notification.php')
         const container = document.getElementById('welcomeMessage');
         
         if (data.error) {
-            container.innerHTML = `
-                <div class="alert alert-danger">
-                    ${data.error}
-                    <button onclick="location.reload()">Refresh</button>
-                </div>
-            `;
+            container.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
             return;
         }
 
-        // 清空容器
+        // 1. 清空容器
         container.innerHTML = '';
-        
-        // 1. 首先添加欢迎通知（固定显示）
-        const welcomeItem = document.createElement('div');
-        welcomeItem.className = 'notification-item';
-        welcomeItem.innerHTML = `
-            <div class="title">Welcome Notification</div>
-            <div class="content">Welcome, ${data.user_info.name}! We are happy to have you at The Seeds Learning Centre.</div>
-            <div class="date">Member since: ${data.user_info.first_login_date}</div>
+
+        // 2. 固定添加欢迎通知（不依赖数据库）
+        const welcomeMsg = `
+            <div class="notification-item">
+                <div class="title">Welcome to The Seeds</div>
+                <div class="content">Hello ${data.user_name}! Thank you for joining us.</div>
+                <div class="date">Member since: ${data.first_login_date}</div>
+            </div>
         `;
-        container.appendChild(welcomeItem);
-        
-        // 2. 添加其他通知（按时间倒序）
-        if (data.notifications && data.notifications.length > 0) {
-            data.notifications.forEach(notif => {
-                const notificationItem = document.createElement('div');
-                notificationItem.className = 'notification-item';
-                notificationItem.innerHTML = `
-                    <div class="title">${notif.notification_category}</div>
-                    <div class="content">${notif.notification_content}</div>
-                    <div class="date">${new Date(notif.notification_created_at).toLocaleString()}</div>
-                `;
-                container.appendChild(notificationItem);
-            });
-        }
+        container.insertAdjacentHTML('afterbegin', welcomeMsg);
+
+        // 3. 添加其他通知
+        data.notifications.forEach(notif => {
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'notification-item';
+            notificationItem.innerHTML = `
+                <div class="title">${notif.notification_category}</div>
+                <div class="content">${notif.notification_content}</div>
+                <div class="date">${new Date(notif.notification_created_at).toLocaleString()}</div>
+            `;
+            container.appendChild(notificationItem);
+        });
     })
     .catch(error => {
         console.error('Fetch error:', error);
         document.getElementById('welcomeMessage').innerHTML = `
             <div class="alert alert-danger">
-                System busy. Please try again later.
-                <button onclick="location.reload()">Retry</button>
+                Failed to load notifications. Please try again later.
             </div>
         `;
     });

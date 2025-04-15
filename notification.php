@@ -17,47 +17,39 @@ if ($conn->connect_error) {
 
 $parent_id = (int)$_SESSION['parent_id'];
 
-// 获取用户信息
-$sql = "SELECT parent_name, first_login_date FROM parent WHERE parent_id = ?";
-$stmt = $conn->prepare($sql);
+// 获取用户信息（仅需姓名和首次登录日期）
+$user_sql = "SELECT parent_name, first_login_date FROM parent WHERE parent_id = ?";
+$stmt = $conn->prepare($user_sql);
 $stmt->bind_param("i", $parent_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$user = $stmt->get_result()->fetch_assoc();
 
-if ($result->num_rows === 0) {
+if (!$user) {
     echo json_encode(['error' => 'User not found', 'code' => 404]);
     exit();
 }
 
-$user = $result->fetch_assoc();
-
-// 如果是首次登录，更新日期
+// 如果是首次登录，更新日期（不创建通知记录）
 if (empty($user['first_login_date'])) {
-    $current_date = date('Y-m-d');
-    $update_sql = "UPDATE parent SET first_login_date = ? WHERE parent_id = ?";
+    $update_sql = "UPDATE parent SET first_login_date = CURDATE() WHERE parent_id = ?";
     $update_stmt = $conn->prepare($update_sql);
-    $update_stmt->bind_param("si", $current_date, $parent_id);
+    $update_stmt->bind_param("i", $parent_id);
     $update_stmt->execute();
-    $is_first_login = true;
-} else {
-    $is_first_login = false;
+    $user['first_login_date'] = date('Y-m-d');
 }
 
-// 获取真实通知（不包括欢迎通知）
-$notifications = $conn->query("SELECT * FROM notification WHERE parent_id = $parent_id AND notification_category != 'welcome' ORDER BY notification_created_at DESC")
-                     ->fetch_all(MYSQLI_ASSOC);
+// 获取真实通知（从原有notification表查询）
+$notifications = $conn->query("
+    SELECT * FROM notification 
+    ORDER BY notification_created_at DESC
+")->fetch_all(MYSQLI_ASSOC);
 
-// 准备响应数据
-$response = [
+echo json_encode([
     'success' => true,
-    'notifications' => $notifications,
-    'user_info' => [
-        'name' => $user['parent_name'],
-        'first_login_date' => $user['first_login_date'] ?? date('Y-m-d'),
-        'is_first_login' => $is_first_login
-    ]
-];
+    'user_name' => $user['parent_name'],
+    'first_login_date' => $user['first_login_date'],
+    'notifications' => $notifications
+]);
 
-echo json_encode($response);
 $conn->close();
 ?>
