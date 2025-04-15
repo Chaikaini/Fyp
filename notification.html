@@ -234,28 +234,37 @@
 // 使用 fetch 获取 notification.php 中的消息
 fetch('notification.php')
     .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();
     })
     .then(data => {
-        const welcomeMessage = document.getElementById('welcomeMessage');
-
+        const container = document.getElementById('welcomeMessage');
+        
         if (data.error) {
-            welcomeMessage.innerHTML = `<div class="error-alert">${data.error}</div>`;
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    ${data.error}
+                    <button onclick="location.reload()">Refresh</button>
+                </div>
+            `;
             return;
         }
 
-        // 使用data.message作为标题，保持原有格式
-        welcomeMessage.innerHTML = `
-            <div class="title">${data.message || 'Welcome!'}</div>
-            <div class="content">We are happy to have you at The Seeds Learning Centre.</div>
-            <div class="date">${data.date || 'Unknown date'}</div>
+        container.innerHTML = `
+            <div class="welcome-card">
+                <h3>${data.message}</h3>
+                <p>We are happy to have you at The Seeds Learning Centre</p>
+                ${data.date ? `<small>Member since: ${data.date}</small>` : ''}
+            </div>
         `;
     })
     .catch(error => {
         console.error('Fetch error:', error);
         document.getElementById('welcomeMessage').innerHTML = `
-            <div class="error-alert">Failed to load notifications. Please refresh.</div>
+            <div class="alert alert-danger">
+                System busy. Please try again later.
+                <button onclick="location.reload()">Retry</button>
+            </div>
         `;
     });
 
