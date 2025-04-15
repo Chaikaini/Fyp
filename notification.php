@@ -1,47 +1,53 @@
 <?php
-// 启动 session
 session_start();
+include 'get_email.php';
 
-// 连接数据库 - 确保这个文件使用正确的数据库配置
-include 'get_email.php';  // 应该连接到 'the seeds' 数据库
-
-// 检查用户是否登录（检查 session 中是否有用户的 email）
 if (!isset($_SESSION['email'])) {
-    echo json_encode(['error' => 'User not logged in']);
+    echo json_encode(['error' => 'user no login']);
     exit();
 }
 
-// 获取当前用户的 email
 $user_email = $_SESSION['email'];
 
-// 从数据库查询该用户的详细信息（根据 email 获取家长信息）
-$sql = "SELECT parent_id, parent_name FROM parent WHERE parent_email = ?";
+// 查询用户信息 + 是否首次登录
+$sql = "SELECT parent_id, parent_name, welcome_notification_shown 
+        FROM parent 
+        WHERE parent_email = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $user_email);  // 绑定 email 参数
+$stmt->bind_param("s", $user_email);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// 检查是否找到该用户
 if ($result->num_rows > 0) {
-    // 获取家长信息
     $row = $result->fetch_assoc();
     $parent_id = $row['parent_id'];
     $parent_name = $row['parent_name'];
+    $is_first_login = !$row['welcome_notification_shown'];
     
-    // 将 parent_id 存入 session 以便后续使用
-    $_SESSION['parent_id'] = $parent_id;
-    
-    // 返回欢迎信息的 JSON 响应
-    echo json_encode([
-        'message' => "Welcome, $parent_name!",
-        'parent_id' => $parent_id,
-        'parent_name' => $parent_name
-    ]);
+    // 如果是首次登录
+    if ($is_first_login) {
+        // 1. 标记为已登录
+        $update_sql = "UPDATE parent SET welcome_notification_shown = TRUE 
+                      WHERE parent_id = ?";
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param("i", $parent_id);
+        $update_stmt->execute();
+        
+        // 2. 返回首次登录的日期（当前时间）
+        echo json_encode([
+            'show_welcome' => true,
+            'message' => "欢迎, $parent_name！",
+            'first_login_date' => date('Y-m-d') // 固定日期
+        ]);
+    } else {
+        // 非首次登录：不返回日期（前端用本地存储的日期）
+        echo json_encode(['show_welcome' => false]);
+    }
 } else {
-    echo json_encode(['error' => 'User not found in parent records']);
+    echo json_encode(['error' => '用户不存在']);
 }
 
-// 关闭数据库连接
 $stmt->close();
+if (isset($update_stmt)) $update_stmt->close();
 $conn->close();
 ?>
