@@ -244,41 +244,45 @@
     <div id="resultsContainer"></div>
 
     <script>
-        // 获取年级参数（默认为 Year 1）
-        const urlParams = new URLSearchParams(window.location.search);
-        const year = urlParams.get('year') || 'Year 1';
+// 获取年级参数（默认为 Year 1）
+const urlParams = new URLSearchParams(window.location.search);
+const year = urlParams.get('year') || 'Year 1';
 
-        // 请求获取科目数据
-        function showSubjects(year) {
-            fetch(`subject.php?year=${year}`)
-                .then(response => response.json())
-                .then(data => {
-                    // 获取显示科目的容器
-                    const subjectGrid = document.getElementById('subjectGrid');
-                    subjectGrid.innerHTML = ''; // 清空现有内容
+// 请求获取科目数据
+function showSubjects(year) {
+    fetch(`subject.php?year=${year}`)
+        .then(response => response.json())
+        .then(data => {
+            const subjectGrid = document.getElementById('subjectGrid');
+            subjectGrid.innerHTML = '';
 
-                    // 渲染科目信息
-                    data.forEach(subject => {
-                        const card = document.createElement('div');
-                        card.className = 'subject-card';
-                        card.innerHTML = `
-                            <img src="${subject.image}" alt="${subject.name}">
-                        <h5>${subject.name}</h5>
-                        <p>${subject.rating}⭐</p>
-                        `;
-                        card.onclick = function () {
+            data.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <img src="${subject.image}" alt="${subject.name}">
+                    <h5>${subject.name}</h5>
+                    <p>Teacher: ${subject.teacher}</p>
+                    <p>Rating: ${subject.rating.toFixed(1)}⭐</p>
+                    <p>Price: RM ${subject.price}</p>
+                    <p>Class ID: ${subject.class_id}</p>
+                `;
+                card.onclick = function() {
                     window.location.href = subject.page;
                 };
-                        subjectGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('获取数据失败:', error);
-                });
-        }
+                subjectGrid.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('subjectGrid').innerHTML = 
+                '<p>Error loading subjects. Please try again later.</p>';
+        });
+}
 
-        // 初次加载页面时默认显示 Year 1 的科目
-        showSubjects(year);
+// 初次加载
+showSubjects(year);
+
     </script>
 
 
