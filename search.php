@@ -1,5 +1,6 @@
 <?php
-// 检查是否存在 'year' 参数，若不存在则使用默认值 'Year 1'
+header('Content-Type: application/json'); // 确保返回 JSON 格式
+
 $year = isset($_GET['year']) ? $_GET['year'] : 'Year 1';
 $query = isset($_GET['query']) ? $_GET['query'] : '';
 
@@ -12,22 +13,32 @@ $dbname = "the seeds";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
-    die("连接失败: " . $conn->connect_error);
+    die(json_encode(['error' => "Connection failed: " . $conn->connect_error]));
 }
 
-// 根据年级和查询条件搜索科目
-$sql = "SELECT * FROM subjects WHERE year = '$year' AND name LIKE '%$query%'";
-$result = $conn->query($sql);
+// 安全查询：使用预处理语句防止 SQL 注入
+$sql = "SELECT 
+        subject_id,
+        subject_name as name,
+        subject_image as image,
+        subject_price as price,
+        year,
+        page
+    FROM subject 
+    WHERE year = ? 
+    AND subject_name LIKE ?";
+
+$stmt = $conn->prepare($sql);
+$searchTerm = "%$query%";
+$stmt->bind_param("ss", $year, $searchTerm);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $subjects = [];
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $subjects[] = $row;
-    }
+while ($row = $result->fetch_assoc()) {
+    $subjects[] = $row;
 }
 
 $conn->close();
-
-// 返回 JSON 格式的结果
 echo json_encode($subjects);
 ?>
