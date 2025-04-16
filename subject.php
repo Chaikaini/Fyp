@@ -4,6 +4,11 @@ include 'db_connect.php';
 
 $year = isset($_GET['year']) ? $_GET['year'] : 'Year 1';
 
+// 确保year参数是'Year 1'或'Year 2'
+if (!in_array($year, ['Year 1', 'Year 2'])) {
+    $year = 'Year 1';
+}
+
 $sql = "SELECT 
         s.subject_id,
         s.subject_name as name,
