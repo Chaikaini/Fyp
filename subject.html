@@ -187,6 +187,25 @@
         margin-top: 5px;
         text-align: center;
     }
+
+
+        /* 添加在<head>的<style>标签内 */
+            #resultsContainer {
+        width: 70%; /* 与subject-grid同宽 */
+        margin-left: 30%; /* 与year-list宽度相同 */
+        padding: 20px;
+        display: none; /* 初始隐藏 */
+    }
+    
+    /* 当显示搜索结果时，隐藏主内容 */
+    .show-results #subjectGrid {
+        display: none;
+    }
+    
+    .show-results #resultsContainer {
+        display: block;
+    }
+    
     </style>
 </head>
 
@@ -323,7 +342,6 @@ showSubjects(year);
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
-    const clearButton = document.getElementById('clearSearch');
     const resultsContainer = document.getElementById('resultsContainer');
 
     if (!searchInput || !searchButton || !resultsContainer) {
@@ -355,19 +373,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Clear search
-    clearButton.addEventListener('click', function() {
-        searchInput.value = '';
-        resultsContainer.innerHTML = '';
-        resultsContainer.style.display = 'none';
-        document.getElementById('subjectGrid').style.display = 'flex';
-    });
-
     // Improved search function
     function search(query) {
         resultsContainer.innerHTML = '<p>Searching...</p>';
-        resultsContainer.style.display = 'block';
-        document.getElementById('subjectGrid').style.display = 'none';
+        document.body.classList.add('show-results');
 
         fetch(`search.php?query=${encodeURIComponent(query)}`)
             .then(response => {
@@ -390,8 +399,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         <h5>${item.name}</h5>
                         <p>${item.rating}⭐ (${item.year})</p>
                         <p>Price: RM ${item.price}</p>
-                        <button class="btn btn-sm btn-primary" onclick="window.location.href='${item.page}'">View Details</button>
                     `;
+                    card.onclick = function() {
+                        window.location.href = item.page;
+                    };
                     resultsContainer.appendChild(card);
                 });
             })
