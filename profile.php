@@ -598,8 +598,8 @@
                 <label for="year">Year</label>
                 <select id="year" name="child_year">
                     <option value="" disabled selected>Year</option>
-                    <option value="Year 1">Year 1</option>
-                    <option value="Year 2">Year 2</option>   
+                    <option value="1">Year 1</option>
+                    <option value="2">Year 2</option>   
                 </select>
             </div>
             <div class="form-group">
@@ -626,6 +626,7 @@
         </div>
 
         <form id="childForm" method="post" action="profile_editchild.php">
+        <input type="hidden" name="child_id" id="childId">
            
 
             <div class="form-group">
@@ -654,8 +655,8 @@
             <div class="form-group">
                 <label for="childYear">Year</label>
                 <select id="childYear" name="child_year">
-                    <option value="Year 1">Year 1</option>
-                    <option value="Year 2">Year 2</option>
+                    <option value="1">Year 1</option>
+                    <option value="2">Year 2</option>
                 </select>
             </div>
             <div class="form-group">
@@ -821,31 +822,6 @@ function displayLearningStatus() {
 }
 
 
-function openModal(name, gender, kidNumber, birthday, school, year) {
-    document.getElementById("childName").value = name;
-    document.getElementById("childGender").value = gender;
-    document.getElementById("editkidNumber").value = kidNumber;
-    document.getElementById("childBirthday").value = birthday;
-    document.getElementById("childSchool").value = school;
-    document.getElementById("childYear").value = year;
-
-    document.getElementById("childFormModal").style.display = "block";
-}
-
-   document.querySelectorAll('.edit-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const childName = row.querySelector('td:nth-child(1)').textContent.trim();
-        const childGender = row.querySelector('td:nth-child(2)').textContent.trim();
-        const kidNumber = row.querySelector('td:nth-child(3)').textContent.trim(); 
-        const childBirthday = row.querySelector('td:nth-child(4)').textContent.trim();
-        const childSchool = row.querySelector('td:nth-child(5)').textContent.trim();
-        const childYear = row.querySelector('td:nth-child(6)').textContent.trim();
-        
-        openEditModal(childName, childGender, kidNumber, childBirthday, childSchool, childYear);
-    });
-});
-
 
 document.querySelector('.close').addEventListener('click', function() {
   document.getElementById('childFormModal').style.display = "none";
@@ -868,40 +844,50 @@ document.getElementById("avatar-upload").addEventListener("change", function(eve
 
 // delete modal
 document.addEventListener("DOMContentLoaded", function () {
-    let selectedKidNumber = null;
+    let selectedChildId = null; // save the select child_id
 
+    // when click delete button，get child_id and display delete modal
     document.querySelector("#children-info-content").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
-            selectedKidNumber = event.target.getAttribute("data-kidNumber");
-            document.getElementById("deleteConfirmModal").style.display = "flex"; // show modal
+            selectedChildId = event.target.getAttribute("data-child-id");
+            document.getElementById("deleteConfirmModal").style.display = "flex";
         }
     });
 
+    // cancel delete
     document.getElementById("cancelDeleteBtn").addEventListener("click", function () {
-        document.getElementById("deleteConfirmModal").style.display = "none"; // cancel delete
+        document.getElementById("deleteConfirmModal").style.display = "none";
+        selectedChildId = null; 
     });
 
+    // make sure delete
     document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
-        if (selectedKidNumber) {
+        if (selectedChildId) {
             fetch("profile_deletechild.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "kidNumber=" + encodeURIComponent(selectedKidNumber)
+                body: "child_id=" + encodeURIComponent(selectedChildId)
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("deleteConfirmModal").style.display = "none"; // close modal
+                document.getElementById("deleteConfirmModal").style.display = "none";
+                selectedChildId = null;
+
                 if (data.success) {
-                    showToast("Children Information deleted successfully!");
+                    showToast("Children information deleted successfully!");
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
                     showToast("Error: " + data.error, true);
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("Unexpected error occurred.", true);
+            });
         }
     });
 });
+
 
 // Toast Notification Function
 function showToast(message, isError = false) {
@@ -918,10 +904,36 @@ function showToast(message, isError = false) {
 }
 
 // edit modal
+function openEditModal(name, gender, kidNumber, birthday, school, year, childId) {
+    console.log("Opening edit modal with childId:", childId); 
+
+    document.getElementById("childName").value = name;
+    document.getElementById("childGender").value = gender;
+    document.getElementById("editkidNumber").value = kidNumber;
+    document.getElementById("childBirthday").value = birthday;
+    document.getElementById("childSchool").value = school;
+    document.getElementById("childId").value = childId; 
+
+    let yearSelect = document.getElementById("childYear");
+    for (let i = 0; i < yearSelect.options.length; i++) {
+        if (yearSelect.options[i].value == year) {
+            yearSelect.options[i].selected = true;
+            break;
+        }
+    }
+
+    document.getElementById("childFormModal").style.display = "block";
+}
+
 document.getElementById("childForm").addEventListener("submit", function (event) {
     event.preventDefault();
 
     let formData = new FormData(this);
+
+    // 调试日志
+    for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
 
     fetch("profile_editchild.php", {
         method: "POST",
@@ -941,26 +953,6 @@ document.getElementById("childForm").addEventListener("submit", function (event)
 
 
 
-
-function openEditModal(name, gender, kidNumber, birthday, school, year) {
-    document.getElementById("childName").value = name;
-    document.getElementById("childGender").value = gender;
-    document.getElementById("editkidNumber").value = kidNumber;
-    document.getElementById("childBirthday").value = birthday;
-    document.getElementById("childSchool").value = school;
-    document.getElementById("childYear").value = year;
-
-    
-    let genderSelect = document.getElementById("childGender");
-    for (let i = 0; i < genderSelect.options.length; i++) {
-        if (genderSelect.options[i].value.toUpperCase() === gender.toUpperCase()) {
-            genderSelect.options[i].selected = true;
-            break;
-        }
-    }
-
-    document.getElementById("childFormModal").style.display = "block";
-}
 
 
 // add child
@@ -1102,9 +1094,9 @@ function fetchChildrenInfo() {
                         <td>${child.child_year}</td>
                         <td>
                             <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
-                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}')"></i>
-                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
-                               data-kidNumber="${child.child_kidNumber}"></i>
+                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}', '${child.child_id}')"></i>
+                           <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"  data-child-id="${child.child_id}"></i>
+
                         </td>
                     `;
                     tbody.appendChild(row);
