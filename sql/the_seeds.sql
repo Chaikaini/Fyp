@@ -91,7 +91,7 @@ CREATE TABLE `class` (
   `class_id` varchar(20) NOT NULL,
   `subject_id` varchar(20) NOT NULL,
   `part_id` int(11) NOT NULL,
-  `year` year(4) NOT NULL,
+  `year` text NOT NULL,
   `class_time` time NOT NULL,
   `class_capacity` int(11) NOT NULL,
   `class_enrolled` int(11) NOT NULL,
