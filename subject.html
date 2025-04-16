@@ -244,41 +244,101 @@
     <div id="resultsContainer"></div>
 
     <script>
-        // 获取年级参数（默认为 Year 1）
-        const urlParams = new URLSearchParams(window.location.search);
-        const year = urlParams.get('year') || 'Year 1';
+// 获取年级参数（默认为 Year 1）
+const urlParams = new URLSearchParams(window.location.search);
+const year = urlParams.get('year') || 'Year 1';
 
-        // 请求获取科目数据
-        function showSubjects(year) {
-            fetch(`subject.php?year=${year}`)
-                .then(response => response.json())
-                .then(data => {
-                    // 获取显示科目的容器
-                    const subjectGrid = document.getElementById('subjectGrid');
-                    subjectGrid.innerHTML = ''; // 清空现有内容
+// 高亮当前选中的年级
+function highlightSelectedYear(selectedYear) {
+    document.querySelectorAll('.year').forEach(yearElement => {
+        if (yearElement.textContent === selectedYear) {
+            yearElement.style.backgroundColor = '#e0f7e4';
+            yearElement.style.fontWeight = 'bold';
+        } else {
+            yearElement.style.backgroundColor = '#f8f9fa';
+            yearElement.style.fontWeight = 'normal';
+        }
+    });
+}
 
-                    // 渲染科目信息
-                    data.forEach(subject => {
-                        const card = document.createElement('div');
-                        card.className = 'subject-card';
-                        card.innerHTML = `
-                            <img src="${subject.image}" alt="${subject.name}">
-                        <h5>${subject.name}</h5>
-                        <p>${subject.rating}⭐</p>
-                        `;
-                        card.onclick = function () {
+// 请求获取科目数据
+function showSubjects(year) {
+    // 更新URL参数
+    window.history.pushState({}, '', `subject.html?year=${year}`);
+    
+    // 高亮选中的年级
+    highlightSelectedYear(year);
+    
+    fetch(`subject.php?year=${encodeURIComponent(year)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const subjectGrid = document.getElementById('subjectGrid');
+            subjectGrid.innerHTML = '';
+
+            if (data.length === 0) {
+                subjectGrid.innerHTML = '<p>No subjects available for ' + year + '.</p>';
+                return;
+            }
+
+            data.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                    <h5>${subject.name}</h5>
+                    <p>Teacher: ${subject.teacher}</p>
+                    <div class="stars-container">
+                        ${renderStars(subject.rating)}
+                    </div>
+                    <p>Price: RM ${subject.price.toFixed(2)}</p>
+                `;
+                card.onclick = function() {
                     window.location.href = subject.page;
                 };
-                        subjectGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('获取数据失败:', error);
-                });
-        }
+                subjectGrid.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('subjectGrid').innerHTML = 
+                '<p>Error loading subjects. Please try again later.</p>';
+        });
+}
 
-        // 初次加载页面时默认显示 Year 1 的科目
-        showSubjects(year);
+// 渲染星级评分
+function renderStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    let starsHtml = '';
+    
+    // 完整星星
+    for (let i = 0; i < fullStars; i++) {
+        starsHtml += '<div class="star yellow"></div>';
+    }
+    
+    // 半星
+    if (hasHalfStar) {
+        starsHtml += '<div class="star half"></div>';
+    }
+    
+    // 剩余空白星
+    const remaining = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    for (let i = 0; i < remaining; i++) {
+        starsHtml += '<div class="star"></div>';
+    }
+    
+    return starsHtml;
+}
+
+// 初次加载
+highlightSelectedYear(year);
+showSubjects(year);
+
     </script>
 
 
@@ -353,6 +413,7 @@
         <!-- Template Javascript -->
         <script src="js/main.js"></script>
     <script>
+
         document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const year = urlParams.get('year') || 'Year 1'; // 获取 URL 参数
@@ -405,7 +466,7 @@ function renderSubjects(subjectsData) {
                 container.appendChild(card);
             });
         }
-    });
+    });  
 }
 
 
