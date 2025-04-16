@@ -110,7 +110,17 @@
             background-color: #e0f7e4;
         }
 
-
+    .subject-grid, #resultsContainer {
+    display: flex;
+    flex-wrap: nowrap; /* 不换行 */
+    justify-content: flex-start; /* 左对齐 */
+    gap: 20px; /* 统一间距 */
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+} 
 
 
 /* 课程卡片 */
@@ -180,30 +190,15 @@
     }
 
 
-    .subject-content {
-    flex: 1; /* 占据剩余空间 */
-    position: relative; /* 为绝对定位子元素提供基准 */
-}
 
-.subject-grid, #resultsContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 15px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-}
 
 #resultsContainer {
     display: none; /* 初始隐藏 */
+}
+
+.search-results {
+    display: flex !important;
+    flex-direction: row !important;
 }
 
 .search-active .subject-grid {
@@ -264,133 +259,144 @@
             <div class="year" onclick="showSubjects('Year 2')">Year 2</div>
         
         </div>
-
+       
         <div class="subject-grid" id="subjectGrid"></div>
         <div id="resultsContainer"></div>
     </div>
 
-    <div id="resultsContainer"></div>
+    
 
     <script>
 
-               // Initialize with current year
-        const urlParams = new URLSearchParams(window.location.search);
-        const year = urlParams.get('year') || 'Year 1';
-        
-        // Highlight selected year
-        function highlightSelectedYear(selectedYear) {
-            document.querySelectorAll('.year').forEach(yearElement => {
-                yearElement.style.backgroundColor = yearElement.textContent === selectedYear ? 
-                    '#e0f7e4' : '#f8f9fa';
-                yearElement.style.fontWeight = yearElement.textContent === selectedYear ? 
-                    'bold' : 'normal';
-            });
+// Initialize with current year
+const urlParams = new URLSearchParams(window.location.search);
+const year = urlParams.get('year') || 'Year 1';
+
+// Highlight selected year
+function highlightSelectedYear(selectedYear) {
+    document.querySelectorAll('.year').forEach(yearElement => {
+        if (yearElement.textContent === selectedYear) {
+            yearElement.style.backgroundColor = '#e0f7e4'; // 选中颜色
+            yearElement.style.fontWeight = 'bold';
+        } else {
+            yearElement.style.backgroundColor = '#f8f9fa'; // 默认颜色
+            yearElement.style.fontWeight = 'normal';
         }
+    });
+}
 
-        // Load subjects for a year
-        function showSubjects(year) {
-            document.getElementById('resultsContainer').style.display = 'none';
-            document.getElementById('subjectGrid').style.display = 'flex';
-            
-            fetch(`subject.php?year=${encodeURIComponent(year)}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    const subjectGrid = document.getElementById('subjectGrid');
-                    subjectGrid.innerHTML = '';
+// Load subjects for a year
+function showSubjects(year) {
+    // 更新URL参数但不刷新页面
+    history.pushState(null, '', `?year=${encodeURIComponent(year)}`);
+    
+    // 高亮选中的年份
+    highlightSelectedYear(year);
+    
+    document.getElementById('resultsContainer').style.display = 'none';
+    document.getElementById('subjectGrid').style.display = 'flex';
+    
+    fetch(`subject.php?year=${encodeURIComponent(year)}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            const subjectGrid = document.getElementById('subjectGrid');
+            subjectGrid.innerHTML = '';
 
-                    if (!data || data.length === 0) {
-                        subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
-                        return;
-                    }
-
-                    data.forEach(subject => {
-                        const card = document.createElement('div');
-                        card.className = 'subject-card';
-                        card.innerHTML = `
-                            <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
-                            <h5>${subject.name}</h5>
-                            <p>${subject.rating || 0}⭐</p>
-                        `;
-                        card.onclick = () => window.location.href = subject.page;
-                        subjectGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('subjectGrid').innerHTML = 
-                        '<p>Error loading subjects. Please try again later.</p>';
-                });
-        }
-
-        // Search functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            highlightSelectedYear(year);
-            showSubjects(year);
-            
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            
-            searchButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                performSearch(searchInput.value.trim());
-            });
-            
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    performSearch(searchInput.value.trim());
-                }
-            });
-        });
-
-        function performSearch(query) {
-            if (!query) {
-                alert('Please enter a search term!');
+            if (!data || data.length === 0) {
+                subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
                 return;
             }
 
-                 // 添加search-active类来触发CSS变化
-            document.body.classList.add('search-active');
+            data.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                    <h5>${subject.name}</h5>
+                    <p>${subject.rating || 0}⭐</p>
+                `;
+                card.onclick = () => window.location.href = subject.page;
+                subjectGrid.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('subjectGrid').innerHTML = 
+                '<p>Error loading subjects. Please try again later.</p>';
+        });
+}
 
-            document.getElementById('subjectGrid').style.display = 'none';
-            const resultsContainer = document.getElementById('resultsContainer');
-            resultsContainer.style.display = 'block';
-            resultsContainer.innerHTML = '<p>Searching...</p>';
-            
-            fetch(`search.php?query=${encodeURIComponent(query)}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.json();
-                })
-                .then(data => {
-                    resultsContainer.innerHTML = '<div class="search-results"></div>';
-                    const resultsGrid = resultsContainer.querySelector('.search-results');
-                    
-                    if (!data || data.length === 0) {
-                        resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
-                        return;
-                    }
-
-                    data.forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'subject-card';
-                        card.innerHTML = `
-                            <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
-                            <h5>${item.name}</h5>
-                            <p>${item.rating || 0}⭐ (${item.year})</p>
-                        `;
-                        card.onclick = () => window.location.href = item.page;
-                        resultsGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
-                });
+// 初始加载
+document.addEventListener('DOMContentLoaded', function() {
+    highlightSelectedYear(year);  // 初始高亮
+    showSubjects(year);          // 加载科目
+    
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    
+    searchButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        performSearch(searchInput.value.trim());
+    });
+    
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch(searchInput.value.trim());
         }
+    });
+});
+
+function performSearch(query) {
+    if (!query) {
+        alert('Please enter a search term!');
+        return;
+    }
+
+    document.body.classList.add('search-active');
+    document.getElementById('subjectGrid').style.display = 'none';
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.style.display = 'flex'; // 修改为flex
+    resultsContainer.innerHTML = '<div class="search-results"></div>'; // 直接创建results容器
+    
+    fetch(`search.php?query=${encodeURIComponent(query)}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.json();
+        })
+        .then(data => {
+            const resultsGrid = document.querySelector('.search-results');
+            resultsGrid.innerHTML = ''; // 清空现有结果
+            
+            if (!data || data.length === 0) {
+                resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
+                return;
+            }
+
+            // 使用Set去重
+            const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
+            
+            uniqueData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
+                    <h5>${item.name}</h5>
+                    <p>${item.rating || 0}⭐ (${item.year})</p>
+                `;
+                card.onclick = () => window.location.href = item.page;
+                resultsGrid.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('resultsContainer').innerHTML = 
+                `<p>Error performing search: ${error.message}</p>`;
+        });
+}
 
         function clearSearch() {
             document.getElementById('searchInput').value = '';
