@@ -1,41 +1,38 @@
 <?php
-header('Content-Type: application/json'); // 确保返回 JSON 格式
+header('Content-Type: application/json');
+include 'db_connect.php';
 
-$year = isset($_GET['year']) ? $_GET['year'] : 'Year 1';
 $query = isset($_GET['query']) ? $_GET['query'] : '';
 
-// 数据库连接
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "the seeds";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die(json_encode(['error' => "Connection failed: " . $conn->connect_error]));
+if (empty($query)) {
+    echo json_encode(['error' => 'Search query is empty']);
+    exit;
 }
 
-// 安全查询：使用预处理语句防止 SQL 注入
+// Search both subject_name and year
 $sql = "SELECT 
-        subject_id,
-        subject_name as name,
-        subject_image as image,
-        subject_price as price,
-        year,
-        page
-    FROM subject 
-    WHERE year = ? 
-    AND subject_name LIKE ?";
+        s.subject_id,
+        s.subject_name as name,
+        s.subject_image as image,
+        s.subject_price as price,
+        ROUND(COALESCE(AVG(c.comment_rating), 0.0), 1) as rating,
+        s.page,
+        s.year
+    FROM subject s
+    LEFT JOIN comments c ON s.subject_id = c.subject_id
+    WHERE s.subject_name LIKE ? OR s.year LIKE ?
+    GROUP BY s.subject_id";
 
 $stmt = $conn->prepare($sql);
 $searchTerm = "%$query%";
-$stmt->bind_param("ss", $year, $searchTerm);
+$stmt->bind_param("ss", $searchTerm, $searchTerm);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $subjects = [];
 while ($row = $result->fetch_assoc()) {
+    // Ensure all required fields exist
+    $row['rating'] = $row['rating'] ?? 0;
     $subjects[] = $row;
 }
 
