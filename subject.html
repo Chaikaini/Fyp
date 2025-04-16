@@ -348,57 +348,8 @@ showSubjects(year);
 
 
 
-// 保留原有的搜索功能
-// Initialize with current year
-const urlParams = new URLSearchParams(window.location.search);
-        const year = urlParams.get('year') || 'Year 1';
-        
-        // Highlight selected year
-        function highlightSelectedYear(selectedYear) {
-            document.querySelectorAll('.year').forEach(yearElement => {
-                yearElement.style.backgroundColor = yearElement.textContent === selectedYear ? 
-                    '#e0f7e4' : '#f8f9fa';
-                yearElement.style.fontWeight = yearElement.textContent === selectedYear ? 
-                    'bold' : 'normal';
-            });
-        }
-
-        // Load subjects for a year
-        function showSubjects(year) {
-            document.body.classList.remove('search-active');
-            document.querySelector('.search-status').style.display = 'none';
-            
-            fetch(`subject.php?year=${encodeURIComponent(year)}`)
-                .then(handleResponse)
-                .then(data => displaySubjects(data, year))
-                .catch(handleError);
-        }
-
-        // Display subjects in grid
-        function displaySubjects(data, year) {
-            const subjectGrid = document.getElementById('subjectGrid');
-            subjectGrid.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
-                return;
-            }
-
-            data.forEach(subject => {
-                const card = document.createElement('div');
-                card.className = 'subject-card';
-                card.innerHTML = `
-                    <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
-                    <h5>${subject.name}</h5>
-                    <p>${subject.rating || 0}⭐</p>
-                `;
-                card.onclick = () => window.location.href = subject.page;
-                subjectGrid.appendChild(card);
-            });
-        }
-
-        // Search functionality
-        document.addEventListener('DOMContentLoaded', function() {
+ // Search functionality
+ document.addEventListener('DOMContentLoaded', function() {
             highlightSelectedYear(year);
             showSubjects(year);
             
