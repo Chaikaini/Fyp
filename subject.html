@@ -110,17 +110,8 @@
             background-color: #e0f7e4;
         }
 
-        .subject-grid, #resultsContainer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* 让卡片均匀对齐 */
-    gap: 20px; /* 统一间距 */
-    padding: 15px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-}
+
+
 
 /* 课程卡片 */
 .subject-card {
@@ -189,26 +180,40 @@
     }
 
 
-        /* Updated search results container style */
-        #resultsContainer {
-            width: 70%;
-            margin-left: 30%;
-            padding: 20px;
-            display: none;
-        }
-        
-        .search-results {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: flex-start;
-        }
-        .search-active .subject-grid {
+    .subject-content {
+    flex: 1; /* 占据剩余空间 */
+    position: relative; /* 为绝对定位子元素提供基准 */
+}
+
+.subject-grid, #resultsContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+#resultsContainer {
+    display: none; /* 初始隐藏 */
+}
+
+.search-active .subject-grid {
     display: none;
 }
+
 .search-active #resultsContainer {
-    display: block;
+    display: flex;
 }
+
     </style>
 </head>
 
@@ -261,6 +266,7 @@
         </div>
 
         <div class="subject-grid" id="subjectGrid"></div>
+        <div id="resultsContainer"></div>
     </div>
 
     <div id="resultsContainer"></div>
@@ -345,6 +351,9 @@
                 alert('Please enter a search term!');
                 return;
             }
+
+                 // 添加search-active类来触发CSS变化
+            document.body.classList.add('search-active');
 
             document.getElementById('subjectGrid').style.display = 'none';
             const resultsContainer = document.getElementById('resultsContainer');
