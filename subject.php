@@ -4,17 +4,18 @@ include 'db_connect.php';
 
 $year = isset($_GET['year']) ? $_GET['year'] : 'Year 1';
 
+// 直接从subject表获取数据，因为year字段已经在subject表中
 $sql = "SELECT 
         s.subject_id,
         s.subject_name as name,
         s.subject_image as image,
         s.subject_price as price,
         COALESCE(AVG(c.comment_rating), 5.0) as rating,
-        s.page
+        s.page,
+        s.year
     FROM subject s
-    JOIN class cl ON s.subject_id = cl.subject_id
     LEFT JOIN comments c ON s.subject_id = c.subject_id
-    WHERE cl.year = ?
+    WHERE s.year = ?
     GROUP BY s.subject_id";
 
 $stmt = $conn->prepare($sql);
