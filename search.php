@@ -7,7 +7,7 @@ $query = isset($_GET['query']) ? $_GET['query'] : '';
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "tuition_centre";
+$dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
