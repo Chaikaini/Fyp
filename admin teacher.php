@@ -160,36 +160,53 @@
 <script>
   
   document.getElementById("search-btn").addEventListener("click", function () {
-    const teacherId = document.getElementById("search").value;
+    const teacherId = document.getElementById("search").value.trim(); // 去除空格
+
+    if (!teacherId) {
+        alert("Please enter a valid Teacher ID.");
+        return;
+    }
 
     fetch("teacher_schedule.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "teacher_id=" + encodeURIComponent(teacherId),
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "teacher_id=" + encodeURIComponent(teacherId),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        const tbody = document.getElementById("schedule-table-body");
-        tbody.innerHTML = ""; // Clear previous rows
-
-        if (data.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='6'>No data found.</td></tr>";
-        } else {
-          data.forEach((row) => {
-            tbody.innerHTML += `
-              <tr>
-                <td>${row.subject_id}</td>
-                <td>${row.subject_name}</td>
-                <td>${row.class_id}</td>
-                <td>${row.year}</td>
-                <td>${row.time}</td>
-                <td>${row.teacher_id}</td>
-              </tr>
-            `;
-          });
+    .then((res) => {
+        if (!res.ok) {
+            throw new Error("Network response was not ok");
         }
-      });
-  });
+        return res.json();
+    })
+    .then((data) => {
+        const tbody = document.getElementById("schedule-table-body");
+        tbody.innerHTML = "";
+
+        if (data.error) {
+            tbody.innerHTML = `<tr><td colspan='6'>${data.error}</td></tr>`;
+        } else if (data.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='6'>No data found.</td></tr>";
+        } else {
+            data.forEach((row) => {
+                tbody.innerHTML += `
+                  <tr>
+                    <td>${row.subject_id}</td>
+                    <td>${row.subject_name}</td>
+                    <td>${row.class_id}</td>
+                    <td>${row.year}</td>
+                    <td>${row.time}</td>
+                    <td>${row.teacher_id}</td>
+                  </tr>
+                `;
+            });
+        }
+    })
+    .catch((err) => {
+        console.error("Error loading schedule:", err);
+        const tbody = document.getElementById("schedule-table-body");
+        tbody.innerHTML = "<tr><td colspan='6'>Error loading schedule.</td></tr>";
+    });
+});
 </script>
 
    
