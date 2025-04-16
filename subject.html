@@ -110,7 +110,7 @@
             background-color: #e0f7e4;
         }
 
-        .subject-grid {
+        .subject-grid, #resultsContainer {
     display: flex;
     flex-wrap: wrap;
     justify-content: center; /* 让卡片均匀对齐 */
@@ -203,6 +203,12 @@
             gap: 20px;
             justify-content: flex-start;
         }
+        .search-active .subject-grid {
+    display: none;
+}
+.search-active #resultsContainer {
+    display: block;
+}
     </style>
 </head>
 
