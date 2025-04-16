@@ -10,7 +10,7 @@ $sql = "SELECT
         s.subject_name as name,
         s.subject_image as image,
         s.subject_price as price,
-        COALESCE(AVG(c.comment_rating), 5.0) as rating,
+        ROUND(COALESCE(AVG(c.comment_rating), 0.0), 1) as rating, -- 默认 0.0，保留 1 位小数
         s.page,
         s.year
     FROM subject s
