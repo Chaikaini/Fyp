@@ -262,25 +262,30 @@ function highlightSelectedYear(selectedYear) {
 }
 
 // 请求获取科目数据
+function highlightSelectedYear(selectedYear) {
+    document.querySelectorAll('.year').forEach(yearElement => {
+        if (yearElement.textContent === selectedYear) {
+            yearElement.style.backgroundColor = '#e0f7e4';
+            yearElement.style.fontWeight = 'bold';
+        } else {
+            yearElement.style.backgroundColor = '#f8f9fa';
+            yearElement.style.fontWeight = 'normal';
+        }
+    });
+}
+
 function showSubjects(year) {
-    // 更新URL参数
-    window.history.pushState({}, '', `subject.html?year=${year}`);
-    
-    // 高亮选中的年级
-    highlightSelectedYear(year);
-    
     fetch(`subject.php?year=${encodeURIComponent(year)}`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then(data => {
+            console.log('Data received:', data);
             const subjectGrid = document.getElementById('subjectGrid');
             subjectGrid.innerHTML = '';
 
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 subjectGrid.innerHTML = '<p>No subjects available for ' + year + '.</p>';
                 return;
             }
@@ -301,8 +306,10 @@ function showSubjects(year) {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('subjectGrid').innerHTML = 
-                '<p>Error loading subjects. Please try again later.</p>';
+            const subjectGrid = document.getElementById('subjectGrid');
+            if (subjectGrid) {
+                subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
+            }
         });
 }
 
