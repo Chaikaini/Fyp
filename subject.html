@@ -273,95 +273,76 @@
     <div id="resultsContainer"></div>
 
     <script>
-// 获取年级参数（默认为 Year 1）
-const urlParams = new URLSearchParams(window.location.search);
-const year = urlParams.get('year') || 'Year 1';
-
-// 高亮当前选中的年级
-function highlightSelectedYear(selectedYear) {
-    document.querySelectorAll('.year').forEach(yearElement => {
-        if (yearElement.textContent === selectedYear) {
-            yearElement.style.backgroundColor = '#e0f7e4';
-            yearElement.style.fontWeight = 'bold';
-        } else {
-            yearElement.style.backgroundColor = '#f8f9fa';
-            yearElement.style.fontWeight = 'normal';
-        }
-    });
-}
-
-// 请求获取科目数据
-function highlightSelectedYear(selectedYear) {
-    document.querySelectorAll('.year').forEach(yearElement => {
-        if (yearElement.textContent === selectedYear) {
-            yearElement.style.backgroundColor = '#e0f7e4';
-            yearElement.style.fontWeight = 'bold';
-        } else {
-            yearElement.style.backgroundColor = '#f8f9fa';
-            yearElement.style.fontWeight = 'normal';
-        }
-    });
-}
-
-function showSubjects(year) {
-    fetch(`subject.php?year=${encodeURIComponent(year)}`)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
-        .then(data => {
-            console.log('Data received:', data);
-            const subjectGrid = document.getElementById('subjectGrid');
-            subjectGrid.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                subjectGrid.innerHTML = '<p>No subjects available for ' + year + '.</p>';
-                return;
-            }
-
-            data.forEach(subject => {
-                const card = document.createElement('div');
-                card.className = 'subject-card';
-                card.innerHTML = `
-                    <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
-                    <h5>${subject.name}</h5>
-                    <p>${subject.rating}⭐</p>
-                `;
-                card.onclick = function() {
-                    window.location.href = subject.page;
-                };
-                subjectGrid.appendChild(card);
+        const urlParams = new URLSearchParams(window.location.search);
+        const year = urlParams.get('year') || 'Year 1';
+        
+        // 高亮选中年份
+        function highlightSelectedYear(selectedYear) {
+            document.querySelectorAll('.year').forEach(yearElement => {
+                if (yearElement.textContent === selectedYear) {
+                    yearElement.style.backgroundColor = '#e0f7e4';
+                    yearElement.style.fontWeight = 'bold';
+                } else {
+                    yearElement.style.backgroundColor = '#f8f9fa';
+                    yearElement.style.fontWeight = 'normal';
+                }
             });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const subjectGrid = document.getElementById('subjectGrid');
-            if (subjectGrid) {
-                subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
-            }
-        });
-}
+        }
 
-// 初次加载
-highlightSelectedYear(year);
-showSubjects(year);
+        // 显示科目
+        function showSubjects(year) {
+            fetch(`subject.php?year=${encodeURIComponent(year)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const subjectGrid = document.getElementById('subjectGrid');
+                    subjectGrid.innerHTML = '';
+                    
+                    if (!data || data.length === 0) {
+                        subjectGrid.innerHTML = '<p>No subjects available for ' + year + '.</p>';
+                        return;
+                    }
 
+                    data.forEach(subject => {
+                        const card = document.createElement('div');
+                        card.className = 'subject-card';
+                        card.innerHTML = `
+                            <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                            <h5>${subject.name}</h5>
+                            <p>${subject.rating || 0}⭐</p>
+                        `;
+                        card.onclick = function() {
+                            window.location.href = subject.page;
+                        };
+                        subjectGrid.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const subjectGrid = document.getElementById('subjectGrid');
+                    if (subjectGrid) {
+                        subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
+                    }
+                });
+        }
 
-
- // Search functionality
- document.addEventListener('DOMContentLoaded', function() {
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
             highlightSelectedYear(year);
             showSubjects(year);
             
+            // 设置搜索功能
             const searchInput = document.getElementById('searchInput');
             const searchButton = document.getElementById('searchButton');
             
-            searchButton.addEventListener('click', (e) => {
+            searchButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 performSearch(searchInput.value.trim());
             });
             
-            searchInput.addEventListener('keypress', (e) => {
+            searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     performSearch(searchInput.value.trim());
@@ -369,64 +350,59 @@ showSubjects(year);
             });
         });
 
+        // 执行搜索
         function performSearch(query) {
             if (!query) {
                 alert('Please enter a search term!');
                 return;
             }
-
-            document.getElementById('searchQueryText').textContent = query;
-            document.querySelector('.search-status').style.display = 'block';
-            document.body.classList.add('search-active');
+            
+            document.getElementById('subjectGrid').style.display = 'none';
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.style.display = 'block';
+            resultsContainer.innerHTML = '<p>Searching...</p>';
             
             fetch(`search.php?query=${encodeURIComponent(query)}`)
-                .then(handleResponse)
-                .then(data => displaySearchResults(data, query))
-                .catch(handleError);
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    resultsContainer.innerHTML = '<div class="search-results"></div>';
+                    const resultsGrid = resultsContainer.querySelector('.search-results');
+                    
+                    if (!data || data.length === 0) {
+                        resultsGrid.innerHTML = '<p>No results found for "' + query + '"</p>';
+                        return;
+                    }
+                    
+                    data.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'subject-card';
+                        card.innerHTML = `
+                            <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
+                            <h5>${item.name}</h5>
+                            <p>${item.rating || 0}⭐ (${item.year})</p>
+                            <p>Price: RM ${item.price}</p>
+                        `;
+                        card.onclick = function() {
+                            window.location.href = item.page;
+                        };
+                        resultsGrid.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultsContainer.innerHTML = '<p>Error performing search. Please try again.</p>';
+                });
         }
 
-        function displaySearchResults(data, query) {
-            const container = document.getElementById('resultsContainer');
-            container.innerHTML = '<div class="search-results"></div>';
-            const resultsGrid = container.querySelector('.search-results');
-            
-            if (!data || data.length === 0) {
-                resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
-                return;
-            }
-
-            data.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'subject-card';
-                card.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
-                    <h5>${item.name}</h5>
-                    <p>${item.rating || 0}⭐ (${item.year})</p>
-                    <p>Price: RM ${item.price}</p>
-                `;
-                card.onclick = () => window.location.href = item.page;
-                resultsGrid.appendChild(card);
-            });
-        }
-
+        // 清除搜索
         function clearSearch() {
-            document.body.classList.remove('search-active');
-            document.querySelector('.search-status').style.display = 'none';
             document.getElementById('searchInput').value = '';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('subjectGrid').style.display = 'flex';
             showSubjects(year);
-        }
-
-        function handleResponse(response) {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        }
-
-        function handleError(error) {
-            console.error('Error:', error);
-            const container = error.type === 'search' ? 
-                document.getElementById('resultsContainer') : 
-                document.getElementById('subjectGrid');
-            container.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
         }
 
     </script>
