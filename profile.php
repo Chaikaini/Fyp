@@ -844,40 +844,50 @@ document.getElementById("avatar-upload").addEventListener("change", function(eve
 
 // delete modal
 document.addEventListener("DOMContentLoaded", function () {
-    let selectedKidNumber = null;
+    let selectedChildId = null; // save the select child_id
 
+    // when click delete button，get child_id and display delete modal
     document.querySelector("#children-info-content").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
-            selectedKidNumber = event.target.getAttribute("data-kidNumber");
-            document.getElementById("deleteConfirmModal").style.display = "flex"; // show modal
+            selectedChildId = event.target.getAttribute("data-child-id");
+            document.getElementById("deleteConfirmModal").style.display = "flex";
         }
     });
 
+    // cancel delete
     document.getElementById("cancelDeleteBtn").addEventListener("click", function () {
-        document.getElementById("deleteConfirmModal").style.display = "none"; // cancel delete
+        document.getElementById("deleteConfirmModal").style.display = "none";
+        selectedChildId = null; 
     });
 
+    // make sure delete
     document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
-        if (selectedKidNumber) {
+        if (selectedChildId) {
             fetch("profile_deletechild.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "kidNumber=" + encodeURIComponent(selectedKidNumber)
+                body: "child_id=" + encodeURIComponent(selectedChildId)
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("deleteConfirmModal").style.display = "none"; // close modal
+                document.getElementById("deleteConfirmModal").style.display = "none";
+                selectedChildId = null;
+
                 if (data.success) {
-                    showToast("Children Information deleted successfully!");
+                    showToast("Children information deleted successfully!");
                     setTimeout(() => { location.reload(); }, 2000);
                 } else {
                     showToast("Error: " + data.error, true);
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("Unexpected error occurred.", true);
+            });
         }
     });
 });
+
 
 // Toast Notification Function
 function showToast(message, isError = false) {
@@ -1085,8 +1095,8 @@ function fetchChildrenInfo() {
                         <td>
                             <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
                                onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}', '${child.child_id}')"></i>
-                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
-                               data-kidNumber="${child.child_kidNumber}"></i>
+                           <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"  data-child-id="${child.child_id}"></i>
+
                         </td>
                     `;
                     tbody.appendChild(row);

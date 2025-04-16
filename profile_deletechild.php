@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json");
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -11,11 +12,11 @@ if ($conn->connect_error) {
     exit();
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["child_kidNumber"])) {
-    $kidNumber = $_POST["child_kidNumber"];
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["child_id"])) {
+    $child_id = $_POST["child_id"];
 
-    $stmt = $conn->prepare("DELETE FROM child WHERE child_kidNumber = ?");
-    $stmt->bind_param("s", $child_kidNumber); 
+    $stmt = $conn->prepare("DELETE FROM child WHERE child_id = ?");
+    $stmt->bind_param("i", $child_id); 
 
     if ($stmt->execute()) {
         echo json_encode(["success" => true]);
