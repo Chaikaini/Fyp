@@ -420,46 +420,53 @@
             </div>
             
             <form>
-                <div class="form-group">
-                    <label for="username"> Name</label>
-                    <input type="text" id="username">
-                </div>
-                <div class="form-group">
-                    <label for="gender">Gender</label>
-                    <select id="gender" name="gender">
-                        <option value="" disabled selected>Select your gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="ic-num">IC Number</label>
-                    <input type="text" id="ic-num" placeholder="000000-00-0000">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email <span class="required">*</span> <small class="required"></small></label>
-                    <input type="email" id="email" value="" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="phone-num-1">Phone Number </label>
-                    <input type="text" id="phone-num-1">
-                </div>
-                <div class="form-group">
-                    <label for="phone-num-2">Emergency Phone Number </label>
-                    <input type="text" id="phone-num-2">
-                </div>
-                <div class="form-group">
-                    <label for="relationship">Relationship</label>
-                    <select id="relationship" name="relationship">
-                        <option value="" disabled selected>Select Relationship With Children</option>
-                        <option value="Parent">Parent</option>
-                        <option value="Guardian">Guardian</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="address">Address</label>
-                    <textarea id="address"></textarea>
-                </div>
+            <div class="form-group">
+        <label for="username"> Name</label>
+        <input type="text" id="username" name="parent_name">
+    </div>
+
+    <div class="form-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="parent_gender">
+            <option value="" disabled selected>Select your gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="ic-num">IC Number</label>
+        <input type="text" id="ic-num" name="ic_number" placeholder="000000-00-0000">
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email <span class="required">*</span></label>
+        <input type="email" id="email" name="parent_email" readonly>
+    </div>
+
+    <div class="form-group">
+        <label for="phone-num-1">Phone Number</label>
+        <input type="text" id="phone-num-1" name="phone_number">
+    </div>
+
+    <div class="form-group">
+        <label for="phone-num-2">Emergency Phone Number</label>
+        <input type="text" id="phone-num-2" name="phone_number2">
+    </div>
+
+    <div class="form-group">
+        <label for="relationship">Relationship</label>
+        <select id="relationship" name="parent_relationship">
+            <option value="" disabled selected>Select Relationship With Children</option>
+            <option value="Parent">Parent</option>
+            <option value="Guardian">Guardian</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="address">Address</label>
+        <textarea id="address" name="parent_address"></textarea>
+    </div>
                 <h3>Reset Password</h3>
                 
                 <div class="form-group">
@@ -1009,13 +1016,13 @@ document.querySelector("form").addEventListener("submit", async function (event)
 
     // get data
     const formData = {
-        username: document.getElementById("username").value,
-        gender: document.getElementById("gender").value,
-        ic_num: document.getElementById("ic-num").value,
-        phone_num_1: document.getElementById("phone-num-1").value,
-        phone_num_2: document.getElementById("phone-num-2").value,
-        relationship: document.getElementById("relationship").value,
-        address: document.getElementById("address").value,
+        parent_name: document.getElementById("username").value,
+        parent_gender: document.getElementById("gender").value,
+        ic_number: document.getElementById("ic-num").value,
+        phone_number: document.getElementById("phone-num-1").value,
+        phone_number2: document.getElementById("phone-num-2").value,
+        parent_relationship: document.getElementById("relationship").value,
+        parent_address: document.getElementById("address").value,
         current_password: document.getElementById("current-password").value.trim(),
         new_password: document.getElementById("new-password").value.trim(),
         confirm_password: document.getElementById("confirm-password").value.trim(),
