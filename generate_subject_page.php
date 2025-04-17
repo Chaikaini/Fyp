@@ -337,10 +337,10 @@ ob_start();
     font-size: 18px;
 }
 
-.review-section {
+ .review-section {
     width: 35%;
     margin-top: 0;
-}
+} 
 
 .review-section h2 {
     font-size: 32px;
@@ -420,6 +420,13 @@ ob_start();
             text-align: center;
             transition: opacity 0.5s ease-in-out;
         }
+
+        .error {
+    color: #dc3545;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 5px;
+}
 
  </style>
 </head>
@@ -562,7 +569,7 @@ ob_start();
             <h2>Parent Reviews</h2>
             <div id="review-list">
                 <!-- 评论将通过JavaScript动态加载 -->
-                <div class="review-filter">
+             <!--   <div class="review-filter">
                 <label for="yearFilter">Filter by Year: </label>
                 <select id="yearFilter">
                     <option value="All">All</option>
@@ -570,7 +577,7 @@ ob_start();
                     <option value="2024">2024</option>
                     <option value="2023">2023</option>
                 </select>
-            </div>
+            </div> -->
             </div>
         </div>
     </div>
@@ -857,7 +864,7 @@ function setRating(rating) {
 
 
 
-document.getElementById("yearFilter").addEventListener("change", function() {
+/*document.getElementById("yearFilter").addEventListener("change", function() {
     var selectedYear = this.value;
     var reviews = document.querySelectorAll(".review-item");
     reviews.forEach(function(review) {
@@ -868,7 +875,7 @@ document.getElementById("yearFilter").addEventListener("change", function() {
             review.style.display = "none";
         }
     });
-});
+}); */
 
 
     </script>
@@ -942,96 +949,103 @@ document.getElementById("yearFilter").addEventListener("change", function() {
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
     <script>
-        // 获取并显示评论的函数
-        function fetchReviews() {
-    const url = `get_comments.php?subject_id=<?= $subject_id ?>`;
+       // 获取并显示评论的函数
+function fetchReviews() {
+    // 使用当前页面的 subject_id
+    const subject_id = <?= $subject_id ?>; 
+    const url = `get_comments.php?subject_id=${subject_id}`;
+    
+    console.log('Fetching reviews from:', url);
+
     fetch(url)
         .then(response => {
+            console.log('Response status:', response.status);
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            const reviewList = document.getElementById('review-list');
-            
-            // 清空现有内容但保留筛选器
-            const existingFilter = reviewList.querySelector('.review-filter');
-            reviewList.innerHTML = '';
-            if (existingFilter) {
-                reviewList.appendChild(existingFilter);
-            }
-
-            if (data.data && data.data.length > 0) {
-                // 如果没有筛选器则创建
-                if (!existingFilter) {
-                    const filterDiv = document.createElement('div');
-                    filterDiv.className = 'review-filter';
-                    filterDiv.innerHTML = `
-                        <label for="yearFilter">按年份筛选: </label>
-                        <select id="yearFilter">
-                            <option value="All">全部</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                        </select>
-                    `;
-                    reviewList.appendChild(filterDiv);
-                }
-
-                data.data.forEach(comment => {
-                    const reviewItem = document.createElement('div');
-                    reviewItem.className = 'review-item';
-                    const commentDate = new Date(comment.comment_created_at);
-                    reviewItem.setAttribute('data-year', commentDate.getFullYear());
-
-                    const reviewText = document.createElement('div');
-                    reviewText.className = 'review-text';
-
-                    // 家长姓名和日期
-                    const nameDate = document.createElement('p');
-                    nameDate.innerHTML = `<strong>${comment.parent_name || '匿名用户'}</strong> - ${commentDate.toLocaleDateString()}`;
-                    reviewText.appendChild(nameDate);
-
-                    // 评分星星
-                    const starsContainer = document.createElement('div');
-                    starsContainer.className = 'stars-container';
-                    
-                    const rating = parseFloat(comment.rating) || 0;
-                    const fullStars = Math.floor(rating);
-                    const hasHalfStar = rating % 1 >= 0.5;
-                    
-                    // 生成星星
-                    starsContainer.innerHTML = `
-                        ${'<span class="star yellow"></span>'.repeat(fullStars)}
-                        ${hasHalfStar ? '<span class="star half"></span>' : ''}
-                        ${'<span class="star"></span>'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0))}
-                        <span class="rating-number">${rating.toFixed(1)}</span>
-                    `;
-                    
-                    reviewText.appendChild(starsContainer);
-
-                    // 评论内容
-                    if (comment.comment) {
-                        const commentText = document.createElement('p');
-                        commentText.textContent = comment.comment;
-                        reviewText.appendChild(commentText);
-                    }
-
-                    reviewItem.appendChild(reviewText);
-                    reviewList.appendChild(reviewItem);
-                });
-            } else {
-                reviewList.innerHTML = '<p>暂无评论</p>';
-            }
+            console.log('Received data:', data);
+            displayReviews(data.data || []);
         })
         .catch(error => {
-            console.error('加载评论出错:', error);
-            document.getElementById('review-list').innerHTML = '<p>加载评论时出错</p>';
+            console.error('Fetch error:', error);
+            showError('Error loading reviews: ' + error.message);
         });
 }
-    
 
+function displayReviews(comments) {
+    const reviewList = document.getElementById('review-list');
+    
+    // 保留筛选器
+   /* const filterHtml = `
+        <div class="review-filter">
+            <label for="yearFilter">Filter by Year: </label>
+            <select id="yearFilter">
+                <option value="All">All</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+            </select>
+        </div>`;*/
+    
+        reviewList.innerHTML = '<div class="review-items-container"></div>';
+        const container = reviewList.querySelector('.review-items-container');
+
+    if (comments.length > 0) {
+        comments.forEach(comment => {
+            const reviewItem = document.createElement('div');
+            reviewItem.className = 'review-item';
+            
+            const commentDate = new Date(comment.comment_created_at);
+            reviewItem.setAttribute('data-year', commentDate.getFullYear());
+
+            const reviewText = document.createElement('div');
+            reviewText.className = 'review-text';
+
+            // 家长信息
+            const nameDate = document.createElement('p');
+            nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
+            
+            // 评分星星
+            const starsContainer = document.createElement('div');
+            starsContainer.className = 'stars-container';
+            const rating = parseFloat(comment.rating) || 0;
+            
+            starsContainer.innerHTML = `
+                ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
+                ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
+                ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
+                <span class="rating-number">${rating.toFixed(1)}</span>`;
+            
+            // 评论内容
+            const commentText = document.createElement('p');
+            commentText.textContent = comment.comment;
+            
+            // 组装元素
+            reviewText.appendChild(nameDate);
+            reviewText.appendChild(starsContainer);
+            reviewText.appendChild(commentText);
+            reviewItem.appendChild(reviewText);
+            reviewList.appendChild(reviewItem);
+        });
+    } else {
+        reviewList.innerHTML += '<p>No reviews yet</p>';
+    }
+}
+
+function showError(message) {
+    const reviewList = document.getElementById('review-list');
+    reviewList.innerHTML = `
+        <div class="review-filter">
+            <!-- 保留筛选器 -->
+        </div>
+        <p class="error">${message}</p>`;
+}
+
+// 确保页面加载时调用
+document.addEventListener("DOMContentLoaded", fetchReviews);
 
     </script>
 </body>
