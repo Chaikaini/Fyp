@@ -1,45 +1,60 @@
 <?php
-// 开启错误报告（调试完成后可移除）
+// Enable error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 1. 引入数据库连接文件
-include('db1.php');  // 确保数据库连接成功
+// 1. Include database connection
+include('db1.php');
 
-// 2. 获取科目ID（支持 CLI 和 HTTP 请求）
-$subject_id = 0;
-if (php_sapi_name() === 'cli') {
-    // 从命令行参数中获取科目ID
-    $subject_id = isset($argv[1]) ? (int)$argv[1] : 0;
-} else {
-    // 从 URL 参数中获取科目ID
-    $subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
-}
-
+// 2. Get subject ID
+$subject_id = isset($_GET['subject_id']) ? (int)$_GET['subject_id'] : 0;
 if (!$subject_id) {
-    die("Error: 必须提供科目ID");
+    die("Error: Subject ID is required");
 }
 
-// 3. 从数据库读取科目信息
-$query = "SELECT * FROM admin_subject WHERE subject_ID = ?";
-$stmt = $conn->prepare($query);  // 使用 $conn 执行查询
-$stmt->bind_param("i", $subject_id);  // 绑定参数
+// 3. Fetch subject data
+$query = "SELECT * FROM subject WHERE subject_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $subject_id);
 $stmt->execute();
-$subject = $stmt->get_result()->fetch_assoc();  // 获取查询结果
+$subject = $stmt->get_result()->fetch_assoc();
 
 if (!$subject) {
-    die("Error: 找不到ID为 $subject_id 的科目");
+    die("Error: Subject not found");
 }
 
-// 4. 动态生成 HTML 内容
-ob_start();  // 启动输出缓冲区
+// Set default values for missing fields
+$subject = array_merge([
+    'subject_name' => 'Unknown Subject',
+    'teacher_id' => 0,
+    'subject_price' => '0.00',
+    'rating' => 0, // Note: This field isn't in your DB structure
+    'subject_description' => 'No description available',
+    'subject_image' => 'img/default-subject.jpg',
+    'year' => 'Year 1'
+], $subject);
 
+// Get teacher name (you'll need to implement this)
+$teacher_name = "Unknown Teacher"; // Default
+if ($subject['teacher_id']) {
+    $teacher_query = "SELECT teacher_name FROM teacher WHERE teacher_id = ?";
+    $teacher_stmt = $conn->prepare($teacher_query);
+    $teacher_stmt->bind_param("i", $subject['teacher_id']);
+    $teacher_stmt->execute();
+    $teacher_result = $teacher_stmt->get_result()->fetch_assoc();
+    if ($teacher_result) {
+        $teacher_name = $teacher_result['teacher_name'];
+    }
+}
+
+// Start output buffering
+ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title><?= htmlspecialchars($subject['subject']) ?> Class</title>
+    <title><?= htmlspecialchars($subject['subject_name']) ?> Class</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre" name="keywords">
     <meta content="The Seeds Learning Centre" name="description">
@@ -438,13 +453,13 @@ ob_start();  // 启动输出缓冲区
 
     <!-- 面包屑导航 -->
     <div class="breadcrumb-container">
-        <h2><?= htmlspecialchars($subject['subject']) ?></h2>
+    <h2><?= htmlspecialchars($subject['subject_name']) ?></h2>
         <ul class="breadcrumb">
             <li><a href="member.html">Home</a></li>
             <li>&gt;</li>
             <li><a href="subject.html">Subject</a></li>
             <li>&gt;</li>
-            <li><?= htmlspecialchars($subject['subject']) ?></li>
+            <li><?= htmlspecialchars($subject['subject_name']) ?></li>
         </ul>
     </div>
 
@@ -452,10 +467,10 @@ ob_start();  // 启动输出缓冲区
  <div class="container my-5">
         <div class="class-details-container">
             <div class="subject-image">
-                <img src="<?= htmlspecialchars($subject['image']) ?>" alt="Subject Image" id="subjectImage">
+            <img src="<?= htmlspecialchars($subject['subject_image']) ?>" alt="Subject Image" id="subjectImage">
             </div>
             <div class="class-details">
-                <h2 id="subjectName"><?= htmlspecialchars($subject['subject']) ?></h2>
+            <h2 id="subjectName"><?= htmlspecialchars($subject['subject_name']) ?></h2>
                 
                 <div class="rating-container">
                     <div class="stars-container">
@@ -482,8 +497,8 @@ ob_start();  // 启动输出缓冲区
                 </div>
                 
                 <div class="class-info">
-                    <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($subject['teacher']) ?></p>
-                    <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['price']) ?></p>
+                <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($teacher_name) ?></p>
+                <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['subject_price']) ?></p>
                 </div>
 
                 <!-- 时间选择部分 -->
@@ -536,7 +551,7 @@ ob_start();  // 启动输出缓冲区
         <!-- 课程概述 -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
-            <p><?= nl2br(htmlspecialchars($subject['description'])) ?></p>
+            <p><?= nl2br(htmlspecialchars($subject['subject_description'])) ?></p>
         </div>
 
         <!-- 评论部分（直接嵌入，不使用fetch_reviews.php） -->
@@ -582,30 +597,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const courses = data.data;
 
-// 🔧 修复点：转换 part_id 为 part 字符串
-courses.forEach(course => {
-    if (course.part_id === 1) course.part = "Part A";
-    else if (course.part_id === 2) course.part = "Part B";
-});
+            // 添加 part 名称
+            courses.forEach(course => {
+                if (course.part_id === 1) course.part = "Part A";
+                else if (course.part_id === 2) course.part = "Part B";
+            });
 
-const partA = courses.find(c => c.part === 'Part A');
-const partB = courses.find(c => c.part === 'Part B');
+            const partA = courses.find(c => c.part === 'Part A');
+            const partB = courses.find(c => c.part === 'Part B');
 
-            // 处理 Part A
+            // 设置颜色和状态
             if (partA) {
                 const partAElement = document.getElementById('partA');
-                if (partA.status === 'available') {
-                    partAElement.classList.remove('gray');
+                if (partA.class_status.toLowerCase() === 'available') {
+                    partAElement.classList.remove('gray', 'disabled');
                     partAElement.classList.add('green');
                 } else {
                     partAElement.classList.add('disabled');
                 }
             }
 
-            // 处理 Part B
             if (partB) {
                 const partBElement = document.getElementById('partB');
-                if (partB.status === 'available') {
+                if (partB.class_status.toLowerCase() === 'available') {
                     partBElement.classList.remove('gray', 'disabled');
                     partBElement.classList.add('green');
                 } else {
@@ -615,25 +629,27 @@ const partB = courses.find(c => c.part === 'Part B');
 
             // 点击 Part A
             document.getElementById('partA').addEventListener('click', function () {
-                if (!partA || partA.status !== 'available') return;
+                if (!partA || partA.class_status.toLowerCase() !== 'available') return;
                 
                 selectedClassInfo = {
-                    class_id: partA.class_id || 'N/A',  // 处理空 class_id
-                    capacity: partA.capacity
+                    class_id: partA.class_id || 'N/A',
+                    capacity: partA.class_capacity,
+                    enrolled: partA.class_enrolled
                 };
-                
+
                 updatePopup(partA);
             });
 
             // 点击 Part B
             document.getElementById('partB').addEventListener('click', function () {
-                if (!partB || partB.status !== 'available') return;
+                if (!partB || partB.class_status.toLowerCase() !== 'available') return;
                 
                 selectedClassInfo = {
-                    class_id: partB.class_id || 'N/A',  // 处理空 class_id
-                    capacity: partB.capacity
+                    class_id: partB.class_id || 'N/A',
+                    capacity: partB.class_capacity,
+                    enrolled: partB.class_enrolled
                 };
-                
+
                 updatePopup(partB);
             });
 
@@ -642,19 +658,21 @@ const partB = courses.find(c => c.part === 'Part B');
                 document.getElementById('popup').style.display = 'none';
             });
 
-            // 更新弹窗内容的公共函数
+            // 更新弹窗内容
             function updatePopup(course) {
-                document.getElementById('popupMonth').textContent = course.month;
-                document.getElementById('popupTime').textContent = course.time;
-                
-                // 处理 capacity 显示
-                if (course.capacity && course.capacity.includes('/')) {
-                    const [enrolled, total] = course.capacity.split('/');
-                    document.getElementById('popupchildren').textContent = `${enrolled} / ${total}`;
-                } else {
-                    document.getElementById('popupchildren').textContent = '0 / 0';
-                }
-                
+                // 显示月份（根据 part_id 简单推断）
+                const monthText = course.part_id === 1 ? "January - June" : "July - December";
+                document.getElementById('popupMonth').textContent = monthText;
+
+                // 显示时间（课程时间）
+                document.getElementById('popupTime').textContent = course.class_time || 'Not set';
+
+                // 显示当前报名人数
+                const enrolled = course.class_enrolled ?? 0;
+                const capacity = course.class_capacity ?? 0;
+                document.getElementById('popupchildren').textContent = `${enrolled} / ${capacity}`;
+
+                // 显示弹窗
                 document.getElementById('popup').style.display = 'flex';
             }
         })
@@ -685,72 +703,55 @@ const partB = courses.find(c => c.part === 'Part B');
        // 购物车功能
 
        document.getElementById("addToCart").addEventListener("click", function() {
-    let selectedChild = document.getElementById("childrenSelect").innerText.replace('Choose', '').trim();
-    let subjectName = document.getElementById("subjectName").innerText;
-    let subjectPrice = document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim();
-    let teacher = document.getElementById("teacher").innerText.replace('Teacher: ', '').trim();
-    let time = document.getElementById("time").innerText.replace('Time: ', '').trim();
-    let price = parseFloat(subjectPrice);
-
-    let subjectImage = document.getElementById("subjectImage").src; // 获取img标签的src属性
+    const selectedChild = document.getElementById("childrenSelect").value;
+    const subjectName = document.getElementById("subjectName").innerText;
+    const subjectPrice = document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim();
+    const teacher = document.getElementById("teacher").innerText.replace('Teacher: ', '').trim();
+    const price = parseFloat(subjectPrice);
+    const subjectImage = document.getElementById("subjectImage").src;
+    const subjectId = <?= $subject_id ?>;
 
     if (isNaN(price)) {
         alert("Invalid price value");
         return;
     }
 
-    // 创建一个购物车商品对象
-    const cartItem = {
-    subject: subjectName,
-    price: price,
-    child: selectedChild,
-    image: subjectImage,
-    teacher: teacher,
-    time: time,
-    class_id: selectedClassInfo?.class_id || null,
-    capacity: selectedClassInfo?.capacity || null
-};
-
-
-    // 获取购物车中的现有商品
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    // 检查当前商品是否已在购物车中
-    let itemExists = cart.some(item => item.subject === cartItem.subject && item.child === cartItem.child && item.teacher === cartItem.teacher && item.time === cartItem.time);
-
-    if (itemExists) {
-        showToast("This item is already in your cart!", true); // 如果已存在，显示提示消息
-    } else {
-        // 如果不存在，发送 POST 请求到 save_cart.php
-        fetch('save_cart.php', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json'  // 确保使用正确的 Content-Type
-            },
-            body: JSON.stringify({ cart: [cartItem] })  // 发送 JSON 格式数据
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                // 👉 如果服务器返回了数据库中的 id，就添加到 cartItem 上
-                if (data.id) {
-                    cartItem.id = data.id;
-                }
-
-                // ✅ 将商品添加到购物车并更新 localStorage
-                cart.push(cartItem);
-                localStorage.setItem("cart", JSON.stringify(cart)); // 更新购物车
-
-                showToast("Item added to cart!");
-            } else {
-                showToast(data.message, true); // 显示错误消息
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast("An error occurred. Please try again.", true);  // 请求错误提示
-        });
+    if (!selectedChild) {
+        alert("Please select a child first");
+        return;
     }
+
+    // Create cart item object
+    const cartItem = {
+        subject_id: subjectId,
+        subject_name: subjectName,
+        price: price,
+        child_name: selectedChild,
+        image: subjectImage,
+        teacher: teacher,
+        class_id: selectedClassInfo?.class_id || null
+    };
+
+    // Send to server to save in database
+    fetch('save_cart.php', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cartItem)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            showToast("Item added to cart successfully!");
+        } else {
+            showToast(data.message || "Error adding to cart", true);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast("An error occurred. Please try again.", true);
+    });
 });
 
 // Toast Notification Function
@@ -776,36 +777,31 @@ function showToast(message, isError = false) {
 
         
 document.addEventListener("DOMContentLoaded", function() {
-            // 通过 Fetch 请求获取孩子的数据
-            fetch('get_child.php')  // 获取孩子数据
-                .then(response => response.json())
-                .then(data => {
-                    let select = document.getElementById("childrenSelect");
-                    select.innerHTML = '<option value="">Choose </option>'; // 清空现有选项
-
-                    // 如果返回的数组为空，显示一个选项表示没有孩子
-                    if (Array.isArray(data) && data.length > 0) {
-                        // 遍历返回的孩子数据，筛选出 Year 1 的孩子
-                        data.forEach(child => {
-                            if (child.year === "Year 1") { // 只处理 Year 1 的孩子
-                                let option = document.createElement("option");
-                                option.value = child.name;  // 孩子的名字作为值
-                                option.textContent = child.name;  // 只显示名字
-                                select.appendChild(option);
-                            }
-                        });
-                    } else {
-                        // 如果没有孩子数据，显示一个"无孩子"选项
-                        let option = document.createElement("option");
-                        option.textContent = "No children found";
-                        option.disabled = true; // 禁用无子项的选项
-                        select.appendChild(option);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching children:', error);
+    fetch('get_child.php')
+        .then(response => response.json())
+        .then(data => {
+            let select = document.getElementById("childrenSelect");
+            select.innerHTML = '<option value="">Choose</option>';
+            
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(child => {
+                    // Changed from child.name to child.child_name (or whatever your field is)
+                    let option = document.createElement("option");
+                    option.value = child.child_name || child.name; // Try different field names
+                    option.textContent = child.child_name || child.name;
+                    select.appendChild(option);
                 });
+            } else {
+                let option = document.createElement("option");
+                option.textContent = "No children found";
+                option.disabled = true;
+                select.appendChild(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching children:', error);
         });
+});
 
 
 
@@ -919,63 +915,89 @@ document.getElementById("yearFilter").addEventListener("change", function() {
     <script>
         // 获取并显示评论的函数
         function fetchReviews() {
-            const url = 'get_comments.php';  // 获取固定条件下的评论
-            fetch(url)
-                .then(response => response.json())
-                .then(comments => {
-                    const reviewList = document.getElementById('review-list');
-                    reviewList.innerHTML = ''; // 清空现有的评论
-    
-                    if (comments.length > 0) {
-                        comments.forEach(comment => {
-                            const reviewItem = document.createElement('div');
-                            reviewItem.classList.add('review-item');
-                            reviewItem.setAttribute('data-year', comment.year_created);
-    
-                            const reviewText = document.createElement('div');
-                            reviewText.classList.add('review-text');
-    
-                            const name = document.createElement('p');
-                            name.innerHTML = `<strong>${comment.comment_created_at.split(' ')[0]}</strong>`;
-                            reviewText.appendChild(name);
-    
-                            // 生成评分星星
-                            const starsContainer = document.createElement('div');
-                            starsContainer.classList.add('stars-container');
-                            const rating = comment.rating;
-                            let fullStars = Math.floor(rating);
-                            let halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
-                            let emptyStars = 5 - fullStars - halfStar;
-    
-                            for (let i = 0; i < fullStars; i++) {
-                                starsContainer.innerHTML += '<span class="star filled"></span>';
-                            }
-    
-                            if (halfStar) {
-                                starsContainer.innerHTML += '<span class="star half"></span>';
-                            }
-    
-                            for (let i = 0; i < emptyStars; i++) {
-                                starsContainer.innerHTML += '<span class="star"></span>';
-                            }
-    
-                            reviewText.appendChild(starsContainer);
-    
-                            const commentText = document.createElement('p');
-                            commentText.textContent = comment.comment;
-                            reviewText.appendChild(commentText);
-    
-                            reviewItem.appendChild(reviewText);
-                            reviewList.appendChild(reviewItem);
-                        });
-                    } else {
-                        reviewList.innerHTML = 'No reviews found.';
+    // Include subject_id in the request
+    const url = `get_comments.php?subject_id=<?= $subject_id ?>`;
+    fetch(url)
+        .then(response => response.json())
+        .then(comments => {
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            if (comments.length > 0) {
+                // Create filter dropdown
+                const filterDiv = document.createElement('div');
+                filterDiv.className = 'review-filter';
+                filterDiv.innerHTML = `
+                    <label for="yearFilter">Filter by Year: </label>
+                    <select id="yearFilter">
+                        <option value="All">All</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                    </select>
+                `;
+                reviewList.appendChild(filterDiv);
+
+                comments.forEach(comment => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item';
+                    const commentDate = new Date(comment.comment_created_at);
+                    reviewItem.setAttribute('data-year', commentDate.getFullYear());
+
+                    const reviewText = document.createElement('div');
+                    reviewText.className = 'review-text';
+
+                    // Parent name and date
+                    const nameDate = document.createElement('p');
+                    nameDate.innerHTML = `<strong>${comment.parent_name || 'Anonymous'}</strong> - ${commentDate.toLocaleDateString()}`;
+                    reviewText.appendChild(nameDate);
+
+                    // Rating stars
+                    const starsContainer = document.createElement('div');
+                    starsContainer.className = 'stars-container';
+                    
+                    const rating = parseFloat(comment.rating) || 0;
+                    const fullStars = Math.floor(rating);
+                    const hasHalfStar = rating % 1 >= 0.5;
+                    
+                    for (let i = 0; i < fullStars; i++) {
+                        starsContainer.innerHTML += '<span class="star yellow"></span>';
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching reviews:', error);
+                    
+                    if (hasHalfStar) {
+                        starsContainer.innerHTML += '<span class="star half"></span>';
+                    }
+                    
+                    for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                        starsContainer.innerHTML += '<span class="star"></span>';
+                    }
+                    
+                    reviewText.appendChild(starsContainer);
+
+                    // Comment text
+                    if (comment.comment) {
+                        const commentText = document.createElement('p');
+                        commentText.textContent = comment.comment;
+                        reviewText.appendChild(commentText);
+                    }
+
+                    reviewItem.appendChild(reviewText);
+                    reviewList.appendChild(reviewItem);
                 });
-        }
+            } else {
+                reviewList.innerHTML = '<p>No reviews found for this subject.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching reviews:', error);
+            document.getElementById('review-list').innerHTML = '<p>Error loading reviews.</p>';
+        });
+}
+        .catch(error => {
+            console.error('Error fetching reviews:', error);
+            document.getElementById('review-list').innerHTML = '<p>Error loading reviews.</p>';
+        });
+}
     
         // 页面加载时显示评论
         window.onload = function() {
@@ -985,22 +1007,19 @@ document.getElementById("yearFilter").addEventListener("change", function() {
 </body>
 </html>
 <?php
-
-// 5. 保存为静态 HTML 文件
-$filename = str_replace(' ', '_', $subject['subject']) . '_class.html';  // 文件名
-$html_content = ob_get_clean();  // 获取输出缓冲区中的内容
+// Save the generated HTML
+$filename = str_replace(' ', '_', $subject['subject_name']) . '_class.html';
+$html_content = ob_get_clean();
 
 if (file_put_contents($filename, $html_content)) {
-    // 页面生成成功
-    echo "Page can run : <a href='$filename'>$filename</a>";
-
-    // 6. 更新数据库标记，记录页面生成路径
-    $update = "UPDATE admin_subject SET page_generated = 1, page_path = ? WHERE subject_ID = ?";
+    // Update database to mark page as generated
+    $update = "UPDATE subject SET page_generated = 1, page_path = ? WHERE subject_id = ?";
     $stmt = $conn->prepare($update);
     $stmt->bind_param("si", $filename, $subject_id);
-    $stmt->execute();  // 执行更新
+    $stmt->execute();
+    
+    echo "Page generated successfully: <a href='$filename'>$filename</a>";
 } else {
-    // 页面生成失败
-    die("Error: Can not write page");
+    die("Error: Could not write page to file");
 }
 ?>
