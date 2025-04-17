@@ -12,8 +12,11 @@ if (!$subject_id) {
     die("Error: Subject ID is required");
 }
 
-// 3. Fetch subject data
-$query = "SELECT * FROM subject WHERE subject_id = ?";
+// 3. Fetch subject data with average rating calculation
+$query = "SELECT s.*, 
+          (SELECT AVG(comment_rating) FROM comments WHERE subject_id = s.subject_id) as avg_rating
+          FROM subject s 
+          WHERE s.subject_id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $subject_id);
 $stmt->execute();
@@ -28,14 +31,14 @@ $subject = array_merge([
     'subject_name' => 'Unknown Subject',
     'teacher_id' => 0,
     'subject_price' => '0.00',
-    'rating' => 0, // Note: This field isn't in your DB structure
+    'avg_rating' => 0,
     'subject_description' => 'No description available',
     'subject_image' => 'img/default-subject.jpg',
     'year' => 'Year 1'
 ], $subject);
 
-// Get teacher name (you'll need to implement this)
-$teacher_name = "Unknown Teacher"; // Default
+// Get teacher name
+$teacher_name = "Unknown Teacher";
 if ($subject['teacher_id']) {
     $teacher_query = "SELECT teacher_name FROM teacher WHERE teacher_id = ?";
     $teacher_stmt = $conn->prepare($teacher_query);
@@ -777,6 +780,11 @@ function showToast(message, isError = false) {
 
         
 document.addEventListener("DOMContentLoaded", function() {
+    // 设置评分星星
+    const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
+    setRating(avgRating);
+    
+    // 获取孩子数据并填充下拉框
     fetch('get_child.php')
         .then(response => response.json())
         .then(data => {
@@ -784,13 +792,26 @@ document.addEventListener("DOMContentLoaded", function() {
             select.innerHTML = '<option value="">Choose</option>';
             
             if (Array.isArray(data) && data.length > 0) {
+                // 获取课程年份（转换为数字）
+                const subjectYear = <?= intval(str_replace('Year ', '', $subject['year'])) ?>;
+                
                 data.forEach(child => {
-                    // Changed from child.name to child.child_name (or whatever your field is)
-                    let option = document.createElement("option");
-                    option.value = child.child_name || child.name; // Try different field names
-                    option.textContent = child.child_name || child.name;
-                    select.appendChild(option);
+                    // 检查孩子年份是否匹配课程年份
+                    if (child.child_year === subjectYear) {
+                        let option = document.createElement("option");
+                        option.value = child.child_name;
+                        option.textContent = child.child_name;
+                        select.appendChild(option);
+                    }
                 });
+                
+                // 如果没有匹配的孩子，显示提示
+                if (select.options.length === 1) {
+                    let option = document.createElement("option");
+                    option.textContent = "No matching children found";
+                    option.disabled = true;
+                    select.appendChild(option);
+                }
             } else {
                 let option = document.createElement("option");
                 option.textContent = "No children found";
@@ -807,26 +828,34 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-        function setRating(rating) {
+function setRating(rating) {
     const stars = document.querySelectorAll('.stars-container .star');
     const fullStars = Math.floor(rating);
     const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
-    const emptyStars = stars.length - fullStars - halfStar;
-
+    
+    // 重置所有星星
+    stars.forEach(star => {
+        star.classList.remove('yellow', 'half');
+    });
+    
+    // 设置满星
     for (let i = 0; i < fullStars; i++) {
         stars[i].classList.add('yellow');
     }
-
+    
+    // 设置半星
     if (halfStar) {
         stars[fullStars].classList.add('half');
     }
-
-    for (let i = fullStars + halfStar; i < stars.length; i++) {
-        stars[i].classList.remove('yellow', 'half');
+    
+    // 更新评分数字显示
+    const ratingNumber = document.querySelector('.rating-number');
+    if (ratingNumber) {
+        ratingNumber.textContent = rating.toFixed(1);
     }
 }
 
-setRating(4.6);
+
 
 document.getElementById("yearFilter").addEventListener("change", function() {
     var selectedYear = this.value;
@@ -915,30 +944,42 @@ document.getElementById("yearFilter").addEventListener("change", function() {
     <script>
         // 获取并显示评论的函数
         function fetchReviews() {
-    // Include subject_id in the request
     const url = `get_comments.php?subject_id=<?= $subject_id ?>`;
     fetch(url)
-        .then(response => response.json())
-        .then(comments => {
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
             const reviewList = document.getElementById('review-list');
+            
+            // 清空现有内容但保留筛选器
+            const existingFilter = reviewList.querySelector('.review-filter');
             reviewList.innerHTML = '';
+            if (existingFilter) {
+                reviewList.appendChild(existingFilter);
+            }
 
-            if (comments.length > 0) {
-                // Create filter dropdown
-                const filterDiv = document.createElement('div');
-                filterDiv.className = 'review-filter';
-                filterDiv.innerHTML = `
-                    <label for="yearFilter">Filter by Year: </label>
-                    <select id="yearFilter">
-                        <option value="All">All</option>
-                        <option value="2025">2025</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                    </select>
-                `;
-                reviewList.appendChild(filterDiv);
+            if (data.data && data.data.length > 0) {
+                // 如果没有筛选器则创建
+                if (!existingFilter) {
+                    const filterDiv = document.createElement('div');
+                    filterDiv.className = 'review-filter';
+                    filterDiv.innerHTML = `
+                        <label for="yearFilter">按年份筛选: </label>
+                        <select id="yearFilter">
+                            <option value="All">全部</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    `;
+                    reviewList.appendChild(filterDiv);
+                }
 
-                comments.forEach(comment => {
+                data.data.forEach(comment => {
                     const reviewItem = document.createElement('div');
                     reviewItem.className = 'review-item';
                     const commentDate = new Date(comment.comment_created_at);
@@ -947,12 +988,12 @@ document.getElementById("yearFilter").addEventListener("change", function() {
                     const reviewText = document.createElement('div');
                     reviewText.className = 'review-text';
 
-                    // Parent name and date
+                    // 家长姓名和日期
                     const nameDate = document.createElement('p');
-                    nameDate.innerHTML = `<strong>${comment.parent_name || 'Anonymous'}</strong> - ${commentDate.toLocaleDateString()}`;
+                    nameDate.innerHTML = `<strong>${comment.parent_name || '匿名用户'}</strong> - ${commentDate.toLocaleDateString()}`;
                     reviewText.appendChild(nameDate);
 
-                    // Rating stars
+                    // 评分星星
                     const starsContainer = document.createElement('div');
                     starsContainer.className = 'stars-container';
                     
@@ -960,21 +1001,17 @@ document.getElementById("yearFilter").addEventListener("change", function() {
                     const fullStars = Math.floor(rating);
                     const hasHalfStar = rating % 1 >= 0.5;
                     
-                    for (let i = 0; i < fullStars; i++) {
-                        starsContainer.innerHTML += '<span class="star yellow"></span>';
-                    }
-                    
-                    if (hasHalfStar) {
-                        starsContainer.innerHTML += '<span class="star half"></span>';
-                    }
-                    
-                    for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-                        starsContainer.innerHTML += '<span class="star"></span>';
-                    }
+                    // 生成星星
+                    starsContainer.innerHTML = `
+                        ${'<span class="star yellow"></span>'.repeat(fullStars)}
+                        ${hasHalfStar ? '<span class="star half"></span>' : ''}
+                        ${'<span class="star"></span>'.repeat(5 - fullStars - (hasHalfStar ? 1 : 0))}
+                        <span class="rating-number">${rating.toFixed(1)}</span>
+                    `;
                     
                     reviewText.appendChild(starsContainer);
 
-                    // Comment text
+                    // 评论内容
                     if (comment.comment) {
                         const commentText = document.createElement('p');
                         commentText.textContent = comment.comment;
@@ -985,24 +1022,17 @@ document.getElementById("yearFilter").addEventListener("change", function() {
                     reviewList.appendChild(reviewItem);
                 });
             } else {
-                reviewList.innerHTML = '<p>No reviews found for this subject.</p>';
+                reviewList.innerHTML = '<p>暂无评论</p>';
             }
         })
         .catch(error => {
-            console.error('Error fetching reviews:', error);
-            document.getElementById('review-list').innerHTML = '<p>Error loading reviews.</p>';
-        });
-}
-        .catch(error => {
-            console.error('Error fetching reviews:', error);
-            document.getElementById('review-list').innerHTML = '<p>Error loading reviews.</p>';
+            console.error('加载评论出错:', error);
+            document.getElementById('review-list').innerHTML = '<p>加载评论时出错</p>';
         });
 }
     
-        // 页面加载时显示评论
-        window.onload = function() {
-            fetchReviews(); // 默认加载所有评论（即英文一年级的评论）
-        };
+
+
     </script>
 </body>
 </html>
