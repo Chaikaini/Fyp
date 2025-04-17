@@ -209,7 +209,7 @@
             if (data.error) {
                 tbody.innerHTML = `<tr><td colspan='8'>${data.error}</td></tr>`;
             } else if (data.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='8'>No data found.</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='8'>No subject found.</td></tr>";
             } else {
                 data.forEach(row => {
                     tbody.innerHTML += `

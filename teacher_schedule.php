@@ -1,8 +1,8 @@
 <?php
 
 header('Content-Type: application/json');
-ini_set('display_errors', 0); // 禁止直接输出错误
-ini_set('log_errors', 1); // 启用错误日志记录
+ini_set('display_errors', 0); 
+ini_set('log_errors', 1); 
 
 $host = 'localhost';
 $user = 'root';
