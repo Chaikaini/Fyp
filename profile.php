@@ -539,7 +539,7 @@
     
         <div class="profile-content" id="history-content">
             <h3>Registration History</h3>
-            <p>Here you can view your payment history for registration.</p>
+            <p>Here you can view your payment history for registration class.</p>
             <table class="table table-striped">
     <div class="card-body">
         <table class="table table-striped">
