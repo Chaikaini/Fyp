@@ -539,14 +539,14 @@
     
         <div class="profile-content" id="history-content">
             <h3>Registration History</h3>
-            <p>Here you can view your payment for registration history.</p>
+            <p>Here you can view your payment history for registration.</p>
             <table class="table table-striped">
     <div class="card-body">
         <table class="table table-striped">
             <thead>
                 <tr>
-                <th>Student Name</th>
-                <th>Course Name</th>
+                <th>Child Name</th>
+                <th>Subject Name</th>
                 <th>Payment Method</th>
                 <th>Total Amount</th>
                 <th>Payment Date</th>
@@ -1132,11 +1132,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 data.data.forEach(payment => {
                     const row = document.createElement("tr");
                     row.innerHTML = `
-                        <td>${payment.student_name}</td>
-                        <td>${payment.course_name}</td>
+                        <td>${payment.child_name}</td>
+                        <td>${payment.subject_name}</td>
                         <td>${payment.payment_method}</td>
-                        <td>RM${parseFloat(payment.total_amount).toFixed(2)}</td>
-                        <td>${payment.order_date}</td>
+                        <td>RM${parseFloat(payment.payment_total_amount).toFixed(2)}</td>
+                        <td>${payment.payment_time}</td>
                     `;
                     tableBody.appendChild(row);
                 });
