@@ -132,6 +132,7 @@
         <form class="d-flex ms-auto">
           <input class="form-control me-2" type="search" placeholder="Search with Subject ID" id="search" />
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+          </form>
       </div>
       <div class="card-body">
         <table class="table table-striped">
@@ -157,9 +158,37 @@
 </body>
 
  
+<!-- Student Modal -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="studentModalLabel">Student List For  <span id="modal-class-id"></span> </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Gender</th>
+              <th>Kid Number</th>
+              <th>Parent Name</th>
+              <th>Phone Number</th>
+            </tr>
+          </thead>
+          <tbody id="student-modal-body">
+            <!-- Data will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
-  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
 <script>
+
     document.getElementById("search-btn").addEventListener("click", function () {
         const subjectId = document.getElementById("search").value.trim();
     
@@ -194,7 +223,8 @@
                             <td>${row.time}</td>
                             <td>${row.capacity}</td>
                             <td>
-                            <i class='pointer-cursor fas fa-eye text-info view-icon' onclick='viewStudents("CLASS_ID")'></i>
+                            <i class='pointer-cursor fas fa-eye text-info view-icon' onclick='viewStudents("${row.class_id}")'></i>
+
                             <button class="btn btn-primary">Take Attendance</button>
                             </td>
                         </tr>
@@ -207,6 +237,52 @@
             document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
         });
     });
+
+
+
+    function viewStudents(classId) {
+
+      document.getElementById("modal-class-id").textContent = classId;
+
+
+      document.getElementById("student-modal-body").innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+
+
+
+    fetch("teacher_studentinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "class_id=" + encodeURIComponent(classId),
+    })
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById("student-modal-body");
+        tbody.innerHTML = "";
+
+        if (data.error) {
+            tbody.innerHTML = `<tr><td colspan='5'>${data.error}</td></tr>`;
+        } else {
+            data.forEach(row => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${row.child_name}</td>
+                        <td>${row.child_gender}</td>
+                        <td>${row.child_kidnumber}</td>
+                        <td>${row.parent_name}</td>
+                        <td>${row.phone_number}</td>
+                    </tr>
+                `;
+            });
+            const modal = new bootstrap.Modal(document.getElementById("studentModal"));
+            modal.show();
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching students:", err);
+        document.getElementById("student-modal-body").innerHTML = "<tr><td colspan='5'>Error loading students.</td></tr>";
+    });
+}
+
     </script>
     
 

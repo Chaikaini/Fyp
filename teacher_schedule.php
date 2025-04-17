@@ -53,7 +53,14 @@ $result = $stmt->get_result();
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+    $data[] = [
+        'subject_id' => $row['subject_id'],
+        'subject_name' => $row['subject_name'],
+        'class_id' => $row['class_id'],
+        'year' => $row['year'],
+        'time' => $row['class_time'],
+        'teacher_id' => $row['teacher_id']
+    ];
 }
 
 echo json_encode($data);
