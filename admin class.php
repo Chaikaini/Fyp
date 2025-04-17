@@ -312,13 +312,11 @@
         <label for="year">Year:</label>
         <input type="text" id="year" name="year" required>
         <label for="part">Part:</label>
-        <input type="text" id="part" name="part" required>
-        <label for="month">Month:</label>
-        <input type="text" id="month" name="month" required>
+        <input type="text" id="part" name="part_id" required>
         <label for="class_time">Time:</label>
         <input type="text" id="class_time" name="class_time" required>
         <label for="teacher">Teacher:</label>
-        <input type="text" id="teacher" name="teacher" required>
+        <input type="text" id="teacher" name="teacher_id" required>
         <label for="class_capacity">Maximum Capacity:</label>
         <input type="number" id="class_capacity" name="class_capacity" required>
         <label for="class_status">Status:</label>
@@ -539,7 +537,7 @@ function updateEnrollment(classId) {
             const enrolledElement = document.getElementById('enrolled-' + classId);
             if (enrolledElement) {
                 const capacity = enrolledElement.getAttribute('data-capacity');
-                enrolledElement.textContent = `${data.enrolled}/${capacity}`;
+                enrolledElement.textContent = `${data.class_enrolled}/${capacity}`;
             }
         }
     })
