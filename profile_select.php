@@ -21,7 +21,7 @@ if (!isset($_SESSION['parent_id'])) {
 
 $parent_id = $_SESSION['parent_id'];
 
-$sql = "SELECT child_name FROM child WHERE parent_id = ?";
+$sql = "SELECT child_id, child_name FROM child WHERE parent_id = ?";
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
@@ -34,7 +34,10 @@ $result = $stmt->get_result();
 
 $children = [];
 while ($row = $result->fetch_assoc()) {
-    $children[] = ["name" => $row["child_name"]];
+    $children[] = [
+        "id" => $row["child_id"],   
+        "name" => $row["child_name"]
+    ];
 }
 
 $stmt->close();

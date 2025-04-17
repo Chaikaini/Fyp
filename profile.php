@@ -404,7 +404,7 @@
         <div class="profile-options">
             <a href="#" id="my-info-tab" class="active">My Information</a>
             <a href="#" id="children-info-tab">Childrens Information</a>
-            <a href="#" id="history-tab">Payment History</a>
+            <a href="#" id="history-tab">Registration History</a>
         </div>
     
         <div class="profile-content active" id="my-info-content">
@@ -521,7 +521,7 @@
     Children Information deleted successfully!
 </div>
     <div class="select-child mt-3">
-        <label for="childSelect" class="form-label">Select to display child learning classes:</label>
+        <label for="childSelect" class="form-label">Select to display child registered classes:</label>
         <select id="childSelect" class="form-select" onchange="displayLearningStatus()">
             <option value="">--Select--</option>
             
@@ -530,7 +530,7 @@
 
     <div id="learningStatus" class="card mt-3">
         <div class="card-body">
-            <h4 class="card-title">Learning Classes</h4>
+            <h4 class="card-title">Registered Classes</h4>
             <p id="statusContent" class="card-text"></p>
         </div>
     </div>
@@ -538,8 +538,8 @@
 
     
         <div class="profile-content" id="history-content">
-            <h3>Payment History</h3>
-            <p>Here you can view your payment for tuition fee history.</p>
+            <h3>Registration History</h3>
+            <p>Here you can view your payment for registration history.</p>
             <table class="table table-striped">
     <div class="card-body">
         <table class="table table-striped">
@@ -750,30 +750,29 @@
 });
 
 
-//  get name from the childreninfo based on email
-document.addEventListener("DOMContentLoaded", function() {
-    
+
+document.addEventListener("DOMContentLoaded", function () {
+    let select = document.getElementById("childSelect");
+    var childId = select.value;
+
     fetch('profile_select.php') 
         .then(response => response.json())
         .then(data => {
-            let select = document.getElementById("childSelect");
             select.innerHTML = '<option value="">--Select--</option>'; 
 
-            
             const children = data.children;
 
             if (Array.isArray(children) && children.length > 0) {
-               
                 children.forEach(child => {
                     let option = document.createElement("option");
-                    option.value = child.name;
+                    option.value = child.id; // use child_id as value
                     option.textContent = child.name;
                     select.appendChild(option);
                 });
             } else {
                 let option = document.createElement("option");
                 option.textContent = "No children found";
-                option.disabled = true; 
+                option.disabled = true;
                 select.appendChild(option);
             }
         })
@@ -781,40 +780,47 @@ document.addEventListener("DOMContentLoaded", function() {
             console.error('Error fetching children:', error);
         });
 
-
-// based on the selected name display learning status
-select.addEventListener("change", displayLearningStatus);
+    // moved inside here so it registers correctly
+    select.addEventListener("change", displayLearningStatus);
 });
 
-function displayLearningStatus() {
-    var select = document.getElementById("childSelect");
-    var selectedChild = select.value.trim();
-    var statusContent = document.getElementById("statusContent");
-    var learningStatus = document.getElementById("learningStatus");
 
-    if (!selectedChild) {
-        console.warn("No child selected");
+
+//display learning status
+function displayLearningStatus() {
+    const select = document.getElementById("childSelect");
+    const childId = select.value;  
+
+    const statusContent = document.getElementById("statusContent");
+    const learningStatus = document.getElementById("learningStatus");
+
+    console.log("Selected child_id:", childId); 
+
+    if (!childId) {
         statusContent.innerHTML = "<p class='text-warning'>Please select a child.</p>";
         learningStatus.style.display = "none";
         return;
     }
 
-    fetch(`http://localhost/TWP-Project/profile_learning.php?student_name=${encodeURIComponent(selectedChild)}`)
-
+    fetch(`http://localhost/TWP-Project/profile_learning.php?child_id=${encodeURIComponent(childId)}`)
         .then(response => response.json())
         .then(data => {
-            console.log("Fetching learning status for:", selectedChild);
             console.log("Received data:", data);
 
             if (!Array.isArray(data) || data.length === 0) {
-                statusContent.innerHTML = "<p> No learning classes.</p>";
+                statusContent.innerHTML = "<p>No learning classes.</p>";
                 learningStatus.style.display = "block";
                 return;
             }
 
-            let table = "<table class='table table-striped'><thead><tr><th>Subject</th><th>Time</th></tr></thead><tbody>";
+            let table = "<table class='table table-striped'><thead><tr><th>Subject</th><th>Part</th><th>Teacher</th><th>Time</th></tr></thead><tbody>";
             data.forEach(course => {
-                table += `<tr><td>${course.course_name}</td><td>${course.time}</td></tr>`;
+                table += `<tr>
+                    <td>${course.subject_name}</td>
+                    <td>${course.part_name} (${course.part_duration})</td>
+                    <td>${course.teacher_name}</td>
+                    <td>${course.class_time}</td>
+                </tr>`;
             });
             table += "</tbody></table>";
 
@@ -823,7 +829,7 @@ function displayLearningStatus() {
         })
         .catch(error => {
             console.error("Error fetching learning status:", error);
-            statusContent.innerHTML = "<p class='text-danger'>Failed to fetch learning status. Please try again later.</p>";
+            statusContent.innerHTML = "<p class='text-danger'>No register class yet.</p>";
             learningStatus.style.display = "block";
         });
 }
@@ -937,7 +943,6 @@ document.getElementById("childForm").addEventListener("submit", function (event)
 
     let formData = new FormData(this);
 
-    // 调试日志
     for (let [key, value] of formData.entries()) {
         console.log(key, value);
     }
