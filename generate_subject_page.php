@@ -581,8 +581,15 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const courses = data.data;
-            const partA = courses.find(c => c.part === 'Part A');
-            const partB = courses.find(c => c.part === 'Part B');
+
+// 🔧 修复点：转换 part_id 为 part 字符串
+courses.forEach(course => {
+    if (course.part_id === 1) course.part = "Part A";
+    else if (course.part_id === 2) course.part = "Part B";
+});
+
+const partA = courses.find(c => c.part === 'Part A');
+const partB = courses.find(c => c.part === 'Part B');
 
             // 处理 Part A
             if (partA) {
@@ -929,7 +936,7 @@ document.getElementById("yearFilter").addEventListener("change", function() {
                             reviewText.classList.add('review-text');
     
                             const name = document.createElement('p');
-                            name.innerHTML = `<strong>${comment.subject} - ${comment.year_created}</strong>`;
+                            name.innerHTML = `<strong>${comment.comment_created_at.split(' ')[0]}</strong>`;
                             reviewText.appendChild(name);
     
                             // 生成评分星星

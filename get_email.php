@@ -10,6 +10,9 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 // 检查连接是否成功
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
+} else {
+    // 连接成功
+    echo "Connection successful!";
 }
 
 // 示例：查询parent表中的parent_id
