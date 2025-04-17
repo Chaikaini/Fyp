@@ -125,12 +125,12 @@
       </div>
     </nav>
 
-    <!-- Schedule -->
-    <h1 class="mb-4">View My Classes</h1>
+    <!-- Attendance -->
+    <h1 class="mb-4">Attendance</h1>
     <div class="card">
       <div class="card-header">
         <form class="d-flex ms-auto">
-          <input class="form-control me-2" type="search" placeholder="Search with Teacher ID" id="search" />
+          <input class="form-control me-2" type="search" placeholder="Search with Subject ID" id="search" />
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
       </div>
       <div class="card-body">
@@ -138,11 +138,13 @@
             <thead>
               <tr>
                 <th>Subject ID</th>
-                <th>Subject Name</th>
                 <th>Class ID</th>
+                <th>Subject Name</th>
                 <th>Year</th>
+                <th>Part</th>
                 <th>Time</th>
-                <th>Teacher ID</th>
+                <th>Class capasity</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="schedule-table-body">
@@ -158,56 +160,55 @@
 
   
 <script>
-  
-  document.getElementById("search-btn").addEventListener("click", function () {
-    const teacherId = document.getElementById("search").value.trim(); // 去除空格
-
-    if (!teacherId) {
-        alert("Please enter a valid Teacher ID.");
-        return;
-    }
-
-    fetch("teacher_schedule.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "teacher_id=" + encodeURIComponent(teacherId),
-    })
-    .then((res) => {
-        if (!res.ok) {
-            throw new Error("Network response was not ok");
+    document.getElementById("search-btn").addEventListener("click", function () {
+        const subjectId = document.getElementById("search").value.trim();
+    
+        if (!subjectId) {
+            alert("Please enter a valid Subject ID.");
+            return;
         }
-        return res.json();
-    })
-    .then((data) => {
-        const tbody = document.getElementById("schedule-table-body");
-        tbody.innerHTML = "";
-
-        if (data.error) {
-            tbody.innerHTML = `<tr><td colspan='6'>${data.error}</td></tr>`;
-        } else if (data.length === 0) {
-            tbody.innerHTML = "<tr><td colspan='6'>No data found.</td></tr>";
-        } else {
-            data.forEach((row) => {
-                tbody.innerHTML += `
-                  <tr>
-                    <td>${row.subject_id}</td>
-                    <td>${row.subject_name}</td>
-                    <td>${row.class_id}</td>
-                    <td>${row.year}</td>
-                    <td>${row.time}</td>
-                    <td>${row.teacher_id}</td>
-                  </tr>
-                `;
-            });
-        }
-    })
-    .catch((err) => {
-        console.error("Error loading schedule:", err);
-        const tbody = document.getElementById("schedule-table-body");
-        tbody.innerHTML = "<tr><td colspan='6'>Error loading schedule.</td></tr>";
+    
+        fetch("teacher_attendance_info.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "subject_id=" + encodeURIComponent(subjectId),
+        })
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("schedule-table-body");
+            tbody.innerHTML = "";
+    
+            if (data.error) {
+                tbody.innerHTML = `<tr><td colspan='8'>${data.error}</td></tr>`;
+            } else if (data.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='8'>No data found.</td></tr>";
+            } else {
+                data.forEach(row => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.subject_id}</td>
+                            <td>${row.class_id}</td>
+                            <td>${row.subject_name}</td>
+                            <td>${row.year}</td>
+                            <td>${row.part}</td>
+                            <td>${row.time}</td>
+                            <td>${row.capacity}</td>
+                            <td>
+                            <i class='pointer-cursor fas fa-eye text-info view-icon' onclick='viewStudents("CLASS_ID")'></i>
+                            <button class="btn btn-primary">Take Attendance</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error loading attendance:", error);
+            document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
+        });
     });
-});
-</script>
+    </script>
+    
 
    
       
