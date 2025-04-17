@@ -1,8 +1,8 @@
 <?php
 
 header('Content-Type: application/json');
-ini_set('display_errors', 0); // 禁止直接输出错误
-ini_set('log_errors', 1); // 启用错误日志记录
+ini_set('display_errors', 0); 
+ini_set('log_errors', 1); 
 
 $host = 'localhost';
 $user = 'root';
@@ -53,7 +53,14 @@ $result = $stmt->get_result();
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+    $data[] = [
+        'subject_id' => $row['subject_id'],
+        'subject_name' => $row['subject_name'],
+        'class_id' => $row['class_id'],
+        'year' => $row['year'],
+        'time' => $row['class_time'],
+        'teacher_id' => $row['teacher_id']
+    ];
 }
 
 echo json_encode($data);

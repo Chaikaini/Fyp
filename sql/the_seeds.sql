@@ -92,7 +92,7 @@ CREATE TABLE `class` (
   `subject_id` varchar(20) NOT NULL,
   `part_id` int(11) NOT NULL,
   `year` text NOT NULL,
-  `class_time` time NOT NULL,
+  `class_time` text NOT NULL,
   `class_capacity` int(11) NOT NULL,
   `class_enrolled` int(11) NOT NULL,
   `class_status` enum('Available','Unavailable','Full') NOT NULL
