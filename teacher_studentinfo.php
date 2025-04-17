@@ -34,7 +34,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("i", $class_id);
+$stmt->bind_param("s", $class_id);
 $stmt->execute();
 $result = $stmt->get_result();
 

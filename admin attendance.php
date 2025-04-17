@@ -249,6 +249,8 @@
 
 
 
+      // view student list for the selected class
+
     fetch("teacher_studentinfo.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -256,27 +258,32 @@
     })
     .then(res => res.json())
     .then(data => {
-        const tbody = document.getElementById("student-modal-body");
-        tbody.innerHTML = "";
+    const tbody = document.getElementById("student-modal-body");
+    tbody.innerHTML = "";
 
-        if (data.error) {
-            tbody.innerHTML = `<tr><td colspan='5'>${data.error}</td></tr>`;
-        } else {
-            data.forEach(row => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${row.child_name}</td>
-                        <td>${row.child_gender}</td>
-                        <td>${row.child_kidnumber}</td>
-                        <td>${row.parent_name}</td>
-                        <td>${row.phone_number}</td>
-                    </tr>
-                `;
-            });
-            const modal = new bootstrap.Modal(document.getElementById("studentModal"));
-            modal.show();
-        }
-    })
+    
+    const modal = new bootstrap.Modal(document.getElementById("studentModal"));
+    modal.show();
+
+    if (data.error) {
+        tbody.innerHTML = `<tr><td colspan='5'>${data.error}</td></tr>`;
+    } else if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan='5' class="text-center">No student enrolled yet</td></tr>`;
+    } else {
+      data.forEach((row, index) => {
+    tbody.innerHTML += `
+        <tr>
+            <td>${index + 1}. ${row.child_name}</td>
+            <td>${row.child_gender}</td>
+            <td>${row.child_kidnumber}</td>
+            <td>${row.parent_name}</td>
+            <td>${row.phone_number}</td>
+        </tr>
+            `;
+        });
+    }
+})
+
     .catch(err => {
         console.error("Error fetching students:", err);
         document.getElementById("student-modal-body").innerHTML = "<tr><td colspan='5'>Error loading students.</td></tr>";
