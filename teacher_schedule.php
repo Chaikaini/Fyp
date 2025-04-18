@@ -34,7 +34,7 @@ $sql = "SELECT
             s.subject_name, 
             s.teacher_id,
             c.class_id,
-            c.year,
+            s.year,
             c.class_time
         FROM subject s
         JOIN class c ON s.subject_id = c.subject_id
