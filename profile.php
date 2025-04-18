@@ -401,7 +401,7 @@
         <div class="profile-options">
             <a href="#" id="my-info-tab" class="active">My Information</a>
             <a href="#" id="children-info-tab">Childrens Information</a>
-            <a href="#" id="history-tab">Registration History</a>
+            <a href="#" id="history-tab">Payment History</a>
         </div>
     
         <div class="profile-content active" id="my-info-content">
@@ -535,7 +535,7 @@
 
     
         <div class="profile-content" id="history-content">
-            <h3>Registration History</h3>
+            <h3>Payment History</h3>
             <p>Here you can view your payment history for registration class.</p>
             <table class="table table-striped">
     <div class="card-body">
