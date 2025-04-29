@@ -236,11 +236,11 @@
     <ul class="nav flex-column">
       <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
       <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Teacher List</span></a></li>
-      <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Registration Class List</span></a></li>
+      <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
-      <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Order List</span></a></li>
+      <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
-      <li class="nav-item"><a href="admin class.php" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
+      <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
       <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
