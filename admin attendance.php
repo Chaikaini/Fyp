@@ -273,8 +273,8 @@
             <tr>
               <th>Student ID</th>
               <th>Student Name</th>
-              <th>Midterm</th>
-              <th>Final</th>
+              <th>Midterm result</th>
+              <th>Final result</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -283,6 +283,7 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+        <button class="btn btn-success" onclick="exportExamResultsToExcel()">Export to Excel</button>
       </div>
     </div>
   </div>
@@ -705,6 +706,10 @@ function openExamResultModal(classId) {
       `;
       });
 
+      // Update modal title to include the class_id
+      const modalTitle = document.getElementById("examResultModalLabel");
+      modalTitle.textContent = `Exam Results for ${classId}`;
+
       // Store classId in a global variable or in the modal
       window.currentClassId = classId;
 
@@ -748,6 +753,45 @@ function saveExamResults() {
   .catch(err => {
     console.error("Save error:", err);
     alert("Failed to save results.");
+  });
+}
+
+
+// Function to export the student results table to Excel
+function exportExamResultsToExcel() {
+  const table = document.querySelector("#studentResultsTable");
+  const classId = window.currentClassId || "Unknown";  // Get the current class ID from the global variable
+
+  // Get all rows in the table
+  const rows = table.querySelectorAll("tbody tr");
+
+  // Loop through the rows and update the input fields with their values
+  rows.forEach(row => {
+    const midtermInput = row.querySelector("input[data-exam='midterm']");
+    const finalInput = row.querySelector("input[data-exam='final']");
+
+    // Replace input fields with their values
+    midtermInput.parentNode.textContent = midtermInput.value;
+    finalInput.parentNode.textContent = finalInput.value;
+  });
+
+ 
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.table_to_sheet(table);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Exam Results");
+
+  // filename with the class ID
+  const filename = `Exam_Results_Class_${classId}.xlsx`;
+  XLSX.writeFile(workbook, filename);
+
+  
+  rows.forEach(row => {
+    const midtermInput = row.querySelector("input[data-exam='midterm']");
+    const finalInput = row.querySelector("input[data-exam='final']");
+
+    
+    midtermInput.parentNode.innerHTML = `<input type="number" value="${midtermInput.value}" data-exam="midterm" data-child-id="${midtermInput.dataset.childId}">`;
+    finalInput.parentNode.innerHTML = `<input type="number" value="${finalInput.value}" data-exam="final" data-child-id="${finalInput.dataset.childId}">`;
   });
 }
 
