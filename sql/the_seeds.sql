@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 29, 2025 at 02:28 PM
+-- Generation Time: Apr 29, 2025 at 06:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -288,8 +288,8 @@ CREATE TABLE `registration_class` (
 
 INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `child_id`, `subject_id`, `teacher_id`, `payment_id`) VALUES
 (1, 1, 'Mly0001', 1, '11351', 12345, 1),
-(3, 1, 'Eng0001', 1, '11245', 12233, 3),
-(4, 2, 'Mat0001', 2, '11132', 12123, 2);
+(2, 1, 'Eng0001', 1, '11245', 12233, 3),
+(3, 2, 'Mat0001', 2, '11132', 12123, 2);
 
 -- --------------------------------------------------------
 
@@ -334,17 +334,22 @@ CREATE TABLE `teacher` (
   `teacher_name` varchar(100) NOT NULL,
   `teacher_gender` enum('Male','Female') NOT NULL,
   `teacher_email` varchar(100) NOT NULL,
-  `teacher_password` varchar(255) NOT NULL
+  `teacher_phone_number` varchar(20) DEFAULT NULL,
+  `teacher_address` text DEFAULT NULL,
+  `teacher_join_date` date DEFAULT NULL,
+  `teacher_status` enum('Active','Inactive') DEFAULT 'Active',
+  `teacher_password` varchar(255) NOT NULL,
+  `teacher_image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `teacher`
 --
 
-INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_password`) VALUES
-(12123, 'Mr. David', 'Male', '12123@gmail.com', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
-(12233, 'Mr. John', 'Male', '12233@gmail.com', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC');
+INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`, `teacher_image`) VALUES
+(12123, 'Mr. David', 'Male', '12123@gmail.com', '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny', NULL),
+(12233, 'Mr. John', 'Male', '12233@gmail.com', '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.', NULL),
+(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC', NULL);
 
 --
 -- Indexes for dumped tables
@@ -479,7 +484,7 @@ ALTER TABLE `cart`
 -- AUTO_INCREMENT for table `child`
 --
 ALTER TABLE `child`
-  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `comments`
@@ -521,7 +526,13 @@ ALTER TABLE `payment`
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `teacher`
+--
+ALTER TABLE `teacher`
+  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12348;
 
 --
 -- Constraints for dumped tables

@@ -273,16 +273,17 @@
             <tr>
               <th>Student ID</th>
               <th>Student Name</th>
-              <th>Midterm</th>
-              <th>Final</th>
+              <th>Midterm result</th>
+              <th>Final result</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+        <button class="btn btn-success" onclick="exportExamResultsToExcel()">Export to Excel</button>
       </div>
     </div>
   </div>
@@ -681,57 +682,119 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
-     // Function to open the modal and load student data
-     function openExamResultModal(classId) {
-  fetch(`teacher_exam_students.php?class_id=${classId}`)
+
+
+// Function to open the modal and load student data
+function openExamResultModal(classId) {
+  fetch(`teacher_exam_students.php`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "class_id=" + encodeURIComponent(classId)
+  })
     .then(response => response.json())
     .then(data => {
       const tbody = document.querySelector("#studentResultsTable tbody");
       tbody.innerHTML = "";
       data.forEach(student => {
         tbody.innerHTML += `
-          <tr>
-            <td>${student.student_id}</td>
-            <td>${student.student_name}</td>
-            <td><input type="number" value="${student.midterm}" data-student-id="${student.student_id}" data-exam="midterm"></td>
-            <td><input type="number" value="${student.final}" data-student-id="${student.student_id}" data-exam="final"></td>
-          </tr>
-        `;
+        <tr>
+          <td>${student.child_id}</td>
+          <td>${student.child_name}</td>
+          <td><input type="number" value="${student.exam_result_midterm ?? ''}" data-exam="midterm" data-child-id="${student.child_id}"></td>
+          <td><input type="number" value="${student.exam_result_final ?? ''}" data-exam="final" data-child-id="${student.child_id}"></td>
+        </tr>
+      `;
       });
 
-      
+      // Update modal title to include the class_id
+      const modalTitle = document.getElementById("examResultModalLabel");
+      modalTitle.textContent = `Exam Results for ${classId}`;
+
+      // Store classId in a global variable or in the modal
+      window.currentClassId = classId;
+
       const modal = new bootstrap.Modal(document.getElementById("examResultModal"));
       modal.show();
     })
     .catch(error => console.error("Error loading student data:", error));
 }
 
-
 // Function to save exam results
 function saveExamResults() {
-  const inputs = document.querySelectorAll("#studentResultsTable input");
-  const results = Array.from(inputs).map(input => ({
-    student_id: input.getAttribute("data-student-id"),
-    exam: input.getAttribute("data-exam"),
-    value: input.value
-  }));
+  const rows = document.querySelectorAll("#studentResultsTable tbody tr");
+  const results = [];
+  const classId = window.currentClassId; // Use the classId from the global variable
+
+  rows.forEach(row => {
+    const childId = row.querySelector("input[data-child-id]").dataset.childId;
+    const midterm = row.querySelector("input[data-exam='midterm']").value;
+    const final = row.querySelector("input[data-exam='final']").value;
+
+    results.push({
+      child_id: childId,
+      exam_result_midterm: parseFloat(midterm),
+      exam_result_final: parseFloat(final)
+    });
+  });
 
   fetch("save_exam_results.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(results)
+    body: JSON.stringify({ class_id: classId, results: results })
   })
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
     if (data.success) {
       alert("Exam results saved successfully!");
-      closeModal();
     } else {
-      alert("Error saving exam results.");
+      alert("Error: " + (data.error || "Failed to save results."));
     }
   })
-  .catch(error => console.error("Error saving exam results:", error));
+  .catch(err => {
+    console.error("Save error:", err);
+    alert("Failed to save results.");
+  });
 }
+
+
+// Function to export the student results table to Excel
+function exportExamResultsToExcel() {
+  const table = document.querySelector("#studentResultsTable");
+  const classId = window.currentClassId || "Unknown";  // Get the current class ID from the global variable
+
+  // Get all rows in the table
+  const rows = table.querySelectorAll("tbody tr");
+
+  // Loop through the rows and update the input fields with their values
+  rows.forEach(row => {
+    const midtermInput = row.querySelector("input[data-exam='midterm']");
+    const finalInput = row.querySelector("input[data-exam='final']");
+
+    // Replace input fields with their values
+    midtermInput.parentNode.textContent = midtermInput.value;
+    finalInput.parentNode.textContent = finalInput.value;
+  });
+
+ 
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.table_to_sheet(table);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Exam Results");
+
+  // filename with the class ID
+  const filename = `Exam_Results_Class_${classId}.xlsx`;
+  XLSX.writeFile(workbook, filename);
+
+  
+  rows.forEach(row => {
+    const midtermInput = row.querySelector("input[data-exam='midterm']");
+    const finalInput = row.querySelector("input[data-exam='final']");
+
+    
+    midtermInput.parentNode.innerHTML = `<input type="number" value="${midtermInput.value}" data-exam="midterm" data-child-id="${midtermInput.dataset.childId}">`;
+    finalInput.parentNode.innerHTML = `<input type="number" value="${finalInput.value}" data-exam="final" data-child-id="${finalInput.dataset.childId}">`;
+  });
+}
+
 
 
 </script>
