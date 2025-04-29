@@ -1,16 +1,5 @@
-
-
-
 <?php
 session_start();
-require_once 'src/Dotenv.php';
-require_once 'src/Validator.php';
-
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
 
 $servername = "localhost";
 $username = "root";
