@@ -48,17 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
         ch.child_year
     FROM child ch
     LEFT JOIN parent p ON ch.parent_id = p.parent_id
-    WHERE ch.child_id LIKE '%$search_term%' OR
-          ch.child_name LIKE '%$search_term%' OR
-          p.parent_name LIKE '%$search_term%' OR
-          ch.child_gender LIKE '%$search_term%' OR
-          ch.child_kidNumber LIKE '%$search_term%' OR
-          ch.child_birthday LIKE '%$search_term%' OR
-          ch.child_school LIKE '%$search_term%' OR
-          ch.child_year LIKE '%$search_term%'
+    WHERE ch.child_name LIKE '%$search_term%'
     ORDER BY ch.child_id ASC
 ";
-
 
     $result = $conn->query($sql);
 
@@ -72,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     echo json_encode($registrations);
     exit;
 }
+
 
 $sql = "
     SELECT 
