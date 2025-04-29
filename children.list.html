@@ -212,7 +212,7 @@ document.querySelector('table').addEventListener('click', function(event) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        row.remove();
+        fetchRegistrations();
       } else {
         console.error('Deletion failed：', data);
       }
@@ -233,29 +233,25 @@ document.getElementById('search-btn').addEventListener('click', function(event) 
     })
     .then(response => response.json())
     .then(data => {
-        const tableBody = document.getElementById('registrationTable');
-        tableBody.innerHTML = '';
-        if (data.length > 0) {
-            data.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.child_id}</td>
-                    <td>${item.child_name}</td>
-                    <td>${item.parent_name}</td>
-                    <td>${item.child_gender}</td>
-                    <td>${item.child_kidNumber}</td>
-                    <td>${item.child_birthday}</td>
-                    <td>${item.child_school}</td>
-                    <td>${item.child_year}</td>
-                    <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
-                `;
-                tableBody.appendChild(row);
-            });
-        } else {
-            tableBody.innerHTML = '<tr><td colspan="8">No matching records found.</td></tr>';
-        }
-    })
-    .catch(error => console.error('Search error:', error));
+  const tableBody = document.getElementById('registrationTable');
+  tableBody.innerHTML = '';
+  data.forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.child_id}</td>
+      <td>${item.child_name}</td>
+      <td>${item.parent_name}</td>
+      <td>${item.child_gender}</td>
+      <td>${item.child_kidNumber}</td>
+      <td>${item.child_birthday}</td>
+      <td>${item.child_school}</td>
+      <td>${item.child_year}</td>
+      <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+    `;
+    tableBody.appendChild(row);
+  });
+})
+.catch(error => console.error('Error searching data:', error));
 });
 
 
