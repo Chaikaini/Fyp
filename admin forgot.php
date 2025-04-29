@@ -8,6 +8,11 @@ $dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+require_once 'vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
