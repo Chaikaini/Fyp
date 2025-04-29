@@ -16,8 +16,9 @@ if ($conn->connect_error) {
     die(json_encode(['success' => false, 'message' => 'Database connection failed'])); 
 }
 
+
 if (isset($_GET['action']) && $_GET['action'] === 'getAdmins') {
-    $result = $conn->query("SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email FROM teacher");
+    $result = $conn->query("SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email, teacher_phone_number AS phone, teacher_address AS address, teacher_join_date AS join_date, teacher_status AS status FROM teacher");
 
     $admins = [];
     while ($row = $result->fetch_assoc()) {
@@ -36,6 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $teacher_name = $postData["name"];
         $teacher_gender = $postData["gender"];
         $teacher_email = $postData["email"];
+        $teacher_phone = $postData["phone"];
+        $teacher_address = $postData["address"];
+        $teacher_join_date = $postData["join_date"];
+        $teacher_status = $postData["status"];
         $teacher_password = $postData["password"];
 
         if (empty($teacher_password)) {
@@ -44,8 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $hashed_password = password_hash($teacher_password, PASSWORD_BCRYPT);
 
-        $stmt = $conn->prepare("INSERT INTO teacher (teacher_name, teacher_gender, teacher_email, teacher_password) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $teacher_name, $teacher_gender, $teacher_email, $hashed_password);
+        $stmt = $conn->prepare("INSERT INTO teacher 
+            (teacher_name, teacher_gender, teacher_email, teacher_phone_number, teacher_address, teacher_join_date, teacher_status, teacher_password) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssss", $teacher_name, $teacher_gender, $teacher_email, $teacher_phone, $teacher_address, $teacher_join_date, $teacher_status, $hashed_password);
 
         if ($stmt->execute()) {
             echo json_encode(["success" => true, "id" => $stmt->insert_id]);

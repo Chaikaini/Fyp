@@ -148,6 +148,10 @@
               <th>Name</th>
               <th>Gender</th>
               <th>Email</th>
+              <th>Phone_number</th>
+              <th>Address</th>
+              <th>Join Date</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -174,19 +178,40 @@
             </div>
             <div class="mb-3">
               <label for="adminGender" class="form-label">Gender</label>
-              <select class="form-control" id="adminGender" required>
+              <select class="form-select" id="adminGender" required>
+                <option value="" disabled selected>Select gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
-            </div>
+            </div>            
             <div class="mb-3">
               <label for="adminEmail" class="form-label">Email</label>
               <input type="email" class="form-control" id="adminEmail" required>
             </div>
             <div class="mb-3">
+              <label for="adminPhone" class="form-label">Phone Number</label>
+              <input type="text" class="form-control" id="adminPhone" required>
+            </div>
+            <div class="mb-3">
+              <label for="adminAddress" class="form-label">Address</label>
+              <textarea class="form-control" id="adminAddress" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="adminJoinDate" class="form-label">Join Date</label>
+              <input type="date" class="form-control" id="adminJoinDate" required>
+            </div>
+            <div class="mb-3">
               <label for="adminPassword" class="form-label">Password</label>
               <input type="password" class="form-control" id="adminPassword" required>
-            </div>            
+            </div> 
+            <div class="mb-3">
+              <label for="adminStatus" class="form-label">Status</label>
+              <select class="form-select" id="adminStatus" required>
+                <option value="" disabled selected>Select status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>                             
 
             <!-- Centered Save Button with Full Width -->
             <div class="d-flex justify-content-center">
@@ -222,6 +247,10 @@
                         <td>${admin.name}</td>
                         <td>${admin.gender}</td>
                         <td>${admin.email}</td>
+                        <td>${admin.phone}</td>
+                        <td>${admin.address}</td>
+                        <td>${admin.join_date}</td>
+                        <td>${admin.status}</td>
                         <td>
                           <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${admin.id}"></i>
                         </td>
@@ -257,12 +286,16 @@
           let formData = new FormData(this);
     
           let data = {
-              action: "addAdmin",
-              name: document.getElementById("adminName").value,
-              gender: document.getElementById("adminGender").value,
-              email: document.getElementById("adminEmail").value,
-              password: document.getElementById("adminPassword").value
-          };
+  action: "addAdmin",
+  name: document.getElementById("adminName").value,
+  gender: document.getElementById("adminGender").value,
+  email: document.getElementById("adminEmail").value,
+  phone: document.getElementById("adminPhone").value,
+  address: document.getElementById("adminAddress").value,
+  join_date: document.getElementById("adminJoinDate").value,
+  status: document.getElementById("adminStatus").value,
+  password: document.getElementById("adminPassword").value
+};
     
           fetch("manage_admin.php", {
               method: "POST",
