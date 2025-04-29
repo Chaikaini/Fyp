@@ -260,28 +260,34 @@
 </div>
 
 <!-- Modal Structure -->
-<div id="examResultModal" class="modal">
-  <div class="modal-content">
-    <h4>Exam Results</h4>
-    <table id="studentResultsTable">
-      <thead>
-        <tr>
-          <th>Student ID</th>
-          <th>Student Name</th>
-          <th>Midterm</th>
-          <th>Final</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Student rows will be added here dynamically -->
-      </tbody>
-    </table>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
-    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+<div class="modal fade" id="examResultModal" tabindex="-1" aria-labelledby="examResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg"> 
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="examResultModalLabel">Exam Results</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="studentResultsTable" class="table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Midterm</th>
+              <th>Final</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
   </div>
 </div>
+
 
 
 
@@ -345,7 +351,8 @@ document.getElementById("search-btn").addEventListener("click", function () {
             <td>${row.capacity}</td>
             <td>
               <button class="btn btn-primary" onclick='viewStudents("${row.class_id}")'>View List</button>
-              <button class="btn btn-primary">Exam Result</button>
+              <button class="btn btn-primary" onclick='openExamResultModal("${row.class_id}")'>Exam Result</button>
+
             </td>
           </tr>
         `;
@@ -675,7 +682,7 @@ function showToast(message, isError = false) {
 }
 
      // Function to open the modal and load student data
-function openExamResultModal(classId) {
+     function openExamResultModal(classId) {
   fetch(`teacher_exam_students.php?class_id=${classId}`)
     .then(response => response.json())
     .then(data => {
@@ -691,10 +698,14 @@ function openExamResultModal(classId) {
           </tr>
         `;
       });
-      document.getElementById("examResultModal").style.display = "block";
+
+      
+      const modal = new bootstrap.Modal(document.getElementById("examResultModal"));
+      modal.show();
     })
     .catch(error => console.error("Error loading student data:", error));
 }
+
 
 // Function to save exam results
 function saveExamResults() {
