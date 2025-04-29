@@ -2,57 +2,48 @@
 header('Content-Type: application/json');
 session_start();
 
-// 检查用户是否登录
+// 1. 检查登录
 if (!isset($_SESSION['parent_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'User not logged in']);
+    echo json_encode(['status' => 'error', 'message' => '请先登录']);
     exit();
 }
 
-include 'db.php';
+// 2. 数据库连接
+$conn = new mysqli("localhost", "root", "", "the seeds");
+if ($conn->connect_error) {
+    echo json_encode(['status' => 'error', 'message' => '数据库连接失败']);
+    exit();
+}
 
-// 获取POST数据
+// 3. 获取输入数据
 $data = json_decode(file_get_contents('php://input'), true);
 
-// 验证必要字段
-$requiredFields = ['subject_id', 'subject_name', 'price', 'child_name', 'teacher'];
-foreach ($requiredFields as $field) {
-    if (empty($data[$field])) {
-        echo json_encode(['status' => 'error', 'message' => "Missing required field: $field"]);
-        exit();
-    }
-}
-
-// 准备SQL语句
-$sql = "INSERT INTO cart_items 
-        (parent_id, subject_id, subject_name, price, child_name, child_year, image, teacher, class_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    echo json_encode(['status' => 'error', 'message' => 'Prepare failed: ' . $conn->error]);
+// 4. 验证数据
+if (empty($data['subject_id']) || empty($data['child_name'])) {
+    echo json_encode(['status' => 'error', 'message' => '缺少必要数据']);
     exit();
 }
 
-$stmt->bind_param("iissssssi", 
+// 5. 插入数据
+$sql = "INSERT INTO cart_items 
+       (parent_id, subject_id, subject_name, price, child_name, teacher) 
+       VALUES (?, ?, ?, ?, ?, ?)";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param(
+    "iissss",
     $_SESSION['parent_id'],
     $data['subject_id'],
-    $data['subject_name'],
-    $data['price'],
+    $data['subject_name'] ?? '',
+    $data['price'] ?? 0,
     $data['child_name'],
-    $data['child_year'] ?? null,
-    $data['image'],
-    $data['teacher'],
-    $data['class_id'] ?? null
+    $data['teacher'] ?? ''
 );
 
 if ($stmt->execute()) {
-    echo json_encode([
-        'status' => 'success',
-        'id' => $stmt->insert_id,
-        'message' => 'Item added to cart'
-    ]);
+    echo json_encode(['status' => 'success', 'id' => $stmt->insert_id]);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Execute failed: ' . $stmt->error]);
+    echo json_encode(['status' => 'error', 'message' => '添加失败: '.$stmt->error]);
 }
 
 $stmt->close();
