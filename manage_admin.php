@@ -80,9 +80,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'deleteAdmin' && isset($_GET['
 if (isset($_GET['action']) && $_GET['action'] === 'searchAdmins' && isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
 
-    $sql = "SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email 
+    $sql = "SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email, teacher_phone_number AS phone, teacher_address AS address, teacher_join_date AS join_date, teacher_status AS status  
             FROM teacher 
-            WHERE teacher_name LIKE '%$query%' OR teacher_gender LIKE '%$query%'";
+            WHERE teacher_name LIKE '%$query%'";
 
     $result = $conn->query($sql);
     $admins = [];
