@@ -1,0 +1,543 @@
+<!DOCTYPE html> 
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Shopping Cart</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="The Seeds Learning Centre, Shopping Cart" name="keywords">
+    <meta content="The Seeds Learning Centre | Shopping Cart" name="description">
+
+    <!-- Favicon -->
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        .icon-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #caccce;
+        }
+    
+        .icon-bar a {
+            margin: 0 15px;
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+    
+        .icon-bar a:hover {
+            color: #73cf67;
+        }
+
+        .breadcrumb-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-direction: column; /* 让内容垂直排列 */
+    align-items: flex-start; /* 左对齐 */
+}
+
+.breadcrumb-container h2 {
+    margin-bottom: 10px; /* 增加与面包屑导航的间距 */
+}
+
+.breadcrumb-container .breadcrumb {
+    display: flex;
+    gap: 5px;
+    font-size: 14px;
+}
+
+
+
+
+        .breadcrumb-container .breadcrumb li {
+            color: #555;
+        }
+
+        .breadcrumb-container .breadcrumb li a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .breadcrumb-container .breadcrumb li a:hover {
+            text-decoration: underline;
+        }
+    
+        .container.my-5 {
+            max-width: 650px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-top: 50px;
+        }
+    
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            position: relative;
+            margin-bottom: 20px;
+            margin-top: 40px;
+        }
+    
+        .cart-item img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+    
+        .cart-item-details {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+    
+        .cart-item-details h5 {
+            margin: 0;
+        }
+    
+        .cart-item-details p {
+            margin: 5px 0;
+        }
+    
+        .cart-item-actions {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            gap: 10px;
+            margin-left: 20px;
+        }
+    
+        .cart-item-actions i {
+            font-size: 20px;
+            color: #007bff;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+    
+        .cart-item-actions i:hover {
+            color: #0056b3;
+        }
+    
+        .total-price {
+            margin-top: 100px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    
+        .btn-checkout {
+            background-color: #73cf67;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+    
+        .btn-add {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    
+        .popup-info {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+    
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+    
+        .popup-close:hover {
+            color: #f00;
+        }
+    
+        .popup-row {
+            margin-bottom: 15px;
+        }
+    
+        .popup-label {
+            font-weight: bold;
+            color: #333;
+        }
+    
+        .popup-value {
+            color: #555;
+        }
+    
+        #childrenSelect {
+            width: 100%;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .notification-badge {
+        position: absolute;
+        top: 5px; 
+        right: 10px; 
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        display: none; 
+        z-index: 1000;
+    }
+    .notification-icon {
+        position: relative; 
+    }
+    </style>
+    
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="#" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            </div>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+   <!-- Icon Bar -->
+        <div class="icon-bar">
+            <a href="notification.php" class="notification-icon">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" style="display: none;"></span>
+            </a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+        <a href="profile.php"><i class="fas fa-user"></i></a>
+        </div>
+
+    <!-- Breadcrumb Section -->
+        <div class="breadcrumb-container">
+        <h1>Shopping Cart</h1>
+        <ul class="breadcrumb">
+        <li><a href="member.html">Home</a></li>
+        <li>&gt;</li>
+        <li>Shopping Cart</li>
+        </ul>
+        </div>
+
+    <!-- Cart Items Section -->
+    <div class="container my-5">
+        <h3>Select class</h3>
+        <div class="cart-items">
+            <!-- Cart Item Template -->
+        </div>
+
+        <!-- Total Price Section -->
+        <div class="total-price">
+            <p>Total: RM <span id="total-price">0</span></p>
+            <button class="btn-checkout" id="checkoutButton">Proceed to CheckOut</button>
+        </div>
+    </div>
+
+        <!-- Shopping Cart Section -->
+        <div class="cart-container">
+            <div class="cart-items">
+                <!-- Cart items will be injected here dynamically -->
+            </div>
+        </div>
+    
+        <!-- Popup for editing -->
+        <div class="popup-info">
+            <div class="popup-close">&times;</div>
+            <div class="popup-row">
+                <span class="popup-label">Month:</span>
+                <span class="popup-value" id="popupMonth"></span>
+            </div>
+            <div class="popup-row">
+                <span class="popup-label">Time:</span>
+                <span class="popup-value" id="popupTime"></span>
+            </div>
+            <div class="popup-row">
+                <span class="popup-label">Capacity:</span>
+                <span class="popup-value" id="popupCapacity"></span>
+            </div>
+            <div class="popup-row">
+                <span class="popup-label">Children:</span>
+                <span class="popup-value">
+                    <select id="childrenSelect">
+                        <option value="1">Yuna</option> 
+                        <option value="2"></option>
+                        <option value="3"></option>
+                    </select>
+                </span>
+            </div>
+        </div>
+
+        <div id="cart-container"></div>
+        <div class="cart-items">
+            <ul id="cartList"></ul>
+        </div> 
+        
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications data:', data); 
+
+            // check if there are any unread notifications
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'block'; //show the red dot
+                }
+            } else {
+                console.log('No unread notifications');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    });
+
+
+        // Sample cart items data
+
+        document.addEventListener('DOMContentLoaded', function() {
+    loadCartData();
+});
+
+function loadCartData() {
+    // 发送 GET 请求获取购物车数据
+    fetch('get_cart.php', {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        let cart = data.cart;
+
+        // 获取购物车容器和总价格元素
+        let cartContainer = document.querySelector('.cart-items');
+        let totalPriceElement = document.getElementById('total-price');
+
+        // 如果购物车为空，显示空购物车提示
+        if (cart.length === 0) {
+            cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+            totalPriceElement.textContent = "0";
+            return;
+        }
+
+        cartContainer.innerHTML = '';  // 清空现有购物车显示
+        let totalPrice = 0;
+
+        // 遍历购物车数据并动态生成 HTML
+        cart.forEach((item, index) => {
+            let itemPrice = parseFloat(item.price);
+            totalPrice += itemPrice;
+
+            // 创建 cart-item 元素
+            let cartItem = document.createElement('div');
+            cartItem.classList.add('cart-item');
+
+            cartItem.innerHTML = `
+                <div class="cart-item-details">
+                    <h5>${item.subject}</h5>
+                    <img src="${item.image}" alt="${item.subject} Image" class="cart-item-image"> <!-- Display image -->
+                    <p>Child: ${item.child}</p>
+                    <p>Price: RM ${itemPrice.toFixed(2)}</p>
+                </div>
+                <div class="cart-item-actions">
+                    <i class="fas fa-trash" onclick="removeFromCart(${item.id})"></i>
+                </div>
+            `;
+
+            cartContainer.appendChild(cartItem);
+        });
+
+        // 更新总价
+        totalPriceElement.textContent = totalPrice.toFixed(2); // 显示总价
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function removeFromCart(itemId) {
+    // 获取当前 localStorage 中的 cart
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // 移除本地存储中对应 ID 的项
+    cart = cart.filter(item => item.id !== itemId); // 注意需要每个 cartItem 有 id
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // 发请求删除数据库里的那条记录
+    fetch('remove_cart.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: itemId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            loadCartData(); // 重新加载页面上的购物车
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+document.getElementById("checkoutButton").addEventListener("click", function() {
+    window.location.href = "check.html";  // 跳转到 check.html 页面
+});
+
+
+</script>
+
+
+        <!-- Footer Start -->
+        <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="text-white mb-3">Quick Link</h4>
+                        <a class="btn btn-link" href="">About Us</a>
+                        <a class="btn btn-link" href="">Contact Us</a>
+                        <a class="btn btn-link" href="">Privacy Policy</a>
+                        <a class="btn btn-link" href="">Terms & Condition</a>
+                        <a class="btn btn-link" href="">FAQs & Help</a>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="text-white mb-3">Contact</h4>
+                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
+                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                        <div class="d-flex pt-2">
+                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="text-white mb-3">Gallery</h4>
+                        <div class="row g-2 pt-2">
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                            </div>
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                            </div>
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                            </div>
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                            </div>
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                            </div>
+                            <div class="col-4">
+                                <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <h4 class="text-white mb-3">Newsletter</h4>
+                        <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
+                        <div class="position-relative mx-auto" style="max-width: 400px;">
+                            <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
+                            <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <div class="copyright">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                            &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.
+    
+                            <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                            Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
+                        </div>
+                        <div class="col-md-6 text-center text-md-end">
+                            <div class="footer-menu">
+                                <a href="">Home</a>
+                                <a href="">Cookies</a>
+                                <a href="">Help</a>
+                                <a href="">FQAs</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer End -->
+    
+    
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+     <!-- JavaScript Libraries -->
+     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+</body>
+
+</html>

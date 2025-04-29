@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Comment</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="The Seeds Learning Centre,contact us" name="keywords">
+    <meta content="The Seeds Learning Centre | Contact us" name="description">
+
+    <!-- Favicon -->
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate.min.css" rel="stylesheet">
+    <link href="lib/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 2rem;
+            color: #ddd;
+            cursor: pointer;
+        }
+
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc107;
+        }
+
+        .comment-box {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .comment-subject {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .notification-badge {
+        position: absolute;
+        top: 5px; 
+        right: 10px; 
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        display: none; 
+        z-index: 1000;
+    }
+    .notification-icon {
+        position: relative; 
+    }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            </div>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- Icon Bar Start -->
+    <div class="icon-bar">
+        <a href="notification.php" class="notification-icon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;"></span>
+        </a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+        <a href="profile.php"><i class="fas fa-user"></i></a>
+    </div>
+    <!-- Icon Bar End -->
+
+    <!-- Header Start -->
+    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h1 class="display-3 text-white animated slideInDown">Comment</h1>
+                    <nav aria-label="breadcrumb">
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+    <!-- Comment Section Start -->
+    <div class="container py-5">
+        <h2 class="text-center mb-4">Leave a Comment</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Comment Form -->
+                <div class="mb-4">
+                    <label for="year" class="form-label">Select Year</label>
+                    <select id="year" class="form-select">
+                        <option value="Year 1">Year 1</option>
+                        <option value="Year 2">Year 2</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="subject" class="form-label">Select Subject</label>
+                    <select id="subject" class="form-select">
+                        <option value="Math">Math</option>
+                        <option value="Malay">Malay</option>
+                        <option value="English">English</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Your Rating</label>
+                    <div class="star-rating">
+                        <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
+                        <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment..."></textarea>
+                </div>
+                <button id="submitComment" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <div class="mt-5">
+            <h3>All Comments</h3>
+            <div id="comments">
+                <!-- Dynamic comments will appear here -->
+            </div>
+        </div>
+    </div>
+    <!-- Comment Section End -->
+
+    <!-- JavaScript -->
+    <script>
+        document.getElementById('submitComment').addEventListener('click', function () {
+            const year = document.getElementById('year').value;
+            const subject = document.getElementById('subject').value;
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('comment').value;
+    
+            let valid = true;
+            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+    
+            if (!rating) {
+                valid = false;
+                const ratingError = document.createElement('div');
+                ratingError.classList.add('error-message');
+                ratingError.style.color = 'red';
+                ratingError.textContent = 'Please select a rating!';
+                document.querySelector('.star-rating').appendChild(ratingError);
+            }
+    
+            if (!comment.trim()) {
+                valid = false;
+                const commentError = document.createElement('div');
+                commentError.classList.add('error-message');
+                commentError.style.color = 'red';
+                commentError.textContent = 'Please enter a comment!';
+                document.getElementById('comment').after(commentError);
+            }
+    
+            if (!valid) {
+                return;
+            }
+    
+            const formData = new FormData();
+            formData.append('class_id', year);
+            formData.append('subject_id', subject);
+            formData.append('comment_rating', rating.value);
+            formData.append('comment_text', comment);
+    
+            fetch('submit_comment.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                loadComments(); 
+                document.getElementById('year').value = 'Year 1';
+                document.getElementById('subject').value = '';
+                document.getElementById('comment').value = '';
+                document.querySelector('input[name="rating"]:checked').checked = false;
+            })
+            .catch(error => console.error('Error submitting comment:', error));
+        });
+    
+        function loadComments() {
+            fetch('get_comments.php')
+                .then(response => response.json())
+                .then(data => {
+                    const commentsContainer = document.getElementById('comments');
+                    commentsContainer.innerHTML = '';
+    
+                    data.forEach(comment => {
+                        const commentElement = document.createElement('div');
+                        commentElement.classList.add('comment-box');
+                        commentElement.innerHTML = `
+                            <p class="comment-subject">${comment.subject_id} (${comment.class_id})</p>
+                            <p>Rating: ${'⭐'.repeat(comment.comment_rating)}</p>
+                            <p>${comment.comment_text}</p>
+                            <small>${comment.comment_created_at}</small>
+                        `;
+                        commentsContainer.appendChild(commentElement);
+                    });
+                })
+                .catch(error => console.error('Error loading comments:', error));
+        }
+    
+        window.onload = loadComments;
+
+        document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications data:', data); 
+
+            //check if there have notification is unread
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'block'; //show red dot
+                }
+            } else {
+                console.log('No unread notifications');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    });
+    </script>    
+    <!-- Footer Start -->
+<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container py-5">
+      <div class="row g-5">
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Quick Link</h4>
+          <a class="btn btn-link" href="about.html">About Us</a><br>
+          <a class="btn btn-link" href="contact.html">Contact Us</a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Contact</h4>
+          <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+          <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+          <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Gallery</h4>
+          <div class="row g-2 pt-2">
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        <div class="row">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer End -->
+</body>
+
+</html>

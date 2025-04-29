@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>About us</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="The Seeds Learning Centre,about us" name="keywords">
+    <meta content="The Seeds Learning Centre | About us" name="description">
+
+    <!-- Favicon -->
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate.min.css" rel="stylesheet">
+    <link href="lib/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+
+        .icon-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #caccce;
+        }
+
+        .icon-bar a {
+            margin: 0 15px;
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .icon-bar a:hover {
+            color: #73cf67;
+        }
+
+        /* 修改 .page-header 样式，设置背景图片并提高亮度 */
+        .page-header {
+            position: relative;
+            background-image: url('img/aboutus.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            filter: brightness(0.7) saturate(1); /* 稍微调暗背景以提升文字可读性 */
+        }
+
+        /* 调整标题和介绍内容的容器 */
+        .page-header-content {
+            max-width: 800px; /* 增加宽度以适应更长内容 */
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            
+        }
+
+
+        /* 调整标题样式，确保在背景图片上可读 */
+        .page-header-content h1.main-title {
+            font-family: 'Heebo', sans-serif;
+            font-size: 4rem;
+            color: #00ff00;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-header-content h1.sub-title {
+            font-family: 'Heebo', sans-serif;
+            font-size: 3rem;
+            color: #FFC107;
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .page-header-content .description {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .page-header-content .slogan {
+            font-family: 'Nunito', sans-serif;
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #fff;
+            line-height: 1.6;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 手写文字样式 */
+        .handwritten-text {
+            max-width: 600px;
+            margin: 20px auto 0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .handwritten-part1 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin: 0;
+        }
+
+        .flip-card {
+            perspective: 1000px;
+            height: 300px;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .flip-card-front i {
+            font-size: 40px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background-color: #e0f7e4;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 400px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h5 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        .feature-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .cta-section h3 {
+            margin-bottom: 20px;
+        }
+
+        .cta-section .btn {
+            font-size: 18px;
+            padding: 10px 30px;
+        }
+
+        .notification-badge {
+        position: absolute;
+        top: 5px; 
+        right: 10px; 
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        display: none; 
+        z-index: 1000;
+    }
+    .notification-icon {
+        position: relative; 
+    }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .page-header {
+                height: 700px;
+            }
+            .page-header-content {
+                max-width: 100%; /* 移动端全宽 */
+                padding: 15px;
+                text-align: center;
+            }
+            .page-header-content h1.main-title {
+                font-size: 3rem;
+            }
+            .page-header-content h1.sub-title {
+                font-size: 2rem;
+            }
+            .page-header-content .description {
+                font-size: 1rem;
+            }
+            .page-header-content .slogan {
+                font-size: 1.1rem;
+            }
+            .handwritten-text {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 10px;
+            }
+            .handwritten-part1 {
+                font-size: 1.2rem;
+            }
+            .feature-card {
+                min-height: 450px;
+            }
+            .feature-card img {
+                height: 180px;
+            }
+        }
+
+
+    /* 小标题样式（带绿色装饰线）*/
+    .section-title {
+    position: relative;      /* 相对定位，用于装饰线的定位 */
+    display: inline-block;   /* 让标题宽度根据内容自动调整 */
+    margin-bottom: 40px;     /* 底部留白 */
+    text-align: center;      /* 文字居中 */
+    color: #000000;         /* 黑色文字 */
+    padding: 0 60px;        
+    }
+
+    /* 用伪元素（:before和:after）添加装饰线 */
+    .section-title:before,
+    .section-title:after {
+    content: "";            /* 必须内容（空字符串）*/
+    position: absolute;     /* 绝对定位（相对于.section-title）*/
+    height: 2px;            /* 线的高度 */
+    border-bottom: 2px solid #28a745; /* 绿色实线（颜色可调）*/
+    top: 50%;               /* 垂直居中 */
+    width: 50px;            /* 线的长度 */
+        }
+
+    /* 左侧线条：从标题左侧向外延伸 */
+    .section-title:before {
+    right: calc(100% - 15px); /* 从标题左侧边缘向左延伸 */
+        }
+
+    /* 右侧线条：从标题右侧向外延伸 */
+    .section-title:after {
+    left: calc(100% - 15px); /* 从标题右侧边缘向右延伸 */
+        }
+
+
+
+
+        </style>
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+              
+            </div>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- Icon Bar Start -->
+    <div class="icon-bar">
+        <a href="notification.php" class="notification-icon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;"></span>
+        </a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+        <a href="profile.php"><i class="fas fa-user"></i></a>
+    </div>
+    <!-- Icon Bar End -->
+
+     
+     <!-- Header Start -->
+     <div class="container-fluid page-header mb-5">
+        <div class="container py-5">
+            <div class="row justify-content-start">
+                <div class="col-lg-10 ">
+                    <div class="page-header-content animated slideInDown">
+                        <h1 class="main-title">About Us</h1>
+                        <h1 class="sub-title">The Seeds Learning Centre</h1>
+                        <p class="description">Established in 2015, The Seeds Learning Centre is a premier tutoring center located in Kulai, Johor Darul Ta’zim. We are dedicated to nurturing young minds and helping students achieve academic excellence through personalized and engaging learning experiences.</p>
+                        <p class="slogan">“Every child is a different kind of flower. All together make this world a beautiful garden.”</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Header End -->
+
+   <!-- About Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
+            <h5 class="section-title">Your Child's Success Starts Here</h5>
+            
+            <!-- Features Section -->
+            <div class="row g-4 mb-5">
+                <!-- Teacher Card -->
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front text-center">
+                                <i class="fas fa-chalkboard-teacher fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                <h5>Qualified Educators</h5>
+                                <p>5+ years experience</p>
+                            </div>
+                            <div class="flip-card-back text-center">
+                                <h5>Experienced Teachers</h5>
+                                <p>All our teachers have minimum 5 years teaching experience, with specialized training in their subjects to ensure quality education.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Classroom Card -->
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front text-center">
+                                <i class="fas fa-school fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                <h5>Optimal Classes</h5>
+                                <p>30 students per class</p>
+                            </div>
+                            <div class="flip-card-back text-center">
+                                <h5>Effective Class Size</h5>
+                                <p>Our classes have 30 students, maintaining the perfect balance between group learning and individual attention.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Curriculum Card -->
+                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front text-center">
+                                <i class="fas fa-book-open fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                <h5>Core Subjects</h5>
+                                <p>Focused learning</p>
+                            </div>
+                            <div class="flip-card-back text-center">
+                                <h5>Essential Curriculum</h5>
+                                <p>We specialize in core subjects: Mathematics, Science, English and Bahasa Malaysia, covering key concepts thoroughly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                      <!-- Activities Section -->
+                      <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
+                        <h5 class="section-title">Fun Beyond Learning</h5>
+                        <p class="mb-4">At The Seeds Learning Centre, we believe in holistic development. Apart from academic tutoring, we organize fun and educational activities for our students (subject to availability and conditions).</p>
+                        <div class="row g-4">
+                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                                <div class="feature-card">
+                                    <img src="img/orchard.jpg" alt="Visiting an Orchard" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                                    <h5>Visiting an Orchard</h5>
+                                    <p>We take students to a local orchard to explore nature, learn about fruits, and understand the importance of agriculture (available during harvest season).</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                                <div class="feature-card">
+                                    <img src="img/christmas.jpg" alt="Playing and Eating with Kids" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                                    <h5>Celebrating Christmas</h5>
+                                    <p>We organize fun playtime and shared meals with students, fostering friendship and joy in a relaxed environment.</p>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                                <div class="feature-card">
+                                    <img src="img/newyear.jpg" alt="Playing at the Park" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                                    <h5>Playing at the Park</h5>
+                                    <p>We take students to a local park for fun outdoor play, encouraging physical activity and social bonding (organized during New Year festivities).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+            <!-- Call to Action Section -->
+            <div class="cta-section wow fadeInUp" data-wow-delay="0.1s">
+                <h3>Join The Seeds Learning Centre Today!</h3>
+                <p>Contact us to learn more about our programs or to schedule a free consultation.</p>
+                <a href="contact.html" class="btn btn-light">Get in Touch</a>
+            </div>
+        </div>
+    </div>
+    <!-- About End -->
+    <script>
+   document.addEventListener('DOMContentLoaded', function() {
+    fetch('get_notification.php')
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Notifications data:', data); 
+
+        //check if there have notification is unread
+        if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+            console.log('Unread notifications found!');
+            const badge = document.querySelector('.notification-badge');
+            if (badge) {
+                badge.style.display = 'block'; //show red dot
+            }
+        } else {
+            console.log('No unread notifications');
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+});
+    </script>
+
+    <!-- Footer Start -->
+<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container py-5">
+      <div class="row g-5">
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Quick Link</h4>
+          <a class="btn btn-link" href="about.html">About Us</a><br>
+          <a class="btn btn-link" href="contact.html">Contact Us</a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Contact</h4>
+          <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+          <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+          <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Gallery</h4>
+          <div class="row g-2 pt-2">
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        <div class="row">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow.min.js"></script>
+    <script src="lib/easing.min.js"></script>
+    <script src="lib/waypoints.min.js"></script>
+    <script src="lib/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

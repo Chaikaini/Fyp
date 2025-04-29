@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher</title>
+
+    <!-- Favicon -->
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+    #sidebar {
+      width: 250px;
+      background-color: #343a40;
+      color: white;
+      transition: width 0.3s;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 15px 15px; /* Adjusted padding for better spacing */
+      display: block;
+    }
+    #sidebar a:hover {
+      background-color: #495057;
+    }
+    #sidebar.collapsed {
+      width: 80px;
+    }
+    #sidebar.collapsed .sidebar-header h4,
+    #sidebar.collapsed a span {
+      display: none;
+    }
+    #main-content {
+      flex-grow: 1;
+      padding: 20px;
+      transition: margin-left 0.3s;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #495057;
+    }
+    .sidebar-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .sidebar-header h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .table-container .fa-edit, .table-container .fa-trash-alt {
+      color: #007BFF;
+    }
+
+    .pointer-cursor{
+      cursor:pointer;
+    }
+
+   
+    .card-header form {
+        display: flex;
+        justify-content: flex-start;; 
+        width: 100%;
+    }
+    .card-header .form-control {
+        width: 250px; 
+        margin-right: 10px; 
+    }
+    .card-header button {
+        padding: 8px 15px; 
+    }
+
+    .toast-message {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1055; 
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+    display: none;
+}
+
+.toast-message.error {
+    background-color: #dc3545; 
+}
+</style>
+
+<body>
+  <!-- Sidebar -->
+  <nav id="sidebar" class="d-flex flex-column p-3">
+    <div class="sidebar-header">
+      <h3>Teacher Panel</h3>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-user"></i> <span>Teacher</span></a></li> 
+      <li class="nav-item"><a href="admin attendance.php" class="nav-link"><i class="fas fa-user"></i> <span>Attendance</span></a></li>
+      <li class="nav-item"><a href="teacher_notification.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div id="main-content">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+      <div class="container-fluid">
+        <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-bell"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
+              <li><a class="dropdown-item" href="#">No new notifications</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="admin teacher_profile.html">Profile</a></li>
+              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+  <!-- Attendance -->
+<h1 class="mb-4">Attendance</h1>
+<div class="card">
+  <div class="card-header">
+    <form class="d-flex ms-auto">
+      <select id="search-category" class="form-select me-2" style="max-width: 180px;">
+        <option value="subject_id">Subject ID</option>
+        <option value="subject_name">Subject Name</option>
+      </select>
+      <input class="form-control me-2" type="search" placeholder="Search with Subject ID" id="search" />
+      <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+    </form>
+  </div>
+  <div class="card-body">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Subject ID</th>
+          <th>Subject Name</th>
+          <th>Class ID</th>
+          <th>Year</th>
+          <th>Part</th>
+          <th>Time</th>
+          <th>Class Capacity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="schedule-table-body">
+            <tr><td colspan="7" class="text-center text-muted">Please enter a Subject ID or Subject Name to display classes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Student Modal -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="studentModalLabel">Student List For <span id="modal-class-id"></span></h5>
+        
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Gender</th>
+              <th>Kid Number</th>
+              <th>Parent Name</th>
+              <th>Relationship</th>
+              <th>Phone Number</th>
+
+            </tr>
+          </thead>
+          <tbody id="student-modal-body">
+          </tbody>
+        </table>
+        <div class="modal-footer d-flex justify-content-end">
+        <button class="btn btn-success" onclick="exportStudentTableToExcel()">Export to Excel</button>
+       </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Parent Info Modal -->
+<div class="modal fade" id="parentInfoModal" tabindex="-1" aria-labelledby="parentInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="parentInfoModalLabel">Parent Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="parent-info-body">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!--- toast notification-->
+    <div id="toastContainer" style="position: relative;"></div>
+
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="commentModalLabel">Add Comment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="commentText">Comment</label>
+          <textarea id="commentText" class="form-control" rows="4"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="submitComment()">Save Comment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Structure -->
+<div id="examResultModal" class="modal">
+  <div class="modal-content">
+    <h4>Exam Results</h4>
+    <table id="studentResultsTable">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Student Name</th>
+          <th>Midterm</th>
+          <th>Final</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Student rows will be added here dynamically -->
+      </tbody>
+    </table>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+
+window.addEventListener("DOMContentLoaded", function () {
+  const tbody = document.getElementById("schedule-table-body");
+  tbody.innerHTML = "<tr><td colspan='7' class='text-center text-muted'>Please enter a Subject ID or Subject Name to display classes.</td></tr>";
+});
+
+document.getElementById("search-category").addEventListener("change", function () {
+  const category = this.value;
+  const searchInput = document.getElementById("search");
+
+  if (category === "subject_id") {
+    searchInput.placeholder = "Search with Subject ID";
+  } else if (category === "subject_name") {
+    searchInput.placeholder = "Search with Subject Name";
+  }
+});
+
+
+document.getElementById("search-btn").addEventListener("click", function () {
+  const category = document.getElementById("search-category").value;
+  const keyword = document.getElementById("search").value.trim();
+
+  if (!keyword) {
+    alert("Please enter a valid search value.");
+    return;
+  }
+
+  const bodyData = new URLSearchParams();
+  bodyData.append(category, keyword);
+
+  fetch("teacher_attendance_info.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: bodyData.toString(),
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById("schedule-table-body");
+    tbody.innerHTML = "";
+
+    if (data.error) {
+      tbody.innerHTML = `<tr><td colspan='8'>${data.error}</td></tr>`;
+    } else if (data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='8'>No subject found.</td></tr>";
+    } else {
+      data.forEach(row => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${row.subject_id}</td>
+            <td>${row.subject_name}</td>
+            <td>${row.class_id}</td>
+            <td>${row.year}</td>
+            <td>${row.part}</td>
+            <td>${row.time}</td>
+            <td>${row.capacity}</td>
+            <td>
+              <button class="btn btn-primary" onclick='viewStudents("${row.class_id}")'>View List</button>
+              <button class="btn btn-primary">Exam Result</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+  })
+  .catch(error => {
+    console.error("Error loading attendance:", error);
+    document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
+  });
+});
+
+
+
+
+
+
+
+function viewStudents(classId) {
+    const viewButton = document.querySelector(`button[onclick='viewStudents("${classId}")']`);
+    viewButton.disabled = true;
+
+    fetch("teacher_studentinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "class_id=" + encodeURIComponent(classId),
+    })
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById("student-modal-body");
+        tbody.innerHTML = "";
+
+        const modal = new bootstrap.Modal(document.getElementById("studentModal"));
+        modal.show();
+
+        document.getElementById("studentModal").setAttribute("data-class-id", classId);
+        document.getElementById("studentModalLabel").innerHTML = `Student List For ${classId} (${data.subject_name || "Unknown Subject"})`;
+
+        if (data.error) {
+            tbody.innerHTML = `<tr><td colspan='7'>${data.error}</td></tr>`;
+        } else if (data.students.length === 0) {
+            tbody.innerHTML = `<tr><td colspan='7' class="text-center">No student enrolled yet</td></tr>`;
+        } else {
+            data.students.forEach((row, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}. ${row.child_name}</td>
+                        <td>${row.child_gender}</td>
+                        <td>${row.child_kidnumber}</td>
+                        <td><a href="#" onclick="viewParentInfo('${row.parent_id}', '${row.child_name}')">${row.parent_name}</a></td>
+                        <td>${row.parent_relationship}</td>
+                        <td>${row.phone_number}</td>
+                        <td>
+                            <button class="btn btn-info btn-sm comment-btn" data-child-id="${row.child_id}" data-class-id="${classId}" data-child-name="${row.child_name}">
+                                <i class="fas fa-comment"></i> 
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+        
+            const commentButtons = document.querySelectorAll(".comment-btn");
+            commentButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const childId = this.getAttribute("data-child-id");
+                    const classId = this.getAttribute("data-class-id");
+                    const childName = this.getAttribute("data-child-name");
+                    openCommentModal(childId, classId, childName);
+                });
+            });
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching students:", err);
+        document.getElementById("student-modal-body").innerHTML = "<tr><td colspan='7'>Error loading students.</td></tr>";
+    })
+    .finally(() => {
+        viewButton.disabled = false;
+    });
+}
+
+// CommentModal
+function openCommentModal(childId, classId, childName) {
+    console.log("Opening comment modal for:", childId, classId, childName);
+
+    currentClassId = classId;
+
+    fetchChildId(classId, childName, function(fetchedChildId) {
+        currentChildId = fetchedChildId;
+
+        if (!currentChildId) {
+            showToast("Failed to load child ID. Please try again.");
+            return;
+        }
+
+        document.getElementById("commentModalLabel").innerText = `Add Comment for ${childName}`;
+
+        //after get childId, go to fetch the existing comment
+        loadExistingComment(currentChildId, currentClassId);
+
+        // then open modal
+        const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
+        commentModal.show();
+    });
+}
+
+function fetchChildId(classId, childName, callback) {
+    if (!classId || !childName) {
+        console.error("classId or childName is missing.");
+        callback(null);
+        return;
+    }
+
+    const bodyData = new URLSearchParams();
+    bodyData.append("class_id", classId);
+    bodyData.append("child_name", childName);
+
+    fetch("teacher_getchild_id.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: bodyData.toString(),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error(data.error);
+            callback(null);
+        } else {
+            console.log("Child ID:", data.child_id);
+            callback(data.child_id);
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching child ID:", error);
+        callback(null);
+    });
+}
+
+// use fetch the existing comment
+function loadExistingComment(childId, classId) {
+    const bodyData = new URLSearchParams();
+    bodyData.append("child_id", childId);
+    bodyData.append("class_id", classId);
+
+    fetch("teacher_save_comment.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: bodyData.toString()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.comment_text !== undefined) {
+            document.getElementById("commentText").value = data.comment_text;
+        } else {
+            document.getElementById("commentText").value = "";
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching existing comment:", error);
+        document.getElementById("commentText").value = "";
+    });
+}
+
+function submitComment() {
+    const commentText = document.getElementById("commentText").value.trim();
+
+    if (!commentText) {
+        showToast("Please enter a comment.", true); 
+        return;
+    }
+
+    if (!currentChildId) {
+        showToast("Child ID not loaded yet. Please try again.", true); 
+        return;
+    }
+
+    const bodyData = new URLSearchParams();
+    bodyData.append("child_id", currentChildId);
+    bodyData.append("class_id", currentClassId);
+    bodyData.append("comment_text", commentText);
+
+    fetch("teacher_save_comment.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: bodyData.toString()
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            showToast(result.success, false); 
+            const commentModal = bootstrap.Modal.getInstance(document.getElementById("commentModal"));
+            
+        } else if (result.error) {
+            showToast(result.error, true); 
+        }
+    })
+    .catch(error => {
+        console.error("Error saving comment:", error);
+        showToast("Error saving comment.", true); 
+ } )
+}
+
+
+
+
+
+
+
+function viewParentInfo(parentId,childName) {
+  fetch("teacher_parentinfo.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "parent_id=" + encodeURIComponent(parentId), 
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert(data.error);
+    } else {
+      let content = `
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <th>Name</th>
+        <td>${data.parent_name}</td>
+      </tr>
+      <tr>
+        <th>Gender</th>
+        <td>${data.parent_gender}</td>
+      </tr>
+       <tr>
+        <th>Relationship</th>
+        <td>${data.parent_relationship}</td>
+      </tr>
+      <tr>
+        <th>IC Number</th>
+        <td>${data.ic_number}</td>
+      </tr>
+      <tr>
+        <th>Email</th>
+        <td>${data.parent_email}</td>
+      </tr>
+      <tr>
+        <th>Phone 1</th>
+        <td>${data.phone_number}</td>
+      </tr>
+      <tr>
+        <th>Phone 2</th>
+        <td>${data.phone_number2}</td>
+      </tr>
+      <tr>
+        <th>Address</th>
+        <td>${data.parent_address}</td>
+      </tr>
+      <tr>
+        <th>Parent 2</th>
+        <td>${data.parent_name2} (${data.parent_relationship2}) - ${data.parent_num2}</td>
+      </tr>
+    </tbody>
+  </table>
+`;
+
+      document.getElementById("parentInfoModalLabel").innerText = `Parent Information for ${childName}`;
+
+      document.getElementById("parent-info-body").innerHTML = content;
+      const modal = new bootstrap.Modal(document.getElementById("parentInfoModal"));
+      modal.show();
+    }
+  })
+  .catch(err => {
+    console.error("Error fetching parent info:", err);
+    alert("Error loading parent information.");
+  });
+}
+
+function exportStudentTableToExcel() {
+  const table = document.querySelector("#studentModal .table");
+  const classId = document.getElementById("studentModal").getAttribute("data-class-id") || "Unknown";
+
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.table_to_sheet(table);
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+
+  const filename = `Student_List_${classId}.xlsx`;
+  XLSX.writeFile(workbook, filename);
+}
+
+
+
+// Toast Notification Function
+function showToast(message, isError = false) {
+    let toastContainer = document.getElementById("toastContainer");
+
+    if (!toastContainer) {
+        console.error("Toast container not found!");
+        return;
+    }
+
+    let toast = document.getElementById("successToast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "successToast";
+        toast.className = "toast-message"; 
+        toastContainer.appendChild(toast);
+    }
+
+   
+    toast.innerText = message;
+
+    
+    if (isError) {
+        toast.classList.add("error");  
+    } else {
+        toast.classList.remove("error");  
+    }
+
+    
+    toast.style.display = "block";
+    toast.style.opacity = "1";
+
+   
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => { toast.style.display = "none"; }, 500);
+    }, 3000);
+}
+
+     // Function to open the modal and load student data
+function openExamResultModal(classId) {
+  fetch(`teacher_exam_students.php?class_id=${classId}`)
+    .then(response => response.json())
+    .then(data => {
+      const tbody = document.querySelector("#studentResultsTable tbody");
+      tbody.innerHTML = "";
+      data.forEach(student => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${student.student_id}</td>
+            <td>${student.student_name}</td>
+            <td><input type="number" value="${student.midterm}" data-student-id="${student.student_id}" data-exam="midterm"></td>
+            <td><input type="number" value="${student.final}" data-student-id="${student.student_id}" data-exam="final"></td>
+          </tr>
+        `;
+      });
+      document.getElementById("examResultModal").style.display = "block";
+    })
+    .catch(error => console.error("Error loading student data:", error));
+}
+
+// Function to save exam results
+function saveExamResults() {
+  const inputs = document.querySelectorAll("#studentResultsTable input");
+  const results = Array.from(inputs).map(input => ({
+    student_id: input.getAttribute("data-student-id"),
+    exam: input.getAttribute("data-exam"),
+    value: input.value
+  }));
+
+  fetch("save_exam_results.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(results)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert("Exam results saved successfully!");
+      closeModal();
+    } else {
+      alert("Error saving exam results.");
+    }
+  })
+  .catch(error => console.error("Error saving exam results:", error));
+}
+
+
+</script>
+
+    
+
+   
+      
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Check Out</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="The Seeds Learning Centre,check list" name="keywords">
+    <meta content="The Seeds Learning Centre | Check list" name="description">
+
+    <!-- Favicon -->
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate.min.css" rel="stylesheet">
+    <link href="lib/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+
+    .icon-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #caccce;
+    }
+
+    .icon-bar a {
+    margin: 0 15px;
+    color: #000000;
+    font-size: 24px;
+    transition: color 0.3s ease;
+    }
+
+   .icon-bar a:hover {
+    color: #73cf67;
+    }
+
+    body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    }
+
+    .breadcrumb-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ccc;
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start; 
+}
+
+.breadcrumb-container h2 {
+    margin-bottom: 10px; 
+}
+
+.breadcrumb-container .breadcrumb {
+    display: flex;
+    gap: 5px;
+    font-size: 14px;
+}
+
+
+
+
+        .breadcrumb-container .breadcrumb li {
+            color: #555;
+        }
+
+        .breadcrumb-container .breadcrumb li a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .breadcrumb-container .breadcrumb li a:hover {
+            text-decoration: underline;
+        }
+
+   .containerp {
+    max-width: 650px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    margin-top: 50px;
+    }
+
+   .course-info, .payment-info {
+    margin-bottom: 20px;
+    }
+
+    .course-info h2, .payment-info h2 {
+    margin-bottom: 10px;
+    }
+
+   .course-item {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    }
+
+   .course-item img {
+    width: 180px;
+    height: 200px;
+    margin-right: 20px;
+    transition: none !important; 
+    transform: none !important; 
+    }
+
+    .course-item img:hover {
+    transform: none !important; 
+    transition: none !important;
+    }
+
+   .total-amount {
+    font-weight: 0;
+    margin-top: 10px;
+    text-align: left;
+    }
+
+   .amount-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    }
+
+   .payment-method {
+    margin-top: 20px;
+    }
+
+   .payment-method label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; 
+    font-size: 16px;
+    cursor: pointer;
+    }
+
+   .payment-method input[type="radio"] {
+    margin-right: 10px; 
+    vertical-align: middle; 
+    }
+
+   .payment-method img {
+    margin-right: 10px;
+    width: 24px;
+    height: 24px;
+   }
+
+   .payment-option input[type="radio"] {
+    margin-left: auto; 
+    cursor: pointer;
+   }
+
+   #phone-number-field {
+    display: none;
+    margin-top: 20px;
+   }
+
+    .phone-input {
+    display: flex;
+    align-items: center;
+    }
+
+   .payment {
+    display: flex;
+    justify-content: flex-end; 
+    margin-top: 50px;
+    }
+
+   .payment button {
+    background-color: #15ca39;
+    color: white;
+    padding: 10px 50px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    }   
+
+   .payment button:hover {
+    background-color: #14a631;
+    }
+
+    .error-message {
+    color: red;
+    display: none;
+    font-size: 20px;
+    }
+
+    #phone-number-field {
+    display: block;
+}
+
+.phone-input input {
+    border: none;
+    border-bottom: 1px solid lightgray;
+    background-color: #f0f0f0;
+    padding: 5px;
+    outline: none;
+}
+
+.phone-input input:focus {
+    border-bottom: 2px solid  #15ca39;
+    background-color: white;
+}
+
+#bank-selection {
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        display: none;
+    }
+
+   
+    .bank-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .bank-option {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 4px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        background-color: #fff;
+    }
+
+    .bank-option img {
+        width: 20px;
+        height: 20px;
+        margin-right: 15px;
+    }
+
+    .bank-option span {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .bank-option:hover {
+        transform: scale(1.03);
+        border-color: #007bff;
+        background-color: #eef5ff;
+    }
+
+    .bank-option.selected {
+        border-color: #007bff;
+        background-color: #eef5ff;
+    }
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 350px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.payment_picture {
+    width: 80px;
+    height: 80px;
+    margin: 10px auto; 
+    display: block;
+}
+
+
+#paymentTitle {
+    color: black;
+    font-size: 22px;
+    margin: 10px 0;
+}
+
+
+#paymentMessage {
+    font-size: 16px;
+    color: #333;
+}
+
+
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+.notification-badge {
+    position: absolute;
+    top: 5px; 
+    right: 10px; 
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: none; 
+    z-index: 1000;
+}
+.notification-icon {
+    position: relative; 
+}
+
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Spinner Start -->
+    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <!-- Spinner End -->
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            </div>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    <!-- Icon Bar Start -->
+    <div class="icon-bar">
+        <a href="notification.php" class="notification-icon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;"></span>
+        </a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+        <a href="profile.php"><i class="fas fa-user"></i></a>
+    </div>
+    <!-- Icon Bar End -->
+
+     <!-- Breadcrumb Section -->
+     <div class="breadcrumb-container">
+        <h1>Checkout</h1>
+        <ul class="breadcrumb">
+        <li><a href="Home.html">Home</a></li>
+        <li>&gt;</li>
+        <li><a href="cart.html">Shopping Cart</a></li>
+        <li>&gt;</li>
+        <li>Checkout</li>
+        </ul>
+        </div>
+
+   <!-- Payment Start -->
+   <div class="containerp">
+    <h2>Checkout</h2>
+    <div id="cart-container"></div>
+  
+    <div class="total-amount">
+        <h4>Payment Details</h4>
+        <div class="amount-detail">
+            <p>Subject Fee:</p>
+            <p id="subject-fee">RM0</p>
+        </div>
+        <div class="amount-detail">
+            <p>Enrollment Fee:</p>
+            <p>RM100</p>
+        </div>
+        <div class="amount-detail">
+           <h5><p><b>Total Amount:</b></p><h5>
+            <p id="total-amount"><b>RM0</b></p>
+        </div>
+    </div>
+
+    <hr>
+    
+        <div class="payment-info">
+            <h4>Choose Your Payment Method</h4>
+            <div class="payment-method">
+
+                <label for="online-banking" class="payment-option">
+                    <img src="img/online_banking.png" alt="Online Banking" class="payment-icon"> Online Banking
+                    <input type="radio" id="online-banking" name="payment" value="online-banking">
+                </label>
+
+                <div id="bank-selection">
+                    <h8>Select Your Bank:</h8>
+                    <div class="bank-grid">
+                        <div class="bank-option" data-bank="maybank">
+                            <img src="img/maybank.png" alt="Maybank">
+                            <span>Maybank</span>
+                        </div>
+                        <div class="bank-option" data-bank="cimb">
+                            <img src="img/cimb.png" alt="CIMB Bank">
+                            <span>CIMB Bank</span>
+                        </div>
+                        <div class="bank-option" data-bank="public-bank">
+                            <img src="img/public_bank.png" alt="Public Bank">
+                            <span>Public Bank</span>
+                        </div>
+                        <div class="bank-option" data-bank="rhb">
+                            <img src="img/rhb.png" alt="RHB Bank">
+                            <span>RHB Bank</span>
+                        </div>
+                        <div class="bank-option" data-bank="hongleong">
+                            <img src="img/hongleong.png" alt="Hong Leong Bank">
+                            <span>Hong Leong Bank</span>
+                        </div>
+                    </div>
+                    
+                    <span id="bank-error" class="error-message">*</span>
+                </div>
+
+               <br><label for="jompay" class="payment-option">
+                    <img src="img/jompay.png" alt="JomPAY" class="payment-icon"> JomPAY
+                    <input type="radio" id="jompay" name="payment" value="jompay">
+                </label><br>
+                <label for="tng" class="payment-option">
+                    <img src="img/tng.png" alt="Touch 'n Go" class="payment-icon"> Touch 'n Go eWallet
+                    <input type="radio" id="tng" name="payment" value="tng">
+                </label>
+            </div>
+        </div>
+        <div id="phone-number-field" style="display: none;">
+            <label for="phone-number">Enter your phone number:</label>
+            <div class="phone-input">
+                <span>+60</span>
+                <input type="tel" id="phone-number" name="phone-number" pattern="[0-9]{9}" placeholder="10-0000000">
+                <span id="phone-error" class="error-message">*</span>
+            </div>
+        </div>
+        <div class="payment">
+            <button type="submit" onclick="validateForm()">Payment</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Payment Confirmation Modal -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <img id="payment_picture" src="" alt="Payment Status" class="payment_picture">
+        <h2 id="paymentTitle">Payment Successful</h2>
+        <p id="paymentMessage">You can check your payment history in the profile page.</p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications data:', data); 
+
+            // Check if there are any unread notifications
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'block'; // Show the red dot
+                }
+            } else {
+                console.log('No unread notifications');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    });
+    var selectedBank = ""; 
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        var tngRadio = document.getElementById("tng");
+        var jompayRadio = document.getElementById("jompay");
+        var onlineBankingRadio = document.getElementById("online-banking");
+        var phoneNumberField = document.getElementById("phone-number-field");
+        var bankSelection = document.getElementById("bank-selection");
+    
+        tngRadio.addEventListener("change", function () {
+            phoneNumberField.style.display = tngRadio.checked ? "block" : "none";
+            bankSelection.style.display = "none";
+        });
+    
+        jompayRadio.addEventListener("change", function () {
+            phoneNumberField.style.display = "none";
+            bankSelection.style.display = "none";
+        });
+    
+        onlineBankingRadio.addEventListener("change", function () {
+            phoneNumberField.style.display = "none";
+            bankSelection.style.display = "block";
+        });
+    
+        // bank select
+        document.querySelectorAll(".bank-option").forEach(function (bank) {
+            bank.addEventListener("click", function () {
+                selectedBank = this.getAttribute("data-bank"); 
+                document.querySelectorAll(".bank-option").forEach(b => b.classList.remove("selected"));
+                this.classList.add("selected");
+                console.log("Selected Bank:", selectedBank); 
+            });
+        });
+    });
+    
+    
+    fetch("checkout.php")
+        .then(response => response.json())
+        .then(data => {
+            console.log("Cart Data:", data); 
+    
+            const container = document.getElementById("cart-container");
+            let totalAmount = 0;
+            let enrollmentFee = 100; 
+            container.innerHTML = ""; 
+    
+            data.forEach(item => {
+                totalAmount += parseFloat(item.price);
+    
+                const courseItem = `
+                    <div class="course-item" data-class-id="${item.class_id}">
+                        <img src="${item.image}" alt="${item.subject}">
+                        <div>
+                            <p><b>${item.subject}</b></p>
+                            <p><b>Teacher:</b> ${item.teacher}</p>
+                            <p><b>Price:</b> RM${item.price}</p>
+                            <p><b>Time:</b> ${item.time}</p>
+                            <p><b>Student:</b> ${item.child}</p>
+                        </div>
+                    </div>
+                    <hr>
+                `;
+                container.innerHTML += courseItem;
+            });
+    
+            document.getElementById("subject-fee").innerText = `RM${totalAmount}`;
+            document.getElementById("total-amount").innerText = `RM${totalAmount + enrollmentFee}`;
+        })
+        .catch(error => console.error("Error fetching cart data:", error));
+    
+    
+    function validateForm() {
+        var tngSelected = document.getElementById('tng').checked;
+        var jompaySelected = document.getElementById('jompay').checked;
+        var onlineBankingSelected = document.getElementById('online-banking').checked;
+        var phoneNumber = document.getElementById('phone-number').value;
+        var phoneError = document.getElementById('phone-error');
+        var bankError = document.getElementById("bank-error");
+    
+        var paymentMethod = tngSelected ? "TNG" : (jompaySelected ? "JomPAY" : (onlineBankingSelected ? "Online Banking" : ""));
+        
+        // make sure have choose a payment method
+        if (!paymentMethod) {
+            showErrorPopup("Please select a payment method.");
+            return;
+        }
+    
+        // TNG need phone num
+        if (tngSelected) {
+            if (phoneNumber === '') {
+                phoneError.style.display = 'inline';
+                showErrorPopup('Please enter your phone number.');
+                return;
+            } else if (!/^\d{9}$/.test(phoneNumber)) {
+                phoneError.style.display = 'inline';
+                showErrorPopup('Please enter a valid phone number.');
+                return;
+            } else {
+                phoneError.style.display = 'none';
+            }
+        }
+    
+        // Online Banking need to choose bank
+        if (onlineBankingSelected && !selectedBank) {
+            bankError.style.display = 'inline';
+            showErrorPopup("Please select a bank.");
+            return;
+        } else {
+            bankError.style.display = 'none';
+        }
+    
+        
+        var orderData = {
+            payment_method: paymentMethod,
+            bank: selectedBank,
+            phone: tngSelected ? phoneNumber : null
+        };
+        
+        const classIds = Array.from(document.querySelectorAll(".course-item"))
+       .map(item => item.getAttribute("data-class-id"))
+       .join(",");
+        var totalAmount = document.getElementById("total-amount").innerText.replace("RM", "").trim();
+
+        var studentName = document.querySelector(".course-item p:nth-of-type(5)") ? 
+                  document.querySelector(".course-item p:nth-of-type(5)").innerText.replace("Student: ", "") : "";
+
+        var courseName = document.querySelector(".course-item p b") ? 
+                 document.querySelector(".course-item p b").innerText : "";
+
+        var teacherName = document.querySelector(".course-item p:nth-of-type(2)") ? 
+                  document.querySelector(".course-item p:nth-of-type(2)").innerText.replace("Teacher: ", "") : "";
+
+        var courseTime = document.querySelector(".course-item p:nth-of-type(4)") ? 
+                 document.querySelector(".course-item p:nth-of-type(4)").innerText.replace("Time: ", "") : "";
+
+if (!studentName || !courseName || !teacherName || !courseTime) {
+    alert("Order details are missing.");
+    return;
+}
+
+var orderData = {
+    student_name: studentName,
+    course_name: courseName,
+    teacher_name: teacherName,
+    total_amount: totalAmount,
+    payment_method: paymentMethod,
+    time: courseTime,
+    class_id: classIds,
+   
+};
+
+        console.log("Order Data:", orderData); 
+    
+        
+        fetch("process_payment.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Payment Response:", data); 
+    
+            if (data.success) {
+                showPaymentModal(true);
+                setTimeout(() => { window.location.href = "subject.html"; }, 4000);
+            } else {
+                showPaymentModal(false);
+                showErrorPopup(data.message || "Payment failed.");
+            }
+        })
+        .catch(error => {
+            console.error("Error processing payment:", error);
+            showPaymentModal(false);
+        });
+    }
+    
+    // payment status alert modal
+    function showPaymentModal(isSuccess) {
+        let modal = document.getElementById("paymentModal");
+        let paymentIcon = document.getElementById("payment_picture");
+        let paymentTitle = document.getElementById("paymentTitle");
+        let paymentMessage = document.getElementById("paymentMessage");
+    
+        if (isSuccess) {
+            paymentIcon.src = "img/payment_s.png"; 
+            paymentTitle.innerText = "Payment Successful";
+            paymentMessage.innerText = "You can check your payment history in the profile page.";
+        } else {
+            paymentIcon.src = "img/payment_ns.png"; 
+            paymentTitle.innerText = "Payment Failed";
+            paymentMessage.innerText = "There was an issue processing your payment.";
+        }
+    
+        modal.style.display = "flex";
+    }
+    
+    // close payment status alert modal
+    function closeModal() {
+        document.getElementById("paymentModal").style.display = "none";
+    }
+    
+    
+    function showErrorPopup(message) {
+        alert(message);
+    }
+    
+    </script>
+    
+
+
+        
+    <!-- Footer Start -->
+<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container py-5">
+      <div class="row g-5">
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Quick Link</h4>
+          <a class="btn btn-link" href="about.html">About Us</a><br>
+          <a class="btn btn-link" href="contact.html">Contact Us</a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Contact</h4>
+          <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+          <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+          <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h4 class="text-white mb-4">Gallery</h4>
+          <div class="row g-2 pt-2">
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+            </div>
+            <div class="col-4">
+              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="copyright">
+        <div class="row">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Footer End -->
+
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow.min.js"></script>
+    <script src="lib/easing.min.js"></script>
+    <script src="lib/waypoints.min.js"></script>
+    <script src="lib/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
+</body>
+</html>

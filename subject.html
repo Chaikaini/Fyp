@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Subject</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="The Seeds Learning Centre, subject" name="keywords">
+    <meta content="The Seeds Learning Centre | Subject" name="description">
+
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        .icon-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #caccce;
+        }
+
+        .icon-bar a {
+            margin: 0 15px;
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .icon-bar a:hover {
+            color: #73cf67;
+        }
+
+        .breadcrumb-container {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb-container .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .breadcrumb-container .search-box input {
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        .breadcrumb-container h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .breadcrumb-container .breadcrumb {
+            margin: 0;
+            padding: 0;
+            background: none;
+            font-size: 14px;
+            list-style: none;
+            display: flex;
+            gap: 5px;
+        }
+
+        .breadcrumb-container .breadcrumb li {
+            color: #555;
+        }
+
+        .breadcrumb-container .breadcrumb li a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .breadcrumb-container .breadcrumb li a:hover {
+            text-decoration: underline;
+        }
+
+        .container-main {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            width: 300px; /* 匹配 search-box 的总宽度 */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 1px solid #ccc;
+            padding-right: 15px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            width: 200px;
+            margin-right: 10px;
+            padding: 8px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            height: 38px;
+        }
+
+        .search-box .btn{
+            padding: 10px 20px;
+            font-size: 16px;
+            height: 38px;
+        }
+
+        .year-list select {
+            width: 280px; /* 与 search-box 宽度一致 */
+            padding: 8px 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            height: 38px;
+        }
+
+        .year-list select:focus {
+            outline: none;
+            background-color: #e0f7e4;
+        }
+
+        .subject-grid, #resultsContainer {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            gap: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;  /* 改为水平滚动 */
+            flex: 1; /* 占据剩余空间 */
+        }
+
+        .subject-card {
+            width: 220px;
+            height: 280px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            padding: 15px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .subject-card:hover {
+            transform: scale(1.05);
+            background-color: #e0f7e4;
+        }
+
+        .subject-card img {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .subject-card h5 {
+            font-size: 16px;
+            margin: 0;
+            color: #333;
+        }
+
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .stars-container .star {
+        width: 20px;
+        height: 20px;
+        background-color: #ddd;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        margin-right: 5px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .stars-container .yellow {
+        background-color: gold;
+    }
+
+    .stars-container .half {
+        background: linear-gradient(to right, gold 50%, #ddd 50%);
+    }
+
+    .stars-container .half-4-8 {
+        background: linear-gradient(to right, gold 65%, #ddd 35%); 
+    }
+
+    .rating-text {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+        text-align: center;
+    }
+
+
+#resultsContainer {
+    display: none; /* 初始隐藏 */
+}
+
+.search-results {
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.search-active .subject-grid {
+    display: none;
+}
+
+.search-active #resultsContainer {
+    display: flex;
+}
+
+    /* Toast 样式（ */
+    .toast-message {
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgb(171, 241, 187);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        font-weight: bold;
+         z-index: 1000;
+        text-align: center;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 5px;
+        right: 10px; 
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        display: none; 
+        z-index: 1000;
+    }
+    .notification-icon {
+        position: relative; 
+    }
+
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a href="#" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            </div>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+        </div>
+    </nav>
+
+    <div class="icon-bar">
+        <a href="notification.php" class="notification-icon">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;"></span>
+        </a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+        <a href="profile.php"><i class="fas fa-user"></i></a>
+    </div>
+
+    <div class="breadcrumb-container d-flex justify-content-between align-items-center">
+        <div>
+            <h1>Subject</h1>
+            <ul class="breadcrumb">
+                <li><a href="member.html">Home</a></li>
+                <li>&gt;</li>
+                <li>Subject</li>
+            </ul>
+        </div>
+        </div>
+
+    <div class="container-main">
+        <div class="left-panel">
+            <div class="search-box">
+                <input class="form-control" type="search" placeholder="Search" aria-label="Search" id="searchInput">
+                <button id="searchButton" class="btn btn-outline-success" type="submit">Search</button>
+            </div>
+            <div class="year-list">
+                <select id="yearSelect" onchange="showSubjects(this.value)">
+                    <option value="">Select Year</option>
+                </select>
+            </div>
+        </div>
+        <div class="subject-grid" id="subjectGrid"></div>
+        <div id="resultsContainer"></div>
+        <div id="successToast" class="toast-message" style="display: none;"></div>
+    </div>
+    
+
+    <script>
+
+    // Initialize with current year from URL or default
+    const urlParams = new URLSearchParams(window.location.search);
+    let defaultYear = urlParams.get('year') || '';
+    console.log('Intial URL:',window.location.href);
+    console.log('defaultYear value',defaultYear);
+
+
+     // Toast 函数
+     function showToast(message, isError = false) {
+            let toast = document.getElementById("successToast");
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? "#dc3545" : "#28a745"; // 错误时为红色，成功时为绿色
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => { toast.style.display = "none"; }, 500);
+            }, 3000);
+        }
+
+     // Load years into dropdown
+     function loadYears() {
+            fetch('get_years.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Years data:', data); // Debugging
+                    const yearSelect = document.getElementById('yearSelect');
+                    yearSelect.innerHTML = '<option value="">Select Year</option>';
+
+                    if (!data || data.length === 0) {
+                        console.warn('No years available');
+                        yearSelect.innerHTML += '<option value="">No years available</option>';
+                        return;
+                    }
+
+                    data.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+
+                    console.log('Selected year from URL:', defaultYear); // Debugging
+                    // 不设置 yearSelect.value，保持默认显示 "Select Year"
+                    showSubjects(defaultYear); // 加载 URL 中的年份对应的科目
+                })
+                .catch(error => {
+                    console.error('Error loading years:', error);
+                    document.getElementById('yearSelect').innerHTML = 
+                        '<option value="">Error loading years</option>';
+                });
+        }
+
+        // Highlight selected year (仅在用户手动选择时调用)
+        function highlightSelectedYear(selectedYear) {
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.value = selectedYear;
+        }
+
+        // Load subjects for a year
+        function showSubjects(year) {
+            console.log('showSubjects called with year:', year);
+            history.pushState(null, '', `?year=${encodeURIComponent(year)}`);
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('subjectGrid').style.display = 'flex';
+
+            const subjectGrid = document.getElementById('subjectGrid');
+            subjectGrid.innerHTML = '';
+
+            if (!year) {
+                subjectGrid.innerHTML = '<p>Please select a year</p>';
+                return;
+            }
+
+            fetch(`subject.php?year=${encodeURIComponent(year)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data || data.length === 0) {
+                        subjectGrid.innerHTML = `<p>No subjects available for this year</p>`;
+                        return;
+                    }
+
+                    data.forEach(subject => {
+                        const card = document.createElement('div');
+                        card.className = 'subject-card';
+                        card.innerHTML = `
+                            <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                            <h5>${subject.name}</h5>
+                            <p>${subject.rating || 0}⭐</p>
+                        `;
+                        card.onclick = () => window.location.href = subject.page;
+                        subjectGrid.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
+                });
+        }
+
+        // Initial loading
+        document.addEventListener('DOMContentLoaded', function() {
+            
+         // 清理 URL 参数
+        if (window.location.search && !document.getElementById('yearSelect').value) {
+            defaultYear = '';
+            history.pushState(null, '', 'subject.html');
+            console.log('URL cleaned, new defaultYear:', defaultYear);
+        }
+
+            loadYears();
+
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+
+            searchButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                performSearch(searchInput.value.trim());
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch(searchInput.value.trim());
+                }
+            });
+        });
+
+        function performSearch(query) {
+            if (!query) {
+                showToast('Please enter a search term!', true); // 使用红色背景表示错误
+                return;
+            }
+
+            // 检查输入长度，至少需要 2 个字符
+            if (query.length < 2) {
+                showToast('Please enter at least 2 characters to search.', true); // 使用红色背景表示错误
+                return;
+            }
+
+    document.body.classList.add('search-active');
+    document.getElementById('subjectGrid').style.display = 'none';
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.style.display = 'flex'; // 修改为flex
+    resultsContainer.innerHTML = '<div class="search-results"></div>'; // 直接创建results容器
+    
+    fetch(`search.php?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    const resultsGrid = document.querySelector('.search-results');
+                    resultsGrid.innerHTML = '';
+
+                    if (!data || data.length === 0) {
+                        resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
+                    } else {
+                        const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
+
+                        uniqueData.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'subject-card';
+                            card.innerHTML = `
+                                <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
+                                <h5>${item.name}</h5>
+                                <p>${item.rating || 0}⭐ (${item.year})</p>
+                            `;
+                            card.onclick = () => window.location.href = item.page;
+                            resultsGrid.appendChild(card);
+                        });
+                    }
+
+                    // 搜索完成后清除搜索框
+                    document.getElementById('searchInput').value = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('resultsContainer').innerHTML = 
+                        `<p>Error performing search: ${error.message}</p>`;
+                    // 即使出错也清除搜索框
+                    document.getElementById('searchInput').value = '';
+                });
+        }
+
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('subjectGrid').style.display = 'flex';
+            const selectedYear = document.getElementById('yearSelect').value || defaultYear;
+            showSubjects(selectedYear);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications data:', data); 
+
+            // check if there are any unread notifications
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'block'; //show the red dot
+                }
+            } else {
+                console.log('No unread notifications');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    });
+    </script>
+
+
+     
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+          <div class="row g-5">
+            <div class="col-lg-3 col-md-6">
+              <h4 class="text-white mb-4">Quick Link</h4>
+              <a class="btn btn-link" href="about.html">About Us</a><br>
+              <a class="btn btn-link" href="contact.html">Contact Us</a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <h4 class="text-white mb-4">Contact</h4>
+              <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+              <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+              <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <h4 class="text-white mb-4">Gallery</h4>
+              <div class="row g-2 pt-2">
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                </div>
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                </div>
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                </div>
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                </div>
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                </div>
+                <div class="col-4">
+                  <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="copyright">
+            <div class="row">
+              <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+              </div>
+              <div class="col-md-6 text-center text-md-end">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Footer End -->
+    
+    
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    
+    
+        <!-- JavaScript Libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="lib/wow.min.js"></script>
+        <script src="lib/easing.min.js"></script>
+        <script src="lib/waypoints.min.js"></script>
+        <script src="lib/owl.carousel.min.js"></script>
+    
+        <!-- Template Javascript -->
+        <script src="js/main.js"></script>
+    <script>
+
+     /*   document.addEventListener("DOMContentLoaded", function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const year = urlParams.get('year') || 'Year 1'; // 获取 URL 参数
+
+    function showSubjects(year) {
+        fetch(`subject.php?year=${year}`)
+            .then(response => response.json())
+            .then(data => {
+                const subjectGrid = document.getElementById('subjectGrid');
+                subjectGrid.innerHTML = ''; // 清空现有内容
+
+                data.forEach(subject => {
+                    const card = document.createElement('div');
+                    card.className = 'subject-card';
+                    card.innerHTML = `
+                        <img src="${subject.image}" alt="${subject.name}">
+                        <h5>${subject.name}</h5>
+                        <p>${subject.rating}⭐</p>
+                        <a href="${subject.page}"></a>
+                    `;
+                    card.onclick = function () {
+                    window.location.href = subject.page;
+                    };
+                    subjectGrid.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('获取数据失败:', error);
+            });
+    }
+
+    showSubjects(year); // 初始加载
+});
+
+function renderSubjects(subjectsData) {
+    Object.keys(subjectsData).forEach(year => {
+        const container = document.getElementById(year);
+        if (container) {
+            subjectsData[year].forEach(subject => {
+                const card = document.createElement("div");
+                card.classList.add("subject-card");
+
+                card.innerHTML = `
+                    <img src="${subject.image}" alt="${subject.name}">
+                        <h5>${subject.name}</h5>
+                        <p>${subject.rating}⭐</p>
+                        <a href="${subject.page}"></a>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+    });  
+}    */
+
+
+   /* document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const resultsContainer = document.getElementById('resultsContainer');
+
+    if (!searchInput || !searchButton || !resultsContainer) {
+        console.error('Required elements not found.');
+        return;
+    }
+
+    // Handle search button click
+    searchButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        const searchQuery = searchInput.value.trim();
+
+        if (searchQuery) {
+            console.log('Searching for:', searchQuery); // Debugging log
+            search(searchQuery);
+        } else {
+            alert('Please enter a search term!');
+        }
+    });
+
+    // Handle 'Enter' key press in search input
+    searchInput.addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            const searchQuery = searchInput.value.trim();
+            if (searchQuery) {
+                console.log('Searching for:', searchQuery); // Debugging log
+                search(searchQuery);
+            } else {
+                alert('Please enter a search term!');
+            }
+        }
+    });
+
+    // Function to perform the search
+    function search(query) {
+        fetch(`search.php?query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Search result:', data); // Debugging log
+                if (data.status === 'success') {
+                    const results = data.data;
+                    displayResults(results);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Function to display search results
+    function displayResults(results) {
+        resultsContainer.innerHTML = ''; // Clear existing results
+
+        if (results.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found.</p>';
+        } else {
+            results.forEach(item => {
+                const resultItem = document.createElement('div');
+                resultItem.classList.add('result-item');
+                resultItem.innerHTML = `
+                    <div class="subject-card">
+                        <img src="${item.image}" alt="${item.name}">
+                        <h5>${item.name}</h5>
+                        <p>${item.year}</p>
+                        <p>Price: RM ${item.price}</p>
+                        <a href="${item.page}">More details</a>
+                    </div>
+                `;
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+    }
+});
+*/
+
+
+        </script>
+</body>
+</html>

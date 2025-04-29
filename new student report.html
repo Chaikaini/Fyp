@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New Children Report</title>
+  
+  <!-- Favicon -->
+  <link href="img/the seeds.jpg" rel="icon" type="image/png">
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      overflow-x: hidden;
+    }
+    #sidebar {
+      width: 250px;
+      background-color: #343a40;
+      color: white;
+      transition: width 0.3s;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    #sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 15px 15px;
+      display: block;
+    }
+    #sidebar a:hover {
+      background-color: #495057;
+    }
+    #sidebar.collapsed {
+      width: 80px;
+    }
+    #sidebar.collapsed .sidebar-header h4,
+    #sidebar.collapsed a span {
+      display: none;
+    }
+    #main-content {
+      flex-grow: 1;
+      padding: 20px;
+      transition: margin-left 0.3s;
+    }
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid #495057;
+    }
+    .sidebar-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .sidebar-header h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .table-container .fa-edit, .table-container .fa-trash-alt {
+      color: #007BFF;
+    }
+
+    .pointer-cursor{
+      cursor:pointer;
+    }
+
+  </style>
+</head>
+<body>
+   <!-- Sidebar -->
+   <nav id="sidebar" class="d-flex flex-column p-3">
+    <div class="sidebar-header">
+      <h3>Admin Panel</h3>
+    </div>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+      <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Teacher List</span></a></li>
+      <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
+      <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
+      <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Order List</span></a></li>
+      <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
+      <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
+          <i class="fas fa-chart-line"></i> <span>Report</span>
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+        </a>
+        <div class="collapse" id="reportMenu">
+          <ul class="nav flex-column ms-3">
+            <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
+            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report
+            </span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+          </ul>
+        </div>
+      </li>      
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div id="main-content">
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+      <div class="container-fluid">
+        <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+        <form class="d-flex mx-auto">
+          <input class="form-control me-2" type="date" id="start-date" />
+          <span class="mx-2">to</span>
+          <input class="form-control me-2" type="date" id="end-date" />
+          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </form>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-bell"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
+              <li><a class="dropdown-item" href="#">No new notifications</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
+              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- New Student Report -->
+    <h1 class="mb-4">New Student Report</h1>
+
+
+    <div class="date-range">
+      <h6>Report for: </h6>
+      <span></span>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <h5>New Student Report</h5>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>My kid number</th>
+            <th>Date of Birth</th>
+            <th>Join Date</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody> <!-- 添加 tbody -->
+        </tbody>
+      </table>      
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+
+let originalData = []; // 存储所有数据
+
+// 获取数据并初始化表格
+fetch("fetch_new_children_report.php")
+  .then(response => response.json())
+  .then(data => {
+    console.log("Fetched Data:", data);
+    originalData = data; // 保存原始数据
+    renderTable(data); // 初始化表格
+  })
+  .catch(error => console.error("Error fetching data:", error));
+
+// 渲染表格的函数
+function renderTable(data) {
+  const tableBody = document.querySelector("table tbody");
+  tableBody.innerHTML = "";
+
+  if (data.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='7' class='text-center'>No records found</td></tr>";
+  } else {
+    data.forEach(child => {
+      const joinDate = "2025-02-10"; // 这里的 Join Date 只是示例，你可以换成动态的
+      const row = `
+        <tr>
+          <td>${child.id}</td>
+          <td>${child.name}</td>
+          <td>${child.gender}</td>
+          <td>${child.kidNumber}</td>
+          <td>${child.birthday}</td>
+          <td class="join-date">${joinDate}</td> <!-- 确保这里有 class方便筛选 -->
+          <td>Active</td>
+        </tr>
+      `;
+      tableBody.innerHTML += row;
+    });
+  }
+}
+
+// 监听搜索按钮
+document.getElementById("search-btn").addEventListener("click", () => {
+  const startDate = document.getElementById("start-date").value;
+  const endDate = document.getElementById("end-date").value;
+
+  if (!startDate || !endDate) {
+    alert("Please select both start and end dates.");
+    return;
+  }
+
+  const filteredData = originalData.filter(child => {
+    const joinDate = new Date("2025-02-10"); // 这里的日期格式需要和上面 `Join Date` 一致
+    return joinDate >= new Date(startDate) && joinDate <= new Date(endDate);
+  });
+
+  renderTable(filteredData);
+});
+
+
+
+
+
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    // Toggle icon based on collapse state
+    document.getElementById('reportToggle').addEventListener('click', function() {
+      const icon = document.getElementById('reportIcon');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
+    });
+  </script>
+</body>
+</html>
