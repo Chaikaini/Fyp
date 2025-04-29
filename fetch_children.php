@@ -65,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     exit;
 }
 
-
 $sql = "
     SELECT 
         ch.child_id, 
@@ -75,7 +74,8 @@ $sql = "
         ch.child_kidNumber, 
         ch.child_birthday, 
         ch.child_school, 
-        ch.child_year
+        ch.child_year,
+        ch.child_register_date
     FROM child ch
     LEFT JOIN parent p ON ch.parent_id = p.parent_id
     ORDER BY ch.child_id ASC
@@ -86,9 +86,36 @@ $result = $conn->query($sql);
 $registrations = array();
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
+        $birthYear = date("Y", strtotime($row['child_birthday']));
+        $registerDate = $row['child_register_date'];
+        $calculatedYear = calculateYear($birthYear, $registerDate);
+
+        if ($row['child_year'] !== $calculatedYear) {
+            $updateSql = "UPDATE child SET child_year = '$calculatedYear' WHERE child_id = " . $row['child_id'];
+            $conn->query($updateSql);
+        }
+
+        $row['child_year'] = $calculatedYear; 
         $registrations[] = $row;
     }
 }
 
 echo json_encode($registrations);
 $conn->close();
+
+
+
+function calculateYear($birthYear, $registerDate) {
+    $currentYear = date("Y");  
+    $registerYear = date("Y", strtotime($registerDate));  
+    $startYear = 2020;  
+
+    $age = $currentYear - $birthYear;
+    $yearsInSchool = $currentYear - $registerYear;
+
+    return ' ' . ($yearsInSchool + 1);  
+}
+
+
+
+

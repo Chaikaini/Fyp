@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 01:47 PM
+-- Generation Time: Apr 29, 2025 at 02:28 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -85,16 +85,17 @@ CREATE TABLE `child` (
   `child_kidNumber` varchar(50) NOT NULL,
   `child_birthday` date NOT NULL,
   `child_school` varchar(100) NOT NULL,
-  `child_year` int(11) NOT NULL
+  `child_year` int(11) NOT NULL,
+  `child_register_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `child`
 --
 
-INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`) VALUES
-(1, 1, 'Yuna', 'Female', '170909-01-7788', '2017-09-09', 'Kulai 1', 1),
-(2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'Kulai 2', 1);
+INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_register_date`) VALUES
+(1, 1, 'Yuna', 'Female', '170909-01-7788', '2017-09-09', 'Kulai 1', 1, '2025-04-29 12:26:05'),
+(2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'Kulai 2', 1, '2025-04-29 12:26:05');
 
 -- --------------------------------------------------------
 
