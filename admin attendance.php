@@ -260,28 +260,34 @@
 </div>
 
 <!-- Modal Structure -->
-<div id="examResultModal" class="modal">
-  <div class="modal-content">
-    <h4>Exam Results</h4>
-    <table id="studentResultsTable">
-      <thead>
-        <tr>
-          <th>Student ID</th>
-          <th>Student Name</th>
-          <th>Midterm</th>
-          <th>Final</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Student rows will be added here dynamically -->
-      </tbody>
-    </table>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
-    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+<div class="modal fade" id="examResultModal" tabindex="-1" aria-labelledby="examResultModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg"> 
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="examResultModalLabel">Exam Results</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="studentResultsTable" class="table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Student Name</th>
+              <th>Midterm</th>
+              <th>Final</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+      </div>
+    </div>
   </div>
 </div>
+
 
 
 
@@ -345,7 +351,8 @@ document.getElementById("search-btn").addEventListener("click", function () {
             <td>${row.capacity}</td>
             <td>
               <button class="btn btn-primary" onclick='viewStudents("${row.class_id}")'>View List</button>
-              <button class="btn btn-primary">Exam Result</button>
+              <button class="btn btn-primary" onclick='openExamResultModal("${row.class_id}")'>Exam Result</button>
+
             </td>
           </tr>
         `;
@@ -674,53 +681,76 @@ function showToast(message, isError = false) {
     }, 3000);
 }
 
-     // Function to open the modal and load student data
+
+
+// Function to open the modal and load student data
 function openExamResultModal(classId) {
-  fetch(`teacher_exam_students.php?class_id=${classId}`)
+  fetch(`teacher_exam_students.php`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "class_id=" + encodeURIComponent(classId)
+  })
     .then(response => response.json())
     .then(data => {
       const tbody = document.querySelector("#studentResultsTable tbody");
       tbody.innerHTML = "";
       data.forEach(student => {
         tbody.innerHTML += `
-          <tr>
-            <td>${student.student_id}</td>
-            <td>${student.student_name}</td>
-            <td><input type="number" value="${student.midterm}" data-student-id="${student.student_id}" data-exam="midterm"></td>
-            <td><input type="number" value="${student.final}" data-student-id="${student.student_id}" data-exam="final"></td>
-          </tr>
-        `;
+        <tr>
+          <td>${student.child_id}</td>
+          <td>${student.child_name}</td>
+          <td><input type="number" value="${student.exam_result_midterm ?? ''}" data-exam="midterm" data-child-id="${student.child_id}"></td>
+          <td><input type="number" value="${student.exam_result_final ?? ''}" data-exam="final" data-child-id="${student.child_id}"></td>
+        </tr>
+      `;
       });
-      document.getElementById("examResultModal").style.display = "block";
+
+      // Store classId in a global variable or in the modal
+      window.currentClassId = classId;
+
+      const modal = new bootstrap.Modal(document.getElementById("examResultModal"));
+      modal.show();
     })
     .catch(error => console.error("Error loading student data:", error));
 }
 
 // Function to save exam results
 function saveExamResults() {
-  const inputs = document.querySelectorAll("#studentResultsTable input");
-  const results = Array.from(inputs).map(input => ({
-    student_id: input.getAttribute("data-student-id"),
-    exam: input.getAttribute("data-exam"),
-    value: input.value
-  }));
+  const rows = document.querySelectorAll("#studentResultsTable tbody tr");
+  const results = [];
+  const classId = window.currentClassId; // Use the classId from the global variable
+
+  rows.forEach(row => {
+    const childId = row.querySelector("input[data-child-id]").dataset.childId;
+    const midterm = row.querySelector("input[data-exam='midterm']").value;
+    const final = row.querySelector("input[data-exam='final']").value;
+
+    results.push({
+      child_id: childId,
+      exam_result_midterm: parseFloat(midterm),
+      exam_result_final: parseFloat(final)
+    });
+  });
 
   fetch("save_exam_results.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(results)
+    body: JSON.stringify({ class_id: classId, results: results })
   })
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
     if (data.success) {
       alert("Exam results saved successfully!");
-      closeModal();
     } else {
-      alert("Error saving exam results.");
+      alert("Error: " + (data.error || "Failed to save results."));
     }
   })
-  .catch(error => console.error("Error saving exam results:", error));
+  .catch(err => {
+    console.error("Save error:", err);
+    alert("Failed to save results.");
+  });
 }
+
 
 
 </script>
