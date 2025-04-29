@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 29, 2025 at 06:28 PM
+-- Generation Time: Apr 29, 2025 at 06:46 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -146,6 +146,28 @@ CREATE TABLE `comments` (
   `comment_text` text DEFAULT NULL,
   `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `exam_result`
+--
+
+CREATE TABLE `exam_result` (
+  `exam_result_id` int(11) NOT NULL,
+  `child_id` int(11) DEFAULT NULL,
+  `class_id` varchar(20) DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `exam_result_midterm` decimal(5,2) DEFAULT NULL,
+  `exam_result_final` decimal(5,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exam_result`
+--
+
+INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `teacher_id`, `exam_result_midterm`, `exam_result_final`) VALUES
+(1, 1, 'Mly0001', 12345, 70.00, 77.00);
 
 -- --------------------------------------------------------
 
@@ -350,6 +372,21 @@ INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_
 (12233, 'Mr. John', 'Male', '12233@gmail.com', '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
 (12345, 'Ms. Lily', 'Female', 'lily@gmail.com', '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `teacher_comment`
+--
+
+CREATE TABLE `teacher_comment` (
+  `teacher_comment_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `child_id` int(11) NOT NULL,
+  `class_id` varchar(20) NOT NULL,
+  `teacher_comment_text` text DEFAULT NULL,
+  `teacher_comment_created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -401,6 +438,15 @@ ALTER TABLE `comments`
   ADD KEY `parent_id` (`parent_id`),
   ADD KEY `class_id` (`class_id`),
   ADD KEY `subject_id` (`subject_id`);
+
+--
+-- Indexes for table `exam_result`
+--
+ALTER TABLE `exam_result`
+  ADD PRIMARY KEY (`exam_result_id`),
+  ADD KEY `child_id` (`child_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `teacher_id` (`teacher_id`);
 
 --
 -- Indexes for table `notification`
@@ -464,6 +510,15 @@ ALTER TABLE `teacher`
   ADD PRIMARY KEY (`teacher_id`);
 
 --
+-- Indexes for table `teacher_comment`
+--
+ALTER TABLE `teacher_comment`
+  ADD PRIMARY KEY (`teacher_comment_id`),
+  ADD KEY `child_id` (`child_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `teacher_id` (`teacher_id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -490,6 +545,12 @@ ALTER TABLE `child`
 --
 ALTER TABLE `comments`
   MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `exam_result`
+--
+ALTER TABLE `exam_result`
+  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `notification`
@@ -534,6 +595,12 @@ ALTER TABLE `teacher`
   MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12347;
 
 --
+-- AUTO_INCREMENT for table `teacher_comment`
+--
+ALTER TABLE `teacher_comment`
+  MODIFY `teacher_comment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -575,6 +642,14 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
 
 --
+-- Constraints for table `exam_result`
+--
+ALTER TABLE `exam_result`
+  ADD CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
+  ADD CONSTRAINT `exam_result_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
+  ADD CONSTRAINT `exam_result_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+
+--
 -- Constraints for table `notification`
 --
 ALTER TABLE `notification`
@@ -611,6 +686,14 @@ ALTER TABLE `registration_class`
 ALTER TABLE `subject`
   ADD CONSTRAINT `subject_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
   ADD CONSTRAINT `subject_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
+
+--
+-- Constraints for table `teacher_comment`
+--
+ALTER TABLE `teacher_comment`
+  ADD CONSTRAINT `teacher_comment_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
+  ADD CONSTRAINT `teacher_comment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
+  ADD CONSTRAINT `teacher_comment_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
