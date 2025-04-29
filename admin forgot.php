@@ -50,6 +50,15 @@ if (isset($_POST['send_otp'])) {
             $mail->SMTPSecure = 'tls';
             $mail->Port       = 587;
 
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                ]
+            ];
+            
+
             $mail->setFrom('chaikaini@gmail.com', 'Forgot Password System');
             $mail->addAddress($email);
 
@@ -58,6 +67,8 @@ if (isset($_POST['send_otp'])) {
             $mail->Body    = "Your OTP code is <b>$otp</b>";
 
             $mail->send();
+
+            $mail->smtpClose();
             echo "OTP sent to your email. <br><br>
                 <form method='post'>
                     <input type='text' name='input_otp' placeholder='Enter OTP' required><br>
