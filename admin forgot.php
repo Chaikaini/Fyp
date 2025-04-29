@@ -9,7 +9,6 @@ $dbname = "the seeds";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 require_once 'vendor/autoload.php';
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -20,25 +19,83 @@ require 'PHPMailer.php';
 require 'SMTP.php';
 require 'Exception.php';
 
+function renderForm($content) {
+    echo "<!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <title>Forgot Password</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <link href='img/the seeds.jpg' rel='icon' type='image/png'>
+        <link href='https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&display=swap' rel='stylesheet'>
+        <style>
+            body {
+                margin: 0;
+                font-family: 'Heebo', sans-serif;
+                display: flex;
+                height: 100vh;
+                justify-content: center;
+                align-items: center;
+                background-color: #f4f4f4;
+            }
+            .container {
+                width: 100%;
+                max-width: 400px;
+                background-color: #ffffff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            form input, form select {
+                width: 95%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            form button {
+                width: 100%;
+                padding: 10px;
+                background-color: #17a2b8;
+                border: none;
+                border-radius: 5px;
+                color: #ffffff;
+                font-size: 16px;
+                cursor: pointer;
+            }
+            form button:hover {
+                background-color: #138496;
+            }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            $content
+        </div>
+    </body>
+    </html>";
+}
+
 if (isset($_POST['send_otp'])) {
     $email = $_POST['email'];
+    $role = $_POST['role'];
 
-    $userType = '';
-    $query = mysqli_query($conn, "SELECT * FROM admin WHERE admin_email='$email'");
-    if (mysqli_num_rows($query) > 0) {
-        $userType = 'admin';
-    } else {
+    if ($role == 'admin') {
+        $query = mysqli_query($conn, "SELECT * FROM admin WHERE admin_email='$email'");
+    } elseif ($role == 'teacher') {
         $query = mysqli_query($conn, "SELECT * FROM teacher WHERE teacher_email='$email'");
-        if (mysqli_num_rows($query) > 0) {
-            $userType = 'teacher';
-        }
+    } else {
+        renderForm("<p>Invalid role selected.</p>");
+        exit;
     }
 
-    if ($userType != '') {
+    if (mysqli_num_rows($query) > 0) {
         $otp = rand(100000, 999999);
         $_SESSION['otp'] = $otp;
         $_SESSION['email'] = $email;
-        $_SESSION['user_type'] = $userType;
+        $_SESSION['user_type'] = $role;
 
         $mail = new PHPMailer(true);
         try {
@@ -50,50 +107,42 @@ if (isset($_POST['send_otp'])) {
             $mail->SMTPSecure = 'tls';
             $mail->Port       = 587;
 
-            $mail->SMTPOptions = [
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => true
-                ]
-            ];
-            
-
             $mail->setFrom('chaikaini@gmail.com', 'Forgot Password System');
             $mail->addAddress($email);
-
             $mail->isHTML(true);
             $mail->Subject = 'Your OTP Code';
             $mail->Body    = "Your OTP code is <b>$otp</b>";
 
             $mail->send();
 
-            $mail->smtpClose();
-            echo "OTP sent to your email. <br><br>
+            renderForm("
                 <form method='post'>
-                    <input type='text' name='input_otp' placeholder='Enter OTP' required><br>
+                    <h2>Verify OTP</h2>
+                    <input type='text' name='input_otp' placeholder='Enter OTP' required>
                     <button type='submit' name='verify_otp'>Verify OTP</button>
-                </form>";
+                </form>
+            ");
         } catch (Exception $e) {
-            echo "Failed to send email. Error: {$mail->ErrorInfo}";
+            renderForm("<p>Failed to send email. Error: {$mail->ErrorInfo}</p>");
         }
     } else {
-        echo "Email not found in system.";
+        renderForm("<p>Email not found for selected role.</p>");
     }
 }
 
 elseif (isset($_POST['verify_otp'])) {
     $inputOtp = $_POST['input_otp'];
-
     if ($_SESSION['otp'] == $inputOtp) {
-        echo "OTP Verified. <br><br>
+        renderForm("
             <form method='post'>
-                <input type='password' name='new_password' placeholder='New Password' required><br>
-                <input type='password' name='confirm_password' placeholder='Confirm Password' required><br>
+                <h2>Reset Password</h2>
+                <input type='password' name='new_password' placeholder='New Password' required>
+                <input type='password' name='confirm_password' placeholder='Confirm Password' required>
                 <button type='submit' name='reset_password'>Reset Password</button>
-            </form>";
+            </form>
+        ");
     } else {
-        echo "Invalid OTP.";
+        renderForm("<p>Invalid OTP.</p>");
     }
 }
 
@@ -104,7 +153,7 @@ elseif (isset($_POST['reset_password'])) {
     $userType = $_SESSION['user_type'];
 
     if ($newPassword == $confirmPassword) {
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT); 
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
         if ($userType == 'admin') {
             $update = mysqli_query($conn, "UPDATE admin SET admin_password='$hashedPassword' WHERE admin_email='$email'");
@@ -114,21 +163,13 @@ elseif (isset($_POST['reset_password'])) {
 
         if ($update) {
             session_destroy();
-            echo "Password successfully changed. <a href='admin login.html'>Go to Login</a>";
+            header("Location: admin login.html");
+            exit();
         } else {
-            echo "Error updating password.";
+            renderForm("<p>Error updating password.</p>");
         }
     } else {
-        echo "Passwords do not match.";
+        renderForm("<p>Passwords do not match.</p>");
     }
-}
-
-else {
-?>
-    <form method="post">
-        <input type="email" name="email" placeholder="Enter your Email" required><br>
-        <button type="submit" name="send_otp">Send OTP</button>
-    </form>
-<?php
 }
 ?>
