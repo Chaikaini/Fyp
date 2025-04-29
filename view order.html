@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Order List</title>
-  
+  <title>Registration Class List</title>
+
   <!-- Favicon -->
   <link href="img/the seeds.jpg" rel="icon" type="image/png">
-  
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <style>
@@ -23,11 +23,14 @@
       transition: width 0.3s;
       white-space: nowrap;
       overflow: hidden;
+      height: 130vh;
+    display: flex;
+    flex-direction: column;
     }
     #sidebar a {
       color: white;
       text-decoration: none;
-      padding: 15px 15px; 
+      padding: 15px 15px; /* Adjusted padding for better spacing */
       display: block;
     }
     #sidebar a:hover {
@@ -61,7 +64,7 @@
       margin: 0;
       font-size: 16px;
     }
-    .table-container .fa-edit, .table-container .fa-trash-alt {
+    .table-container .fa-edit, .table-container .fa-trash-alt, .table-container .fa-eye {
       color: #007BFF;
     }
 
@@ -81,7 +84,7 @@
       <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Teacher List</span></a></li>
       <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
-      <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Order List</span></a></li>
+      <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
       <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
@@ -103,41 +106,24 @@
 
   <!-- Main Content -->
   <div id="main-content">
-    <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <form class="d-flex ms-auto">
-          <input class="form-control me-2" type="search" placeholder="Search" id="search" />
-          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-        </form>
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-              <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
-              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
-            </ul>
-          </li>
-        </ul>
+        <div class="ms-auto d-flex gap-2">
+          <select id="subjectSelect" class="form-select" style="min-width: 200px;">
+            <option value="">Select Subject</option>
+          </select>
+          <select id="classSelect" class="form-select" style="min-width: 200px;" disabled>
+            <option value="">Select Class</option>
+          </select>
+        </div>
       </div>
     </nav>
 
-    <!-- Admin List -->
-    <h1 class="mb-4">Order List</h1>
+    <h1 class="mb-4">Registration Class List</h1>
     <div class="card">
       <div class="card-header">
-        <h5>Order List</h5>
+        <h5>Registration Class List</h5>
       </div>
       <div class="card-body">
         <table class="table table-striped">
@@ -154,7 +140,7 @@
             </tr>
           </thead>
           <tbody id="registrationTable">
-            <!-- Dynamic rows will be added here -->
+            <!-- Dynamic rows will be inserted here -->
           </tbody>
         </table>
       </div>
@@ -164,98 +150,146 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.getElementById('toggleSidebar').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
 
-document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
-  const icon = document.getElementById('reportIcon');
-  icon.classList.toggle('fa-chevron-down');
-  icon.classList.toggle('fa-chevron-up');
-});
+    document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
+      const icon = document.getElementById('reportIcon');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
+    });
 
-function fetchRegistrations() {
-  fetch('fetch_orders.php')
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById('registrationTable');
-      tableBody.innerHTML = '';
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.registration_id}</td>
-          <td>${item.parent_name}</td>
-          <td>${item.class_id}</td>
-          <td>${item.child_name}</td>
-          <td>${item.subject_name}</td>
-          <td>${item.teacher_name}</td>
-          <td>RM ${item.payment_total_amount}</td>
-          <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
-        `;
-        tableBody.appendChild(row);
-      });
-    })
-    .catch(error => console.error('Error fetching data:', error));
-}
-
-document.querySelector('table').addEventListener('click', function(event) {
-  if (event.target.classList.contains('delete-btn')) {
-    const row = event.target.closest('tr');
-    const registrationId = row.querySelector('td:first-child').textContent;
-
-    fetch('fetch_orders.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `registration_id=${registrationId}`
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        row.remove();
-      } else {
-        console.error('Deletion failed：', data);
-      }
-    })
-    .catch(error => console.error('Error deleting record:', error));
-  }
-});
-
-document.querySelector('form').addEventListener('submit', function(event) {
-  event.preventDefault();
-  const searchTerm = document.querySelector('input[type="search"]').value;
-
+    // Load Subjects
+    function loadSubjects() {
   fetch('fetch_orders.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `search_term=${searchTerm}`
+    body: new URLSearchParams({
+      action: 'getSubjects'
+    })
   })
-  .then(response => response.json())
-  .then(data => {
-    const tableBody = document.getElementById('registrationTable');
-    tableBody.innerHTML = '';
-    if (data.length > 0) {
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.registration_id}</td>
-          <td>${item.parent_name}</td>
-          <td>${item.class_id}</td>
-          <td>${item.child_name}</td>
-          <td>${item.subject_name}</td>
-          <td>${item.teacher_name}</td>
-          <td>RM ${item.payment_total_amount}</td>
-          <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
-        `;
-        tableBody.appendChild(row);
-      });
-    } else {
-      tableBody.innerHTML = '<tr><td colspan="8">No matching records found.</td></tr>';
+  .then(res => res.json())
+  .then(subjects => {
+    const subjectSelect = document.getElementById('subjectSelect');
+    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+    subjects.forEach(subject => {
+      subjectSelect.innerHTML += `<option value="${subject.subject_id}">${subject.subject_id} - ${subject.subject_name}</option>`;
+    });
+  })
+  .catch(error => console.error('Error fetching subjects:', error));
+}
+
+
+    // Load Classes by Subject
+    function loadClasses(subjectId) {
+      fetch('fetch_orders.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'getClasses',
+          subject_id: subjectId
+        })
+      })
+        .then(res => res.json())
+        .then(classes => {
+          const classSelect = document.getElementById('classSelect');
+          classSelect.innerHTML = '<option value="">Select Class</option>';
+          classes.forEach(cls => {
+            classSelect.innerHTML += `<option value="${cls.class_id}">${cls.class_id}</option>`;
+          });
+          classSelect.disabled = false;
+        });
     }
-  })
-  .catch(error => console.error('Search error:', error));
-});
 
-fetchRegistrations();
+    // Load Registrations by Subject and Class
+    function loadRegistrations(subjectId, classId) {
+      fetch('fetch_orders.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'filter',
+          subject_id: subjectId,
+          class_id: classId
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById('registrationTable');
+          table.innerHTML = '';
+          if (data.length === 0) {
+            table.innerHTML = '<tr><td colspan="8">No registrations found.</td></tr>';
+            return;
+          }
+          data.forEach(item => {
+            const row = `
+              <tr>
+                <td>${item.registration_id}</td>
+                <td>${item.parent_name}</td>
+                <td>${item.class_id}</td>
+                <td>${item.child_name}</td>
+                <td>${item.subject_name}</td>
+                <td>${item.teacher_name}</td>
+                <td>RM ${item.payment_total_amount}</td>
+                <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${item.registration_id}"></i></td>
+              </tr>`;
+            table.innerHTML += row;
+          });
 
+          // Add delete event listeners
+          const deleteBtns = document.querySelectorAll('.delete-btn');
+          deleteBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const registrationId = btn.getAttribute('data-id');
+              deleteRegistration(registrationId);
+            });
+          });
+        });
+    }
+
+    // Delete Registration
+    function deleteRegistration(registrationId) {
+      fetch('fetch_orders.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'delete',
+          registration_id: registrationId
+        })
+      })
+        .then(res => res.json())
+        .then(response => {
+          if (response.success) {
+            loadRegistrations(document.getElementById('subjectSelect').value, document.getElementById('classSelect').value);
+          } else {
+            alert('Failed to delete registration.');
+          }
+        });
+    }
+
+    // Event listeners for subject and class select
+    document.getElementById('subjectSelect').addEventListener('change', function () {
+      const subjectId = this.value;
+      if (subjectId) {
+        loadClasses(subjectId);
+      } else {
+        document.getElementById('classSelect').innerHTML = '<option value="">Select Class</option>';
+        document.getElementById('classSelect').disabled = true;
+        document.getElementById('registrationTable').innerHTML = '';
+      }
+    });
+
+    document.getElementById('classSelect').addEventListener('change', function () {
+      const subjectId = document.getElementById('subjectSelect').value;
+      const classId = this.value;
+      if (classId) {
+        loadRegistrations(subjectId, classId);
+      } else {
+        document.getElementById('registrationTable').innerHTML = '';
+      }
+    });
+
+    // Initial load of subjects
+    loadSubjects();
   </script>
 </body>
 </html>
