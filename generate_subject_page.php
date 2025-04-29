@@ -8,18 +8,18 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // 数据库连接（使用 PDO）
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=your_database", "root", "");
+    $pdo = new PDO("mysql:host=localhost;dbname=the seeds", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("数据库连接失败: " . $e->getMessage());
+    die("Database Connection Failed: " . $e->getMessage());
 }
 
 // 获取 subject_id
 $subject_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($subject_id <= 0) {
-    die("无效的主题 ID");
+    die("Can not find the subject ID");
 }
 
 // 查询主题详情和平均评分

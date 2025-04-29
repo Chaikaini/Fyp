@@ -2,54 +2,35 @@
 header('Content-Type: application/json');
 include 'db_connect.php';
 
-// 确保没有意外输出
-ob_start(); // 开启输出缓冲，避免意外输出干扰 JSON
-
-$query = isset($_GET['query']) ? trim($_GET['query']) : '';
+$query = isset($_GET['query']) ? '%' . $_GET['query'] . '%' : '';
+$results = [];
 
 if (empty($query)) {
-    echo json_encode([]);
-    ob_end_flush();
+    echo json_encode($results);
     exit;
 }
 
-// Search only in subject_name to avoid year mismatches
 $sql = "SELECT 
         s.subject_id,
-        s.subject_name AS name,
-        s.subject_image AS image,
-        s.subject_price AS price,
-        ROUND(COALESCE(AVG(c.comment_rating), 0.0), 1) AS rating,
-        COALESCE(s.page_path, s.page) AS page,
+        s.subject_name as name,
+        s.subject_image as image,
+        s.subject_price as price,
+        ROUND(COALESCE(AVG(c.comment_rating), 0.0), 1) as rating,
         s.year
     FROM subject s
     LEFT JOIN comments c ON s.subject_id = c.subject_id
     WHERE s.subject_name LIKE ?
-    GROUP BY s.subject_id
-    ORDER BY s.subject_name ASC";
+    GROUP BY s.subject_id";
 
 $stmt = $conn->prepare($sql);
-if (!$stmt) {
-    echo json_encode(['error' => 'Prepare failed: ' . $conn->error]);
-    ob_end_flush();
-    exit;
-}
-
-$searchTerm = "%$query%";
-$stmt->bind_param("s", $searchTerm);
+$stmt->bind_param("s", $query);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$subjects = [];
 while ($row = $result->fetch_assoc()) {
-    $subjects[] = $row;
+    $row['page'] = 'generate_subject_page.php?id=' . $row['subject_id'];
+    $results[] = $row;
 }
 
-// Clean up
-$stmt->close();
-$result->free();
-$conn->close();
-
-echo json_encode($subjects);
-ob_end_flush();
+echo json_encode($results);
 ?>
