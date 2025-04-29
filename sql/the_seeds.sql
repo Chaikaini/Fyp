@@ -94,7 +94,7 @@ CREATE TABLE `child` (
 --
 
 INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_register_date`) VALUES
-(1, 1, 'Yuna', 'Female', '170909-01-7788', '2017-09-09', 'Kulai 1', 1, '2025-04-29 12:26:05'),
+(1, 1, 'Yuna', 'Female', '170909-01-7788', '2017-09-09', 'Kulai 1', 2, '2025-04-29 12:26:05'),
 (2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'Kulai 2', 1, '2025-04-29 12:26:05');
 
 -- --------------------------------------------------------

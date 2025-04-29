@@ -87,8 +87,8 @@ $registrations = array();
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $birthYear = date("Y", strtotime($row['child_birthday']));
-        $registerDate = $row['child_register_date'];
-        $calculatedYear = calculateYear($birthYear, $registerDate);
+        $registerYear = date("Y", strtotime($row['child_register_date']));
+$calculatedYear = calculateYear($birthYear, $registerYear);
 
         if ($row['child_year'] !== $calculatedYear) {
             $updateSql = "UPDATE child SET child_year = '$calculatedYear' WHERE child_id = " . $row['child_id'];
@@ -105,15 +105,13 @@ $conn->close();
 
 
 
-function calculateYear($birthYear, $registerDate) {
-    $currentYear = date("Y");  
-    $registerYear = date("Y", strtotime($registerDate));  
-    $startYear = 2020;  
-
-    $age = $currentYear - $birthYear;
-    $yearsInSchool = $currentYear - $registerYear;
-
-    return ' ' . ($yearsInSchool + 1);  
+function calculateYear($birthYear, $registerYear) {
+    $age = $registerYear - $birthYear;  
+    if ($age < 7) {
+        return 1;  
+    } else {
+        return $age - 6; 
+    }
 }
 
 
