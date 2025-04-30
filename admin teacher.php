@@ -167,13 +167,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
 window.addEventListener("DOMContentLoaded", function () {
   const tbody = document.getElementById("schedule-table-body");
-  tbody.innerHTML = "<tr><td colspan='7' class='text-center text-muted'>Please enter a Teacher ID or Subject Name to view classes.</td></tr>";
+  tbody.innerHTML = "<tr><td colspan='7' class='text-center text-muted'>Loading your schedule...</td></tr>";
+  loadTeacherSchedule(); // auto load related data of teacher_id
 });
-  
-  document.getElementById("search-category").addEventListener("change", function () {
+
+document.getElementById("search-category").addEventListener("change", function () {
   const category = this.value;
   const searchInput = document.getElementById("search");
 
@@ -196,62 +196,13 @@ document.getElementById("search-btn").addEventListener("click", function () {
   fetch("teacher_schedule.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(keyword)}`,
+    body: `category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(keyword)}`
   })
     .then((res) => {
       if (!res.ok) throw new Error("Network response was not ok");
       return res.json();
     })
-    .then((data) => {
-      const tbody = document.getElementById("schedule-table-body");
-      tbody.innerHTML = "";
-
-      if (data.error) {
-        tbody.innerHTML = `<tr><td colspan='7'>${data.error}</td></tr>`;
-      } else if (data.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='7'>No classes found.</td></tr>";
-      } else {
-        const currentMonth = new Date().getMonth(); // 0 = January
-        const monthMap = {
-          "January": 0, "February": 1, "March": 2, "April": 3,
-          "May": 4, "June": 5, "July": 6, "August": 7,
-          "September": 8, "October": 9, "November": 10, "December": 11
-        };
-
-        data.forEach((row) => {
-          let status = "Ongoing";
-          let statusClass = "text-success";
-
-          if (row.part_duration) {
-            const [start, end] = row.part_duration.split(" - ").map(s => s.trim());
-            const startMonth = monthMap[start];
-            const endMonth = monthMap[end];
-
-            if (startMonth !== undefined && endMonth !== undefined) {
-              if (currentMonth < startMonth) {
-                status = "Not Started";
-                statusClass = "text-secondary";
-              } else if (currentMonth > endMonth) {
-                status = "Complete";
-                statusClass = "text-danger";
-              }
-            }
-          }
-
-          tbody.innerHTML += `
-            <tr>
-              <td>${row.subject_id}</td>
-              <td>${row.subject_name}</td>
-              <td>${row.teacher_id}</td>
-              <td>${row.class_id}</td>
-              <td>${row.year}</td>
-              <td>${row.time}</td>
-              <td class="${statusClass}">${status}</td>
-            </tr>
-          `;
-        });
-      }
-    })
+    .then(renderSchedule)
     .catch((err) => {
       console.error("Error loading schedule:", err);
       const tbody = document.getElementById("schedule-table-body");
@@ -259,7 +210,76 @@ document.getElementById("search-btn").addEventListener("click", function () {
     });
 });
 
+function loadTeacherSchedule() {
+  fetch("teacher_schedule.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    // use session teacher_id return all classes
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Network response was not ok");
+      return res.json();
+    })
+    .then(renderSchedule)
+    .catch((err) => {
+      console.error("Error loading schedule:", err);
+      const tbody = document.getElementById("schedule-table-body");
+      tbody.innerHTML = "<tr><td colspan='7'>Error loading schedule.</td></tr>";
+    });
+}
+
+function renderSchedule(data) {
+  const tbody = document.getElementById("schedule-table-body");
+  tbody.innerHTML = "";
+
+  if (data.error) {
+    tbody.innerHTML = `<tr><td colspan='7'>${data.error}</td></tr>`;
+  } else if (data.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='7'>No classes found.</td></tr>";
+  } else {
+    const currentMonth = new Date().getMonth();
+    const monthMap = {
+      "January": 0, "February": 1, "March": 2, "April": 3,
+      "May": 4, "June": 5, "July": 6, "August": 7,
+      "September": 8, "October": 9, "November": 10, "December": 11
+    };
+
+    data.forEach((row) => {
+      let status = "Ongoing";
+      let statusClass = "text-success";
+
+      if (row.part_duration) {
+        const [start, end] = row.part_duration.split(" - ").map(s => s.trim());
+        const startMonth = monthMap[start];
+        const endMonth = monthMap[end];
+
+        if (startMonth !== undefined && endMonth !== undefined) {
+          if (currentMonth < startMonth) {
+            status = "Not Started";
+            statusClass = "text-secondary";
+          } else if (currentMonth > endMonth) {
+            status = "Complete";
+            statusClass = "text-danger";
+          }
+        }
+      }
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.subject_id}</td>
+          <td>${row.subject_name}</td>
+          <td>${row.teacher_id}</td>
+          <td>${row.class_id}</td>
+          <td>${row.year}</td>
+          <td>${row.time}</td>
+          <td class="${statusClass}">${status}</td>
+        </tr>
+      `;
+    });
+  }
+}
 </script>
+
 
    
       

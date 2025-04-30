@@ -1,24 +1,26 @@
 <?php
+session_start();
+
 $host = 'localhost';
 $user = 'root';
 $password = '';
 $dbname = 'the seeds';
-
 $conn = new mysqli($host, $user, $password, $dbname);
 if ($conn->connect_error) {
     die(json_encode(['error' => 'Connection failed']));
 }
 
-
-$subject_id = $_POST['subject_id'] ?? '';
-$subject_name = $_POST['subject_name'] ?? '';
-
-if (empty($subject_id) && empty($subject_name)) {
-    echo json_encode(['error' => 'Search input is required']);
+// get teacher_id from session
+$teacher_id = $_SESSION['teacher_id'] ?? '';
+if (empty($teacher_id)) {
+    echo json_encode(['error' => 'Unauthorized access.']);
     exit;
 }
 
-// base on serach category to select
+// 获取搜索字段（如果有）
+$subject_id = $_POST['subject_id'] ?? '';
+$subject_name = $_POST['subject_name'] ?? '';
+
 if (!empty($subject_id)) {
     $sql = "SELECT 
                 s.subject_id, 
@@ -33,10 +35,10 @@ if (!empty($subject_id)) {
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.subject_id = ?";
+            WHERE s.subject_id = ? AND s.teacher_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $subject_id);
-} else {
+    $stmt->bind_param("ss", $subject_id, $teacher_id);
+} elseif (!empty($subject_name)) {
     $sql = "SELECT 
                 s.subject_id, 
                 s.subject_name, 
@@ -50,10 +52,28 @@ if (!empty($subject_id)) {
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.subject_name LIKE ?";
+            WHERE s.subject_name LIKE ? AND s.teacher_id = ?";
     $stmt = $conn->prepare($sql);
-    $subject_name = '%' . $subject_name . '%'; 
-    $stmt->bind_param("s", $subject_name);
+    $subject_name = '%' . $subject_name . '%';
+    $stmt->bind_param("ss", $subject_name, $teacher_id);
+} else {
+    // if no searching, get all classes for the teacher
+    $sql = "SELECT 
+                s.subject_id, 
+                s.subject_name, 
+                c.class_id, 
+                c.class_time, 
+                c.class_capacity,
+                c.class_enrolled,
+                p.part_name,
+                p.part_duration,
+                s.year
+            FROM subject s
+            JOIN class c ON s.subject_id = c.subject_id
+            JOIN part p ON c.part_id = p.part_id
+            WHERE s.teacher_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $teacher_id);
 }
 
 if (!$stmt) {

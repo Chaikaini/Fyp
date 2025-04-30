@@ -201,6 +201,7 @@
               <th>Parent Name</th>
               <th>Relationship</th>
               <th>Phone Number</th>
+              <th>Teacher Comment</th>
 
             </tr>
           </thead>
@@ -303,22 +304,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 
+
+
+
 window.addEventListener("DOMContentLoaded", function () {
   const tbody = document.getElementById("schedule-table-body");
-  tbody.innerHTML = "<tr><td colspan='7' class='text-center text-muted'>Please enter a Subject ID or Subject Name to display classes.</td></tr>";
+  tbody.innerHTML = "<tr><td colspan='8' class='text-center text-muted'>Loading your subjects...</td></tr>";
+
+  // Load teacher's data automatically on page load
+  loadTeacherData();
 });
-
-document.getElementById("search-category").addEventListener("change", function () {
-  const category = this.value;
-  const searchInput = document.getElementById("search");
-
-  if (category === "subject_id") {
-    searchInput.placeholder = "Search with Subject ID";
-  } else if (category === "subject_name") {
-    searchInput.placeholder = "Search with Subject Name";
-  }
-});
-
 
 document.getElementById("search-btn").addEventListener("click", function () {
   const category = document.getElementById("search-category").value;
@@ -339,33 +334,81 @@ document.getElementById("search-btn").addEventListener("click", function () {
   })
   .then(res => res.json())
   .then(data => {
-    const tbody = document.getElementById("schedule-table-body");
-    tbody.innerHTML = "";
+    populateTable(data);
+  })
+  .catch(error => {
+    console.error("Error loading attendance:", error);
+    document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
+  });
+});
 
-    if (data.error) {
-      tbody.innerHTML = `<tr><td colspan='8'>${data.error}</td></tr>`;
-    } else if (data.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='8'>No subject found.</td></tr>";
-    } else {
-      data.forEach(row => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${row.subject_id}</td>
-            <td>${row.subject_name}</td>
-            <td>${row.class_id}</td>
-            <td>${row.year}</td>
-            <td>${row.part}</td>
-            <td>${row.time}</td>
-            <td>${row.capacity}</td>
-            <td>
-              <button class="btn btn-primary" onclick='viewStudents("${row.class_id}")'>View List</button>
-              <button class="btn btn-primary" onclick='openExamResultModal("${row.class_id}")'>Exam Result</button>
+// function to load teacher's data
+function loadTeacherData() {
+  fetch("teacher_attendance_info.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    populateTable(data);
+  })
+  .catch(error => {
+    console.error("Error loading attendance:", error);
+    document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
+  });
+}
 
-            </td>
-          </tr>
-        `;
-      });
-    }
+
+function populateTable(data) {
+  const tbody = document.getElementById("schedule-table-body");
+  tbody.innerHTML = "";
+
+  if (data.error) {
+    tbody.innerHTML = `<tr><td colspan='8'>${data.error}</td></tr>`;
+  } else if (data.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='8'>No subject found.</td></tr>";
+  } else {
+    data.forEach(row => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${row.subject_id}</td>
+          <td>${row.subject_name}</td>
+          <td>${row.class_id}</td>
+          <td>${row.year}</td>
+          <td>${row.part}</td>
+          <td>${row.time}</td>
+          <td>${row.capacity}</td>
+          <td>
+            <button class="btn btn-primary" onclick='viewStudents("${row.class_id}")'>View List</button>
+            <button class="btn btn-primary" onclick='openExamResultModal("${row.class_id}")'>Exam Result</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+}
+
+   
+document.getElementById("search-btn").addEventListener("click", function () {
+  const category = document.getElementById("search-category").value;
+  const keyword = document.getElementById("search").value.trim();
+
+  if (!keyword) {
+    alert("Please enter a valid search value.");
+    return;
+  }
+
+  const bodyData = new URLSearchParams();
+  bodyData.append(category, keyword);
+
+  fetch("teacher_attendance_info.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: bodyData.toString(),
+  })
+  .then(res => res.json())
+  .then(data => {
+    populateTable(data);
   })
   .catch(error => {
     console.error("Error loading attendance:", error);
