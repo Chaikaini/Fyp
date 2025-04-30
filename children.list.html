@@ -64,9 +64,23 @@
     .table-container .fa-edit, .table-container .fa-trash-alt {
       color: #007BFF;
     }
-
-    .pointer-cursor{
-      cursor:pointer;
+    .pointer-cursor {
+      cursor: pointer;
+    }
+    /* Added styles for card-header */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .card-header form {
+      display: flex;
+      align-items: center;
+    }
+    .card-header .form-control {
+      width: 200px;
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -107,10 +121,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <form class="d-flex ms-auto">
-          <input class="form-control me-2" type="search" placeholder="Search Children Name" id="search" />
-          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-        </form>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
@@ -137,7 +147,10 @@
     <h1 class="mb-4">Children List</h1>
     <div class="card">
       <div class="card-header">
-        <h5>Children List</h5>
+        <form class="d-flex align-items-center">
+          <input class="form-control me-2" type="search" placeholder="Search Children Name" id="search" />
+          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </form>
       </div>
       <div class="card-body">
         <table class="table table-striped">
@@ -165,98 +178,96 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.getElementById('toggleSidebar').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
 
-document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
-  const icon = document.getElementById('reportIcon');
-  icon.classList.toggle('fa-chevron-down');
-  icon.classList.toggle('fa-chevron-up');
-});
+    document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
+      const icon = document.getElementById('reportIcon');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
+    });
 
-function fetchRegistrations() {
-  fetch('fetch_children.php')
-    .then(response => response.json())
-    .then(data => {
-      const tableBody = document.getElementById('registrationTable');
-      tableBody.innerHTML = '';
-      data.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.child_id}</td>
-          <td>${item.child_name}</td>
-          <td>${item.parent_name}</td>
-          <td>${item.child_gender}</td>
-          <td>${item.child_kidNumber}</td>
-          <td>${item.child_birthday}</td>
-          <td>${item.child_school}</td>
-          <td>${item.child_year}</td>
-          <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
-        `;
-        tableBody.appendChild(row);
-      });
-    })
-    .catch(error => console.error('Error fetching data:', error));
-}
+    function fetchRegistrations() {
+      fetch('fetch_children.php')
+        .then(response => response.json())
+        .then(data => {
+          const tableBody = document.getElementById('registrationTable');
+          tableBody.innerHTML = '';
+          data.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${item.child_id}</td>
+              <td>${item.child_name}</td>
+              <td>${item.parent_name}</td>
+              <td>${item.child_gender}</td>
+              <td>${item.child_kidNumber}</td>
+              <td>${item.child_birthday}</td>
+              <td>${item.child_school}</td>
+              <td>${item.child_year}</td>
+              <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+            `;
+            tableBody.appendChild(row);
+          });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+    }
 
-document.querySelector('table').addEventListener('click', function(event) {
-  if (event.target.classList.contains('delete-btn')) {
-    const row = event.target.closest('tr');
-    const registrationId = row.querySelector('td:first-child').textContent;
+    document.querySelector('table').addEventListener('click', function(event) {
+      if (event.target.classList.contains('delete-btn')) {
+        const row = event.target.closest('tr');
+        const registrationId = row.querySelector('td:first-child').textContent;
 
-    fetch('fetch_children.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `child_id=${registrationId}`
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        fetchRegistrations();
-      } else {
-        console.error('Deletion failed：', data);
+        fetch('fetch_children.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `child_id=${registrationId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            fetchRegistrations();
+          } else {
+            console.error('Deletion failed:', data);
+          }
+        })
+        .catch(error => console.error('Error deleting record:', error));
       }
-    })
-    .catch(error => console.error('Error deleting record:', error));
-  }
-});
+    });
 
-document.getElementById('search-btn').addEventListener('click', function(event) {
-    event.preventDefault(); 
+    document.getElementById('search-btn').addEventListener('click', function(event) {
+      event.preventDefault(); 
 
-    const searchTerm = document.getElementById('search').value;
+      const searchTerm = document.getElementById('search').value;
 
-    fetch('fetch_children.php', {
+      fetch('fetch_children.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `search_term=${searchTerm}`
-    })
-    .then(response => response.json())
-    .then(data => {
-  const tableBody = document.getElementById('registrationTable');
-  tableBody.innerHTML = '';
-  data.forEach(item => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${item.child_id}</td>
-      <td>${item.child_name}</td>
-      <td>${item.parent_name}</td>
-      <td>${item.child_gender}</td>
-      <td>${item.child_kidNumber}</td>
-      <td>${item.child_birthday}</td>
-      <td>${item.child_school}</td>
-      <td>${item.child_year}</td>
-      <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
-    `;
-    tableBody.appendChild(row);
-  });
-})
-.catch(error => console.error('Error searching data:', error));
-});
+      })
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.getElementById('registrationTable');
+        tableBody.innerHTML = '';
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${item.child_id}</td>
+            <td>${item.child_name}</td>
+            <td>${item.parent_name}</td>
+            <td>${item.child_gender}</td>
+            <td>${item.child_kidNumber}</td>
+            <td>${item.child_birthday}</td>
+            <td>${item.child_school}</td>
+            <td>${item.child_year}</td>
+            <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+          `;
+          tableBody.appendChild(row);
+        });
+      })
+      .catch(error => console.error('Error searching data:', error));
+    });
 
-
-fetchRegistrations();
-
+    fetchRegistrations();
   </script>
 </body>
 </html>
