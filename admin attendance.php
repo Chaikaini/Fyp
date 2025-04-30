@@ -259,10 +259,13 @@
   </div>
 </div>
 
+
+
 <!-- Modal Structure -->
 <div class="modal fade" id="examResultModal" tabindex="-1" aria-labelledby="examResultModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg"> 
     <div class="modal-content">
+    <div id="toastContainer"></div>
       <div class="modal-header">
         <h5 class="modal-title" id="examResultModalLabel">Exam Results</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -283,12 +286,24 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
+        
         <button class="btn btn-success" onclick="exportExamResultsToExcel()">Export to Excel</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Toast container -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+  <div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastMessage">
+        <!-- Toast message goes here -->
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
 
 
 
@@ -684,6 +699,7 @@ function showToast(message, isError = false) {
 
 
 
+
 // Function to open the modal and load student data
 function openExamResultModal(classId) {
   fetch(`teacher_exam_students.php`, {
@@ -723,7 +739,7 @@ function openExamResultModal(classId) {
 function saveExamResults() {
   const rows = document.querySelectorAll("#studentResultsTable tbody tr");
   const results = [];
-  const classId = window.currentClassId; // Use the classId from the global variable
+  const classId = window.currentClassId;
 
   rows.forEach(row => {
     const childId = row.querySelector("input[data-child-id]").dataset.childId;
@@ -747,14 +763,15 @@ function saveExamResults() {
     if (data.success) {
       alert("Exam results saved successfully!");
     } else {
-      alert("Error: " + (data.error || "Failed to save results."));
+      alert("Error: " + (data.error || "Failed to save results."), true);
     }
   })
   .catch(err => {
     console.error("Save error:", err);
-    alert("Failed to save results.");
+    alert("Failed to save results.", true);
   });
 }
+
 
 
 // Function to export the student results table to Excel
