@@ -24,13 +24,13 @@
       white-space: nowrap;
       overflow: hidden;
       height: 130vh;
-    display: flex;
-    flex-direction: column;
+      display: flex;
+      flex-direction: column;
     }
     #sidebar a {
       color: white;
       text-decoration: none;
-      padding: 15px 15px; /* Adjusted padding for better spacing */
+      padding: 15px 15px;
       display: block;
     }
     #sidebar a:hover {
@@ -67,10 +67,36 @@
     .table-container .fa-edit, .table-container .fa-trash-alt, .table-container .fa-eye {
       color: #007BFF;
     }
-
-    .pointer-cursor{
-      cursor:pointer;
+    .pointer-cursor {
+      cursor: pointer;
     }
+    .card-header form {
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      align-items: center;
+    }
+    .card-header .form-select {
+      width: 200px;
+      margin-right: 10px;
+    }
+    .card-header button {
+      padding: 8px 15px;
+    }
+
+    .card-header form {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  align-items: center;
+}
+.card-header .form-select {
+  width: 200px;
+  margin-right: 10px;
+}
+.card-header button {
+  padding: 8px 15px;
+}
   </style>
 </head>
 <body>
@@ -91,7 +117,7 @@
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
         <div class="collapse" id="reportMenu">
           <ul class="nav flex-column ms-3">
@@ -100,23 +126,37 @@
             <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>      
+      </li>
     </ul>
   </nav>
 
-  <!-- Main Content -->
   <div id="main-content">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
-        <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <div class="ms-auto d-flex gap-2">
-          <select id="subjectSelect" class="form-select" style="min-width: 200px;">
-            <option value="">Select Subject</option>
-          </select>
-          <select id="classSelect" class="form-select" style="min-width: 200px;" disabled>
-            <option value="">Select Class</option>
-          </select>
-        </div>
+        <!-- Toggle Sidebar Button (Left) -->
+        <button class="btn btn-outline-secondary me-2" id="toggleSidebar">
+          <i class="fas fa-bars"></i>
+        </button>
+        <!-- Icons (Right) -->
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-bell"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
+              <li><a class="dropdown-item" href="#">No new notifications</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
+              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </nav>
 
@@ -124,6 +164,15 @@
     <div class="card">
       <div class="card-header">
         <h5>Registration Class List</h5>
+        <form class="d-flex align-items-center">
+          <select id="subjectSelect" class="form-select">
+            <option value="">Select Subject</option>
+          </select>
+          <select id="classSelect" class="form-select" disabled>
+            <option value="">Select Class</option>
+          </select>
+          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </form>
       </div>
       <div class="card-body">
         <table class="table table-striped">
@@ -161,24 +210,23 @@
 
     // Load Subjects
     function loadSubjects() {
-  fetch('fetch_orders.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      action: 'getSubjects'
-    })
-  })
-  .then(res => res.json())
-  .then(subjects => {
-    const subjectSelect = document.getElementById('subjectSelect');
-    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
-    subjects.forEach(subject => {
-      subjectSelect.innerHTML += `<option value="${subject.subject_id}">${subject.subject_id} - ${subject.subject_name}</option>`;
-    });
-  })
-  .catch(error => console.error('Error fetching subjects:', error));
-}
-
+      fetch('fetch_orders.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          action: 'getSubjects'
+        })
+      })
+      .then(res => res.json())
+      .then(subjects => {
+        const subjectSelect = document.getElementById('subjectSelect');
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        subjects.forEach(subject => {
+          subjectSelect.innerHTML += `<option value="${subject.subject_id}">${subject.subject_id} - ${subject.subject_name}</option>`;
+        });
+      })
+      .catch(error => console.error('Error fetching subjects:', error));
+    }
 
     // Load Classes by Subject
     function loadClasses(subjectId) {
@@ -190,15 +238,15 @@
           subject_id: subjectId
         })
       })
-        .then(res => res.json())
-        .then(classes => {
-          const classSelect = document.getElementById('classSelect');
-          classSelect.innerHTML = '<option value="">Select Class</option>';
-          classes.forEach(cls => {
-            classSelect.innerHTML += `<option value="${cls.class_id}">${cls.class_id}</option>`;
-          });
-          classSelect.disabled = false;
+      .then(res => res.json())
+      .then(classes => {
+        const classSelect = document.getElementById('classSelect');
+        classSelect.innerHTML = '<option value="">Select Class</option>';
+        classes.forEach(cls => {
+          classSelect.innerHTML += `<option value="${cls.class_id}">${cls.class_id}</option>`;
         });
+        classSelect.disabled = false;
+      });
     }
 
     // Load Registrations by Subject and Class
@@ -212,38 +260,38 @@
           class_id: classId
         })
       })
-        .then(res => res.json())
-        .then(data => {
-          const table = document.getElementById('registrationTable');
-          table.innerHTML = '';
-          if (data.length === 0) {
-            table.innerHTML = '<tr><td colspan="8">No registrations found.</td></tr>';
-            return;
-          }
-          data.forEach(item => {
-            const row = `
-              <tr>
-                <td>${item.registration_id}</td>
-                <td>${item.parent_name}</td>
-                <td>${item.class_id}</td>
-                <td>${item.child_name}</td>
-                <td>${item.subject_name}</td>
-                <td>${item.teacher_name}</td>
-                <td>RM ${item.payment_total_amount}</td>
-                <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${item.registration_id}"></i></td>
-              </tr>`;
-            table.innerHTML += row;
-          });
+      .then(res => res.json())
+      .then(data => {
+        const table = document.getElementById('registrationTable');
+        table.innerHTML = '';
+        if (data.length === 0) {
+          table.innerHTML = '<tr><td colspan="8">No registrations found.</td></tr>';
+          return;
+        }
+        data.forEach(item => {
+          const row = `
+            <tr>
+              <td>${item.registration_id}</td>
+              <td>${item.parent_name}</td>
+              <td>${item.class_id}</td>
+              <td>${item.child_name}</td>
+              <td>${item.subject_name}</td>
+              <td>${item.teacher_name}</td>
+              <td>RM ${item.payment_total_amount}</td>
+              <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${item.registration_id}"></i></td>
+            </tr>`;
+          table.innerHTML += row;
+        });
 
-          // Add delete event listeners
-          const deleteBtns = document.querySelectorAll('.delete-btn');
-          deleteBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-              const registrationId = btn.getAttribute('data-id');
-              deleteRegistration(registrationId);
-            });
+        // Add delete event listeners
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const registrationId = btn.getAttribute('data-id');
+            deleteRegistration(registrationId);
           });
         });
+      });
     }
 
     // Delete Registration
@@ -256,14 +304,14 @@
           registration_id: registrationId
         })
       })
-        .then(res => res.json())
-        .then(response => {
-          if (response.success) {
-            loadRegistrations(document.getElementById('subjectSelect').value, document.getElementById('classSelect').value);
-          } else {
-            alert('Failed to delete registration.');
-          }
-        });
+      .then(res => res.json())
+      .then(response => {
+        if (response.success) {
+          loadRegistrations(document.getElementById('subjectSelect').value, document.getElementById('classSelect').value);
+        } else {
+          alert('Failed to delete registration.');
+        }
+      });
     }
 
     // Event listeners for subject and class select
@@ -279,12 +327,23 @@
     });
 
     document.getElementById('classSelect').addEventListener('change', function () {
-      const subjectId = document.getElementById('subjectSelect').value;
+      const subjectId = mercredi.getElementById('subjectSelect').value;
       const classId = this.value;
       if (classId) {
         loadRegistrations(subjectId, classId);
       } else {
         document.getElementById('registrationTable').innerHTML = '';
+      }
+    });
+
+    // Search button event listener
+    document.getElementById('search-btn').addEventListener('click', function () {
+      const subjectId = document.getElementById('subjectSelect').value;
+      const classId = document.getElementById('classSelect').value;
+      if (subjectId && classId) {
+        loadRegistrations(subjectId, classId);
+      } else {
+        alert('Please select both a subject and a class.');
       }
     });
 
