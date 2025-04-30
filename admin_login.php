@@ -20,6 +20,7 @@ require 'SMTP.php';
 require 'Exception.php';
 
 function renderForm($content, $error = '') {
+    $errorMessage = $error ? "<p style='color: red; font-size: 14px; margin-bottom: 15px;'>$error</p>" : '';
     echo "<!DOCTYPE html>
     <html lang='en'>
     <head>
@@ -47,11 +48,6 @@ function renderForm($content, $error = '') {
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                 text-align: center;
             }
-            .error {
-                color: red;
-                margin-bottom: 15px;
-                font-size: 14px;
-            }
             form input, form select {
                 width: 100%;
                 padding: 10px;
@@ -73,36 +69,13 @@ function renderForm($content, $error = '') {
             form button:hover {
                 background-color: #138496;
             }
-            .toggle-password {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                font-size: 13px;
-                margin-top: -10px;
-                margin-bottom: 15px;
-                color: #333;
-                cursor: pointer;
-            }
-            a {
-                color: #17a2b8;
-            }
         </style>
     </head>
     <body>
         <div class='container'>
-    $content
-    " . (!empty($error) ? "<div class='error'>$error</div>" : "") . "
-</div>
-        <script>
-            function togglePassword(id) {
-                const field = document.getElementById(id);
-                if (field.type === 'password') {
-                    field.type = 'text';
-                } else {
-                    field.type = 'password';
-                }
-            }
-        </script>
+            $errorMessage
+            $content
+        </div>
     </body>
     </html>";
 }
@@ -116,7 +89,20 @@ if (isset($_POST['send_otp'])) {
     } elseif ($role == 'teacher') {
         $query = mysqli_query($conn, "SELECT * FROM teacher WHERE teacher_email='$email'");
     } else {
-        renderForm("", "Invalid role selected.");
+        renderForm("
+            <form action='admin forgot.php' method='post'>
+                <h2>Forgot Password</h2>
+                <p>Select your role and enter your email to receive a reset OTP.</p>
+                <select name='role' required>
+                    <option value='' disabled selected>Select Role</option>
+                    <option value='admin'>Admin</option>
+                    <option value='teacher'>Teacher</option>
+                </select>
+                <input type='email' name='email' placeholder='Enter your email' required>
+                <button type='submit' name='send_otp'>Send OTP</button>
+                <p>Remember your password? <a href='admin login.html'>Login here</a></p>
+            </form>
+        ", "Invalid role selected.");
         exit;
     }
 
@@ -152,19 +138,32 @@ if (isset($_POST['send_otp'])) {
                 </form>
             ");
         } catch (Exception $e) {
-            renderForm("", "Failed to send email. Error: {$mail->ErrorInfo}");
+            renderForm("
+                <form action='admin forgot.php' method='post'>
+                    <h2>Forgot Password</h2>
+                    <p>Select your role and enter your email to receive a reset OTP.</p>
+                    <select name='role' required>
+                        <option value='' disabled selected>Select Role</option>
+                        <option value='admin'>Admin</option>
+                        <option value='teacher'>Teacher</option>
+                    </select>
+                    <input type='email' name='email' placeholder='Enter your email' required>
+                    <button type='submit' name='send_otp'>Send OTP</button>
+                    <p>Remember your password? <a href='admin login.html'>Login here</a></p>
+                </form>
+            ", "Failed to send email. Error: {$mail->ErrorInfo}");
         }
     } else {
         renderForm("
-            <form action='' method='post'>
+            <form action='admin forgot.php' method='post'>
                 <h2>Forgot Password</h2>
                 <p>Select your role and enter your email to receive a reset OTP.</p>
                 <select name='role' required>
-                    <option value='' disabled>Select Role</option>
-                    <option value='admin' " . ($role == 'admin' ? 'selected' : '') . ">Admin</option>
-                    <option value='teacher' " . ($role == 'teacher' ? 'selected' : '') . ">Teacher</option>
+                    <option value='' disabled selected>Select Role</option>
+                    <option value='admin'>Admin</option>
+                    <option value='teacher'>Teacher</option>
                 </select>
-                <input type='email' name='email' placeholder='Enter your email' value='$email' required>
+                <input type='email' name='email' placeholder='Enter your email' required>
                 <button type='submit' name='send_otp'>Send OTP</button>
                 <p>Remember your password? <a href='admin login.html'>Login here</a></p>
             </form>
@@ -178,14 +177,8 @@ elseif (isset($_POST['verify_otp'])) {
         renderForm("
             <form method='post'>
                 <h2>Reset Password</h2>
-                <input type='password' name='new_password' id='new_password' placeholder='New Password' required>
-                <div class='toggle-password' onclick=\"togglePassword('new_password')\">
-                    👁 Show/Hide Password
-                </div>
-                <input type='password' name='confirm_password' id='confirm_password' placeholder='Confirm Password' required>
-                <div class='toggle-password' onclick=\"togglePassword('confirm_password')\">
-                    👁 Show/Hide Password
-                </div>
+                <input type='password' name='new_password' placeholder='New Password' required>
+                <input type='password' name='confirm_password' placeholder='Confirm Password' required>
                 <button type='submit' name='reset_password'>Reset Password</button>
             </form>
         ");
@@ -220,20 +213,21 @@ elseif (isset($_POST['reset_password'])) {
             header("Location: admin login.html");
             exit();
         } else {
-            renderForm("", "Error updating password.");
+            renderForm("
+                <form method='post'>
+                    <h2>Reset Password</h2>
+                    <input type='password' name='new_password' placeholder='New Password' required>
+                    <input type='password' name='confirm_password' placeholder='Confirm Password' required>
+                    <button type='submit' name='reset_password'>Reset Password</button>
+                </form>
+            ", "Error updating password.");
         }
     } else {
         renderForm("
             <form method='post'>
                 <h2>Reset Password</h2>
-                <input type='password' name='new_password' id='new_password' placeholder='New Password' required>
-                <div class='toggle-password' onclick=\"togglePassword('new_password')\">
-                    👁 Show/Hide Password
-                </div>
-                <input type='password' name='confirm_password' id='confirm_password' placeholder='Confirm Password' required>
-                <div class='toggle-password' onclick=\"togglePassword('confirm_password')\">
-                    👁 Show/Hide Password
-                </div>
+                <input type='password' name='new_password' placeholder='New Password' required>
+                <input type='password' name='confirm_password' placeholder='Confirm Password' required>
                 <button type='submit' name='reset_password'>Reset Password</button>
             </form>
         ", "Passwords do not match.");
