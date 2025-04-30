@@ -265,7 +265,10 @@
 <div class="modal fade" id="examResultModal" tabindex="-1" aria-labelledby="examResultModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg"> 
     <div class="modal-content">
-    <div id="toastContainer"></div>
+
+    <!-- Toast Message Container -->
+   <div id="successToast" class="toast-message" style="display: none;"></div>
+
       <div class="modal-header">
         <h5 class="modal-title" id="examResultModalLabel">Exam Results</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -293,17 +296,6 @@
   </div>
 </div>
 
-<!-- Toast container -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
-  <div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body" id="toastMessage">
-        <!-- Toast message goes here -->
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-  </div>
-</div>
 
 
 
@@ -700,6 +692,45 @@ function showToast(message, isError = false) {
 
 
 
+
+
+// Function to save exam results
+function saveExamResults() {
+    const rows = document.querySelectorAll("#studentResultsTable tbody tr");
+    const results = [];
+    const classId = window.currentClassId;
+
+    rows.forEach(row => {
+        const childId = row.querySelector("input[data-child-id]").dataset.childId;
+        const midterm = row.querySelector("input[data-exam='midterm']").value;
+        const final = row.querySelector("input[data-exam='final']").value;
+
+        results.push({
+            child_id: childId,
+            exam_result_midterm: parseFloat(midterm),
+            exam_result_final: parseFloat(final)
+        });
+    });
+
+    fetch("save_exam_results.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ class_id: classId, results: results })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast("Exam results saved successfully!");
+        } else {
+            showToast("Error: " + (data.error || "Failed to save results."), true);
+        }
+    })
+    .catch(err => {
+        console.error("Save error:", err);
+        showToast("Failed to save results.", true);
+    });
+}
+
 // Function to open the modal and load student data
 function openExamResultModal(classId) {
   fetch(`teacher_exam_students.php`, {
@@ -735,42 +766,7 @@ function openExamResultModal(classId) {
     .catch(error => console.error("Error loading student data:", error));
 }
 
-// Function to save exam results
-function saveExamResults() {
-  const rows = document.querySelectorAll("#studentResultsTable tbody tr");
-  const results = [];
-  const classId = window.currentClassId;
 
-  rows.forEach(row => {
-    const childId = row.querySelector("input[data-child-id]").dataset.childId;
-    const midterm = row.querySelector("input[data-exam='midterm']").value;
-    const final = row.querySelector("input[data-exam='final']").value;
-
-    results.push({
-      child_id: childId,
-      exam_result_midterm: parseFloat(midterm),
-      exam_result_final: parseFloat(final)
-    });
-  });
-
-  fetch("save_exam_results.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ class_id: classId, results: results })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      alert("Exam results saved successfully!");
-    } else {
-      alert("Error: " + (data.error || "Failed to save results."), true);
-    }
-  })
-  .catch(err => {
-    console.error("Save error:", err);
-    alert("Failed to save results.", true);
-  });
-}
 
 
 
