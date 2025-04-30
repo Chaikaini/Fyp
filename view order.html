@@ -97,6 +97,12 @@
 .card-header button {
   padding: 8px 15px;
 }
+
+.text-center {
+  text-align: center;
+  color: #6c757d; 
+  font-style: italic;
+}
   </style>
 </head>
 <body>
@@ -163,7 +169,6 @@
     <h1 class="mb-4">Registration Class List</h1>
     <div class="card">
       <div class="card-header">
-        <h5>Registration Class List</h5>
         <form class="d-flex align-items-center">
           <select id="subjectSelect" class="form-select">
             <option value="">Select Subject</option>
@@ -190,6 +195,7 @@
           </thead>
           <tbody id="registrationTable">
             <!-- Dynamic rows will be inserted here -->
+              <tr><td colspan="8" class="text-center">Please select subject and class first</td></tr>
           </tbody>
         </table>
       </div>
@@ -209,146 +215,145 @@
     });
 
     // Load Subjects
-    function loadSubjects() {
-      fetch('fetch_orders.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'getSubjects'
-        })
-      })
-      .then(res => res.json())
-      .then(subjects => {
-        const subjectSelect = document.getElementById('subjectSelect');
-        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
-        subjects.forEach(subject => {
-          subjectSelect.innerHTML += `<option value="${subject.subject_id}">${subject.subject_id} - ${subject.subject_name}</option>`;
-        });
-      })
-      .catch(error => console.error('Error fetching subjects:', error));
+function loadSubjects() {
+  fetch('fetch_orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      action: 'getSubjects'
+    })
+  })
+  .then(res => res.json())
+  .then(subjects => {
+    const subjectSelect = document.getElementById('subjectSelect');
+    subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+    subjects.forEach(subject => {
+      subjectSelect.innerHTML += `<option value="${subject.subject_id}">${subject.subject_id} - ${subject.subject_name}</option>`;
+    });
+  })
+  .catch(error => console.error('Error fetching subjects:', error));
+}
+
+// Load Classes by Subject
+function loadClasses(subjectId) {
+  fetch('fetch_orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      action: 'getClasses',
+      subject_id: subjectId
+    })
+  })
+  .then(res => res.json())
+  .then(classes => {
+    const classSelect = document.getElementById('classSelect');
+    classSelect.innerHTML = '<option value="">Select Class</option>';
+    classes.forEach(cls => {
+      classSelect.innerHTML += `<option value="${cls.class_id}">${cls.class_id}</option>`;
+    });
+    classSelect.disabled = false;
+  });
+}
+
+// Load Registrations by Subject and Class
+function loadRegistrations(subjectId, classId) {
+  fetch('fetch_orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      action: 'filter',
+      subject_id: subjectId,
+      class_id: classId
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const table = document.getElementById('registrationTable');
+    table.innerHTML = ''; // 清空表格
+    if (data.length === 0) {
+      table.innerHTML = '<tr><td colspan="8" class="text-center">没有找到注册信息</td></tr>';
+      return;
     }
-
-    // Load Classes by Subject
-    function loadClasses(subjectId) {
-      fetch('fetch_orders.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'getClasses',
-          subject_id: subjectId
-        })
-      })
-      .then(res => res.json())
-      .then(classes => {
-        const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select Class</option>';
-        classes.forEach(cls => {
-          classSelect.innerHTML += `<option value="${cls.class_id}">${cls.class_id}</option>`;
-        });
-        classSelect.disabled = false;
-      });
-    }
-
-    // Load Registrations by Subject and Class
-    function loadRegistrations(subjectId, classId) {
-      fetch('fetch_orders.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'filter',
-          subject_id: subjectId,
-          class_id: classId
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const table = document.getElementById('registrationTable');
-        table.innerHTML = '';
-        if (data.length === 0) {
-          table.innerHTML = '<tr><td colspan="8">No registrations found.</td></tr>';
-          return;
-        }
-        data.forEach(item => {
-          const row = `
-            <tr>
-              <td>${item.registration_id}</td>
-              <td>${item.parent_name}</td>
-              <td>${item.class_id}</td>
-              <td>${item.child_name}</td>
-              <td>${item.subject_name}</td>
-              <td>${item.teacher_name}</td>
-              <td>RM ${item.payment_total_amount}</td>
-              <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${item.registration_id}"></i></td>
-            </tr>`;
-          table.innerHTML += row;
-        });
-
-        // Add delete event listeners
-        const deleteBtns = document.querySelectorAll('.delete-btn');
-        deleteBtns.forEach(btn => {
-          btn.addEventListener('click', () => {
-            const registrationId = btn.getAttribute('data-id');
-            deleteRegistration(registrationId);
-          });
-        });
-      });
-    }
-
-    // Delete Registration
-    function deleteRegistration(registrationId) {
-      fetch('fetch_orders.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          action: 'delete',
-          registration_id: registrationId
-        })
-      })
-      .then(res => res.json())
-      .then(response => {
-        if (response.success) {
-          loadRegistrations(document.getElementById('subjectSelect').value, document.getElementById('classSelect').value);
-        } else {
-          alert('Failed to delete registration.');
-        }
-      });
-    }
-
-    // Event listeners for subject and class select
-    document.getElementById('subjectSelect').addEventListener('change', function () {
-      const subjectId = this.value;
-      if (subjectId) {
-        loadClasses(subjectId);
-      } else {
-        document.getElementById('classSelect').innerHTML = '<option value="">Select Class</option>';
-        document.getElementById('classSelect').disabled = true;
-        document.getElementById('registrationTable').innerHTML = '';
-      }
+    data.forEach(item => {
+      const row = `
+        <tr>
+          <td>${item.registration_id}</td>
+          <td>${item.parent_name}</td>
+          <td>${item.class_id}</td>
+          <td>${item.child_name}</td>
+          <td>${item.subject_name}</td>
+          <td>${item.teacher_name}</td>
+          <td>RM ${item.payment_total_amount}</td>
+          <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${item.registration_id}"></i></td>
+        </tr>`;
+      table.innerHTML += row;
     });
 
-    document.getElementById('classSelect').addEventListener('change', function () {
-      const subjectId = mercredi.getElementById('subjectSelect').value;
-      const classId = this.value;
-      if (classId) {
-        loadRegistrations(subjectId, classId);
-      } else {
-        document.getElementById('registrationTable').innerHTML = '';
-      }
+    // Add delete event listeners
+    const deleteBtns = document.querySelectorAll('.delete-btn');
+    deleteBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const registrationId = btn.getAttribute('data-id');
+        deleteRegistration(registrationId);
+      });
     });
+  });
+}
 
-    // Search button event listener
-    document.getElementById('search-btn').addEventListener('click', function () {
-      const subjectId = document.getElementById('subjectSelect').value;
-      const classId = document.getElementById('classSelect').value;
-      if (subjectId && classId) {
-        loadRegistrations(subjectId, classId);
-      } else {
-        alert('Please select both a subject and a class.');
-      }
-    });
+// Delete Registration
+function deleteRegistration(registrationId) {
+  fetch('fetch_orders.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      action: 'delete',
+      registration_id: registrationId
+    })
+  })
+  .then(res => res.json())
+  .then(response => {
+    if (response.success) {
+      loadRegistrations(document.getElementById('subjectSelect').value, document.getElementById('classSelect').value);
+    } else {
+      alert('Failed to delete registration.');
+    }
+  });
+}
 
-    // Initial load of subjects
-    loadSubjects();
+// Event listeners for subject and class select
+document.getElementById('subjectSelect').addEventListener('change', function () {
+  const subjectId = this.value;
+  if (subjectId) {
+    loadClasses(subjectId);
+  } else {
+    document.getElementById('classSelect').innerHTML = '<option value="">Select Class</option>';
+    document.getElementById('classSelect').disabled = true;
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+  }
+});
+
+document.getElementById('classSelect').addEventListener('change', function () {
+  const subjectId = document.getElementById('subjectSelect').value;
+  const classId = this.value;
+  if (!subjectId || !classId) {
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+  }
+});
+
+// Search button event listener
+document.getElementById('search-btn').addEventListener('click', function () {
+  const subjectId = document.getElementById('subjectSelect').value;
+  const classId = document.getElementById('classSelect').value;
+  if (subjectId && classId) {
+    loadRegistrations(subjectId, classId);
+  } else {
+    alert('Please select both a subject and a class.');
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+  }
+});
+
+// Initial load of subjects
+loadSubjects();
   </script>
 </body>
 </html>
