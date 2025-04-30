@@ -13,10 +13,10 @@ $dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die(json_encode(['success' => false, 'message' => 'Database connection failed'])); 
+    die(json_encode(['success' => false, 'message' => 'Database connection failed']));
 }
 
-
+// 获取所有教师
 if (isset($_GET['action']) && $_GET['action'] === 'getAdmins') {
     $result = $conn->query("SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email, teacher_phone_number AS phone, teacher_address AS address, teacher_join_date AS join_date, teacher_status AS status FROM teacher");
 
@@ -29,10 +29,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'getAdmins') {
     exit;
 }
 
+// 处理POST请求
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $inputJSON = file_get_contents("php://input");
     $postData = json_decode($inputJSON, true);
 
+    // 添加教师
     if ($postData["action"] === "addAdmin") {
         $teacher_name = $postData["name"];
         $teacher_gender = $postData["gender"];
@@ -44,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $teacher_password = $postData["password"];
 
         if (empty($teacher_password)) {
-            $teacher_password = "admin123";  
+            $teacher_password = "admin123";
         }
 
         $hashed_password = password_hash($teacher_password, PASSWORD_BCRYPT);
@@ -61,22 +63,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         exit;
     }
-}
 
-if (isset($_GET['action']) && $_GET['action'] === 'deleteAdmin' && isset($_GET['id'])) {
-    $id = $_GET['id'];
+    // 编辑教师
+    if ($postData["action"] === "editAdmin") {
+        $teacher_id = $postData["id"];
+        $teacher_name = $postData["name"];
+        $teacher_gender = $postData["gender"];
+        $teacher_phone = $postData["phone"];
+        $teacher_address = $postData["address"];
+        $teacher_join_date = $postData["join_date"];
+        $teacher_status = $postData["status"];
 
-    $stmt = $conn->prepare("DELETE FROM teacher WHERE teacher_id = ?");
-    $stmt->bind_param("i", $id);
+        $stmt = $conn->prepare("UPDATE teacher 
+            SET teacher_name = ?, teacher_gender = ?, teacher_phone_number = ?, teacher_address = ?, teacher_join_date = ?, teacher_status = ?
+            WHERE teacher_id = ?");
+        $stmt->bind_param("ssssssi", $teacher_name, $teacher_gender, $teacher_phone, $teacher_address, $teacher_join_date, $teacher_status, $teacher_id);
 
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error: ' . $stmt->error]);
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Update failed: " . $stmt->error]);
+        }
+        exit;
     }
-    exit;
 }
 
+// 搜索教师
 if (isset($_GET['action']) && $_GET['action'] === 'searchAdmins' && isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
 
