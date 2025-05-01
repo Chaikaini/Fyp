@@ -67,7 +67,6 @@
     .pointer-cursor {
       cursor: pointer;
     }
-    /* Added styles for card-header */
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -81,6 +80,10 @@
     .card-header .form-control {
       width: 200px;
       margin-right: 10px;
+    }
+    .no-results {
+      padding: 20px;
+      font-size: 16px;
     }
   </style>
 </head>
@@ -102,7 +105,7 @@
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
         <div class="collapse" id="reportMenu">
           <ul class="nav flex-column ms-3">
@@ -189,27 +192,48 @@
 
     function fetchRegistrations() {
       fetch('fetch_children.php')
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
           const tableBody = document.getElementById('registrationTable');
           tableBody.innerHTML = '';
-          data.forEach(item => {
+          if (data.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${item.child_id}</td>
-              <td>${item.child_name}</td>
-              <td>${item.parent_name}</td>
-              <td>${item.child_gender}</td>
-              <td>${item.child_kidNumber}</td>
-              <td>${item.child_birthday}</td>
-              <td>${item.child_school}</td>
-              <td>${item.child_year}</td>
-              <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+              <td colspan="9" class="text-center text-muted no-results">No children found</td>
             `;
             tableBody.appendChild(row);
-          });
+          } else {
+            data.forEach(item => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${item.child_id}</td>
+                <td>${item.child_name}</td>
+                <td>${item.parent_name}</td>
+                <td>${item.child_gender}</td>
+                <td>${item.child_kidNumber}</td>
+                <td>${item.child_birthday}</td>
+                <td>${item.child_school}</td>
+                <td>${item.child_year}</td>
+                <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+              `;
+              tableBody.appendChild(row);
+            });
+          }
         })
-        .catch(error => console.error('Error fetching data:', error));
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          const tableBody = document.getElementById('registrationTable');
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="9" class="text-center text-danger no-results">Error loading data. Please try again.</td>
+            </tr>
+          `;
+        });
     }
 
     document.querySelector('table').addEventListener('click', function(event) {
@@ -222,49 +246,83 @@
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `child_id=${registrationId}`
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             fetchRegistrations();
           } else {
             console.error('Deletion failed:', data);
+            alert('Deletion failed: ' + (data.error || 'Unknown error'));
           }
         })
-        .catch(error => console.error('Error deleting record:', error));
+        .catch(error => {
+          console.error('Error deleting record:', error);
+          alert('Error deleting record. Please try again.');
+        });
       }
     });
 
     document.getElementById('search-btn').addEventListener('click', function(event) {
       event.preventDefault(); 
 
-      const searchTerm = document.getElementById('search').value;
+      const searchTerm = document.getElementById('search').value.trim();
 
-      fetch('fetch_children.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `search_term=${searchTerm}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        const tableBody = document.getElementById('registrationTable');
-        tableBody.innerHTML = '';
-        data.forEach(item => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${item.child_id}</td>
-            <td>${item.child_name}</td>
-            <td>${item.parent_name}</td>
-            <td>${item.child_gender}</td>
-            <td>${item.child_kidNumber}</td>
-            <td>${item.child_birthday}</td>
-            <td>${item.child_school}</td>
-            <td>${item.child_year}</td>
-            <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+      if (searchTerm === '') {
+        fetchRegistrations();
+      } else {
+        fetch('fetch_children.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `search_term=${searchTerm}`
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const tableBody = document.getElementById('registrationTable');
+          tableBody.innerHTML = '';
+          if (data.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td colspan="9" class="text-center text-muted no-results">No results found</td>
+            `;
+            tableBody.appendChild(row);
+          } else {
+            data.forEach(item => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${item.child_id}</td>
+                <td>${item.child_name}</td>
+                <td>${item.parent_name}</td>
+                <td>${item.child_gender}</td>
+                <td>${item.child_kidNumber}</td>
+                <td>${item.child_birthday}</td>
+                <td>${item.child_school}</td>
+                <td>${item.child_year}</td>
+                <td><i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i></td>
+              `;
+              tableBody.appendChild(row);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error searching data:', error);
+          const tableBody = document.getElementById('registrationTable');
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="9" class="text-center text-danger no-results">Error searching data. Please try again.</td>
+            </tr>
           `;
-          tableBody.appendChild(row);
         });
-      })
-      .catch(error => console.error('Error searching data:', error));
+      }
     });
 
     fetchRegistrations();

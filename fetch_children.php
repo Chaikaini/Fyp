@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['child_id'])) {
     if ($child_id) {
         $child_id = $conn->real_escape_string($child_id);
         $sql = "DELETE FROM child WHERE child_id = '$child_id'";
-
+ 
         if ($conn->query($sql) === TRUE) {
             echo json_encode(["success" => true]);
         } else {
