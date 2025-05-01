@@ -12,6 +12,42 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Handle Update Request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
+    $parent_id = $conn->real_escape_string($_POST['parent_id']);
+    $parent_name = $conn->real_escape_string($_POST['parent_name']);
+    $ic_number = $conn->real_escape_string($_POST['ic_number']);
+    $parent_gender = $conn->real_escape_string($_POST['parent_gender']);
+    $phone_number = $conn->real_escape_string($_POST['phone_number']);
+    $parent_address = $conn->real_escape_string($_POST['parent_address']);
+    $parent_relationship = $conn->real_escape_string($_POST['parent_relationship']);
+
+    if ($parent_id) {
+        $sql = "
+            UPDATE parent 
+            SET 
+                parent_name = '$parent_name',
+                ic_number = '$ic_number',
+                parent_gender = '$parent_gender',
+                phone_number = '$phone_number',
+                parent_address = '$parent_address',
+                parent_relationship = '$parent_relationship'
+            WHERE parent_id = '$parent_id'
+        ";
+
+        if ($conn->query($sql) === TRUE) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "error" => $conn->error]);
+        }
+        exit;
+    } else {
+        echo json_encode(["success" => false, "error" => "Parent ID is missing."]);
+        exit;
+    }
+}
+
+// Handle Delete Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['parent_id'])) {
     $parent_id = $_POST['parent_id'];
 
@@ -31,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['parent_id'])) {
     }
 }
 
+// Handle Search Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     $search_term = $conn->real_escape_string($_POST['search_term']);
 
@@ -62,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     exit;
 }
 
+// Fetch All Parents
 $sql = "
     SELECT 
         parent_id,
@@ -87,3 +125,4 @@ if ($result->num_rows > 0) {
 
 echo json_encode($registrations);
 $conn->close();
+?>
