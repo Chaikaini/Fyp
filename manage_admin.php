@@ -16,7 +16,6 @@ if ($conn->connect_error) {
     die(json_encode(['success' => false, 'message' => 'Database connection failed']));
 }
 
-// 获取所有教师
 if (isset($_GET['action']) && $_GET['action'] === 'getAdmins') {
     $result = $conn->query("SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email, teacher_phone_number AS phone, teacher_address AS address, teacher_join_date AS join_date, teacher_status AS status FROM teacher");
 
@@ -29,12 +28,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'getAdmins') {
     exit;
 }
 
-// 处理POST请求
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $inputJSON = file_get_contents("php://input");
     $postData = json_decode($inputJSON, true);
 
-    // 添加教师
     if ($postData["action"] === "addAdmin") {
         $teacher_name = $postData["name"];
         $teacher_gender = $postData["gender"];
@@ -64,7 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // 编辑教师
     if ($postData["action"] === "editAdmin") {
         $teacher_id = $postData["id"];
         $teacher_name = $postData["name"];
@@ -88,7 +84,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 
-// 搜索教师
 if (isset($_GET['action']) && $_GET['action'] === 'searchAdmins' && isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
 

@@ -68,6 +68,10 @@
     .pointer-cursor{
       cursor:pointer;
     }
+
+    .card-header form {
+      width: 300px;
+    }
   </style>
 </head>
 <body>
@@ -102,64 +106,64 @@
   </nav>
 
   <!-- Main Content -->
-  <div id="main-content">
-    <!-- Top Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
-      <div class="container-fluid">
-        <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <form class="d-flex ms-auto">
-          <input class="form-control me-2" type="search" placeholder="Search" id="search" />
-          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-        </form>
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-user"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-              <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
-              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </nav>
+<div id="main-content">
+  <!-- Top Navbar (only for notifications and user menu) -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+    <div class="container-fluid">
+      <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-bell"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
+            <li><a class="dropdown-item" href="#">No new notifications</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+            <i class="fas fa-user"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+            <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
+            <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-    <!-- Admin List -->
-    <h1 class="mb-4">Teacher List</h1>
-    <div class="card">
-      <div class="card-header">
-        <button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addAdminModal">Add Teacher</button>
-      </div>
-      <div class="card-body">
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Teacher ID</th>
-              <th>Name</th>
-              <th>Gender</th>
-              <th>Email</th>
-              <th>Phone_number</th>
-              <th>Address</th>
-              <th>Join Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="staffTable">
-          </tbody>
-        </table>
-      </div>
+  <!-- Admin List -->
+  <h1 class="mb-4">Teacher List</h1>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <form class="d-flex">
+        <input class="form-control me-2" type="search" placeholder="Search" id="search" />
+        <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+      </form>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdminModal">Add Teacher</button>
+    </div>
+    <div class="card-body">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Teacher ID</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Email</th>
+            <th>Phone_number</th>
+            <th>Address</th>
+            <th>Join Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="staffTable">
+        </tbody>
+      </table>
     </div>
   </div>
+</div>
 
   <!-- Add Teacher Modal -->
   <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
@@ -316,7 +320,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // 事件委托绑定 .edit-btn
     document.getElementById("staffTable").addEventListener("click", function (event) {
         if (event.target.classList.contains("edit-btn")) {
             const row = event.target.closest("tr");
@@ -334,7 +337,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // 编辑表单提交
     document.getElementById("editTeacherForm").addEventListener("submit", function (e) {
         e.preventDefault();
         const data = {
@@ -367,7 +369,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("Error:", error));
     });
 
-    // 添加教师
     document.getElementById("adminForm").addEventListener("submit", function (event) {
         event.preventDefault();
 
@@ -402,7 +403,6 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("Error:", error));
     });
 
-    // 搜索功能
     document.getElementById("search-btn").addEventListener("click", function () {
         let searchQuery = document.getElementById("search").value.trim();
 
@@ -440,7 +440,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    // 侧边栏切换
     document.getElementById('toggleSidebar').addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('collapsed');
     });
