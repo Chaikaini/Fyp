@@ -72,6 +72,11 @@
     .card-header form {
       width: 300px;
     }
+
+    .no-results {
+    padding: 20px;
+    font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -104,6 +109,7 @@
       </li>      
     </ul>
   </nav>
+  
 
   <!-- Main Content -->
 <div id="main-content">
@@ -414,14 +420,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function searchAdmins(query) {
-        fetch(`manage_admin.php?action=searchAdmins&query=${query}`)
-            .then(response => response.json())
-            .then(data => {
-                const table = document.getElementById("staffTable");
-                table.innerHTML = "";
+    fetch(`manage_admin.php?action=searchAdmins&query=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const table = document.getElementById("staffTable");
+            table.innerHTML = "";
 
+            if (data.admins.length === 0) {
+                // Display "No results found" message
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td colspan="9" class="text-center text-muted">No results found</td>
+                `;
+                table.appendChild(row);
+            } else {
+                // Populate table with search results
                 data.admins.forEach(admin => {
                     let row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td colspan="9" class="text-center text-muted no-results">No results found</td>
+                    `;
                     row.innerHTML = `
                         <td>${admin.id}</td>
                         <td>${admin.name}</td>
@@ -437,8 +455,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     `;
                     table.appendChild(row);
                 });
-            });
-    }
+            }
+        })
+        .catch(error => console.error("Error:", error));
+}
 
     document.getElementById('toggleSidebar').addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('collapsed');
