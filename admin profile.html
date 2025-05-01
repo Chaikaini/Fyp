@@ -66,8 +66,8 @@
       color: #007BFF;
     }
 
-    .pointer-cursor{
-      cursor:pointer;
+    .pointer-cursor {
+      cursor: pointer;
     }
   </style>
 </head>
@@ -89,14 +89,13 @@
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
         <div class="collapse" id="reportMenu">
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report
-            </span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
       </li>      
@@ -123,8 +122,8 @@
               <i class="fas fa-user"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
-                <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
+              <li><a class="dropdown-item" href="admin profile.html">Profile</a></li>
+              <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
             </ul>
           </li>
         </ul>
@@ -141,40 +140,98 @@
           <p><strong>Gender:</strong> <span id="profile-gender" class="fw-bold"></span></p>
         </div>
         <div class="mb-3">
-          <p><strong>Age:</strong> <span id="profile-age" class="fw-bold"></span></p>
-        </div>
-        <div class="mb-3">
           <p><strong>Email:</strong> <span id="profile-email" class="fw-bold"></span></p>
         </div>
-        <div class="mb-3">
-          <p><strong>Role:</strong> <span id="profile-role" class="fw-bold"></span></p>
+        <div class="text-center">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
         </div>
       </div>
     </div>
-         
-  
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit-name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="edit-name" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-gender" class="form-label">Gender</label>
+              <select class="form-control" id="edit-gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="edit-email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="edit-email" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="saveProfile">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
-    
+
     document.addEventListener("DOMContentLoaded", function () {
-  fetch("admin_profile.php")
-    .then(response => response.json())
-    .then(data => {
-      if (data.status === "success") {
-        document.getElementById("profile-name").innerText = data.data.name;
-        document.getElementById("profile-gender").innerText = data.data.gender;
-        document.getElementById("profile-email").innerText = data.data.email;
-        document.getElementById("profile-role").innerText = data.data.role;
-        document.getElementById("profile-age").closest("div").style.display = "none";
-      } else {
-        alert("Failed to load profile: " + data.message);
-      }
-    })
-    .catch(error => console.error("Error fetching profile:", error));
-});
+      // Fetch profile data
+      fetch("admin_profile.php")
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "success") {
+            document.getElementById("profile-name").innerText = data.data.name;
+            document.getElementById("profile-gender").innerText = data.data.gender;
+            document.getElementById("profile-email").innerText = data.data.email;
+            // Populate modal fields
+            document.getElementById("edit-name").value = data.data.name;
+            document.getElementById("edit-gender").value = data.data.gender;
+            document.getElementById("edit-email").value = data.data.email;
+          } else {
+            alert("Failed to load profile: " + data.message);
+          }
+        })
+        .catch(error => console.error("Error fetching profile:", error));
+
+      // Save profile changes
+      document.getElementById("saveProfile").addEventListener("click", function () {
+        const name = document.getElementById("edit-name").value;
+        const gender = document.getElementById("edit-gender").value;
+        const email = document.getElementById("edit-email").value;
+
+        fetch("admin_profile.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name, gender, email }),
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === "success") {
+              document.getElementById("profile-name").innerText = name;
+              document.getElementById("profile-gender").innerText = gender;
+              document.getElementById("profile-email").innerText = email;
+              bootstrap.Modal.getInstance(document.getElementById("editProfileModal")).hide();
+            } 
+          })
+          .catch(error => console.error("Error updating profile:", error));
+      });
+    });
   </script>
 </body>
 </html>
