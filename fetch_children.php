@@ -12,6 +12,42 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Handle Update Request
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
+    $child_id = $conn->real_escape_string($_POST['child_id']);
+    $child_name = $conn->real_escape_string($_POST['child_name']);
+    $child_gender = $conn->real_escape_string($_POST['child_gender']);
+    $child_kidNumber = $conn->real_escape_string($_POST['child_kidNumber']);
+    $child_birthday = $conn->real_escape_string($_POST['child_birthday']);
+    $child_school = $conn->real_escape_string($_POST['child_school']);
+    $child_year = $conn->real_escape_string($_POST['child_year']);
+
+    if ($child_id) {
+        $sql = "
+            UPDATE child 
+            SET 
+                child_name = '$child_name',
+                child_gender = '$child_gender',
+                child_kidNumber = '$child_kidNumber',
+                child_birthday = '$child_birthday',
+                child_school = '$child_school',
+                child_year = '$child_year'
+            WHERE child_id = '$child_id'
+        ";
+
+        if ($conn->query($sql) === TRUE) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "error" => $conn->error]);
+        }
+        exit;
+    } else {
+        echo json_encode(["success" => false, "error" => "Child ID is missing."]);
+        exit;
+    }
+}
+
+// Handle Delete Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['child_id'])) {
     $child_id = $_POST['child_id'];
 
@@ -31,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['child_id'])) {
     }
 }
 
+// Handle Search Request
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     $search_term = $conn->real_escape_string($_POST['search_term']);
 
@@ -63,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
     exit;
 }
 
+// Fetch All Children
 $sql = "
     SELECT 
         ch.child_id, 
@@ -86,7 +124,7 @@ if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         $birthYear = date("Y", strtotime($row['child_birthday']));
         $registerYear = date("Y", strtotime($row['child_register_date']));
-$calculatedYear = calculateYear($birthYear, $registerYear);
+        $calculatedYear = calculateYear($birthYear, $registerYear);
 
         if ($row['child_year'] !== $calculatedYear) {
             $updateSql = "UPDATE child SET child_year = '$calculatedYear' WHERE child_id = " . $row['child_id'];
@@ -101,8 +139,6 @@ $calculatedYear = calculateYear($birthYear, $registerYear);
 echo json_encode($registrations);
 $conn->close();
 
-
-
 function calculateYear($birthYear, $registerYear) {
     $age = $registerYear - $birthYear;  
     if ($age < 7) {
@@ -111,7 +147,4 @@ function calculateYear($birthYear, $registerYear) {
         return $age - 6; 
     }
 }
-
-
-
-
+?>
