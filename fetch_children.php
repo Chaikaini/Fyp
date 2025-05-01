@@ -1,6 +1,4 @@
 <?php
-file_put_contents('debug_log.txt', print_r($_POST, true), FILE_APPEND);
-
 session_start();
 
 $servername = "localhost";
