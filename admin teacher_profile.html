@@ -142,6 +142,9 @@
 
     <div id="profile" class="card shadow-sm p-4 mb-4" style="max-width: 600px; margin:auto;">
       <h3 class="card-title mb-3 text-center">Teacher Profile</h3>
+      <div class="text-center mb-3">
+        <img id="profile-image" src="default-avatar.png" alt="Profile Image" class="rounded-circle" width="120" height="120">
+      </div>
       <div class="card-body">
         <div class="mb-3">
           <p><strong>Name:</strong> <span id="profile-name" class="fw-bold"></span></p>
@@ -153,10 +156,70 @@
           <p><strong>Email:</strong> <span id="profile-email" class="fw-bold"></span></p>
         </div>
         <div class="mb-3">
-          <p><strong>Role:</strong> <span id="profile-role" class="fw-bold"></span></p>
+          <p><strong>Phone:</strong> <span id="profile-phone" class="fw-bold"></span></p>
+        </div>
+        <div class="mb-3">
+          <p><strong>Address:</strong> <span id="profile-address" class="fw-bold"></span></p>
+        </div>
+        <!-- Edit Button -->
+        <div class="text-center">
+          <button id="edit-button" class="btn btn-primary">Edit Profile</button>
         </div>
       </div>
     </div>
+    
+    <!-- Modal for editing profile -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="edit-profile-form">
+              <div class="mb-3">
+                <label for="edit-name" class="form-label">Name</label>
+                <input type="text" id="edit-name" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit-gender" class="form-label">Gender</label>
+                <select id="edit-gender" class="form-select" required>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit-email" class="form-label">Email</label>
+                <input type="email" id="edit-email" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label for="edit-phone" class="form-label">Phone</label>
+                <input type="text" id="edit-phone" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label for="edit-address" class="form-label">Address</label>
+                <textarea id="edit-address" class="form-control"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="edit-image-upload" class="form-label">Profile Image</label>
+                <input type="file" id="edit-image-upload" class="form-control" accept="image/*">
+              </div>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+
+                  <!-- Reset Password Button -->
+            <div class="text-center my-3">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
+                Reset Password
+              </button>
+            </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
          
     <!-- Reset Password Button -->
 <div class="text-center my-3">
@@ -208,23 +271,69 @@
   
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-  fetch("admin_profile.php")
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Fetch the profile data when the page loads
+  fetch("teacher_profile.php")
     .then(response => response.json())
     .then(data => {
       if (data.status === "success") {
-        document.getElementById("profile-name").innerText = data.data.name;
-        document.getElementById("profile-gender").innerText = data.data.gender;
-        document.getElementById("profile-email").innerText = data.data.email;
-        document.getElementById("profile-role").innerText = data.data.role;
+        const profile = data.data;
         
+        // Fill in the profile details on the page
+        document.getElementById("profile-name").innerText = profile.name;
+        document.getElementById("profile-gender").innerText = profile.gender;
+        document.getElementById("profile-email").innerText = profile.email;
+        document.getElementById("profile-phone").innerText = profile.phone_number || '';
+        document.getElementById("profile-address").innerText = profile.address || '';
+        
+        // Set profile image
+        const imageElement = document.getElementById("profile-image");
+        if (profile.image) {
+          imageElement.src = profile.image;
+        }
+        
+        // Fill the modal form with the profile data
+        document.getElementById("edit-name").value = profile.name;
+        document.getElementById("edit-gender").value = profile.gender;
+        document.getElementById("edit-email").value = profile.email;
+        document.getElementById("edit-phone").value = profile.phone_number || '';
+        document.getElementById("edit-address").value = profile.address || '';
       } else {
         alert("Failed to load profile: " + data.message);
       }
     })
     .catch(error => console.error("Error fetching profile:", error));
-});
 
+  // Open the edit modal when the Edit button is clicked
+  document.getElementById("edit-button").addEventListener("click", function () {
+    const myModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    myModal.show();
+  });
+
+  // Handle the form submission to update the profile
+  document.getElementById("edit-profile-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+
+    fetch("teacher_profile.php", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === "success") {
+        alert("Profile updated successfully");
+        location.reload(); // Reload the page to reflect changes
+      } else {
+        alert("Failed to update profile: " + data.message);
+      }
+    })
+    .catch(error => console.error("Error updating profile:", error));
+  });
+});
 
 
 document.getElementById("reset-password-form").addEventListener("submit", async function (e) {
