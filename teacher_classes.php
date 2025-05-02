@@ -121,7 +121,7 @@
     </div>
     <ul class="nav flex-column">
       <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-calendar"></i> <span>My schedule</span></a></li> 
-      <li class="nav-item"><a href="admin attendance.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
+      <li class="nav-item"><a href="teacher_classes.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
       <li class="nav-item"><a href="teacher_notification.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
     </ul>
   </nav>
@@ -333,7 +333,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
   const bodyData = new URLSearchParams();
   bodyData.append(category, keyword);
 
-  fetch("teacher_attendance_info.php", {
+  fetch("teacher_classes_info.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: bodyData.toString(),
@@ -350,7 +350,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
 
 // function to load teacher's data
 function loadTeacherData() {
-  fetch("teacher_attendance_info.php", {
+  fetch("teacher_classes_info.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" }
   })
@@ -407,7 +407,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
   const bodyData = new URLSearchParams();
   bodyData.append(category, keyword);
 
-  fetch("teacher_attendance_info.php", {
+  fetch("teacher_classes_info.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: bodyData.toString(),

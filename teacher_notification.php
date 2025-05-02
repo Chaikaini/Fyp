@@ -143,7 +143,7 @@
     </div>
     <ul class="nav flex-column">
       <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-calendar"></i> <span>My schedule</span></a></li> 
-      <li class="nav-item"><a href="admin attendance.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
+      <li class="nav-item"><a href="teacher_classes.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
       <li class="nav-item"><a href="teacher_notification.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
     </ul>
   </nav>
