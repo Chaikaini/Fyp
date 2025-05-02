@@ -356,7 +356,7 @@ function showToast(message, isError = false) {
       container.innerHTML = "";
 
       if (data.length === 0) {
-        container.innerHTML = "<div class='text-muted text-center'>No notifications yet.</div>";
+        container.innerHTML = "<div class='text-muted text-center'>No release any announcements yet.</div>";
       } else {
         data.reverse().forEach(n => {
           const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';

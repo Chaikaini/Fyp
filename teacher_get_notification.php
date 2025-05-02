@@ -1,5 +1,14 @@
 <?php
+session_start();
 header('Content-Type: application/json');
+
+
+if (!isset($_SESSION['teacher_id'])) {
+    echo json_encode(["error" => "Not logged in"]);
+    exit;
+}
+
+$teacher_id = $_SESSION['teacher_id'];
 
 $conn = new mysqli("localhost", "root", "", "the seeds");
 
@@ -7,44 +16,40 @@ if ($conn->connect_error) {
     die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
 }
 
-// get notification
-$sql = "SELECT * FROM notification ORDER BY notification_id DESC";
-$result = $conn->query($sql);
+
+$teacher_name = 'Unknown Teacher';
+$sqlTeacher = "SELECT teacher_name FROM teacher WHERE teacher_id = ?";
+$stmtTeacher = $conn->prepare($sqlTeacher);
+$stmtTeacher->bind_param("s", $teacher_id);
+$stmtTeacher->execute();
+$resultTeacher = $stmtTeacher->get_result();
+
+if ($resultTeacher->num_rows > 0) {
+    $teacher_name = $resultTeacher->fetch_assoc()['teacher_name'];
+}
+
+// check and display all anouncement of the teacher
+$sql = "SELECT * FROM notification WHERE sender_id = ? ORDER BY notification_id DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $teacher_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 $notifications = [];
 
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        // based on the sender_id, get the teacher name
-        $sender_id = $row['sender_id'];
-        $sqlSender = "SELECT teacher_name FROM teacher WHERE teacher_id = ?";
-        $stmtSender = $conn->prepare($sqlSender);
-        $stmtSender->bind_param("s", $sender_id);
-        $stmtSender->execute();
-        $resultSender = $stmtSender->get_result();
-
-        $teacher_name = 'Unknown Teacher';
-        if ($resultSender->num_rows > 0) {
-            $teacher_name = $resultSender->fetch_assoc()['teacher_name'];
-        }
-
-        // Add notification to array
-        $notifications[] = [
-            'notification_id' => $row['notification_id'],
-            'sender_name' => $teacher_name, 
-            'sender_id' => $sender_id, 
-            'subject_id' => $row['subject_id'],
-            'class_id' => $row['class_id'],
-            'notification_title' => $row['notification_title'],
-            'notification_content' => $row['notification_content'],
-            'notification_document' => $row['notification_document'],
-            'notification_created_at' => $row['notification_created_at'] ?? null
-        ];
-    }
+while ($row = $result->fetch_assoc()) {
+    $notifications[] = [
+        'notification_id' => $row['notification_id'],
+        'sender_name' => $teacher_name, 
+        'sender_id' => $row['sender_id'],
+        'subject_id' => $row['subject_id'],
+        'class_id' => $row['class_id'],
+        'notification_title' => $row['notification_title'],
+        'notification_content' => $row['notification_content'],
+        'notification_document' => $row['notification_document'],
+        'notification_created_at' => $row['notification_created_at'] ?? null
+    ];
 }
-
-// Reverse the order of notifications to display the newest at the top
-$notifications = array_reverse($notifications);
 
 $conn->close();
 
