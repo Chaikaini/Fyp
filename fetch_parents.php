@@ -12,7 +12,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle Update Request
+// Handle Update Request for Primary Contact
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update') {
     $parent_id = $conn->real_escape_string($_POST['parent_id']);
     $parent_name = $conn->real_escape_string($_POST['parent_name']);
@@ -32,6 +32,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 phone_number = '$phone_number',
                 parent_address = '$parent_address',
                 parent_relationship = '$parent_relationship'
+            WHERE parent_id = '$parent_id'
+        ";
+
+        if ($conn->query($sql) === TRUE) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "error" => $conn->error]);
+        }
+        exit;
+    } else {
+        echo json_encode(["success" => false, "error" => "Parent ID is missing."]);
+        exit;
+    }
+}
+
+// Handle Update Request for Second Contact
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_second_contact') {
+    $parent_id = $conn->real_escape_string($_POST['parent_id']);
+    $parent_name2 = $conn->real_escape_string($_POST['parent_name2']);
+    $parent_relationship2 = $conn->real_escape_string($_POST['parent_relationship2']);
+    $parent_num2 = $conn->real_escape_string($_POST['parent_num2']);
+
+    if ($parent_id) {
+        $sql = "
+            UPDATE parent 
+            SET 
+                parent_name2 = '$parent_name2',
+                parent_relationship2 = '$parent_relationship2',
+                parent_num2 = '$parent_num2'
             WHERE parent_id = '$parent_id'
         ";
 
@@ -80,7 +109,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['search_term'])) {
         parent_email,
         phone_number,
         parent_address,
-        parent_relationship
+        parent_relationship,
+        parent_name2,
+        parent_relationship2,
+        parent_num2
     FROM parent
     WHERE parent_name LIKE '%$search_term%'
     ORDER BY parent_id ASC
@@ -109,7 +141,10 @@ $sql = "
         parent_email,
         phone_number,
         parent_address,
-        parent_relationship
+        parent_relationship,
+        parent_name2,
+        parent_relationship2,
+        parent_num2
     FROM parent
     ORDER BY parent_id ASC
 ";
