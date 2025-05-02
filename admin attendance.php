@@ -85,8 +85,8 @@
     }
 
     .toast-message {
-    position: absolute;
-    top: 10px;
+    position: fixed;  
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     background-color: #28a745;
@@ -96,15 +96,21 @@
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     font-size: 16px;
     font-weight: bold;
-    z-index: 1055; 
+    z-index: 9999; 
     text-align: center;
-    transition: opacity 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
     display: none;
+    min-width: 250px;
 }
 
-.toast-message.error {
-    background-color: #dc3545; 
-}
+    .toast-message.error {
+        background-color: #dc3545; 
+    }
+    .comment-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
 </style>
 
 <body>
@@ -288,7 +294,7 @@
         </table>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        
         <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
         
         <button class="btn btn-success" onclick="exportExamResultsToExcel()">Export to Excel</button>
@@ -457,9 +463,10 @@ function viewStudents(classId) {
                         <td>${row.parent_relationship}</td>
                         <td>${row.phone_number}</td>
                         <td>
-                            <button class="btn btn-light btn-sm comment-btn" data-child-id="${row.child_id}" data-class-id="${classId}" data-child-name="${row.child_name}">
-                                <i class="fas fa-comment"></i> 
+                            <button class="btn btn-sm comment-btn" data-child-id="${row.child_id}" data-class-id="${classId}" data-child-name="${row.child_name}">
+                                <i class="fas fa-comment"></i>
                             </button>
+
                         </td>
                     </tr>
                 `;
@@ -594,17 +601,23 @@ function submitComment() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            showToast(result.success, false); 
-            const commentModal = bootstrap.Modal.getInstance(document.getElementById("commentModal"));
+            showToast(result.success, false);
             
+            // close modal
+            setTimeout(() => {
+                const commentModal = bootstrap.Modal.getInstance(document.getElementById("commentModal"));
+                if (commentModal) {
+                    commentModal.hide();
+                }
+            }, 1000); 
         } else if (result.error) {
-            showToast(result.error, true); 
+            showToast(result.error, true);
         }
     })
     .catch(error => {
         console.error("Error saving comment:", error);
-        showToast("Error saving comment.", true); 
- } )
+        showToast("Error saving comment.", true);
+    });
 }
 
 
@@ -696,39 +709,29 @@ function exportStudentTableToExcel() {
 
 // Toast Notification Function
 function showToast(message, isError = false) {
-    let toastContainer = document.getElementById("toastContainer");
-
-    if (!toastContainer) {
-        console.error("Toast container not found!");
-        return;
-    }
-
-    let toast = document.getElementById("successToast");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "successToast";
-        toast.className = "toast-message"; 
-        toastContainer.appendChild(toast);
-    }
-
-   
-    toast.innerText = message;
-
-    
+  
+    const toast = document.createElement("div");
+    toast.className = "toast-message";
     if (isError) {
-        toast.classList.add("error");  
-    } else {
-        toast.classList.remove("error");  
+        toast.classList.add("error");
     }
+    toast.textContent = message;
 
     
-    toast.style.display = "block";
-    toast.style.opacity = "1";
+    document.body.appendChild(toast);
 
-   
+    
+    setTimeout(() => {
+        toast.style.display = "block";
+        toast.style.opacity = "1";
+    }, 100);
+
+  
     setTimeout(() => {
         toast.style.opacity = "0";
-        setTimeout(() => { toast.style.display = "none"; }, 500);
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
     }, 3000);
 }
 

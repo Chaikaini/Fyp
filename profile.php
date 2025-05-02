@@ -26,10 +26,13 @@
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    
 
     <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
+    
     <style>
+        
         .icon-bar {
             display: flex;
             justify-content: flex-end;
@@ -141,6 +144,7 @@
             background-color: #14a631;
         }
 
+       
         .modal {
             display: none;
             position: fixed;
@@ -356,8 +360,39 @@
     position: relative; 
 }
 
+.result-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
 
+.result-modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  width: 400px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  cursor: pointer;
+  font-size: 20px;
+}
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
     </style>
+    
 </head>
 
 <body>
@@ -732,25 +767,33 @@
 </div>
 
    
-<!-- Result Modal -->
-<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="resultModalLabel">Exam Result & Teacher Comment</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Custom Modal -->
+<div id="ResultModal" class="result-modal">
+  <div class="result-modal-content">
+    <span class="close-btn" onclick="closeResultModal()">&times;</span>
+    <h5>Exam Result & Teacher Comment</h5>
+    <form>
+      <div class="mb-3">
+        <label for="midterm" class="form-label">Midterm Result</label>
+        <input type="text" class="form-control" id="midterm" readonly>
       </div>
-      <div class="modal-body">
-        <p><strong>Midterm:</strong> <span id="midterm"></span></p>
-        <p><strong>Final:</strong> <span id="final"></span></p>
-        <p><strong>Teacher Comment:</strong> <span id="teacherComment"></span></p>
+      <div class="mb-3">
+        <label for="final" class="form-label">Final Result</label>
+        <input type="text" class="form-control" id="final" readonly>
       </div>
-    </div>
+      <div class="mb-3">
+        <label for="teacherComment" class="form-label">Teacher Comment</label>
+        <textarea class="form-control" id="teacherComment" rows="3" readonly></textarea>
+      </div>
+    </form>
   </div>
 </div>
 
 
-    
+
+
+</body>   
+
 
     <!-- JavaScript to handle tab switching -->
     <script>
@@ -965,10 +1008,10 @@ function displayLearningStatus() {
                         <td>${course.teacher_name}</td>
                         <td>${course.class_time}</td>
                         <td>
-                            <button class="btn btn-light btn-sm result-btn"
-                                data-child-id="${childId}"
-                                data-class-id="${course.class_id}"
-                                title="View Result">
+                            <button class="icon-button result-btn" 
+                                    data-child-id="${childId}" 
+                                    data-class-id="${course.class_id}" 
+                                    title="View Result">
                                 <i class="fas fa-clipboard"></i>
                             </button>
                         </td>
@@ -1002,26 +1045,21 @@ function openResultModal(child_id, class_id) {
     fetch(`learning_result_comment.php?child_id=${child_id}&class_id=${class_id}`)
         .then(response => response.json())
         .then(data => {
-            document.getElementById("midterm").textContent = data.exam_result_midterm ?? 'N/A';
-            document.getElementById("final").textContent = data.exam_result_final ?? 'N/A';
-            document.getElementById("teacherComment").textContent = data.teacher_comment_text ?? 'N/A';
-            
-            
-            const resultModal = document.getElementById('resultModal');
-            const modal = new bootstrap.Modal(resultModal);
-            modal.show();
+            document.getElementById("midterm").value = data.exam_result_midterm ?? '-';
+            document.getElementById("final").value = data.exam_result_final ?? '-';
+            document.getElementById("teacherComment").value = data.teacher_comment_text ?? '-';
+            document.getElementById("ResultModal").style.display = 'block';
         })
         .catch(error => {
             console.error("Error loading result/comment:", error);
         });
 }
 
-// close modal
-document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById("midterm").textContent = '';
-    document.getElementById("final").textContent = '';
-    document.getElementById("teacherComment").textContent = '';
-});
+function closeResultModal() {
+    document.getElementById("ResultModal").style.display = 'none';
+}
+
+
 
 
 
