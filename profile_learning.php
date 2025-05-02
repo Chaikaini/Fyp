@@ -31,6 +31,7 @@ SELECT
     s.subject_name,
     s.year,
     t.teacher_name,
+    c.class_id,
     c.class_time,
     p.part_name,
     p.part_duration
@@ -57,6 +58,7 @@ while ($row = $result->fetch_assoc()) {
         "subject_name" => $row["subject_name"],
         "year" => $row["year"],
         "teacher_name" => $row["teacher_name"],
+        "class_id" => $row["class_id"],
         "class_time" => $row["class_time"],
         "part_name" => $row["part_name"],
         "part_duration" => $row["part_duration"]

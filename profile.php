@@ -731,8 +731,25 @@
     </div>
 </div>
 
-
    
+<!-- Result Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultModalLabel">Exam Result & Teacher Comment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Midterm:</strong> <span id="midterm"></span></p>
+        <p><strong>Final:</strong> <span id="final"></span></p>
+        <p><strong>Teacher Comment:</strong> <span id="teacherComment"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     
 
     <!-- JavaScript to handle tab switching -->
@@ -865,9 +882,11 @@ document.addEventListener("DOMContentLoaded", function () {
     select.addEventListener("change", displayLearningStatus);
 });
 
+
+
 function displayLearningStatus() {
     const select = document.getElementById("childSelect");
-    const childId = select.value;  
+    const childId = select.value;
 
     const statusContent = document.getElementById("statusContent");
     const learningStatus = document.getElementById("learningStatus");
@@ -895,9 +914,24 @@ function displayLearningStatus() {
                 "October": 9, "November": 10, "December": 11
             };
 
-            let table = "<table class='table table-striped'><thead><tr><th>Subject</th><th>Part</th><th>Year</th><th>Teacher</th><th>Time</th><th>Status</th></tr></thead><tbody>";
+            let table = `
+                <table class='table table-striped'>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Part</th>
+                            <th>Year</th>
+                            <th>Teacher</th>
+                            <th>Time</th>
+                            <th>Result</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
             data.forEach(course => {
-                let status = "Ongoing"; // default
+                let status = "Ongoing"; 
                 const duration = course.part_duration;
                 const timeRange = duration.split(" - ");
 
@@ -923,26 +957,73 @@ function displayLearningStatus() {
                 else if (status === "Complete") statusClass = "text-danger";
                 else if (status === "Not Started") statusClass = "text-secondary";
 
-                table += `<tr>
-                    <td>${course.subject_name}</td>
-                    <td>${course.part_name} (${course.part_duration})</td>
-                    <td>${course.year}</td>
-                    <td>${course.teacher_name}</td>
-                    <td>${course.class_time}</td>
-                    <td class="${statusClass}">${status}</td>
-                </tr>`;
+                table += `
+                    <tr>
+                        <td>${course.subject_name}</td>
+                        <td>${course.part_name} (${course.part_duration})</td>
+                        <td>${course.year}</td>
+                        <td>${course.teacher_name}</td>
+                        <td>${course.class_time}</td>
+                        <td>
+                            <button class="btn btn-light btn-sm result-btn"
+                                data-child-id="${childId}"
+                                data-class-id="${course.class_id}"
+                                title="View Result">
+                                <i class="fas fa-clipboard"></i>
+                            </button>
+                        </td>
+                        <td class="${statusClass}">${status}</td>
+                    </tr>
+                `;
             });
-            table += "</tbody></table>";
 
+            table += "</tbody></table>";
             statusContent.innerHTML = table;
             learningStatus.style.display = "block";
+
+            
+            document.querySelectorAll(".result-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const childId = this.getAttribute("data-child-id");
+                    const classId = this.getAttribute("data-class-id");
+                    openResultModal(childId, classId);
+                });
+            });
         })
         .catch(error => {
             console.error("Error fetching learning status:", error);
-            statusContent.innerHTML = "<p class='text-danger'>No register class yet.</p>";
+            statusContent.innerHTML = "<p class='text-danger'>No registered class yet.</p>";
             learningStatus.style.display = "block";
         });
 }
+
+
+function openResultModal(child_id, class_id) {
+    fetch(`learning_result_comment.php?child_id=${child_id}&class_id=${class_id}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("midterm").textContent = data.exam_result_midterm ?? 'N/A';
+            document.getElementById("final").textContent = data.exam_result_final ?? 'N/A';
+            document.getElementById("teacherComment").textContent = data.teacher_comment_text ?? 'N/A';
+            
+            
+            const resultModal = document.getElementById('resultModal');
+            const modal = new bootstrap.Modal(resultModal);
+            modal.show();
+        })
+        .catch(error => {
+            console.error("Error loading result/comment:", error);
+        });
+}
+
+// close modal
+document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById("midterm").textContent = '';
+    document.getElementById("final").textContent = '';
+    document.getElementById("teacherComment").textContent = '';
+});
+
+
 
 document.querySelector('.close').addEventListener('click', function() {
   document.getElementById('childFormModal').style.display = "none";
