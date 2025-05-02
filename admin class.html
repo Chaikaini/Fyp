@@ -76,17 +76,14 @@
       align-items: center;
       flex-wrap: wrap;
     }
-    .card-header form {
-      display: flex;
-      align-items: center;
+    .card-header .search-form {
+      margin-right: auto;
+    }
+    .card-header .btn {
+      margin-left: auto;
     }
     .card-header .form-control {
       width: 200px;
-      margin-right: 10px;
-    }
-    .card-header .btn btn-primary button {
-      padding: 8px 15px;
-      float: right;
     }
   </style>
 </head>
@@ -152,22 +149,23 @@
     <!-- Class List -->
     <h1 class="mb-4">Class List</h1>
     <div class="card">
-      <div classievers class="card-header">
-        <div class="d-flex align-items-center">
-          <form class="d-flex align-items-center me-3">
-            <input class="form-control me-2" type="search" placeholder="Search" id="search" />
-            <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-          </form>
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">Add Class</button>
-        </div>
+      <div class="card-header">
+        <form class="search-form d-flex align-items-center">
+          <input class="form-control me-2" type="search" placeholder="Search Class" id="search" />
+          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </form>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClassModal">Add Class</button>
       </div>
       <div class="card-body">
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>Subject ID</th>
+              <th>Subject</th>
               <th>Class ID</th>
               <th>Path</th>
+              <th>Teacher</th>
+              <th>Term</th>
+              <th>Year</th>
               <th>Time</th>
               <th>Capacity</th>
               <th>Status</th>
@@ -200,13 +198,31 @@
             </div>
             <div class="mb-3">
               <label for="classId" class="form-label">Class ID</label>
-              <input type="text" class="form-control" id="classId" required>
+              <input type="text" class="form-control" id="classId" readonly required>
             </div>
             <div class="mb-3">
               <label for="pathSelect" class="form-label">Path</label>
               <select class="form-select" id="pathSelect" required>
                 <option value="" disabled selected>Select Path</option>
                 <!-- Path options will be populated here -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="teacherSelect" class="form-label">Teacher</label>
+              <select class="form-select" id="teacherSelect" required>
+                <option value="" disabled selected>Select Teacher</option>
+                <!-- Teacher options will be populated here -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="term" class="form-label">Term</label>
+              <input type="text" class="form-control" id="term" required>
+            </div>
+            <div class="mb-3">
+              <label for="yearSelect" class="form-label">Year</label>
+              <select class="form-select" id="yearSelect" required>
+                <option value="" disabled selected>Select Year</option>
+                <!-- Year options will be populated here -->
               </select>
             </div>
             <div class="mb-3">
@@ -285,9 +301,12 @@
             data.classes.forEach(cls => {
               let row = document.createElement("tr");
               row.innerHTML = `
-                <td>${cls.subject_id}</td>
+                <td data-subject-id="${cls.subject_id}">${cls.subject_id} - ${cls.subject_name}</td>
                 <td>${cls.class_id}</td>
                 <td>${cls.path}</td>
+                <td>${cls.teacher_name}</td>
+                <td>${cls.term}</td>
+                <td>${cls.year}</td>
                 <td>${cls.time}</td>
                 <td>${cls.enrolled} / ${cls.capacity}</td>
                 <td>${cls.status}</td>
@@ -299,7 +318,7 @@
               table.appendChild(row);
             });
           } else {
-            table.innerHTML = `<tr><td colspan="7" class="text-center">No classes found</td></tr>`;
+            table.innerHTML = `<tr><td colspan="10" class="text-center">No classes found</td></tr>`;
           }
         });
     }
@@ -330,6 +349,29 @@
       document.getElementById("overlay").style.display = "none";
     }
 
+    function generateClassId() {
+      const subjectSelect = document.getElementById('subjectSelect');
+      const yearSelect = document.getElementById('yearSelect');
+      const classIdInput = document.getElementById('classId');
+
+      if (subjectSelect.value && yearSelect.value) {
+        fetch(`manage_class.php?action=getNextClassId&subject_id=${subjectSelect.value}&year=${yearSelect.value}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              classIdInput.value = data.class_id;
+            } else {
+              alert("Error generating class ID: " + data.message);
+            }
+          })
+          .catch(error => {
+            console.error("Error:", error);
+          });
+      } else {
+        classIdInput.value = '';
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       fetchClasses();
 
@@ -348,7 +390,7 @@
         }
 
         if (event.target.classList.contains("view-btn")) {
-          let subjectId = event.target.closest("tr").children[0].textContent;
+          let subjectId = event.target.closest("tr").querySelector("td").getAttribute("data-subject-id");
           showStudents(subjectId);
         }
       });
@@ -361,6 +403,9 @@
           subject_id: document.getElementById("subjectSelect").value,
           class_id: document.getElementById("classId").value,
           path: document.getElementById("pathSelect").value,
+          teacher_id: document.getElementById("teacherSelect").value,
+          term: document.getElementById("term").value,
+          year: document.getElementById("yearSelect").value,
           time: document.getElementById("time").value,
           capacity: document.getElementById("capacity").value,
           status: document.getElementById("status").value,
@@ -423,6 +468,53 @@
             });
           }
         });
+
+      // Fetch teachers for the add class modal
+      fetch('manage_class.php?action=getTeachers')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const teacherSelect = document.getElementById('teacherSelect');
+            data.teachers.forEach(teacher => {
+              const option = document.createElement('option');
+              option.value = teacher.teacher_id;
+              option.textContent = `${teacher.teacher_id} - ${teacher.teacher_name}`;
+              teacherSelect.appendChild(option);
+            });
+          }
+        });
+
+      // Fetch years for the add class modal
+      fetch('manage_class.php?action=getYears')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const yearSelect = document.getElementById('yearSelect');
+            data.years.forEach(year => {
+              const option = document.createElement('option');
+              option.value = year;
+              option.textContent = year;
+              yearSelect.appendChild(option);
+            });
+            // Add a default recent year if no years exist yet
+            if (data.years.length === 0) {
+              const currentYear = new Date().getFullYear();
+              for (let i = 0; i < 5; i++) {
+                const yearOption = document.createElement('option');
+                yearOption.value = (currentYear - i).toString();
+                yearOption.textContent = (currentYear - i).toString();
+                yearSelect.appendChild(yearOption);
+              }
+            }
+          }
+        });
+
+      // Generate class ID when subject or year changes
+      const subjectSelect = document.getElementById('subjectSelect');
+      const yearSelect = document.getElementById('yearSelect');
+      subjectSelect.addEventListener('change', generateClassId);
+      yearSelect.addEventListener('change', generateClassId);
+      generateClassId(); // Initial call to set default class ID
     });
   </script>
 </body>
