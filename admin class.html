@@ -64,7 +64,10 @@
       margin: 0;
       font-size: 16px;
     }
-    .table-container .fa-edit, .table-container .fa-trash-alt, .table-container .fa-eye {
+    .table-container .fa-trash-alt, .table-container .fa-eye {
+      color: #007BFF;
+    }
+    .table-container .fa-edit {
       color: #007BFF;
     }
     .pointer-cursor {
@@ -84,6 +87,10 @@
     }
     .card-header .form-control {
       width: 200px;
+    }
+    .fixed-field {
+      background-color: #e9ecef;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -162,7 +169,7 @@
             <tr>
               <th>Subject</th>
               <th>Class ID</th>
-              <th>Path</th>
+              <th>Part</th>
               <th>Teacher</th>
               <th>Term</th>
               <th>Year</th>
@@ -201,9 +208,9 @@
               <input type="text" class="form-control" id="classId" readonly required>
             </div>
             <div class="mb-3">
-              <label for="pathSelect" class="form-label">Path</label>
+              <label for="pathSelect" class="form-label">Part</label>
               <select class="form-select" id="pathSelect" required>
-                <option value="" disabled selected>Select Path</option>
+                <option value="" disabled selected>Select Part</option>
                 <!-- Path options will be populated here -->
               </select>
             </div>
@@ -242,6 +249,70 @@
             </div>
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-primary w-100" id="saveClassBtn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Class Modal -->
+  <div class="modal fade" id="editClassModal" tabindex="-1" aria-labelledby="editClassModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editClassModalLabel">Edit Class</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editClassForm">
+            <div class="mb-3">
+              <label for="editSubject" class="form-label">Subject</label>
+              <input type="text" class="form-control fixed-field" id="editSubject" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="editClassId" class="form-label">Class ID</label>
+              <input type="text" class="form-control fixed-field" id="editClassId" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="editYear" class="form-label">Year</label>
+              <input type="text" class="form-control fixed-field" id="editYear" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="editPathSelect" class="form-label">Part</label>
+              <select class="form-select" id="editPathSelect" required>
+                <option value="" disabled>Select Path</option>
+                <!-- Path options will be populated here -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editTeacherSelect" class="form-label">Teacher</label>
+              <select class="form-select" id="editTeacherSelect" required>
+                <option value="" disabled>Select Teacher</option>
+                <!-- Teacher options will be populated here -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editTerm" class="form-label">Term</label>
+              <input type="text" class="form-control" id="editTerm" required>
+            </div>
+            <div class="mb-3">
+              <label for="editTime" class="form-label">Time</label>
+              <input type="text" class="form-control" id="editTime" required>
+            </div>
+            <div class="mb-3">
+              <label for="editCapacity" class="form-label">Capacity</label>
+              <input type="number" class="form-control" id="editCapacity" required>
+            </div>
+            <div class="mb-3">
+              <label for="editStatus" class="form-label">Status</label>
+              <select class="form-control" id="editStatus" required>
+                <option value="Available">Available</option>
+                <option value="Unavailable">Unavailable</option>
+              </select>
+            </div>
+            <div class="d-flex justify-content-center">
+              <button type="submit" class="btn btn-primary w-100" id="updateClassBtn">Update</button>
             </div>
           </form>
         </div>
@@ -303,7 +374,7 @@
               row.innerHTML = `
                 <td data-subject-id="${cls.subject_id}">${cls.subject_id} - ${cls.subject_name}</td>
                 <td>${cls.class_id}</td>
-                <td>${cls.path}</td>
+                <td data-part-id="${cls.part_id}">${cls.part}</td>
                 <td>${cls.teacher_name}</td>
                 <td>${cls.term}</td>
                 <td>${cls.year}</td>
@@ -312,6 +383,7 @@
                 <td>${cls.status}</td>
                 <td>
                   <i class="pointer-cursor fas fa-eye text-info view-btn" data-id="${cls.class_id}"></i>
+                  <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${cls.class_id}" data-subject="${cls.subject_id} - ${cls.subject_name}" data-year="${cls.year}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${cls.class_id}"></i>
                 </td>
               `;
@@ -372,6 +444,18 @@
       }
     }
 
+    function populateEditModal(classData, partId) {
+      document.getElementById('editSubject').value = classData.subject;
+      document.getElementById('editClassId').value = classData.class_id;
+      document.getElementById('editYear').value = classData.year;
+      document.getElementById('editPathSelect').value = partId || '';
+      document.getElementById('editTeacherSelect').value = classData.teacher_id || '';
+      document.getElementById('editTerm').value = classData.term || '';
+      document.getElementById('editTime').value = classData.time || '';
+      document.getElementById('editCapacity').value = classData.capacity || '';
+      document.getElementById('editStatus').value = classData.status || 'Available';
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       fetchClasses();
 
@@ -393,6 +477,34 @@
           let subjectId = event.target.closest("tr").querySelector("td").getAttribute("data-subject-id");
           showStudents(subjectId);
         }
+
+        if (event.target.classList.contains("edit-btn")) {
+          let classId = event.target.getAttribute("data-id");
+          let subject = event.target.getAttribute("data-subject");
+          let partId = event.target.closest("tr").querySelector("td[data-part-id]").getAttribute("data-part-id");
+          fetch(`manage_class.php?action=getClasses&class_id=${classId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                const cls = data.classes.find(c => c.class_id === classId);
+                if (cls) {
+                  populateEditModal({
+                    subject: subject,
+                    class_id: cls.class_id,
+                    year: cls.year,
+                    teacher_id: cls.teacher_id,
+                    term: cls.term,
+                    time: cls.time,
+                    capacity: cls.capacity,
+                    status: cls.status
+                  }, partId);
+                  new bootstrap.Modal(document.getElementById('editClassModal')).show();
+                }
+              } else {
+                alert("Error: " + data.message);
+              }
+            });
+        }
       });
 
       document.getElementById("classForm").addEventListener("submit", function (event) {
@@ -402,7 +514,7 @@
           action: "addClass",
           subject_id: document.getElementById("subjectSelect").value,
           class_id: document.getElementById("classId").value,
-          path: document.getElementById("pathSelect").value,
+          part: document.getElementById("pathSelect").value,
           teacher_id: document.getElementById("teacherSelect").value,
           term: document.getElementById("term").value,
           year: document.getElementById("yearSelect").value,
@@ -439,6 +551,42 @@
         fetchClasses(searchQuery);
       });
 
+      document.getElementById("editClassForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        let data = {
+          action: "updateClass",
+          class_id: document.getElementById("editClassId").value,
+          part: document.getElementById("editPathSelect").value,
+          teacher_id: document.getElementById("editTeacherSelect").value,
+          term: document.getElementById("editTerm").value,
+          time: document.getElementById("editTime").value,
+          capacity: document.getElementById("editCapacity").value,
+          status: document.getElementById("editStatus").value,
+        };
+
+        fetch("manage_class.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              fetchClasses();
+              let modal = bootstrap.Modal.getInstance(document.getElementById("editClassModal"));
+              modal.hide();
+            } else {
+              alert("Error: " + data.message);
+            }
+          })
+          .catch(error => {
+            console.error("Error:", error);
+          });
+      });
+
       // Fetch subjects for the add class modal
       fetch('manage_class.php?action=getSubjects')
         .then(response => response.json())
@@ -454,32 +602,36 @@
           }
         });
 
-      // Fetch parts for the add class modal
+      // Fetch parts for the add and edit class modals
       fetch('manage_class.php?action=getParts')
         .then(response => response.json())
         .then(data => {
           if (data.success) {
             const pathSelect = document.getElementById('pathSelect');
+            const editPathSelect = document.getElementById('editPathSelect');
             data.parts.forEach(part => {
               const option = document.createElement('option');
               option.value = part.part_id;
               option.textContent = `${part.part_id} - ${part.part_name}`;
-              pathSelect.appendChild(option);
+              pathSelect.appendChild(option.cloneNode(true));
+              editPathSelect.appendChild(option);
             });
           }
         });
 
-      // Fetch teachers for the add class modal
+      // Fetch teachers for the add and edit class modals
       fetch('manage_class.php?action=getTeachers')
         .then(response => response.json())
         .then(data => {
           if (data.success) {
             const teacherSelect = document.getElementById('teacherSelect');
+            const editTeacherSelect = document.getElementById('editTeacherSelect');
             data.teachers.forEach(teacher => {
               const option = document.createElement('option');
               option.value = teacher.teacher_id;
               option.textContent = `${teacher.teacher_id} - ${teacher.teacher_name}`;
-              teacherSelect.appendChild(option);
+              teacherSelect.appendChild(option.cloneNode(true));
+              editTeacherSelect.appendChild(option);
             });
           }
         });

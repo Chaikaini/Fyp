@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'getClasses') {
         try {
             $stmt = $pdo->query("
-                SELECT c.*, s.subject_name, p.part_name, t.teacher_name
+                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
@@ -33,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "class_id" => $row["class_id"],
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
-                    "path" => $row["part_name"],
-                    "teacher_id" => $row["teacher_id"],
+                    "part_id" => $row["part_id"], // Added part_id
+                    "part" => $row["part_name"],
+                    "teacher_id" => $row["teacher_id"], // Added teacher_id
                     "teacher_name" => $row["teacher_name"],
                     "term" => $row["term"],
                     "year" => $row["year"],
@@ -89,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $subjectId = $_GET['subject_id'] ?? '';
 
         $sql = "
-            SELECT c.*, s.subject_name, p.part_name, t.teacher_name
+            SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
             FROM class c
             JOIN subject s ON c.subject_id = s.subject_id
             JOIN part p ON c.part_id = p.part_id
@@ -117,8 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "class_id" => $row["class_id"],
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
-                    "path" => $row["part_name"],
-                    "teacher_id" => $row["teacher_id"],
+                    "part_id" => $row["part_id"], // Added part_id
+                    "part" => $row["part_name"],
+                    "teacher_id" => $row["teacher_id"], // Added teacher_id
                     "teacher_name" => $row["teacher_name"],
                     "term" => $row["term"],
                     "year" => $row["year"],
@@ -221,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([
                 $input['class_id'],
                 $input['subject_id'],
-                $input['path'],
+                $input['part'], // This should be part_id, not part_name
                 $input['teacher_id'],
                 $input['term'],
                 $input['year'],
@@ -251,6 +253,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             echo json_encode(["success" => false, "message" => "Missing class_id or child_id"]);
+        }
+    } elseif ($input['action'] === 'updateClass') {
+        try {
+            $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
+            $stmt->execute([
+                $input['part'], // This should be part_id, not part_name
+                $input['teacher_id'],
+                $input['term'],
+                $input['time'],
+                $input['capacity'],
+                $input['status'],
+                $input['class_id']
+            ]);
+            echo json_encode(["success" => true]);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => $e->getMessage()]);
         }
     }
 }
@@ -286,5 +304,4 @@ elseif ($action === 'getParts') {
         echo json_encode(["success" => false, "message" => $e->getMessage()]);
     }
 }
-
 ?>
