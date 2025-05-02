@@ -102,9 +102,14 @@
     display: none;
 }
 
-.toast-message.error {
-    background-color: #dc3545; 
-}
+    .toast-message.error {
+        background-color: #dc3545; 
+    }
+    .comment-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
 </style>
 
 <body>
@@ -457,9 +462,10 @@ function viewStudents(classId) {
                         <td>${row.parent_relationship}</td>
                         <td>${row.phone_number}</td>
                         <td>
-                            <button class="btn btn-light btn-sm comment-btn" data-child-id="${row.child_id}" data-class-id="${classId}" data-child-name="${row.child_name}">
-                                <i class="fas fa-comment"></i> 
+                            <button class="btn btn-sm comment-btn" data-child-id="${row.child_id}" data-class-id="${classId}" data-child-name="${row.child_name}">
+                                <i class="fas fa-comment"></i>
                             </button>
+
                         </td>
                     </tr>
                 `;
