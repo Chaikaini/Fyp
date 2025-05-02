@@ -222,8 +222,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label for="term" class="form-label">Term</label>
-              <input type="text" class="form-control" id="term" required>
+              <label for="class_term" class="form-label">Term</label>
+              <input type="text" class="form-control" id="class_term" required>
             </div>
             <div class="mb-3">
               <label for="yearSelect" class="form-label">Year</label>
@@ -376,7 +376,7 @@
                 <td>${cls.class_id}</td>
                 <td data-part-id="${cls.part_id}">${cls.part}</td>
                 <td>${cls.teacher_name}</td>
-                <td>${cls.term}</td>
+                <td>${cls.class_term}</td>
                 <td>${cls.year}</td>
                 <td>${cls.time}</td>
                 <td>${cls.enrolled} / ${cls.capacity}</td>
@@ -450,7 +450,7 @@
       document.getElementById('editYear').value = classData.year;
       document.getElementById('editPathSelect').value = partId || '';
       document.getElementById('editTeacherSelect').value = classData.teacher_id || '';
-      document.getElementById('editTerm').value = classData.term || '';
+      document.getElementById('editTerm').value = classData.class_term || '';
       document.getElementById('editTime').value = classData.time || '';
       document.getElementById('editCapacity').value = classData.capacity || '';
       document.getElementById('editStatus').value = classData.status || 'Available';
@@ -493,7 +493,7 @@
                     class_id: cls.class_id,
                     year: cls.year,
                     teacher_id: cls.teacher_id,
-                    term: cls.term,
+                    class_term: cls.class_term,
                     time: cls.time,
                     capacity: cls.capacity,
                     status: cls.status
@@ -516,7 +516,7 @@
           class_id: document.getElementById("classId").value,
           part: document.getElementById("pathSelect").value,
           teacher_id: document.getElementById("teacherSelect").value,
-          term: document.getElementById("term").value,
+          class_term: document.getElementById("class_term").value,
           year: document.getElementById("yearSelect").value,
           time: document.getElementById("time").value,
           capacity: document.getElementById("capacity").value,
@@ -559,7 +559,7 @@
           class_id: document.getElementById("editClassId").value,
           part: document.getElementById("editPathSelect").value,
           teacher_id: document.getElementById("editTeacherSelect").value,
-          term: document.getElementById("editTerm").value,
+          class_term: document.getElementById("editTerm").value,
           time: document.getElementById("editTime").value,
           capacity: document.getElementById("editCapacity").value,
           status: document.getElementById("editStatus").value,

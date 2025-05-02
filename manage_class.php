@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "part" => $row["part_name"],
                     "teacher_id" => $row["teacher_id"], // Added teacher_id
                     "teacher_name" => $row["teacher_name"],
-                    "term" => $row["term"],
+                    "class_term" => $row["class_term"],
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "part" => $row["part_name"],
                     "teacher_id" => $row["teacher_id"], // Added teacher_id
                     "teacher_name" => $row["teacher_name"],
-                    "term" => $row["term"],
+                    "class_term" => $row["class_term"],
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
@@ -218,14 +218,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($input['action'] === 'addClass') {
         try {
-            $stmt = $pdo->prepare("INSERT INTO class (class_id, subject_id, part_id, teacher_id, term, year, class_time, class_capacity, class_enrolled, class_status)
+            $stmt = $pdo->prepare("INSERT INTO class (class_id, subject_id, part_id, teacher_id, class_term, year, class_time, class_capacity, class_enrolled, class_status)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");
             $stmt->execute([
                 $input['class_id'],
                 $input['subject_id'],
                 $input['part'], // This should be part_id, not part_name
                 $input['teacher_id'],
-                $input['term'],
+                $input['class_term'],
                 $input['year'],
                 $input['time'],
                 $input['capacity'],
@@ -256,11 +256,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($input['action'] === 'updateClass') {
         try {
-            $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
+            $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, class_term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
             $stmt->execute([
-                $input['part'], // This should be part_id, not part_name
+                $input['part'], 
                 $input['teacher_id'],
-                $input['term'],
+                $input['class_term'],
                 $input['time'],
                 $input['capacity'],
                 $input['status'],

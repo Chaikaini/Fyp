@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2025 at 07:29 AM
+-- Generation Time: May 02, 2025 at 10:42 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -108,7 +108,7 @@ CREATE TABLE `class` (
   `subject_id` varchar(20) NOT NULL,
   `part_id` int(11) NOT NULL,
   `teacher_id` varchar(20) NOT NULL,
-  `term` varchar(20) NOT NULL,
+  `class_term` varchar(20) NOT NULL,
   `year` varchar(10) NOT NULL,
   `class_time` text NOT NULL,
   `class_capacity` int(11) NOT NULL,
@@ -120,7 +120,7 @@ CREATE TABLE `class` (
 -- Dumping data for table `class`
 --
 
-INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `term`, `year`, `class_time`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
+INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `year`, `class_time`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
 ('Eng0001', '11245', 1, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 1, 'Available'),
 ('Eng0002', '11245', 2, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
 ('Eng2001', '22534', 1, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 30, 0, 'Available'),
@@ -246,7 +246,7 @@ CREATE TABLE `parent` (
 
 INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
 (1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
-(2, 'WW', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', '', 'Mother', '', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm');
+(2, 'Ali', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm');
 
 -- --------------------------------------------------------
 
