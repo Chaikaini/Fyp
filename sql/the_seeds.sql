@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 30, 2025 at 06:26 AM
+-- Generation Time: May 02, 2025 at 07:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,7 +40,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_password`) VALUES
-(11111, 'Anua', 'Male', 'anua@gmail.com', '11111');
+(11111, 'kaini', 'Female', 'chaikaini@gmail.com', '11111');
 
 -- --------------------------------------------------------
 
@@ -107,6 +107,9 @@ CREATE TABLE `class` (
   `class_id` varchar(20) NOT NULL,
   `subject_id` varchar(20) NOT NULL,
   `part_id` int(11) NOT NULL,
+  `teacher_id` varchar(20) NOT NULL,
+  `term` varchar(20) NOT NULL,
+  `year` varchar(10) NOT NULL,
   `class_time` text NOT NULL,
   `class_capacity` int(11) NOT NULL,
   `class_enrolled` int(11) NOT NULL,
@@ -117,19 +120,19 @@ CREATE TABLE `class` (
 -- Dumping data for table `class`
 --
 
-INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `class_time`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', '11245', 1, 'Tuesday 2:30pm - 4:30pm', 30, 1, 'Available'),
-('Eng0002', '11245', 2, 'Tuesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
-('Eng2001', '22534', 1, 'Monday 5:00pm - 7:00pm', 30, 0, 'Available'),
-('Eng2002', '22534', 2, 'Monday 5:00pm - 7:00pm', 30, 0, 'Unavailable'),
-('Mat0001', '11132', 1, 'Wednesday 2:30pm - 4:30pm', 30, 1, 'Available'),
-('Mat0002', '11132', 2, 'Wednesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
-('Mat2001', '22134', 1, 'Wednesday 5:00pm - 7:00pm', 30, 0, 'Available'),
-('Mat2002', '22134', 2, 'Wednesday 5:00pm - 7:00pm', 30, 0, 'Unavailable'),
-('Mly0001', '11351', 1, 'Tuesday 2:30pm - 4:30pm', 30, 1, 'Available'),
-('Mly0002', '11351', 2, 'Tuesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
-('Mly2001', '22345', 1, 'Tuesday 5:00pm - 7:00pm', 30, 0, 'Available'),
-('Mly2002', '22345', 2, 'Tuesday 5:30pm - 7:00pm', 30, 0, 'Unavailable');
+INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `term`, `year`, `class_time`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
+('Eng0001', '11245', 1, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 1, 'Available'),
+('Eng0002', '11245', 2, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
+('Eng2001', '22534', 1, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 30, 0, 'Available'),
+('Eng2002', '22534', 2, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 30, 0, 'Unavailable'),
+('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 30, 1, 'Available'),
+('Mat0002', '11132', 2, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
+('Mat2001', '22134', 1, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 30, 0, 'Available'),
+('Mat2002', '22134', 2, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 30, 0, 'Unavailable'),
+('Mly0001', '11351', 1, '12345', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 1, 'Available'),
+('Mly0002', '11351', 2, '12345', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 30, 0, 'Unavailable'),
+('Mly2001', '22345', 1, '12347', '2025', 'Year 2', 'Tuesday 5:00pm - 7:00pm', 30, 0, 'Available'),
+('Mly2002', '22345', 2, '12347', '2025', 'Year 2', 'Tuesday 5:30pm - 7:00pm', 30, 0, 'Unavailable');
 
 -- --------------------------------------------------------
 
@@ -191,7 +194,8 @@ CREATE TABLE `notification` (
 --
 
 INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30');
+(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
+(2, 12345, '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07');
 
 -- --------------------------------------------------------
 
@@ -211,7 +215,8 @@ CREATE TABLE `notification_receiver` (
 --
 
 INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `read_status`) VALUES
-(1, 1, 1, 'unread');
+(1, 1, 1, 'read'),
+(2, 2, 1, 'read');
 
 -- --------------------------------------------------------
 
@@ -240,7 +245,7 @@ CREATE TABLE `parent` (
 --
 
 INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
-(1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-8278590', '', 'Mother', 'Female', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
+(1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
 (2, 'WW', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', '', 'Mother', '', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm');
 
 -- --------------------------------------------------------
@@ -371,7 +376,8 @@ CREATE TABLE `teacher` (
 INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
 (12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC');
+(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Active', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
 
@@ -557,19 +563,19 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `parent`
 --
 ALTER TABLE `parent`
-  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `part`
@@ -593,7 +599,7 @@ ALTER TABLE `registration_class`
 -- AUTO_INCREMENT for table `teacher`
 --
 ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12347;
+  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12348;
 
 --
 -- AUTO_INCREMENT for table `teacher_comment`
