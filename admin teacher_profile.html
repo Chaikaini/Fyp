@@ -161,9 +161,10 @@
         <div class="mb-3">
           <p><strong>Address:</strong> <span id="profile-address" class="fw-bold"></span></p>
         </div>
-        <!-- Edit Button -->
+        
         <div class="text-center">
           <button id="edit-button" class="btn btn-primary">Edit Profile</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal"> Reset Password</button>
         </div>
       </div>
     </div>
@@ -207,12 +208,7 @@
               </div>
               <button type="submit" class="btn btn-primary">Save Changes</button>
 
-                  <!-- Reset Password Button -->
-            <div class="text-center my-3">
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-                Reset Password
-              </button>
-            </div>
+              
             </form>
           </div>
         </div>
@@ -221,12 +217,7 @@
     
     
          
-    <!-- Reset Password Button -->
-<div class="text-center my-3">
-    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">
-      Reset Password
-    </button>
-  </div>
+   
   
   <!-- Reset Password Modal -->
   <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
