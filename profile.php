@@ -771,7 +771,7 @@
 <div id="ResultModal" class="result-modal">
   <div class="result-modal-content">
     <span class="close-btn" onclick="closeResultModal()">&times;</span>
-    <h5>Exam Result & Comment</h5>
+    <h5>Exam Result & Teacher Comment</h5>
     <form>
       <div class="mb-3">
         <label for="midterm" class="form-label">Midterm Result</label>

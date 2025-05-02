@@ -294,7 +294,7 @@
         </table>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        
         <button class="btn btn-primary" onclick="saveExamResults()">Save</button>
         
         <button class="btn btn-success" onclick="exportExamResultsToExcel()">Export to Excel</button>
