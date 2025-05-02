@@ -878,7 +878,7 @@ function displayLearningStatus() {
         return;
     }
 
-    fetch(`http://localhost/TWP-Project/profile_learning.php?child_id=${encodeURIComponent(childId)}`)
+    fetch(`http://localhost/FYP/profile_learning.php?child_id=${encodeURIComponent(childId)}`)
         .then(response => response.json())
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
