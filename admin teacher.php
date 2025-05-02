@@ -95,8 +95,8 @@
       <h3>Teacher Panel</h3>
     </div>
     <ul class="nav flex-column">
-      <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-user"></i> <span>Teacher</span></a></li> 
-      <li class="nav-item"><a href="admin attendance.php" class="nav-link"><i class="fas fa-user"></i> <span>Attendance</span></a></li>
+      <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-calendar"></i> <span>My schedule</span></a></li> 
+      <li class="nav-item"><a href="admin attendance.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
       <li class="nav-item"><a href="teacher_notification.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
     </ul>
   </nav>
@@ -130,7 +130,7 @@
     </nav>
 
     <!-- Schedule -->
-    <h1 class="mb-4">View My Classes</h1>
+    <h1 class="mb-4">View My Schedule</h1>
     <div class="card">
       <div class="card-header">
       <form class="d-flex ms-auto align-items-center">
