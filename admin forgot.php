@@ -53,7 +53,7 @@ function renderForm($content, $error = '') {
                 font-size: 14px;
             }
             form input, form select {
-                width: 100%;
+                width: 99%;
                 padding: 10px;
                 margin-bottom: 15px;
                 border: 1px solid #ddd;

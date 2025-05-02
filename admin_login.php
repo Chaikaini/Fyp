@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($result_admin->num_rows === 1) {
             $admin = $result_admin->fetch_assoc();
-            if ($password === $admin['admin_password']) {
+            if (password_verify($password, $admin['admin_password'])) {
                 unset($_SESSION['teacher_id'], $_SESSION['teacher_name'], $_SESSION['teacher_email']);
 
                 $_SESSION['admin_id'] = $admin['admin_id'];
