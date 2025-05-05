@@ -384,6 +384,11 @@ function loadCartData() {
 
         // 遍历购物车数据并动态生成 HTML
         cart.forEach((item, index) => {
+            // 如果 cart item 已经软删除，跳过此项
+            if (item.deleted == 1) {
+                return;  // 跳过软删除的项
+            }
+
             let itemPrice = parseFloat(item.price);
             totalPrice += itemPrice;
 
@@ -391,15 +396,19 @@ function loadCartData() {
             let cartItem = document.createElement('div');
             cartItem.classList.add('cart-item');
 
+            // 格式化 capacity 显示为 "class_enrolled/class_capacity"
+            let capacityDisplay = `${item.class_enrolled}/${item.class_capacity}`;
+
             cartItem.innerHTML = `
                 <div class="cart-item-details">
-                    <h5>${item.subject}</h5>
-                    <img src="${item.image}" alt="${item.subject} Image" class="cart-item-image"> <!-- Display image -->
-                    <p>Child: ${item.child}</p>
+                    <h5>${item.subject_name}</h5>
+                    <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name} Image" class="cart-item-image">
+                    <p>Child: ${item.child_name ? item.child_name : 'Not specified'}</p> <!-- Default to 'Not specified' -->
+                    <p>Capacity: ${capacityDisplay}</p> <!-- Display capacity as "1/30" -->
                     <p>Price: RM ${itemPrice.toFixed(2)}</p>
                 </div>
                 <div class="cart-item-actions">
-                    <i class="fas fa-trash" onclick="removeFromCart(${item.id})"></i>
+                    <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, ${item.subject_id}, '${item.child_name}')"></i>
                 </div>
             `;
 
@@ -412,32 +421,33 @@ function loadCartData() {
     .catch(error => console.error('Error:', error));
 }
 
-function removeFromCart(itemId) {
-    // 获取当前 localStorage 中的 cart
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // 移除本地存储中对应 ID 的项
-    cart = cart.filter(item => item.id !== itemId); // 注意需要每个 cartItem 有 id
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    // 发请求删除数据库里的那条记录
+function removeFromCart(cartId, subjectId, childName) {
     fetch('remove_cart.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ id: itemId })
+        body: JSON.stringify({
+            subject_id: subjectId,
+            child_name: childName
+        })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.status === "success") {
-            loadCartData(); // 重新加载页面上的购物车
+        console.log('Response:', data);
+        if (data.status === 'success') {
+            loadCartData();  // Reload cart after deletion
         } else {
-            alert("Error: " + data.message);
+            alert('Error: ' + data.message);
         }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
+
+
 
 
 document.getElementById("checkoutButton").addEventListener("click", function() {

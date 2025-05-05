@@ -523,6 +523,7 @@ unset($_SESSION['message']);
                 </div>
                 <div class="class-info">
                     <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($teacher_name) ?></p>
+                    <input type="hidden" id="teacherId" value="<?= htmlspecialchars($subject['teacher_id']) ?>">
                     <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['subject_price']) ?></p>
                 </div>
                 <div class="time-slot-container">
@@ -746,34 +747,27 @@ unset($_SESSION['message']);
                 }
             });
 
-            
-        // add to cart function 
-        document.getElementById("addToCart").addEventListener("click", async function() {
+            //add to cart function 
+            document.getElementById("addToCart").addEventListener("click", async function() {
     try {
-        // 收集数据
+        // 准备数据
         const cartItem = {
-            subject_id: <?= $subject_id ?>,
-            subject_name: document.getElementById("subjectName").innerText,
-            price: parseFloat(
-                document.getElementById("subjectPrice")
-                    .innerText.replace('Price: RM', '')
-                    .trim()
-            ),
-            child_name: document.getElementById("childrenSelect").value,
-            image: document.getElementById("subjectImage").src,
-            teacher: document.getElementById("teacher").innerText.replace('Teacher: ', ''),
-            child_year: "<?= $subject['year'] ?>",
+            subject_id: <?= json_encode($subject_id) ?>,
+            subject_name: document.getElementById("subjectName").innerText.trim(),
+            price: parseFloat(document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim()),
+            child_name: document.getElementById("childrenSelect").value.trim(),
             class_id: selectedClassInfo?.class_id || null,
-            capacity: selectedClassInfo?.capacity || 0,
-            time: selectedClassInfo?.time || null
+            teacher_id: document.getElementById("teacherId").value  // 添加 teacher_id
         };
 
+        console.log("Sending:", cartItem);  // 调试日志
+
         // 验证
-        if (isNaN(cartItem.price)) {
-            throw new Error("Invalid price value");
-        }
         if (!cartItem.child_name || cartItem.child_name === "Choose") {
-            throw new Error("Please select a child first");
+            throw new Error("Please select a child");
+        }
+        if (isNaN(cartItem.price)) {
+            throw new Error("Invalid price");
         }
 
         // 发送请求
@@ -783,61 +777,28 @@ unset($_SESSION['message']);
             body: JSON.stringify(cartItem)
         });
 
-        // 处理非JSON响应
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            const text = await response.text();
-            errorLog("Non-JSON response: " + text);
-            throw new Error("Server returned an invalid response");
+        console.log("Response status:", response.status);  // 调试日志
+
+        if (!response.ok) {
+            const err = await response.json().catch(() => null);
+            throw new Error(err?.message || `HTTP error ${response.status}`);
         }
 
         const data = await response.json();
-        
-        if (!response.ok || data.status !== "success") {
-            throw new Error(data.message || "Failed to add to cart");
+        console.log("Response data:", data);  // 调试日志
+
+        if (data.status !== 'success') {
+            throw new Error(data.message || "Operation failed");
         }
 
-        // 更新本地购物车
-        updateLocalCart(data.id, cartItem);
-        
-        showToast(data.message || "Item added to cart successfully!");
-        
+        showToast(data.message || "Added to cart successfully!");
+
     } catch (error) {
-        console.error('Cart Error:', error);
-        showToast(
-            error.message.includes('JSON') || error.message.includes('Server')
-                ? "Server error. Please try again later."
-                : error.message,
-            true
-        );
+        console.error("Add to cart error:", error);
+        showToast(error.message || "An error occurred", true);
     }
 });
 
-function updateLocalCart(itemId, item) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    
-    // 添加服务器生成的ID
-    if (itemId) {
-        item.id = itemId;
-    }
-    
-    // 检查是否已存在
-    const exists = cart.some(i => 
-        i.subject_id === item.subject_id && 
-        i.child_name === item.child_name && 
-        i.class_id === item.class_id
-    );
-    
-    if (!exists) {
-        cart.push(item);
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }
-}
-
-function errorLog(message) {
-    // 可以替换为实际的错误日志记录方式
-    console.error("Error:", message);
-}
 
             // Toast 通知
             function showToast(message, isError = false) {

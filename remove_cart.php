@@ -1,47 +1,48 @@
 <?php
 session_start();
-include('db_connect.php'); // 确保连接数据库
-
 header('Content-Type: application/json');
-error_reporting(E_ALL);
-ini_set('display_errors', 1); // 显示所有错误
+require_once('db_connect.php');
 
-$conn = dbConnect();
+try {
+    if (!isset($_SESSION['parent_id'])) {
+        throw new Exception("Unauthorized", 401);
+    }
 
-// 获取请求体中的原始 JSON 数据
-$json = file_get_contents('php://input');
+    $json = file_get_contents('php://input');
+    $data = json_decode($json, true);
 
-// 调试：检查是否有数据接收到
-if (empty($json)) {
-    echo json_encode(['status' => 'error', 'message' => 'No data received', 'raw' => $json]);
-    exit;
-}
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("Invalid JSON", 400);
+    }
 
-// 解析 JSON 数据
-$data = json_decode($json, true);
+    $required = ['subject_id', 'child_name'];
+    foreach ($required as $field) {
+        if (!isset($data[$field]) || empty($data[$field])) {
+            throw new Exception("Missing field: " . $field, 400);
+        }
+    }
 
-// 调试：检查解析后的数据
-if (!$data) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON input', 'raw' => $json]);
-    exit;
-}
+    $child_name = $data['child_name'];
 
-$id = $data['id'] ?? null;
+    // 找到记录并软删除
+    $stmt = $conn->prepare("UPDATE cart SET deleted = 1 WHERE parent_id = ? AND child_name = ? AND subject_id = ? AND deleted = 0");
+    $stmt->bind_param("isi", $_SESSION['parent_id'], $child_name, $data['subject_id']);
+    
+    if (!$stmt->execute() || $stmt->affected_rows === 0) {
+        throw new Exception("Cart item not found or already deleted", 404);
+    }    
 
-// 如果没有提供 id 或 id 无效
-if (!$id) {
-    echo json_encode(['status' => 'error', 'message' => 'No valid item ID received']);
-    exit;
-}
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Removed from cart successfully'
+    ]);
 
-// 删除购物车项
-$stmt = $conn->prepare("DELETE FROM cart_items WHERE id = ?");
-$stmt->bind_param("i", $id); // 假设 id 是整数类型
-
-if ($stmt->execute()) {
-    echo json_encode(['status' => 'success']);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Failed to delete cart item']);
+} catch (Exception $e) {
+    http_response_code($e->getCode() ?: 500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => $e->getMessage()
+    ]);
 }
 
 $conn->close();
