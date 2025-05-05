@@ -2,14 +2,17 @@
 session_start();
 header('Content-Type: application/json');
 
+
 $servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "the seeds";
+$username   = "root";
+$password   = "";
+$dbname     = "the seeds";
+
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    die(json_encode(['status' => 'error', 'message' => 'Database connection failed']));
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
+    exit;
 }
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Teacher' || !isset($_SESSION['teacher_id'])) {
@@ -19,38 +22,48 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Teacher' || !isset($_SES
 
 $teacher_id = $_SESSION['teacher_id'];
 
+// process update profile
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = $_POST;
+    $name    = $_POST['name'] ?? '';
+    $gender  = $_POST['gender'] ?? '';
+    $email   = $_POST['email'] ?? '';
+    $phone   = $_POST['phone_number'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $status  = 'Active'; 
 
-    $name = $input['name'] ?? '';
-    $gender = $input['gender'] ?? '';
-    $email = $input['email'] ?? '';
-    $phone = $input['phone_number'] ?? '';
-    $address = $input['address'] ?? '';
-    $status = $input['status'] ?? 'Active';
-
-    // Check if image was uploaded
+   
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $imageTmp = $_FILES['image']['tmp_name'];
-        $imageName = uniqid() . '-' . $_FILES['image']['name'];
-        $imagePath = "uploads/teacher_images/" . $imageName;
+        $imageTmp  = $_FILES['image']['tmp_name'];
+        $imageName = uniqid() . '-' . basename($_FILES['image']['name']);
+        $uploadDir = "uploads/teacher_images/";
+        $imagePath = $uploadDir . $imageName;
+
+        
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
 
         if (move_uploaded_file($imageTmp, $imagePath)) {
-            // Update with new image
-            $sql = "UPDATE teacher SET teacher_name = ?, teacher_gender = ?, teacher_email = ?, teacher_phone_number = ?, teacher_address = ?, teacher_status = ?, teacher_image = ? WHERE teacher_id = ?";
+            // update with image
+            $sql = "UPDATE teacher 
+                    SET teacher_name = ?, teacher_gender = ?,  teacher_phone_number = ?, teacher_address = ?, teacher_status = ?, teacher_image = ?
+                    WHERE teacher_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssssi", $name, $gender, $email, $phone, $address, $status, $imagePath, $teacher_id);
+            $stmt->bind_param("ssssssi", $name, $gender, $phone, $address, $status, $imagePath, $teacher_id);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to upload image']);
             exit;
         }
     } else {
-        // Update without image
-        $sql = "UPDATE teacher SET teacher_name = ?, teacher_gender = ?, teacher_email = ?, teacher_phone_number = ?, teacher_address = ?, teacher_status = ? WHERE teacher_id = ?";
+        // no update image 
+        $sql = "UPDATE teacher 
+                SET teacher_name = ?, teacher_gender = ?,  teacher_phone_number = ?, teacher_address = ?, teacher_status = ?
+                WHERE teacher_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssi", $name, $gender, $email, $phone, $address, $status, $teacher_id);
+        $stmt->bind_param("sssssi", $name, $gender, $phone, $address, $status, $teacher_id);
     }
 
+    // run the update query
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
     } else {
@@ -62,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-//load teacher profile data
+// get teacher profile
 $sql = "SELECT 
             teacher_name AS name, 
             teacher_gender AS gender, 
@@ -73,6 +86,7 @@ $sql = "SELECT
             teacher_status AS status
         FROM teacher 
         WHERE teacher_id = ?";
+
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $teacher_id);
 $stmt->execute();
