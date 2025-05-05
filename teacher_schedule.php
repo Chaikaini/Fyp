@@ -16,39 +16,48 @@ if ($conn->connect_error) {
     exit;
 }
 
+// get
 $category = $_POST['category'] ?? '';
 $keyword = $_POST['keyword'] ?? '';
 
+
+if (!isset($_SESSION['teacher_id'])) {
+    echo json_encode(["error" => "No teacher ID in session"]);
+    exit;
+}
+
+// auto display
 $sql = "SELECT 
             s.subject_id, 
             s.subject_name, 
-            s.teacher_id,
+            c.teacher_id,
+            c.class_term,
             c.class_id,
-            s.year,
+            c.year,
             c.class_time,
             p.part_duration
         FROM subject s
         JOIN class c ON s.subject_id = c.subject_id
         JOIN part p ON c.part_id = p.part_id
-        WHERE 1 ";
+        WHERE c.teacher_id = ?";
 
-$params = [];
-$types = "";
+$params = [intval($_SESSION['teacher_id'])];
+$types = "i";
 
+// if have search keyword, just can search the data based on teacher_id
 if (!empty($category) && !empty($keyword)) {
-    $allowed = ['teacher_id', 'subject_name'];
+    $allowed = ['class_term', 'subject_name'];
     if (!in_array($category, $allowed)) {
         echo json_encode(["error" => "Invalid search category"]);
         exit;
     }
 
-    if ($category === 'teacher_id' && !is_numeric($keyword)) {
-        echo json_encode(["error" => "Teacher ID must be number"]);
-        exit;
-    }
-
-    if ($category === 'teacher_id') {
-        $sql .= " AND s.teacher_id = ?";
+    if ($category === 'class_term') {
+        if (!is_numeric($keyword)) {
+            echo json_encode(["error" => "Term must be a number"]);
+            exit;
+        }
+        $sql .= " AND c.class_term = ?";
         $params[] = intval($keyword);
         $types .= "i";
     } else if ($category === 'subject_name') {
@@ -56,15 +65,6 @@ if (!empty($category) && !empty($keyword)) {
         $params[] = "%$keyword%";
         $types .= "s";
     }
-} else {
-    //if no searching，then based on teacher_id in session to display all classes
-    if (!isset($_SESSION['teacher_id'])) {
-        echo json_encode(["error" => "No teacher ID in session"]);
-        exit;
-    }
-    $sql .= " AND s.teacher_id = ?";
-    $params[] = intval($_SESSION['teacher_id']);
-    $types .= "i";
 }
 
 $stmt = $conn->prepare($sql);
@@ -73,10 +73,7 @@ if (!$stmt) {
     exit;
 }
 
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
-
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -85,7 +82,7 @@ while ($row = $result->fetch_assoc()) {
     $data[] = [
         'subject_id' => $row['subject_id'],
         'subject_name' => $row['subject_name'],
-        'teacher_id' => $row['teacher_id'],
+        'class_term' => $row['class_term'],
         'class_id' => $row['class_id'],
         'year' => $row['year'],
         'time' => $row['class_time'],

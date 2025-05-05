@@ -17,7 +17,7 @@ if (empty($teacher_id)) {
     exit;
 }
 
-// 获取搜索字段（如果有）
+
 $subject_id = $_POST['subject_id'] ?? '';
 $subject_name = $_POST['subject_name'] ?? '';
 
@@ -31,11 +31,11 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                s.year
+                c.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.subject_id = ? AND s.teacher_id = ?";
+            WHERE s.subject_id = ? AND c.teacher_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $subject_id, $teacher_id);
 } elseif (!empty($subject_name)) {
@@ -48,11 +48,11 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                s.year
+                c.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.subject_name LIKE ? AND s.teacher_id = ?";
+            WHERE s.subject_name LIKE ? AND c.teacher_id = ?";
     $stmt = $conn->prepare($sql);
     $subject_name = '%' . $subject_name . '%';
     $stmt->bind_param("ss", $subject_name, $teacher_id);
@@ -67,11 +67,11 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                s.year
+                c.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.teacher_id = ?";
+            WHERE c.teacher_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $teacher_id);
 }

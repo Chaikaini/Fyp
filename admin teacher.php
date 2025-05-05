@@ -135,10 +135,10 @@
       <div class="card-header">
       <form class="d-flex ms-auto align-items-center">
       <select id="search-category" class="form-select search-category">
-          <option value="teacher_id">Teacher ID</option>
+          <option value="class_term">Term</option>
           <option value="subject_name">Subject Name</option>
         </select>
-          <input class="form-control me-2" type="search" placeholder="Search with Teacher ID" id="search" />
+          <input class="form-control me-2" type="search" placeholder="Search with Term" id="search" />
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
       </div>
       <div class="card-body">
@@ -147,7 +147,7 @@
               <tr>
                 <th>Subject ID</th>
                 <th>Subject Name</th>
-                <th>Teacher ID</th>
+                <th>Term</th>
                 <th>Class ID</th>
                 <th>Year</th>
                 <th>Time</th>
@@ -155,7 +155,7 @@
               </tr>
             </thead>
             <tbody id="schedule-table-body">
-            <tr><td colspan="7" class="text-center text-muted">Please enter a Teacher ID or Subject Name to view classes.</td></tr>
+              <!-- rows will be injected here -->
             </tbody>
           </table>
       </div>
@@ -177,8 +177,8 @@ document.getElementById("search-category").addEventListener("change", function (
   const category = this.value;
   const searchInput = document.getElementById("search");
 
-  if (category === "teacher_id") {
-    searchInput.placeholder = "Search with Teacher ID";
+  if (category === "class_term") {
+    searchInput.placeholder = "Search with Term";
   } else if (category === "subject_name") {
     searchInput.placeholder = "Search with Subject Name";
   }
@@ -193,6 +193,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
     return;
   }
 
+  // search request include teacher_id
   fetch("teacher_schedule.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -213,8 +214,9 @@ document.getElementById("search-btn").addEventListener("click", function () {
 function loadTeacherSchedule() {
   fetch("teacher_schedule.php", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    // use session teacher_id return all classes
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  
+    body: "" 
   })
     .then((res) => {
       if (!res.ok) throw new Error("Network response was not ok");
@@ -268,7 +270,7 @@ function renderSchedule(data) {
         <tr>
           <td>${row.subject_id}</td>
           <td>${row.subject_name}</td>
-          <td>${row.teacher_id}</td>
+          <td>${row.class_term}</td>
           <td>${row.class_id}</td>
           <td>${row.year}</td>
           <td>${row.time}</td>
@@ -278,6 +280,7 @@ function renderSchedule(data) {
     });
   }
 }
+
 </script>
 
 

@@ -271,7 +271,8 @@
         option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
         subjectSelect.appendChild(option);
       });
-    });
+    })
+    .catch(err => console.error('Error loading subjects:', err));
 }
 
 document.getElementById("subject_id").addEventListener("change", function () {
@@ -288,9 +289,11 @@ document.getElementById("subject_id").addEventListener("change", function () {
           option.textContent = cls.class_id;
           classSelect.appendChild(option);
         });
-      });
+      })
+      .catch(err => console.error('Error loading classes:', err));
   }
 });
+
 
 document.getElementById("notificationForm").addEventListener("submit", function (e) {
     e.preventDefault();
