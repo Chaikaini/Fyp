@@ -201,6 +201,7 @@
         <table class="table">
           <thead>
             <tr>
+              <th>No.</th>
               <th>Student Name</th>
               <th>Gender</th>
               <th>Kid Number</th>
@@ -284,7 +285,7 @@
         <table id="studentResultsTable" class="table">
           <thead>
             <tr>
-              <th>Student ID</th>
+              <th>No.</th>
               <th>Student Name</th>
               <th>Midterm result</th>
               <th>Final result</th>
@@ -456,7 +457,8 @@ function viewStudents(classId) {
             data.students.forEach((row, index) => {
                 tbody.innerHTML += `
                     <tr>
-                        <td>${index + 1}. ${row.child_name}</td>
+                        <td>${index + 1}</td>
+                        <td>${row.child_name}</td>
                         <td>${row.child_gender}</td>
                         <td>${row.child_kidnumber}</td>
                         <td><a href="#" onclick="viewParentInfo('${row.parent_id}', '${row.child_name}')">${row.parent_name}</a></td>
@@ -788,10 +790,11 @@ function openExamResultModal(classId) {
     .then(data => {
       const tbody = document.querySelector("#studentResultsTable tbody");
       tbody.innerHTML = "";
-      data.forEach(student => {
-        tbody.innerHTML += `
+      let index = 1;
+    data.forEach(student => {
+      tbody.innerHTML += `
         <tr>
-          <td>${student.child_id}</td>
+          <td>${index++}</td>
           <td>${student.child_name}</td>
           <td><input type="number" value="${student.exam_result_midterm ?? ''}" data-exam="midterm" data-child-id="${student.child_id}"></td>
           <td><input type="number" value="${student.exam_result_final ?? ''}" data-exam="final" data-child-id="${student.child_id}"></td>

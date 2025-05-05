@@ -17,8 +17,11 @@ if (!$teacher_id) {
 }
 
 if ($action === 'subject') {
-    //search subject by teacher_id
-    $stmt = $conn->prepare("SELECT subject_id, subject_name FROM subject WHERE teacher_id = ?");
+   
+    $stmt = $conn->prepare("SELECT DISTINCT s.subject_id, s.subject_name
+                            FROM class c
+                            JOIN subject s ON c.subject_id = s.subject_id
+                            WHERE c.teacher_id = ?");
     $stmt->bind_param("i", $teacher_id);
     $stmt->execute();
     $result = $stmt->get_result();
