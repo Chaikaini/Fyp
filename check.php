@@ -1,3 +1,40 @@
+<?php
+// 启动会话
+session_start();
+
+// 获取用户的邮箱地址（如果存在）
+$email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
+$userPhoneNumber = "";
+
+$_SESSION['email'] = $userEmail;  // 设置session
+session_write_close();  
+
+// 数据库连接
+$conn = new mysqli("localhost", "root", "", "the seeds");
+
+// 检查数据库连接是否成功
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// 如果用户已登录，查询电话号码
+if (!empty($email)) {
+    // 使用预处理语句防止SQL注入
+    $stmt = $conn->prepare("SELECT phone_number FROM parent WHERE parent_email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $userPhoneNumber = $row['phone_number'];
+    }
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -345,6 +382,26 @@ button:hover {
     position: relative; 
 }
 
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 9999;
+}
+
+.toast.success {
+    background-color: green;
+}
+
+.toast.error {
+    background-color: red;
+}
+
 
 
     </style>
@@ -430,39 +487,6 @@ button:hover {
             <h4>Choose Your Payment Method</h4>
             <div class="payment-method">
 
-                <label for="online-banking" class="payment-option">
-                    <img src="img/online_banking.png" alt="Online Banking" class="payment-icon"> Online Banking
-                    <input type="radio" id="online-banking" name="payment" value="online-banking">
-                </label>
-
-                <div id="bank-selection">
-                    <h8>Select Your Bank:</h8>
-                    <div class="bank-grid">
-                        <div class="bank-option" data-bank="maybank">
-                            <img src="img/maybank.png" alt="Maybank">
-                            <span>Maybank</span>
-                        </div>
-                        <div class="bank-option" data-bank="cimb">
-                            <img src="img/cimb.png" alt="CIMB Bank">
-                            <span>CIMB Bank</span>
-                        </div>
-                        <div class="bank-option" data-bank="public-bank">
-                            <img src="img/public_bank.png" alt="Public Bank">
-                            <span>Public Bank</span>
-                        </div>
-                        <div class="bank-option" data-bank="rhb">
-                            <img src="img/rhb.png" alt="RHB Bank">
-                            <span>RHB Bank</span>
-                        </div>
-                        <div class="bank-option" data-bank="hongleong">
-                            <img src="img/hongleong.png" alt="Hong Leong Bank">
-                            <span>Hong Leong Bank</span>
-                        </div>
-                    </div>
-                    
-                    <span id="bank-error" class="error-message">*</span>
-                </div>
-
                <br><label for="jompay" class="payment-option">
                     <img src="img/jompay.png" alt="JomPAY" class="payment-icon"> JomPAY
                     <input type="radio" id="jompay" name="payment" value="jompay">
@@ -473,12 +497,12 @@ button:hover {
                 </label>
             </div>
         </div>
-        <div id="phone-number-field" style="display: none;">
-            <label for="phone-number">Enter your phone number:</label>
+             <div id="phone-number-field" style="display: none;">
+             <label>Your phone number:</label>
             <div class="phone-input">
-                <span>+60</span>
-                <input type="tel" id="phone-number" name="phone-number" pattern="[0-9]{9}" placeholder="10-0000000">
-                <span id="phone-error" class="error-message">*</span>
+            <span>+60 <?php echo !empty($userPhoneNumber) ? htmlspecialchars($userPhoneNumber) : 'Phone number not found'; ?></span>
+             <input type="hidden" id="phone-number" name="phone-number" 
+               value="<?php echo !empty($userPhoneNumber) ? htmlspecialchars($userPhoneNumber) : ''; ?>">
             </div>
         </div>
         <div class="payment">
@@ -525,42 +549,8 @@ button:hover {
             console.error('Fetch error:', error);
         });
     });
-    var selectedBank = ""; 
-    
-    document.addEventListener("DOMContentLoaded", function () {
-        var tngRadio = document.getElementById("tng");
-        var jompayRadio = document.getElementById("jompay");
-        var onlineBankingRadio = document.getElementById("online-banking");
-        var phoneNumberField = document.getElementById("phone-number-field");
-        var bankSelection = document.getElementById("bank-selection");
-    
-        tngRadio.addEventListener("change", function () {
-            phoneNumberField.style.display = tngRadio.checked ? "block" : "none";
-            bankSelection.style.display = "none";
-        });
-    
-        jompayRadio.addEventListener("change", function () {
-            phoneNumberField.style.display = "none";
-            bankSelection.style.display = "none";
-        });
-    
-        onlineBankingRadio.addEventListener("change", function () {
-            phoneNumberField.style.display = "none";
-            bankSelection.style.display = "block";
-        });
-    
-        // bank select
-        document.querySelectorAll(".bank-option").forEach(function (bank) {
-            bank.addEventListener("click", function () {
-                selectedBank = this.getAttribute("data-bank"); 
-                document.querySelectorAll(".bank-option").forEach(b => b.classList.remove("selected"));
-                this.classList.add("selected");
-                console.log("Selected Bank:", selectedBank); 
-            });
-        });
-    });
-    
-    
+
+    // get data
     fetch("checkout.php")
         .then(response => response.json())
         .then(data => {
@@ -575,15 +565,15 @@ button:hover {
                 totalAmount += parseFloat(item.price);
     
                 const courseItem = `
-                    <div class="course-item" data-class-id="${item.class_id}">
-                        <img src="${item.image}" alt="${item.subject}">
-                        <div>
-                            <p><b>${item.subject}</b></p>
-                            <p><b>Teacher:</b> ${item.teacher}</p>
-                            <p><b>Price:</b> RM${item.price}</p>
-                            <p><b>Time:</b> ${item.time}</p>
-                            <p><b>Student:</b> ${item.child}</p>
-                        </div>
+            <div class="course-item" data-class-id="${item.cart_id}">
+            <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name}">
+                     <div>
+            <p><b>${item.subject_name}</b></p>
+            <p><b>Teacher:</b> ${item.teacher_name}</p>
+            <p><b>Price:</b> RM${item.price}</p>
+            <p><b>Time:</b> ${item.class_time}</p>
+            <p><b>Student:</b> ${item.child_name}</p>
+                   </div>
                     </div>
                     <hr>
                 `;
@@ -596,141 +586,158 @@ button:hover {
         .catch(error => console.error("Error fetching cart data:", error));
     
     
-    function validateForm() {
-        var tngSelected = document.getElementById('tng').checked;
-        var jompaySelected = document.getElementById('jompay').checked;
-        var onlineBankingSelected = document.getElementById('online-banking').checked;
-        var phoneNumber = document.getElementById('phone-number').value;
-        var phoneError = document.getElementById('phone-error');
-        var bankError = document.getElementById("bank-error");
+
+        var selectedBank = ""; 
+
+document.addEventListener("DOMContentLoaded", function () {
+    var tngRadio = document.getElementById("tng");
+    var jompayRadio = document.getElementById("jompay");
+    var phoneNumberField = document.getElementById("phone-number-field");
     
-        var paymentMethod = tngSelected ? "TNG" : (jompaySelected ? "JomPAY" : (onlineBankingSelected ? "Online Banking" : ""));
-        
-        // make sure have choose a payment method
-        if (!paymentMethod) {
-            showErrorPopup("Please select a payment method.");
-            return;
-        }
+    // TNG 选择时显示手机号码输入框，JomPAY 没有额外输入要求
+    tngRadio.addEventListener("change", function () {
+        phoneNumberField.style.display = tngRadio.checked ? "block" : "none";
+    });
     
-        // TNG need phone num
-        if (tngSelected) {
-            if (phoneNumber === '') {
-                phoneError.style.display = 'inline';
-                showErrorPopup('Please enter your phone number.');
-                return;
-            } else if (!/^\d{9}$/.test(phoneNumber)) {
-                phoneError.style.display = 'inline';
-                showErrorPopup('Please enter a valid phone number.');
-                return;
-            } else {
-                phoneError.style.display = 'none';
-            }
-        }
+    jompayRadio.addEventListener("change", function () {
+        phoneNumberField.style.display = "none"; // JomPAY 没有手机号要求
+    });
+
+    // bank select - 目前只有 TNG 需要输入手机号，不再需要处理银行选择
+    document.querySelectorAll(".bank-option").forEach(function (bank) {
+        bank.style.display = "none"; // 隐藏银行选择
+    });
+});
+
+function validateForm() {
+    var tngSelected = document.getElementById('tng').checked;
+    var paymentMethod = tngSelected ? "TNG" : "JomPAY";
     
-        // Online Banking need to choose bank
-        if (onlineBankingSelected && !selectedBank) {
-            bankError.style.display = 'inline';
-            showErrorPopup("Please select a bank.");
-            return;
+    // 确保选择了支付方式
+    if (!paymentMethod) {
+        showToast("Please select a payment method.", "error");
+        return;
+    }
+
+    // 获取电话号码（自动从PHP填充）
+    var phoneNumber = document.getElementById('phone-number').value;
+    
+    // 如果是TNG支付，检查是否有电话号码
+    if (tngSelected && !phoneNumber) {
+        showToast("Phone number is required for TNG payment.", "error");
+        return;
+    }
+
+    var orderData = {
+        payment_method: paymentMethod,
+        phone: tngSelected ? phoneNumber : null
+    };
+
+    const cartIds = Array.from(document.querySelectorAll(".course-item"))
+        .map(item => item.getAttribute("data-cart-id"))
+        .join(",");
+    
+    var totalAmount = document.getElementById("total-amount").innerText.replace("RM", "").trim();
+    var studentName = document.querySelector(".course-item p:nth-of-type(5)") ? 
+        document.querySelector(".course-item p:nth-of-type(5)").innerText.replace("Student: ", "") : "";
+    var courseName = document.querySelector(".course-item p b") ? 
+        document.querySelector(".course-item p b").innerText : "";
+    var teacherName = document.querySelector(".course-item p:nth-of-type(2)") ? 
+        document.querySelector(".course-item p:nth-of-type(2)").innerText.replace("Teacher: ", "") : "";
+    var courseTime = document.querySelector(".course-item p:nth-of-type(4)") ? 
+        document.querySelector(".course-item p:nth-of-type(4)").innerText.replace("Time: ", "") : "";
+
+    if (!studentName || !courseName || !teacherName || !courseTime) {
+        showToast("Order details are missing.", "error");
+        return;
+    }
+
+    var orderData = {
+        student_name: studentName,
+        course_name: courseName,
+        teacher_name: teacherName,
+        total_amount: totalAmount,
+        payment_method: paymentMethod,
+        time: courseTime,
+        cart_ids: cartIds 
+    };
+
+    console.log("Order Data:", orderData); 
+
+    fetch("process_payment.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Payment Response:", data); 
+
+        if (data.success) {
+            showPaymentModal(true);
+            setTimeout(() => { window.location.href = "subject.html"; }, 4000);
         } else {
-            bankError.style.display = 'none';
+            showPaymentModal(false);
+            showToast(data.message || "Payment failed.", "error");
         }
-    
-        
-        var orderData = {
-            payment_method: paymentMethod,
-            bank: selectedBank,
-            phone: tngSelected ? phoneNumber : null
-        };
-        
-        const classIds = Array.from(document.querySelectorAll(".course-item"))
-       .map(item => item.getAttribute("data-class-id"))
-       .join(",");
-        var totalAmount = document.getElementById("total-amount").innerText.replace("RM", "").trim();
-
-        var studentName = document.querySelector(".course-item p:nth-of-type(5)") ? 
-                  document.querySelector(".course-item p:nth-of-type(5)").innerText.replace("Student: ", "") : "";
-
-        var courseName = document.querySelector(".course-item p b") ? 
-                 document.querySelector(".course-item p b").innerText : "";
-
-        var teacherName = document.querySelector(".course-item p:nth-of-type(2)") ? 
-                  document.querySelector(".course-item p:nth-of-type(2)").innerText.replace("Teacher: ", "") : "";
-
-        var courseTime = document.querySelector(".course-item p:nth-of-type(4)") ? 
-                 document.querySelector(".course-item p:nth-of-type(4)").innerText.replace("Time: ", "") : "";
-
-if (!studentName || !courseName || !teacherName || !courseTime) {
-    alert("Order details are missing.");
-    return;
+    })
+    .catch(error => {
+        console.error("Error processing payment:", error);
+        showPaymentModal(false);
+    });
 }
 
-var orderData = {
-    student_name: studentName,
-    course_name: courseName,
-    teacher_name: teacherName,
-    total_amount: totalAmount,
-    payment_method: paymentMethod,
-    time: courseTime,
-    class_id: classIds,
-   
-};
+// 显示 toast 消息
+// 修改 showToast 函数，确保它可见
+function showToast(message, type) {
+    var toastContainer = document.createElement('div');
+    toastContainer.classList.add('toast');
+    toastContainer.classList.add(type);
+    toastContainer.style.position = 'fixed';
+    toastContainer.style.top = '20px';
+    toastContainer.style.right = '20px';
+    toastContainer.style.padding = '15px';
+    toastContainer.style.borderRadius = '5px';
+    toastContainer.style.color = 'white';
+    toastContainer.style.zIndex = '9999';
+    toastContainer.style.backgroundColor = type === 'error' ? 'red' : 'green';
+    toastContainer.innerText = message;
+    
+    document.body.appendChild(toastContainer);
+    setTimeout(() => {
+        toastContainer.remove();
+    }, 3000);
+}
+    
+// payment status alert modal
+function showPaymentModal(isSuccess) {
+    let modal = document.getElementById("paymentModal");
+    let paymentIcon = document.getElementById("payment_picture");
+    let paymentTitle = document.getElementById("paymentTitle");
+    let paymentMessage = document.getElementById("paymentMessage");
+    
+    if (isSuccess) {
+        paymentIcon.src = "img/payment_s.png"; 
+        paymentTitle.innerText = "Payment Successful";
+        paymentMessage.innerText = "You can check your payment history in the profile page.";
+    } else {
+        paymentIcon.src = "img/payment_ns.png"; 
+        paymentTitle.innerText = "Payment Failed";
+        paymentMessage.innerText = "There was an issue processing your payment.";
+    }
+    
+    modal.style.display = "flex";
+}
 
-        console.log("Order Data:", orderData); 
-    
-        
-        fetch("process_payment.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(orderData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Payment Response:", data); 
-    
-            if (data.success) {
-                showPaymentModal(true);
-                setTimeout(() => { window.location.href = "subject.html"; }, 4000);
-            } else {
-                showPaymentModal(false);
-                showErrorPopup(data.message || "Payment failed.");
-            }
-        })
-        .catch(error => {
-            console.error("Error processing payment:", error);
-            showPaymentModal(false);
-        });
-    }
-    
-    // payment status alert modal
-    function showPaymentModal(isSuccess) {
-        let modal = document.getElementById("paymentModal");
-        let paymentIcon = document.getElementById("payment_picture");
-        let paymentTitle = document.getElementById("paymentTitle");
-        let paymentMessage = document.getElementById("paymentMessage");
-    
-        if (isSuccess) {
-            paymentIcon.src = "img/payment_s.png"; 
-            paymentTitle.innerText = "Payment Successful";
-            paymentMessage.innerText = "You can check your payment history in the profile page.";
-        } else {
-            paymentIcon.src = "img/payment_ns.png"; 
-            paymentTitle.innerText = "Payment Failed";
-            paymentMessage.innerText = "There was an issue processing your payment.";
-        }
-    
-        modal.style.display = "flex";
-    }
-    
-    // close payment status alert modal
-    function closeModal() {
-        document.getElementById("paymentModal").style.display = "none";
-    }
-    
-    
-    function showErrorPopup(message) {
-        alert(message);
-    }
+// close payment status alert modal
+function closeModal() {
+    document.getElementById("paymentModal").style.display = "none";
+}
+
+function showErrorPopup(message) {
+    alert(message);
+}
+
     
     </script>
     
