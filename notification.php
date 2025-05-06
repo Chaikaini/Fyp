@@ -262,19 +262,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             container.innerHTML = '';
 
-            // if first time login, show welcome message
-            if (data.first_login) {
-                const welcomeMsg = `
-                    <div class="notification-item">
-                        <div class="title">Welcome to The Seeds</div>
-                        <div class="content">Hello ${data.user_name}! Thank you for joining us.</div>
-                        <div class="date">This is your first login!</div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('afterbegin', welcomeMsg);
-            }
+            // Sort notifications by date (newest first)
+            data.notifications.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
 
-            // display all notifications
+            // show notifications
             data.notifications.forEach(notif => {
                 const notificationItem = document.createElement('div');
                 notificationItem.className = 'notification-item';
@@ -311,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${notif.notification_document ? `<div><a href="${notif.notification_document}" target="_blank">View Document</a></div>` : ''}
                 `;
 
-                //when chick mark as read             
+                // when click, mark as read
                 notificationItem.addEventListener('click', function () {
                     const notificationId = this.dataset.notificationId;
                     fetch('mark_as_read.php', {
@@ -321,39 +312,41 @@ document.addEventListener('DOMContentLoaded', function () {
                         },
                         body: `notification_id=${notificationId}`
                     })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.success) {
-                                const titleDiv = this.querySelector('.title');
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            const titleDiv = this.querySelector('.title');
+                            const newLabel = titleDiv.querySelector('.new-label');
+                            if (newLabel) newLabel.remove();
 
-                               
-                                const newLabel = titleDiv.querySelector('.new-label');
-                                if (newLabel) {
-                                    newLabel.remove();
-                                }
-
-                                titleDiv.style.fontWeight = 'normal';
-                                titleDiv.style.color = 'black';
-                            }
-                        })
-                        .catch(error => console.error('Error marking as read:', error));
+                            titleDiv.style.fontWeight = 'normal';
+                            titleDiv.style.color = 'black';
+                        }
+                    })
+                    .catch(error => console.error('Error marking as read:', error));
                 });
 
-                // new notification on top
-                container.insertBefore(notificationItem, container.firstChild);
+                container.appendChild(notificationItem); 
             });
 
-            // Check if there are any unread notifications
-            const notificationDot = document.getElementById('notificationDot');
-            const hasUnread = data.notifications && data.notifications.some(notif => notif.read_status === 'unread');
-
-            if (hasUnread) {
-                notificationDot.style.display = 'block';
-            } else {
-                notificationDot.style.display = 'none';
+            // Welcome message down here
+            if (data.first_login) {
+                const welcomeMsg = `
+                    <div class="notification-item">
+                        <div class="title">Welcome to The Seeds</div>
+                        <div class="content">Hello ${data.user_name}! Thank you for joining us.</div>
+                        <div class="date">This is your first login!</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', welcomeMsg); 
             }
 
-            
+            // unread notification red point
+            const notificationDot = document.getElementById('notificationDot');
+            const hasUnread = data.notifications && data.notifications.some(notif => notif.read_status === 'unread');
+            notificationDot.style.display = hasUnread ? 'block' : 'none';
+
+            // when click the bell icon, hide the red point
             document.querySelector('.fa-bell').addEventListener('click', function () {
                 notificationDot.style.display = 'none';
             });
@@ -368,6 +361,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 });
 </script>
+
 
 
 
