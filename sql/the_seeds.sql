@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2025 at 10:42 AM
+-- Generation Time: May 06, 2025 at 03:27 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -32,6 +32,8 @@ CREATE TABLE `admin` (
   `admin_name` varchar(100) NOT NULL,
   `admin_gender` enum('Male','Female') NOT NULL,
   `admin_email` varchar(100) NOT NULL,
+  `admin_address` varchar(255) DEFAULT NULL,
+  `admin_phone_number` varchar(20) DEFAULT NULL,
   `admin_password` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -39,8 +41,8 @@ CREATE TABLE `admin` (
 -- Dumping data for table `admin`
 --
 
-INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_password`) VALUES
-(11111, 'kaini', 'Female', 'chaikaini@gmail.com', '11111');
+INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_address`, `admin_phone_number`, `admin_password`) VALUES
+(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$PhNMXqvL088UzhUx8aQcb.LsNktY4hOo5CZX9qeTPqP3KtQOXoxiW');
 
 -- --------------------------------------------------------
 
@@ -326,29 +328,24 @@ INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `c
 
 CREATE TABLE `subject` (
   `subject_id` varchar(20) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
-  `admin_id` int(11) NOT NULL,
   `subject_name` varchar(100) NOT NULL,
   `year` text NOT NULL,
   `subject_price` decimal(8,2) NOT NULL,
   `subject_description` text DEFAULT NULL,
-  `subject_image` varchar(255) DEFAULT NULL,
-  `page` varchar(255) NOT NULL,
-  `page_generated` tinyint(1) NOT NULL,
-  `page_path` varchar(255) NOT NULL
+  `subject_image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `subject`
 --
 
-INSERT INTO `subject` (`subject_id`, `teacher_id`, `admin_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`, `page`, `page_generated`, `page_path`) VALUES
-('11132', 12123, 11111, 'Math', 'Year 1', 510.00, NULL, 'img/math.jpg', 'Year 1 Math class.html', 0, ''),
-('11245', 12233, 11111, 'English', 'Year 1', 510.00, NULL, 'img/english.jpg', 'Year 1 English class.html', 0, ''),
-('11351', 12345, 11111, 'Melayu', 'Year 1', 510.00, NULL, 'img/malay1.jpg', 'Year 1 Malay class.html', 0, ''),
-('22134', 12123, 11111, 'Math', 'Year 2', 510.00, NULL, 'img/math.jpg', 'Year 2 Math class.html', 0, ''),
-('22345', 12345, 11111, 'Melayu', 'Year 2', 510.00, NULL, 'img/malay1.jpg', 'Year 2 Malay class.html', 0, ''),
-('22534', 12233, 11111, 'English', 'Year 2', 510.00, NULL, 'img/english.jpg', 'Year 2 English class.html', 0, '');
+INSERT INTO `subject` (`subject_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`) VALUES
+('11132', 'Math', 'Year 1', 510.00, '-', 'img/math.jpg'),
+('11245', 'English', 'Year 1', 510.00, '-', 'img/english.jpg'),
+('11351', 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
+('22134', 'Math', 'Year 2', 510.00, '-', 'img/math.jpg'),
+('22345', 'Melayu', 'Year 2', 510.00, '-', 'img/malay1.jpg'),
+('22534', 'English', 'Year 2', 510.00, '-', 'img/english.jpg');
 
 -- --------------------------------------------------------
 
@@ -506,9 +503,7 @@ ALTER TABLE `registration_class`
 -- Indexes for table `subject`
 --
 ALTER TABLE `subject`
-  ADD PRIMARY KEY (`subject_id`),
-  ADD KEY `teacher_id` (`teacher_id`),
-  ADD KEY `admin_id` (`admin_id`);
+  ADD PRIMARY KEY (`subject_id`);
 
 --
 -- Indexes for table `teacher`
@@ -686,13 +681,6 @@ ALTER TABLE `registration_class`
   ADD CONSTRAINT `registration_class_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
   ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
   ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
-
---
--- Constraints for table `subject`
---
-ALTER TABLE `subject`
-  ADD CONSTRAINT `subject_ibfk_1` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
-  ADD CONSTRAINT `subject_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
 
 --
 -- Constraints for table `teacher_comment`

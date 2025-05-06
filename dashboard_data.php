@@ -1,6 +1,6 @@
 <?php
 // connect database profile/childreninfo.sql
-$conn_children = new mysqli("localhost", "root", "", "profile");
+$conn_children = new mysqli("localhost", "root", "", "the seeds");
 if ($conn_children->connect_error) {
     die("Connection failed: " . $conn_children->connect_error);
 }
