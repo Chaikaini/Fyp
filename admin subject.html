@@ -92,10 +92,10 @@
       background-color: #e9ecef;
       cursor: not-allowed;
     }
-    .subject-image {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
+    #imagePreview {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
     }
   </style>
 </head>
@@ -156,7 +156,7 @@
           </li>
         </ul>
       </div>
-    </nav>
+  </nav>
 
     <!-- Subject List -->
     <h1 class="mb-4">Subject List</h1>
@@ -197,7 +197,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="subjectForm">
+          <form id="subjectForm" enctype="multipart/form-data">
             <div class="mb-3">
               <label for="subjectId" class="form-label">Subject ID</label>
               <input type="text" class="form-control" id="subjectId" required>
@@ -205,14 +205,6 @@
             <div class="mb-3">
               <label for="subjectName" class="form-label">Subject Name</label>
               <input type="text" class="form-control" id="subjectName" required>
-            </div>
-            <div class="mb-3">
-              <label for="year" class="form-label">Year</label>
-              <select class="form-select" id="year" required>
-                <option value="" disabled selected>Select Year</option>
-                <option value="Year 1">Year 1</option>
-                <option value="Year 2">Year 2</option>
-              </select>
             </div>
             <div class="mb-3">
               <label for="price" class="form-label">Price</label>
@@ -224,7 +216,7 @@
             </div>
             <div class="mb-3">
               <label for="image" class="form-label">Image</label>
-              <input type="text" class="form-control" id="image" placeholder="e.g., img/math.jpg">
+              <input type="file" class="form-control" id="image" accept="image/jpeg,image/png,image/jpg" required>
             </div>
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-primary w-100" id="saveSubjectBtn">Save</button>
@@ -244,7 +236,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="editSubjectForm">
+          <form id="editSubjectForm" enctype="multipart/form-data">
             <div class="mb-3">
               <label for="editSubjectId" class="form-label">Subject ID</label>
               <input type="text" class="form-control fixed-field" id="editSubjectId" readonly required>
@@ -252,14 +244,6 @@
             <div class="mb-3">
               <label for="editSubjectName" class="form-label">Subject Name</label>
               <input type="text" class="form-control" id="editSubjectName" required>
-            </div>
-            <div class="mb-3">
-              <label for="editYear" class="form-label">Year</label>
-              <select class="form-select" id="editYear" required>
-                <option value="" disabled>Select Year</option>
-                <option value="Year 1">Year 1</option>
-                <option value="Year 2">Year 2</option>
-              </select>
             </div>
             <div class="mb-3">
               <label for="editPrice" class="form-label">Price</label>
@@ -271,12 +255,28 @@
             </div>
             <div class="mb-3">
               <label for="editImage" class="form-label">Image</label>
-              <input type="text" class="form-control" id="editImage" placeholder="e.g., img/math.jpg">
+              <input type="file" class="form-control" id="editImage" accept="image/jpeg,image/png,image/jpg">
+              <small>Current: <a href="#" id="currentImageLink" target="_blank">View Current Image</a></small>
             </div>
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-primary w-100" id="updateSubjectBtn">Update</button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="imagePreview" src="" alt="Subject Image">
         </div>
       </div>
     </div>
@@ -307,15 +307,23 @@
                 <td>${subject.subject_id}</td>
                 <td>${subject.subject_name}</td>
                 <td>${subject.year}</td>
-                <td>$${subject.subject_price}</td>
+                <td> unii$${subject.subject_price}</td>
                 <td>${subject.subject_description || 'N/A'}</td>
-                <td><img src="${subject.subject_image || 'img/placeholder.jpg'}" class="subject-image" alt="${subject.subject_name}"></td>
+                <td><a href="#" class="image-link" data-image="${subject.subject_image}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">View Image</a></td>
                 <td>
                   <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${subject.subject_id}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${subject.subject_id}"></i>
                 </td>
               `;
               table.appendChild(row);
+            });
+
+            // Attach event listeners to image links
+            document.querySelectorAll('.image-link').forEach(link => {
+              link.addEventListener('click', () => {
+                const imageSrc = link.getAttribute('data-image');
+                document.getElementById('imagePreview').src = imageSrc;
+              });
             });
           } else {
             table.innerHTML = `<tr><td colspan="7" class="text-center">No subjects found</td></tr>`;
@@ -326,10 +334,10 @@
     function populateEditModal(subjectData) {
       document.getElementById('editSubjectId').value = subjectData.subject_id;
       document.getElementById('editSubjectName').value = subjectData.subject_name;
-      document.getElementById('editYear').value = subjectData.year;
       document.getElementById('editPrice').value = subjectData.subject_price;
       document.getElementById('editDescription').value = subjectData.subject_description || '';
-      document.getElementById('editImage').value = subjectData.subject_image || '';
+      document.getElementById('currentImageLink').href = subjectData.subject_image || '#';
+      document.getElementById('currentImageLink').textContent = subjectData.subject_image ? 'View Current Image' : 'No Image';
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -372,22 +380,30 @@
       document.getElementById("subjectForm").addEventListener("submit", function (event) {
         event.preventDefault();
 
-        let data = {
-          action: "addSubject",
-          subject_id: document.getElementById("subjectId").value,
-          subject_name: document.getElementById("subjectName").value,
-          year: document.getElementById("year").value,
-          subject_price: document.getElementById("price").value,
-          subject_description: document.getElementById("description").value,
-          subject_image: document.getElementById("image").value
-        };
+        const subjectId = document.getElementById("subjectId").value;
+        const firstChar = subjectId.charAt(0);
+        let year;
+        if (firstChar === '1') {
+          year = 'Year 1';
+        } else if (firstChar === '2') {
+          year = 'Year 2';
+        } else {
+          alert("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'addSubject');
+        formData.append('subject_id', subjectId);
+        formData.append('subject_name', document.getElementById("subjectName").value);
+        formData.append('year', year);
+        formData.append('subject_price', document.getElementById("price").value);
+        formData.append('subject_description', document.getElementById("description").value);
+        formData.append('image', document.getElementById("image").files[0]);
 
         fetch("manage_subject.php", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
+          body: formData
         })
           .then(response => response.json())
           .then(data => {
@@ -408,22 +424,33 @@
       document.getElementById("editSubjectForm").addEventListener("submit", function (event) {
         event.preventDefault();
 
-        let data = {
-          action: "updateSubject",
-          subject_id: document.getElementById("editSubjectId").value,
-          subject_name: document.getElementById("editSubjectName").value,
-          year: document.getElementById("editYear").value,
-          subject_price: document.getElementById("editPrice").value,
-          subject_description: document.getElementById("editDescription").value,
-          subject_image: document.getElementById("editImage").value
-        };
+        const subjectId = document.getElementById("editSubjectId").value;
+        const firstChar = subjectId.charAt(0);
+        let year;
+        if (firstChar === '1') {
+          year = 'Year 1';
+        } else if (firstChar === '2') {
+          year = 'Year 2';
+        } else {
+          alert("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('action', 'updateSubject');
+        formData.append('subject_id', subjectId);
+        formData.append('subject_name', document.getElementById("editSubjectName").value);
+        formData.append('year', year);
+        formData.append('subject_price', document.getElementById("editPrice").value);
+        formData.append('subject_description', document.getElementById("editDescription").value);
+        const imageFile = document.getElementById("editImage").files[0];
+        if (imageFile) {
+          formData.append('image', imageFile);
+        }
 
         fetch("manage_subject.php", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
+          body: formData
         })
           .then(response => response.json())
           .then(data => {
