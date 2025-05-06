@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Notification</title>
+
   <!-- Favicon -->
-  <link href="img/the_seeds.jpg" rel="icon" type="image/png">
+  <link href="img/the seeds.jpg" rel="icon" type="image/png">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       display: flex;
       height: 100vh;
       overflow-x: hidden;
     }
-
     #sidebar {
       width: 250px;
       background-color: #343a40;
@@ -25,89 +24,89 @@
       white-space: nowrap;
       overflow: hidden;
     }
-
     #sidebar a {
       color: white;
       text-decoration: none;
       padding: 15px 15px;
       display: block;
     }
-
     #sidebar a:hover {
       background-color: #495057;
     }
-
     #sidebar.collapsed {
       width: 80px;
     }
-
     #sidebar.collapsed .sidebar-header h4,
     #sidebar.collapsed a span {
       display: none;
     }
-
     #main-content {
       flex-grow: 1;
       padding: 20px;
       transition: margin-left 0.3s;
-      
     }
-
     .sidebar-header {
       display: flex;
       align-items: center;
       padding: 10px;
       border-bottom: 1px solid #495057;
     }
-
     .sidebar-header img {
       width: 40px;
       height: 40px;
       border-radius: 50%;
       margin-right: 10px;
     }
-
     .sidebar-header h4 {
       margin: 0;
       font-size: 16px;
     }
-
-    .table-container {
-      margin-top: 0px;
+    .pointer-cursor {
+      cursor: pointer;
     }
-
-    .modal-body {
-      padding: 15px;
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
     }
-
-    .modal-footer {
-      padding: 15px;
+    .notification-item {
+      border-left: 5px solid #0d6efd;
+      background-color: #f8f9fa;
     }
-
-    .card {
-      margin: 20px;
-      padding: 20px;
-      background-color: #fff;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
+    .send-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    .send-btn:hover {
+      background-color: #0056b3;
+    }
+    .toast-message {
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #155724;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 1000;
       text-align: center;
-    }
-
-    .card h3 {
-      margin: 0;
-    }
-
-    .form-control {
-      width: auto;
-      display: inline-block;
-      margin-left: 10px;
+      transition: opacity 0.5s ease-in-out;
     }
   </style>
 </head>
-
 <body>
-   <!-- Sidebar -->
-   <nav id="sidebar" class="d-flex flex-column p-3">
+  <!-- Sidebar -->
+  <nav id="sidebar" class="d-flex flex-column p-3">
     <div class="sidebar-header">
       <h3>Admin Panel</h3>
     </div>
@@ -123,17 +122,16 @@
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
         <div class="collapse" id="reportMenu">
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report
-            </span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>      
+      </li>
     </ul>
   </nav>
 
@@ -143,7 +141,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
@@ -166,111 +163,228 @@
       </div>
     </nav>
 
-<!-- Send Notification Form -->
- <!-- Send Notification Form -->
- <div class="card">
-  <h3>Send Notification</h3>
-  <form id="notificationForm" enctype="multipart/form-data">
-      <div class="mb-3">
-          <label for="notificationTitle" class="form-label">Title</label>
-          <select class="form-control" id="notificationTitle">
-              <option value="Holiday">Holiday</option>
-              <option value="Urgent Notice">Urgent Notice</option>
-              <option value="Event Notice">Event Notice</option>
-              <option value="General Notice">General Notice</option>
-          </select>
+    <!-- Notification -->
+    <h1 class="mb-4">Announcement</h1>
+    <div class="card">
+      <div class="card-header">
+        <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#sendNotificationModal">
+          Add Announcement
+        </button>
       </div>
-      <div class="mb-3">
-          <label for="notificationMessage" class="form-label">Message</label>
-          <textarea class="form-control" id="notificationMessage" rows="3"></textarea>
+      <div class="card-body">
+        <div id="notification-list" class="notification-container">
+          <div class="text-muted text-center">Loading notifications...</div>
+        </div>
       </div>
-      
-      <!-- File or Image Upload -->
-      <div class="mb-3">
-          <label for="notificationFile" class="form-label">Upload File/Image</label>
-          <input class="form-control" type="file" id="notificationFile" name="notificationFile" />
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div class="modal fade" id="sendNotificationModal" tabindex="-1" aria-labelledby="sendNotificationModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="sendNotificationModalLabel">Announcement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="notificationForm" enctype="multipart/form-data">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="subject_id" class="form-label">Subject</label>
+                  <select class="form-select form-select-sm" name="subject_id" id="subject_id" required>
+                    <option value="">-- Select Subject --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="class_id" class="form-label">Class</label>
+                  <select class="form-select form-select-sm" name="class_id" id="class_id" required>
+                    <option value="">-- Select Class --</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-8">
+                  <label for="notification_title" class="form-label">Title</label>
+                  <input type="text" class="form-control form-control-sm" name="notification_title" id="notification_title" placeholder="Enter the title" required>
+                </div>
+                <div class="col-md-4">
+                  <label for="notification_document" class="form-label">Attachment</label>
+                  <input type="file" class="form-control form-control-sm" name="notification_document" id="notification_document" accept="image/*">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="notification_content" class="form-label">Content</label>
+                <textarea class="form-control form-control-sm" name="notification_content" id="notification_content" rows="4" placeholder="Write your content..." required></textarea>
+              </div>
+              <div class="error-message" id="formErrorMessage"></div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-sm btn-success">Send Announcement</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
+    </div>
+  </div>
 
-      <!-- 选择发送给所有用户或指定用户 -->
-      <div class="mb-3">
-          <label for="userSelect" class="form-label">Send To</label>
-          <select class="form-control" id="userSelect">
-              <option value="all">All Users</option>
-              <option value="specific">Specific User</option>
-          </select>
-      </div>
-      
-      <div class="mb-3" id="specificUserContainer" style="display:none;">
-          <label for="userEmail" class="form-label">User Email</label>
-          <input type="email" class="form-control" id="userEmail" placeholder="Enter specific user's email">
-      </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
 
-      <button type="submit" class="btn btn-primary">Send Notification</button>
-  </form>
-</div>
+    function showError(message) {
+      const errorDiv = document.getElementById('formErrorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
 
-</div>
+    function clearError() {
+      const errorDiv = document.getElementById('formErrorMessage');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-// Toggle Sidebar
-document.getElementById('toggleSidebar').addEventListener('click', function () {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-  document.getElementById('main-content').classList.toggle('collapsed');
-});
-
-// Toggle specific user input based on select
-document.getElementById('userSelect').addEventListener('change', function () {
-  const userSelect = document.getElementById('userSelect').value;
-  if (userSelect === 'specific') {
-      document.getElementById('specificUserContainer').style.display = 'block';
-  } else {
-      document.getElementById('specificUserContainer').style.display = 'none';
-  }
-});
-
-// Handle form submission
-document.getElementById('notificationForm').addEventListener('submit', function (event) {
-  event.preventDefault(); // 阻止默认提交
-
-  const title = document.getElementById('notificationTitle').value;
-  const message = document.getElementById('notificationMessage').value;
-  const userSelect = document.getElementById('userSelect').value;
-  const userEmail = userSelect === 'specific' ? document.getElementById('userEmail').value : null;
-  const notificationFile = document.getElementById('notificationFile').files[0];
-
-  const formData = new FormData();
-  formData.append('title', title);
-  formData.append('message', message);
-  formData.append('userSelect', userSelect);
-  if (userSelect === 'specific') {
-      formData.append('userEmail', userEmail);
-  }
-  if (notificationFile) {
-      formData.append('notificationFile', notificationFile);
-  }
-
-  // Use Fetch API to send data to PHP backend
-  fetch('send_notification.php', {
-      method: 'POST',
-      body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-      if (data.success) {
-          alert('Notification sent successfully!');
-      } else {
-          alert('Error: ' + data.error);
+    function showToast(message, isError = false) {
+      let toast = document.getElementById('successToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'successToast';
+        toast.className = 'toast-message';
+        document.body.appendChild(toast);
       }
-  })
-  .catch(error => {
-      console.error('Error:', error);
-      alert('Error sending notification.');
-  });
-});
-</script>
-</body>
+      toast.innerText = message;
+      toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+      toast.style.display = 'block';
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => { toast.style.display = 'none'; }, 500);
+      }, 3000);
+    }
 
+    function loadSubjects() {
+      fetch('manage_notification.php?action=subject')
+        .then(res => res.json())
+        .then(subjects => {
+          const subjectSelect = document.getElementById('subject_id');
+          subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
+          subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.subject_id;
+            option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
+            subjectSelect.appendChild(option);
+          });
+        })
+        .catch(err => {
+          console.error('Error loading subjects:', err);
+          showError('Error loading subjects');
+        });
+    }
+
+    document.getElementById('subject_id').addEventListener('change', function () {
+      const subjectId = this.value;
+      const classSelect = document.getElementById('class_id');
+      classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+      if (subjectId) {
+        fetch(`manage_notification.php?action=class&subject_id=${subjectId}`)
+          .then(res => res.json())
+          .then(classes => {
+            classes.forEach(cls => {
+              const option = document.createElement('option');
+              option.value = cls.class_id;
+              option.textContent = cls.class_id;
+              classSelect.appendChild(option);
+            });
+          })
+          .catch(err => {
+            console.error('Error loading classes:', err);
+            showError('Error loading classes');
+          });
+      }
+    });
+
+    function loadNotifications() {
+      fetch('manage_notification.php?action=getNotifications')
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById('notification-list');
+          container.innerHTML = '';
+          if (data.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center">No announcements sent yet.</div>';
+          } else {
+            data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
+            data.forEach(n => {
+              const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
+              const block = document.createElement('div');
+              block.className = 'card mb-3 shadow-sm';
+              block.innerHTML = `
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div><strong>${n.sender_name}</strong></div>
+                    <small class="text-muted">${time}</small>
+                  </div>
+                  <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
+                  <p class="card-text mb-1"><strong>To Class:</strong> ${n.class_id}</p>
+                  <p class="card-text">${n.notification_content}</p>
+                  ${n.notification_document ? `
+                    <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
+                      <i class="fas fa-paperclip me-1"></i>View Attachment
+                    </a>
+                  ` : ''}
+                </div>
+              `;
+              container.appendChild(block);
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Error loading notifications:', err);
+          showError('Error loading notifications');
+        });
+    }
+
+    document.getElementById('notificationForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearError();
+      const formData = new FormData(this);
+      fetch('manage_notification.php', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(err => Promise.reject(err));
+          }
+          return res.json();
+        })
+        .then(msg => {
+          if (msg.success) {
+            showToast(msg.message);
+            this.reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal'));
+            modal.hide();
+            loadNotifications();
+          } else {
+            showError(msg.error || 'An error occurred');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showError(error.error || 'An error occurred while sending the notification');
+        });
+    });
+
+    document.getElementById('sendNotificationModal').addEventListener('hidden.bs.modal', () => {
+      clearError();
+      document.getElementById('notificationForm').reset();
+      document.getElementById('class_id').innerHTML = '<option value="">-- Select Class --</option>';
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      loadSubjects();
+      loadNotifications();
+    });
+  </script>
+</body>
 </html>
