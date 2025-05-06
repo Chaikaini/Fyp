@@ -351,7 +351,7 @@ function showToast(message, isError = false) {
 
 
 
-    function loadNotifications() {
+function loadNotifications() {
   fetch("teacher_get_notification.php")
     .then(res => res.json())
     .then(data => {
@@ -361,7 +361,10 @@ function showToast(message, isError = false) {
       if (data.length === 0) {
         container.innerHTML = "<div class='text-muted text-center'>No release any announcements yet.</div>";
       } else {
-        data.reverse().forEach(n => {
+        //sorting based on date & time
+        data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
+
+        data.forEach(n => {
           const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
           const block = document.createElement("div");
           block.className = "card mb-3 shadow-sm";
@@ -388,6 +391,7 @@ function showToast(message, isError = false) {
       }
     });
 }
+
 
 
   </script>
