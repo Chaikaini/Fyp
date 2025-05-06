@@ -25,15 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $input['name'] ?? '';
     $gender = $input['gender'] ?? '';
     $email = $input['email'] ?? '';
+    $address = $input['address'] ?? '';
+    $phone_number = $input['phone_number'] ?? '';
 
-    if (empty($name) || empty($gender) || empty($email)) {
+    if (empty($name) || empty($gender) || empty($email) || empty($address) || empty($phone_number)) {
         echo json_encode(['status' => 'error', 'message' => 'All fields are required']);
         exit;
     }
 
-    $sql = "UPDATE admin SET admin_name = ?, admin_gender = ?, admin_email = ? WHERE admin_id = ?";
+    $sql = "UPDATE admin SET admin_name = ?, admin_gender = ?, admin_email = ?, admin_address = ?, admin_phone_number = ? WHERE admin_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sssi", $name, $gender, $email, $admin_id);
+    $stmt->bind_param("sssssi", $name, $gender, $email, $address, $phone_number, $admin_id);
 
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully']);
@@ -47,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Handle GET request for fetching profile
-$sql = "SELECT admin_name AS name, admin_gender AS gender, admin_email AS email FROM admin WHERE admin_id = ?";
+$sql = "SELECT admin_name AS name, admin_gender AS gender, admin_email AS email, admin_address AS address, admin_phone_number AS phone_number FROM admin WHERE admin_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $admin_id);
 $stmt->execute();

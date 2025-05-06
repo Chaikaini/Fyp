@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard</title>
   
-    <!-- Favicon -->
-    <link href="img/the seeds.jpg" rel="icon" type="image/png">
-    
+  <!-- Favicon -->
+  <link href="img/the seeds.jpg" rel="icon" type="image/png">
+  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,7 +28,7 @@
     #sidebar a {
       color: white;
       text-decoration: none;
-      padding: 15px 15px; /* Adjusted padding for better spacing */
+      padding: 15px 15px;
       display: block;
     }
     #sidebar a:hover {
@@ -97,8 +97,15 @@
       margin-top: 50px;
     }
     canvas {
-      width: 300px !important;
-      height: 300px !important;
+      max-width: 100%;
+      height: auto !important;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
     }
   </style>
 </head>
@@ -120,17 +127,16 @@
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
         <div class="collapse" id="reportMenu">
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report
-            </span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>      
+      </li>
     </ul>
   </nav>
 
@@ -140,10 +146,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <!--<form class="d-flex ms-auto">
-          <input class="form-control me-2" type="search" placeholder="Search" id="search" />
-          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-        </form>  -->
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
@@ -166,19 +168,20 @@
       </div>
     </nav>
 
+    <!-- Error Message -->
+    <div class="error-message" id="errorMessage"></div>
+
     <!-- Main Cards -->
     <div class="row">
-
       <div class="col-md-3">
         <div class="card card-children">
           <div class="card-inner">
             <h3>CHILDREN</h3>
             <i class="fas fa-users"></i>
           </div>
-          <h1 id="total-children">0</h1> <!-- Dynamic content will be inserted here -->
+          <h1 id="total-children">0</h1>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="card card-parent">
           <div class="card-inner">
@@ -188,21 +191,19 @@
           <h1 id="total-parents">0</h1>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="card card-subject">
           <div class="card-inner">
             <h3>SUBJECTS</h3>
-            <i class="fas fa-users"></i>
+            <i class="fas fa-book"></i>
           </div>
           <h1 id="total-subjects">0</h1>
         </div>
       </div>
-
       <div class="col-md-3">
         <div class="card card-staff">
           <div class="card-inner">
-            <h3>STAFF</h3>
+            <h3>TEACHERS</h3>
             <i class="fas fa-user"></i>
           </div>
           <h1 id="total-users">0</h1>
@@ -210,19 +211,18 @@
       </div>
     </div>
 
-    <!-- Charts - Left to Right -->
+    <!-- Charts -->
     <div class="row">
-      <!-- Subjects Bar Chart -->
+      <!-- Subject Enrollment Bar Chart -->
       <div class="col-md-6">
         <div class="chart-container">
-          <canvas id="subjectsChart" width="400" height="200"></canvas>
+          <canvas id="subjectsChart"></canvas>
         </div>
       </div>
-
-      <!-- New vs Old Users Pie Chart -->
+      <!-- Children by Year Bar Chart -->
       <div class="col-md-6">
         <div class="chart-container">
-          <canvas id="usersChart" width="400" height="200"></canvas>
+          <canvas id="childrenByYearChart"></canvas>
         </div>
       </div>
     </div>
@@ -230,35 +230,108 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    let subjectsChartInstance = null;
+    let childrenByYearChartInstance = null;
 
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
 
+    function clearError() {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
 
-    // Fetch data from the PHP file
-    fetch('dashboard_data.php')
-      .then(response => response.json())
-      .then(data => {
-        // Insert data into the respective HTML elements
-        document.getElementById('total-children').textContent = data.total_children;
-        document.getElementById('total-parents').textContent = data.total_parents;
-        document.getElementById('total-subjects').textContent = data.total_subjects;
-        document.getElementById('total-users').textContent = data.total_users;
-        
-        // Optionally, update charts with the fetched data
-        const ctxSubjects = document.getElementById('subjectsChart').getContext('2d');
-        const subjectsChart = new Chart(ctxSubjects, {
-          type: 'bar',
-          data: {
-            labels: ['English', 'Malay', 'Math'],
-            datasets: [{
-              data: [data.total_subjects, data.total_subjects, data.total_subjects], // For example
-              backgroundColor: ['#1e88e5', '#ff9800', '#388e3c'],
-              borderWidth: 1
-            }]
+    function fetchDashboardData() {
+      fetch('dashboard_data.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            showError(data.error);
+            return;
           }
-        });
-      })
-      .catch(error => console.error('Error fetching data:', error));
+          clearError();
+          // Update card values
+          document.getElementById('total-children').textContent = data.total_children;
+          document.getElementById('total-parents').textContent = data.total_parents;
+          document.getElementById('total-subjects').textContent = data.total_subjects;
+          document.getElementById('total-users').textContent = data.total_users;
 
+          // Update Subject Enrollment Chart
+          if (subjectsChartInstance) {
+            subjectsChartInstance.destroy();
+          }
+          const ctxSubjects = document.getElementById('subjectsChart').getContext('2d');
+          subjectsChartInstance = new Chart(ctxSubjects, {
+            type: 'bar',
+            data: {
+              labels: data.subject_enrollment.map(item => item.subject_name),
+              datasets: [{
+                label: 'Enrolled Children',
+                data: data.subject_enrollment.map(item => item.enrolled_count),
+                backgroundColor: ['#1e88e5', '#ff9800', '#388e3c', '#d81b60', '#8e24aa', '#f4511e'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Subject Enrollment' }
+              },
+              scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Children' } }
+              }
+            }
+          });
+
+          // Update Children by Year Chart
+          if (childrenByYearChartInstance) {
+            childrenByYearChartInstance.destroy();
+          }
+          const ctxChildrenByYear = document.getElementById('childrenByYearChart').getContext('2d');
+          childrenByYearChartInstance = new Chart(ctxChildrenByYear, {
+            type: 'bar',
+            data: {
+              labels: data.children_by_year.map(item => item.year),
+              datasets: [{
+                label: 'Number of Children',
+                data: data.children_by_year.map(item => item.count),
+                backgroundColor: '#2196f3',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Children by Year' }
+              },
+              scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Number of Children' } }
+              }
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+          showError('Failed to load dashboard data');
+        });
+    }
+
+    // Initial fetch
+    fetchDashboardData();
+
+    // Poll every 30 seconds
+    setInterval(fetchDashboardData, 30000);
+
+    // Sidebar toggle
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
   </script>
 </body>
 </html>

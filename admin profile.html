@@ -16,7 +16,6 @@
       height: 100vh;
       overflow-x: hidden;
     }
-
     #sidebar {
       width: 250px;
       background-color: #343a40;
@@ -28,7 +27,7 @@
     #sidebar a {
       color: white;
       text-decoration: none;
-      padding: 15px 15px; 
+      padding: 15px 15px;
       display: block;
     }
     #sidebar a:hover {
@@ -65,9 +64,14 @@
     .table-container .fa-edit, .table-container .fa-trash-alt {
       color: #007BFF;
     }
-
     .pointer-cursor {
       cursor: pointer;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
     }
   </style>
 </head>
@@ -76,7 +80,7 @@
   <nav id="sidebar" class="d-flex flex-column p-3">
     <div class="sidebar-header">
       <h3>Admin Panel</h3>
-    </div> 
+    </div>
     <ul class="nav flex-column">
       <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
       <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Teacher List</span></a></li>
@@ -98,7 +102,7 @@
             <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>      
+      </li>
     </ul>
   </nav>
 
@@ -142,6 +146,12 @@
         <div class="mb-3">
           <p><strong>Email:</strong> <span id="profile-email" class="fw-bold"></span></p>
         </div>
+        <div class="mb-3">
+          <p><strong>Address:</strong> <span id="profile-address" class="fw-bold"></span></p>
+        </div>
+        <div class="mb-3">
+          <p><strong>Phone Number:</strong> <span id="profile-phone-number" class="fw-bold"></span></p>
+        </div>
         <div class="text-center">
           <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
         </div>
@@ -172,6 +182,15 @@
               <label for="edit-email" class="form-label">Email</label>
               <input type="email" class="form-control" id="edit-email" required>
             </div>
+            <div class="mb-3">
+              <label for="edit-address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="edit-address" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-phone-number" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="edit-phone-number" required>
+            </div>
+            <div class="error-message" id="editErrorMessage"></div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -188,37 +207,67 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
 
+    function showError(message) {
+      const errorDiv = document.getElementById('editErrorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function clearError() {
+      const errorDiv = document.getElementById('editErrorMessage');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
+      // Clear error when modal closes
+      document.getElementById('editProfileModal').addEventListener('hidden.bs.modal', () => clearError());
+
       // Fetch profile data
       fetch("admin_profile.php")
         .then(response => response.json())
         .then(data => {
           if (data.status === "success") {
-            document.getElementById("profile-name").innerText = data.data.name;
-            document.getElementById("profile-gender").innerText = data.data.gender;
-            document.getElementById("profile-email").innerText = data.data.email;
+            document.getElementById("profile-name").innerText = data.data.name || '';
+            document.getElementById("profile-gender").innerText = data.data.gender || '';
+            document.getElementById("profile-email").innerText = data.data.email || '';
+            document.getElementById("profile-address").innerText = data.data.address || '';
+            document.getElementById("profile-phone-number").innerText = data.data.phone_number || '';
             // Populate modal fields
-            document.getElementById("edit-name").value = data.data.name;
-            document.getElementById("edit-gender").value = data.data.gender;
-            document.getElementById("edit-email").value = data.data.email;
+            document.getElementById("edit-name").value = data.data.name || '';
+            document.getElementById("edit-gender").value = data.data.gender || '';
+            document.getElementById("edit-email").value = data.data.email || '';
+            document.getElementById("edit-address").value = data.data.address || '';
+            document.getElementById("edit-phone-number").value = data.data.phone_number || '';
+            clearError();
           } else {
-            alert("Failed to load profile: " + data.message);
+            showError("Failed to load profile: " + data.message);
           }
         })
-        .catch(error => console.error("Error fetching profile:", error));
+        .catch(error => {
+          console.error("Error fetching profile:", error);
+          showError("Error fetching profile");
+        });
 
       // Save profile changes
       document.getElementById("saveProfile").addEventListener("click", function () {
         const name = document.getElementById("edit-name").value;
         const gender = document.getElementById("edit-gender").value;
         const email = document.getElementById("edit-email").value;
+        const address = document.getElementById("edit-address").value;
+        const phone_number = document.getElementById("edit-phone-number").value;
+
+        if (!name || !gender || !email || !address || !phone_number) {
+          showError("All fields are required");
+          return;
+        }
 
         fetch("admin_profile.php", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name, gender, email }),
+          body: JSON.stringify({ name, gender, email, address, phone_number }),
         })
           .then(response => response.json())
           .then(data => {
@@ -226,10 +275,18 @@
               document.getElementById("profile-name").innerText = name;
               document.getElementById("profile-gender").innerText = gender;
               document.getElementById("profile-email").innerText = email;
+              document.getElementById("profile-address").innerText = address;
+              document.getElementById("profile-phone-number").innerText = phone_number;
               bootstrap.Modal.getInstance(document.getElementById("editProfileModal")).hide();
-            } 
+              clearError();
+            } else {
+              showError(data.message);
+            }
           })
-          .catch(error => console.error("Error updating profile:", error));
+          .catch(error => {
+            console.error("Error updating profile:", error);
+            showError("Error updating profile");
+          });
       });
     });
   </script>

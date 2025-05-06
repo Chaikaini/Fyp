@@ -17,25 +17,31 @@ try {
 $action = $_GET['action'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-
     if ($action === 'getClasses') {
         try {
-            $stmt = $pdo->query("
+            $sql = "
                 SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
                 JOIN teacher t ON c.teacher_id = t.teacher_id
-            ");
+            ";
+            if (isset($_GET['class_id'])) {
+                $sql .= " WHERE c.class_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$_GET['class_id']]);
+            } else {
+                $stmt = $pdo->query($sql);
+            }
             $classes = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $classes[] = [
                     "class_id" => $row["class_id"],
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
-                    "part_id" => $row["part_id"], // Added part_id
+                    "part_id" => $row["part_id"],
                     "part" => $row["part_name"],
-                    "teacher_id" => $row["teacher_id"], // Added teacher_id
+                    "teacher_id" => $row["teacher_id"],
                     "teacher_name" => $row["teacher_name"],
                     "class_term" => $row["class_term"],
                     "year" => $row["year"],
@@ -47,9 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "classes" => $classes]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error fetching classes: " . $e->getMessage()]);
         }
-
     } elseif ($action === 'deleteClass') {
         $classId = $_GET['id'] ?? '';
         if ($classId) {
@@ -58,12 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmt->execute([$classId]);
                 echo json_encode(["success" => true]);
             } catch (Exception $e) {
-                echo json_encode(["success" => false, "message" => $e->getMessage()]);
+                echo json_encode(["success" => false, "message" => "Error deleting class: " . $e->getMessage()]);
             }
         } else {
             echo json_encode(["success" => false, "message" => "No class ID provided"]);
         }
-
     } elseif ($action === 'getStudentsBySubjectId') {
         $subjectId = $_GET['subject_id'] ?? '';
         if ($subjectId) {
@@ -79,48 +83,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode(["success" => true, "students" => $students]);
             } catch (Exception $e) {
-                echo json_encode(["success" => false, "message" => $e->getMessage()]);
+                echo json_encode(["success" => false, "message" => "Error fetching students: " . $e->getMessage()]);
             }
         } else {
             echo json_encode(["success" => false, "message" => "No subject ID provided"]);
         }
-
     } elseif ($action === 'searchClasses') {
-        $classId = $_GET['class_id'] ?? '';
-        $subjectId = $_GET['subject_id'] ?? '';
-
-        $sql = "
-            SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
-            FROM class c
-            JOIN subject s ON c.subject_id = s.subject_id
-            JOIN part p ON c.part_id = p.part_id
-            JOIN teacher t ON c.teacher_id = t.teacher_id
-            WHERE c.class_id LIKE :search OR s.subject_name LIKE :search
-        ";
-        $params = [':search' => "%$classId%"];
-
-        if (!empty($classId)) {
-            $sql .= " AND c.class_id = :class_id";
-            $params[':class_id'] = $classId;
-        }
-
-        if (!empty($subjectId)) {
-            $sql .= " AND c.subject_id = :subject_id";
-            $params[':subject_id'] = $subjectId;
-        }
-
+        $searchQuery = $_GET['class_id'] ?? '';
         try {
+            $sql = "
+                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
+                FROM class c
+                JOIN subject s ON c.subject_id = s.subject_id
+                JOIN part p ON c.part_id = p.part_id
+                JOIN teacher t ON c.teacher_id = t.teacher_id
+                WHERE c.class_id LIKE :search OR s.subject_name LIKE :search
+            ";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
+            $stmt->execute([':search' => "%$searchQuery%"]);
             $classes = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $classes[] = [
                     "class_id" => $row["class_id"],
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
-                    "part_id" => $row["part_id"], // Added part_id
+                    "part_id" => $row["part_id"],
                     "part" => $row["part_name"],
-                    "teacher_id" => $row["teacher_id"], // Added teacher_id
+                    "teacher_id" => $row["teacher_id"],
                     "teacher_name" => $row["teacher_name"],
                     "class_term" => $row["class_term"],
                     "year" => $row["year"],
@@ -132,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "classes" => $classes]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error searching classes: " . $e->getMessage()]);
         }
     } elseif ($action === 'getTeachers') {
         try {
@@ -146,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "teachers" => $teachers]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error fetching teachers: " . $e->getMessage()]);
         }
     } elseif ($action === 'getYears') {
         try {
@@ -157,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "years" => $years]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error fetching years: " . $e->getMessage()]);
         }
     } elseif ($action === 'getNextClassId') {
         try {
@@ -166,6 +155,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             if (!$subjectId || !$year) {
                 echo json_encode(["success" => false, "message" => "Subject ID and year are required"]);
+                exit;
+            }
+
+            // Validate subject_id and year
+            $stmt = $pdo->prepare("SELECT year FROM subject WHERE subject_id = ?");
+            $stmt->execute([$subjectId]);
+            $subjectYear = $stmt->fetchColumn();
+            if (!$subjectYear) {
+                echo json_encode(["success" => false, "message" => "Invalid subject ID"]);
+                exit;
+            }
+            if ($subjectYear !== $year) {
+                echo json_encode(["success" => false, "message" => "Year does not match subject ID"]);
                 exit;
             }
 
@@ -207,10 +209,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $nextClassId = $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT); // e.g., "Mat0003"
             echo json_encode(["success" => true, "class_id" => $nextClassId]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error generating class ID: " . $e->getMessage()]);
+        }
+    } elseif ($action === 'getSubjects') {
+        try {
+            $stmt = $pdo->query("SELECT subject_id, subject_name FROM subject");
+            $subjects = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $subjects[] = [
+                    "subject_id" => $row["subject_id"],
+                    "subject_name" => $row["subject_name"]
+                ];
+            }
+            echo json_encode(["success" => true, "subjects" => $subjects]);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error fetching subjects: " . $e->getMessage()]);
+        }
+    } elseif ($action === 'getParts') {
+        try {
+            $stmt = $pdo->query("SELECT part_id, part_name FROM part");
+            $parts = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $parts[] = [
+                    "part_id" => $row["part_id"],
+                    "part_name" => $row["part_name"]
+                ];
+            }
+            echo json_encode(["success" => true, "parts" => $parts]);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error fetching parts: " . $e->getMessage()]);
         }
     }
-
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -218,12 +247,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($input['action'] === 'addClass') {
         try {
+            $subjectId = $input['subject_id'];
+            $year = $input['year'];
+            $firstChar = substr($subjectId, 0, 1);
+
+            if ($firstChar !== '1' && $firstChar !== '2') {
+                throw new Exception("Subject ID must start with '1' or '2'");
+            }
+            if (($firstChar === '1' && $year !== 'Year 1') || ($firstChar === '2' && $year !== 'Year 2')) {
+                throw new Exception("Subject ID starting with '$firstChar' must have " . ($firstChar === '1' ? 'Year 1' : 'Year 2'));
+            }
+
             $stmt = $pdo->prepare("INSERT INTO class (class_id, subject_id, part_id, teacher_id, class_term, year, class_time, class_capacity, class_enrolled, class_status)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");
             $stmt->execute([
                 $input['class_id'],
                 $input['subject_id'],
-                $input['part'], // This should be part_id, not part_name
+                $input['part'],
                 $input['teacher_id'],
                 $input['class_term'],
                 $input['year'],
@@ -233,9 +273,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error adding class: " . $e->getMessage()]);
         }
-
     } elseif ($input['action'] === 'registerStudent') {
         $classId = $input['class_id'] ?? '';
         $childId = $input['child_id'] ?? '';
@@ -249,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 echo json_encode(["success" => true]);
             } catch (Exception $e) {
-                echo json_encode(["success" => false, "message" => $e->getMessage()]);
+                echo json_encode(["success" => false, "message" => "Error registering student: " . $e->getMessage()]);
             }
         } else {
             echo json_encode(["success" => false, "message" => "Missing class_id or child_id"]);
@@ -258,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, class_term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
             $stmt->execute([
-                $input['part'], 
+                $input['part'],
                 $input['teacher_id'],
                 $input['class_term'],
                 $input['time'],
@@ -268,40 +307,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error updating class: " . $e->getMessage()]);
         }
-    }
-}
-
-elseif ($action === 'getSubjects') {
-    try {
-        $stmt = $pdo->query("SELECT subject_id, subject_name FROM subject");
-        $subjects = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $subjects[] = [
-                "subject_id" => $row["subject_id"],
-                "subject_name" => $row["subject_name"]
-            ];
-        }
-        echo json_encode(["success" => true, "subjects" => $subjects]);
-    } catch (Exception $e) {
-        echo json_encode(["success" => false, "message" => $e->getMessage()]);
-    }
-}
-
-elseif ($action === 'getParts') {
-    try {
-        $stmt = $pdo->query("SELECT part_id, part_name FROM part");
-        $parts = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $parts[] = [
-                "part_id" => $row["part_id"],
-                "part_name" => $row["part_name"]
-            ];
-        }
-        echo json_encode(["success" => true, "parts" => $parts]);
-    } catch (Exception $e) {
-        echo json_encode(["success" => false, "message" => $e->getMessage()]);
     }
 }
 ?>
