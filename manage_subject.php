@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "subjects" => $subjects]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error fetching subjects: " . $e->getMessage()]);
         }
     } elseif ($action === 'deleteSubject') {
         $subjectId = $_GET['id'] ?? '';
@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmt = $pdo->prepare("DELETE FROM subject WHERE subject_id = ?");
                 $stmt->execute([$subjectId]);
                 echo json_encode(["success" => true]);
-            } catch         catch (Exception $e) {
-                echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            } catch (Exception $e) {
+                echo json_encode(["success" => false, "message" => "Error deleting subject: " . $e->getMessage()]);
             }
         } else {
             echo json_encode(["success" => false, "message" => "No subject ID provided"]);
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         try {
             $sql = "SELECT subject_id, subject_name, year, subject_price, subject_description, subject_image 
                     FROM subject 
-                    WHERE subject_id LIKE :search OR subject_name LIKE :search";
+                    WHERE subject_name LIKE :search";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':search' => "%$searchQuery%"]);
             $subjects = [];
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             }
             echo json_encode(["success" => true, "subjects" => $subjects]);
         } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error searching subjects: " . $e->getMessage()]);
         }
     }
 }
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Invalid file type. Only JPG, PNG, and JPEG are allowed");
         }
 
-        $uploadDir = 'uploads/';
+        $uploadDir = 'img/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -129,9 +129,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($_POST['action'] === 'addSubject') {
         try {
             $subjectId = $_POST['subject_id'];
+            $year = $_POST['year'];
             $firstChar = substr($subjectId, 0, 1);
+
             if ($firstChar !== '1' && $firstChar !== '2') {
-                throw new Exception("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+                throw new Exception("Subject ID must start with '1' or '2'");
+            }
+            if (($firstChar === '1' && $year !== 'Year 1') || ($firstChar === '2' && $year !== 'Year 2')) {
+                throw new Exception("Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
             }
 
             // Check if subject_id already exists
@@ -141,14 +146,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Subject ID already exists");
             }
 
-            $imagePath = handleFileUpload($_FILES['image']);
+            $imagePath = null;
+            if (!empty($_FILES['image']['name'])) {
+                $imagePath = handleFileUpload($_FILES['image']);
+            } else {
+                throw new Exception("Image file is required");
+            }
 
             $stmt = $pdo->prepare("INSERT INTO subject (subject_id, subject_name, year, subject_price, subject_description, subject_image) 
                                    VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $subjectId,
                 $_POST['subject_name'],
-                $firstChar === '1' ? 'Year 1' : 'Year 2',
+                $year,
                 $_POST['subject_price'],
                 $_POST['subject_description'] ?: null,
                 $imagePath
@@ -159,14 +169,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($imagePath) && file_exists($imagePath)) {
                 unlink($imagePath);
             }
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error adding subject: " . $e->getMessage()]);
         }
     } elseif ($_POST['action'] === 'updateSubject') {
         try {
             $subjectId = $_POST['subject_id'];
+            $year = $_POST['year'];
             $firstChar = substr($subjectId, 0, 1);
+
             if ($firstChar !== '1' && $firstChar !== '2') {
-                throw new Exception("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+                throw new Exception("Subject ID must start with '1' or '2'");
+            }
+            if (($firstChar === '1' && $year !== 'Year 1') || ($firstChar === '2' && $year !== 'Year 2')) {
+                throw new Exception("Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
             }
 
             $imagePath = null;
@@ -186,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     SET subject_name = ?, year = ?, subject_price = ?, subject_description = ?";
             $params = [
                 $_POST['subject_name'],
-                $firstChar === '1' ? 'Year 1' : 'Year 2',
+                $year,
                 $_POST['subject_price'],
                 $_POST['subject_description'] ?: null
             ];
@@ -208,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($imagePath) && file_exists($imagePath)) {
                 unlink($imagePath);
             }
-            echo json_encode(["success" => false, "message" => $e->getMessage()]);
+            echo json_encode(["success" => false, "message" => "Error updating subject: " . $e->getMessage()]);
         }
     }
 }

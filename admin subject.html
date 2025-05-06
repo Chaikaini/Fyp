@@ -97,6 +97,12 @@
       max-height: 400px;
       object-fit: contain;
     }
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -111,7 +117,7 @@
       <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
-      <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
+      <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
       <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
       <li class="nav-item">
@@ -156,14 +162,14 @@
           </li>
         </ul>
       </div>
-  </nav>
+    </nav>
 
     <!-- Subject List -->
     <h1 class="mb-4">Subject List</h1>
     <div class="card">
       <div class="card-header">
         <form class="search-form d-flex align-items-center">
-          <input class="form-control me-2" type="search" placeholder="Search Subject" id="search" />
+          <input class="form-control me-2" type="search" placeholder="Search Subject Name" id="search" />
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
         </form>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubjectModal">Add Subject</button>
@@ -207,6 +213,14 @@
               <input type="text" class="form-control" id="subjectName" required>
             </div>
             <div class="mb-3">
+              <label for="year" class="form-label">Year</label>
+              <select class="form-select" id="year" required>
+                <option value="" disabled selected>Select Year</option>
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+              </select>
+            </div>
+            <div class="mb-3">
               <label for="price" class="form-label">Price</label>
               <input type="number" step="0.01" class="form-control" id="price" required>
             </div>
@@ -218,6 +232,7 @@
               <label for="image" class="form-label">Image</label>
               <input type="file" class="form-control" id="image" accept="image/jpeg,image/png,image/jpg" required>
             </div>
+            <div class="error-message" id="addErrorMessage"></div>
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-primary w-100" id="saveSubjectBtn">Save</button>
             </div>
@@ -246,6 +261,14 @@
               <input type="text" class="form-control" id="editSubjectName" required>
             </div>
             <div class="mb-3">
+              <label for="editYear" class="form-label">Year</label>
+              <select class="form-select" id="editYear" required>
+                <option value="" disabled>Select Year</option>
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+              </select>
+            </div>
+            <div class="mb-3">
               <label for="editPrice" class="form-label">Price</label>
               <input type="number" step="0.01" class="form-control" id="editPrice" required>
             </div>
@@ -258,6 +281,7 @@
               <input type="file" class="form-control" id="editImage" accept="image/jpeg,image/png,image/jpg">
               <small>Current: <a href="#" id="currentImageLink" target="_blank">View Current Image</a></small>
             </div>
+            <div class="error-message" id="editErrorMessage"></div>
             <div class="d-flex justify-content-center">
               <button type="submit" class="btn btn-primary w-100" id="updateSubjectBtn">Update</button>
             </div>
@@ -288,6 +312,18 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
 
+    function showError(modalId, message) {
+      const errorDiv = document.getElementById(modalId === 'addSubjectModal' ? 'addErrorMessage' : 'editErrorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function clearError(modalId) {
+      const errorDiv = document.getElementById(modalId === 'addSubjectModal' ? 'addErrorMessage' : 'editErrorMessage');
+      errorDiv.textContent = '';
+      errorDiv.style.display = 'none';
+    }
+
     function fetchSubjects(searchQuery = "") {
       let url = "manage_subject.php?action=getSubjects";
       if (searchQuery) {
@@ -295,21 +331,27 @@
       }
 
       fetch(url)
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
         .then(data => {
+          console.log("Fetch Subjects Response:", data);
           const table = document.getElementById("subjectTable");
           table.innerHTML = "";
 
-          if (data.success && data.subjects.length > 0) {
+          if (data.success && data.subjects && data.subjects.length > 0) {
             data.subjects.forEach(subject => {
               let row = document.createElement("tr");
               row.innerHTML = `
                 <td>${subject.subject_id}</td>
                 <td>${subject.subject_name}</td>
                 <td>${subject.year}</td>
-                <td> unii$${subject.subject_price}</td>
+                <td>RM ${subject.subject_price}</td>
                 <td>${subject.subject_description || 'N/A'}</td>
-                <td><a href="#" class="image-link" data-image="${subject.subject_image}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">View Image</a></td>
+                <td><a href="#" class="image-link" data-image="${subject.subject_image}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">${subject.subject_image || 'No Image'}</a></td>
                 <td>
                   <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${subject.subject_id}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${subject.subject_id}"></i>
@@ -318,45 +360,55 @@
               table.appendChild(row);
             });
 
-            // Attach event listeners to image links
             document.querySelectorAll('.image-link').forEach(link => {
               link.addEventListener('click', () => {
                 const imageSrc = link.getAttribute('data-image');
-                document.getElementById('imagePreview').src = imageSrc;
+                document.getElementById('imagePreview').src = imageSrc || '';
               });
             });
           } else {
-            table.innerHTML = `<tr><td colspan="7" class="text-center">No subjects found</td></tr>`;
+            table.innerHTML = `<tr><td colspan="7" class="text-center">No subjects found: ${data.message || 'Empty result'}</td></tr>`;
           }
+        })
+        .catch(error => {
+          console.error("Fetch Subjects Error:", error);
+          document.getElementById("subjectTable").innerHTML = `<tr><td colspan="7" class="text-center">Error loading subjects: ${error.message}</td></tr>`;
         });
     }
 
     function populateEditModal(subjectData) {
       document.getElementById('editSubjectId').value = subjectData.subject_id;
       document.getElementById('editSubjectName').value = subjectData.subject_name;
+      document.getElementById('editYear').value = subjectData.year;
       document.getElementById('editPrice').value = subjectData.subject_price;
       document.getElementById('editDescription').value = subjectData.subject_description || '';
       document.getElementById('currentImageLink').href = subjectData.subject_image || '#';
-      document.getElementById('currentImageLink').textContent = subjectData.subject_image ? 'View Current Image' : 'No Image';
+      document.getElementById('currentImageLink').textContent = subjectData.subject_image || 'No Image';
     }
 
     document.addEventListener("DOMContentLoaded", function () {
       fetchSubjects();
 
+      // Clear error messages when modals are closed
+      document.getElementById('addSubjectModal').addEventListener('hidden.bs.modal', () => clearError('addSubjectModal'));
+      document.getElementById('editSubjectModal').addEventListener('hidden.bs.modal', () => clearError('editSubjectModal'));
+
       document.getElementById("subjectTable").addEventListener("click", function (event) {
         if (event.target.classList.contains("delete-btn")) {
           let subjectId = event.target.getAttribute("data-id");
-          if (confirm("Are you sure you want to delete this subject?")) {
-            fetch(`manage_subject.php?action=deleteSubject&id=${subjectId}`)
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  fetchSubjects();
-                } else {
-                  alert("Delete failed: " + data.message);
-                }
-              });
-          }
+          fetch(`manage_subject.php?action=deleteSubject&id=${subjectId}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                fetchSubjects();
+              } else {
+                showError('addSubjectModal', data.message);
+              }
+            })
+            .catch(error => {
+              console.error("Delete Error:", error);
+              showError('addSubjectModal', "Error deleting subject");
+            });
         }
 
         if (event.target.classList.contains("edit-btn")) {
@@ -364,31 +416,37 @@
           fetch(`manage_subject.php?action=getSubjects&subject_id=${subjectId}`)
             .then(response => response.json())
             .then(data => {
-              if (data.success) {
-                const subject = data.subjects.find(s => s.subject_id === subjectId);
-                if (subject) {
-                  populateEditModal(subject);
-                  new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
-                }
+              console.log("Fetch Subject for Edit:", data);
+              if (data.success && data.subjects.length > 0) {
+                const subject = data.subjects[0];
+                populateEditModal(subject);
+                clearError('editSubjectModal');
+                new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
               } else {
-                alert("Error: " + data.message);
+                showError('editSubjectModal', data.message);
               }
+            })
+            .catch(error => {
+              console.error("Edit Fetch Error:", error);
+              showError('editSubjectModal', "Error loading subject for edit");
             });
         }
       });
 
       document.getElementById("subjectForm").addEventListener("submit", function (event) {
         event.preventDefault();
+        clearError('addSubjectModal');
 
         const subjectId = document.getElementById("subjectId").value;
+        const year = document.getElementById("year").value;
         const firstChar = subjectId.charAt(0);
-        let year;
-        if (firstChar === '1') {
-          year = 'Year 1';
-        } else if (firstChar === '2') {
-          year = 'Year 2';
-        } else {
-          alert("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+
+        if (firstChar !== '1' && firstChar !== '2') {
+          showError('addSubjectModal', "Subject ID must start with '1' or '2'");
+          return;
+        }
+        if ((firstChar === '1' && year !== 'Year 1') || (firstChar === '2' && year !== 'Year 2')) {
+          showError('addSubjectModal', "Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
           return;
         }
 
@@ -407,32 +465,36 @@
         })
           .then(response => response.json())
           .then(data => {
+            console.log("Add Subject Response:", data);
             if (data.success) {
               fetchSubjects();
               document.getElementById("subjectForm").reset();
               let modal = bootstrap.Modal.getInstance(document.getElementById("addSubjectModal"));
               modal.hide();
             } else {
-              alert("Error: " + data.message);
+              showError('addSubjectModal', data.message);
             }
           })
           .catch(error => {
-            console.error("Error:", error);
+            console.error("Add Subject Error:", error);
+            showError('addSubjectModal', "Error adding subject");
           });
       });
 
       document.getElementById("editSubjectForm").addEventListener("submit", function (event) {
         event.preventDefault();
+        clearError('editSubjectModal');
 
         const subjectId = document.getElementById("editSubjectId").value;
+        const year = document.getElementById("editYear").value;
         const firstChar = subjectId.charAt(0);
-        let year;
-        if (firstChar === '1') {
-          year = 'Year 1';
-        } else if (firstChar === '2') {
-          year = 'Year 2';
-        } else {
-          alert("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+
+        if (firstChar !== '1' && firstChar !== '2') {
+          showError('editSubjectModal', "Subject ID must start with '1' or '2'");
+          return;
+        }
+        if ((firstChar === '1' && year !== 'Year 1') || (firstChar === '2' && year !== 'Year 2')) {
+          showError('editSubjectModal', "Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
           return;
         }
 
@@ -454,16 +516,18 @@
         })
           .then(response => response.json())
           .then(data => {
+            console.log("Update Subject Response:", data);
             if (data.success) {
               fetchSubjects();
               let modal = bootstrap.Modal.getInstance(document.getElementById("editSubjectModal"));
               modal.hide();
             } else {
-              alert("Error: " + data.message);
+              showError('editSubjectModal', data.message);
             }
           })
           .catch(error => {
-            console.error("Error:", error);
+            console.error("Update Subject Error:", error);
+            showError('editSubjectModal', "Error updating subject");
           });
       });
 
