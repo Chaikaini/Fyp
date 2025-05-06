@@ -25,7 +25,7 @@ if (empty($child_id)) {
     exit;
 }
 
-// 查询注册课程信息
+// check registration_class
 $sql = "
 SELECT 
     s.subject_name,
@@ -38,7 +38,7 @@ SELECT
 FROM registration_class rc
 JOIN class c ON rc.class_id = c.class_id
 JOIN subject s ON c.subject_id = s.subject_id
-JOIN teacher t ON s.teacher_id = t.teacher_id
+JOIN teacher t ON c.teacher_id = t.teacher_id
 JOIN part p ON c.part_id = p.part_id
 WHERE rc.child_id = ? AND rc.parent_id = ?
 ";
