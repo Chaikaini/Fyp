@@ -19,7 +19,14 @@ $action = $_GET['action'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'getSubjects') {
         try {
-            $stmt = $pdo->query("SELECT subject_id, subject_name, year, subject_price, subject_description, subject_image FROM subject");
+            $sql = "SELECT subject_id, subject_name, year, subject_price, subject_description, subject_image FROM subject";
+            if (isset($_GET['subject_id'])) {
+                $sql .= " WHERE subject_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$_GET['subject_id']]);
+            } else {
+                $stmt = $pdo->query($sql);
+            }
             $subjects = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $subjects[] = [
@@ -39,10 +46,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $subjectId = $_GET['id'] ?? '';
         if ($subjectId) {
             try {
+                // Check if subject has associated classes
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE subject_id = ?");
+                $stmt->execute([$subjectId]);
+                $classCount = $stmt->fetchColumn();
+
+                if ($classCount > 0) {
+                    echo json_encode(["success" => false, "message" => "Cannot delete subject with associated classes"]);
+                    exit;
+                }
+
+                // Get current image path to delete the file
+                $stmt = $pdo->prepare("SELECT subject_image FROM subject WHERE subject_id = ?");
+                $stmt->execute([$subjectId]);
+                $imagePath = $stmt->fetchColumn();
+                if ($imagePath && file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+
                 $stmt = $pdo->prepare("DELETE FROM subject WHERE subject_id = ?");
                 $stmt->execute([$subjectId]);
                 echo json_encode(["success" => true]);
-            } catch (Exception $e) {
+            } catch         catch (Exception $e) {
                 echo json_encode(["success" => false, "message" => $e->getMessage()]);
             }
         } else {
@@ -75,39 +100,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Handle file upload
+    function handleFileUpload($file) {
+        if ($file['size'] > 2 * 1024 * 1024) { // 2MB limit
+            throw new Exception("File size exceeds 2MB");
+        }
 
-    if ($input['action'] === 'addSubject') {
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            throw new Exception("Invalid file type. Only JPG, PNG, and JPEG are allowed");
+        }
+
+        $uploadDir = 'uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $fileName = uniqid() . '_' . basename($file['name']);
+        $filePath = $uploadDir . $fileName;
+
+        if (!move_uploaded_file($file['tmp_name'], $filePath)) {
+            throw new Exception("Failed to upload file");
+        }
+
+        return $filePath;
+    }
+
+    if ($_POST['action'] === 'addSubject') {
         try {
+            $subjectId = $_POST['subject_id'];
+            $firstChar = substr($subjectId, 0, 1);
+            if ($firstChar !== '1' && $firstChar !== '2') {
+                throw new Exception("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+            }
+
+            // Check if subject_id already exists
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM subject WHERE subject_id = ?");
+            $stmt->execute([$subjectId]);
+            if ($stmt->fetchColumn() > 0) {
+                throw new Exception("Subject ID already exists");
+            }
+
+            $imagePath = handleFileUpload($_FILES['image']);
+
             $stmt = $pdo->prepare("INSERT INTO subject (subject_id, subject_name, year, subject_price, subject_description, subject_image) 
                                    VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $input['subject_id'],
-                $input['subject_name'],
-                $input['year'],
-                $input['subject_price'],
-                $input['subject_description'] ?: null,
-                $input['subject_image'] ?: null
+                $subjectId,
+                $_POST['subject_name'],
+                $firstChar === '1' ? 'Year 1' : 'Year 2',
+                $_POST['subject_price'],
+                $_POST['subject_description'] ?: null,
+                $imagePath
             ]);
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
+            // Clean up uploaded file if it exists
+            if (isset($imagePath) && file_exists($imagePath)) {
+                unlink($imagePath);
+            }
             echo json_encode(["success" => false, "message" => $e->getMessage()]);
         }
-    } elseif ($input['action'] === 'updateSubject') {
+    } elseif ($_POST['action'] === 'updateSubject') {
         try {
-            $stmt = $pdo->prepare("UPDATE subject 
-                                   SET subject_name = ?, year = ?, subject_price = ?, subject_description = ?, subject_image = ? 
-                                   WHERE subject_id = ?");
-            $stmt->execute([
-                $input['subject_name'],
-                $input['year'],
-                $input['subject_price'],
-                $input['subject_description'] ?: null,
-                $input['subject_image'] ?: null,
-                $input['subject_id']
-            ]);
+            $subjectId = $_POST['subject_id'];
+            $firstChar = substr($subjectId, 0, 1);
+            if ($firstChar !== '1' && $firstChar !== '2') {
+                throw new Exception("Subject ID must start with '1' for Year 1 or '2' for Year 2");
+            }
+
+            $imagePath = null;
+            if (!empty($_FILES['image']['name'])) {
+                // Delete old image if exists
+                $stmt = $pdo->prepare("SELECT subject_image FROM subject WHERE subject_id = ?");
+                $stmt->execute([$subjectId]);
+                $oldImage = $stmt->fetchColumn();
+                if ($oldImage && file_exists($oldImage)) {
+                    unlink($oldImage);
+                }
+
+                $imagePath = handleFileUpload($_FILES['image']);
+            }
+
+            $sql = "UPDATE subject 
+                    SET subject_name = ?, year = ?, subject_price = ?, subject_description = ?";
+            $params = [
+                $_POST['subject_name'],
+                $firstChar === '1' ? 'Year 1' : 'Year 2',
+                $_POST['subject_price'],
+                $_POST['subject_description'] ?: null
+            ];
+
+            if ($imagePath) {
+                $sql .= ", subject_image = ?";
+                $params[] = $imagePath;
+            }
+
+            $sql .= " WHERE subject_id = ?";
+            $params[] = $subjectId;
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
+            // Clean up uploaded file if it exists
+            if (isset($imagePath) && file_exists($imagePath)) {
+                unlink($imagePath);
+            }
             echo json_encode(["success" => false, "message" => $e->getMessage()]);
         }
     }
