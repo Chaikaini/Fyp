@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->close();
     exit;
 }
-
+ 
 // Handle GET request for fetching profile
 $sql = "SELECT admin_name AS name, admin_gender AS gender, admin_email AS email FROM admin WHERE admin_id = ?";
 $stmt = $conn->prepare($sql);
