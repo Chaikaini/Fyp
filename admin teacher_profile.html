@@ -215,6 +215,7 @@
         </div>
 
         <div class="modal-body">
+          
         
           <div class="mb-3 text-center">
             <label class="form-label d-block">Profile Image</label>
@@ -253,13 +254,18 @@
             <label for="edit-address" class="form-label">Address</label>
             <textarea id="edit-address" name="address" class="form-control"></textarea>
           </div>
+          <div id="edit-success-message" class="text-success text-center mt-2" style="display: none;"></div>
         </div>
+
+        
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
       </form>
+      
+
     </div>
   </div>
 </div>
@@ -378,24 +384,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // sumit form and update profile
   document.getElementById("edit-profile-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    const formData = new FormData(this);
+  e.preventDefault();
+  const formData = new FormData(this);
+  const successMessage = document.getElementById("edit-success-message");
+  successMessage.style.display = "none";
+  successMessage.textContent = "";
 
-    fetch("teacher_profile.php", {
-      method: "POST",
-      body: formData
-    })
+  fetch("teacher_profile.php", {
+    method: "POST",
+    body: formData
+  })
     .then(response => response.json())
     .then(data => {
       if (data.status === "success") {
-        alert("Profile updated successfully");
-        location.reload();
+        successMessage.textContent = "Profile updated successfully!";
+        successMessage.style.display = "block";
+
+        setTimeout(() => {
+          const modal = bootstrap.Modal.getInstance(document.getElementById("editProfileModal"));
+          modal.hide();
+          location.reload(); 
+        }, 4000);
       } else {
         alert("Failed to update profile: " + data.message);
       }
     })
     .catch(error => console.error("Error updating profile:", error));
-  });
+});
+
 });
 
 
@@ -445,7 +461,7 @@ document.getElementById("reset-password-form").addEventListener("submit", async 
       setTimeout(() => {
         const modal = bootstrap.Modal.getInstance(document.getElementById("resetPasswordModal"));
         modal.hide();
-      }, 2000);
+      }, 4000);
     }
   } catch (error) {
     console.error("Error:", error);
