@@ -130,17 +130,28 @@
     </nav>
 
     <!-- Schedule -->
-    <h1 class="mb-4">View My Schedule</h1>
-    <div class="card">
-      <div class="card-header">
-      <form class="d-flex ms-auto align-items-center">
-      <select id="search-category" class="form-select search-category">
-          <option value="class_term">Term</option>
-          <option value="subject_name">Subject Name</option>
-        </select>
-          <input class="form-control me-2" type="search" placeholder="Search with Term" id="search" />
+        <h1 class="mb-4">View My Schedule</h1>
+        <div class="card">
+        <div class="card-header">
+      <div class="row w-100 align-items-center">
+      
+        <div class="col-md-9 d-flex gap-2 flex-wrap align-items-center">
+          <select id="search-category" class="form-select search-category">
+            <option value="class_term">Term</option>
+            <option value="subject_name">Subject Name</option>
+          </select>
+          <input class="form-control" type="search" placeholder="Search with Term" id="search" />
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </div>
+
+        
+        <div class="col-md-3 text-md-end mt-2 mt-md-0">
+          <button type="button" class="btn btn-primary" id="view-timetable-btn">View Ongoing Timetable</button>
+        </div>
       </div>
+    </div>
+     
+
       <div class="card-body">
         <table class="table table-striped">
             <thead>
@@ -161,7 +172,25 @@
       </div>
     </div>
   </div>
+
+
+  <!-- Timetable Modal -->
+<div class="modal fade" id="timetableModal" tabindex="-1" aria-labelledby="timetableModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl"> 
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="timetableModalLabel">Ongoing Timetable</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="timetable-modal-body">
+        <!-- Timetable will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
+
 
  
 
@@ -280,6 +309,74 @@ function renderSchedule(data) {
     });
   }
 }
+
+document.getElementById("view-timetable-btn").addEventListener("click", function () {
+  const allRows = document.querySelectorAll("#schedule-table-body tr");
+  const timetableData = [];
+
+  allRows.forEach(row => {
+    const status = row.cells[6].textContent.trim();
+    if (status === "Ongoing") {
+      const subject_id = row.cells[0].textContent.trim();
+      const subject_name = row.cells[1].textContent.trim();
+      const class_id = row.cells[3].textContent.trim();
+      const time = row.cells[5].textContent.trim(); // Example: "Monday 9:00AM - 10:00AM"
+
+      const subject = `${subject_id} - ${subject_name} (${class_id})`;
+      timetableData.push({ subject, time });
+    }
+  });
+
+  renderTimetableModal(timetableData);
+
+  const timetableModal = new bootstrap.Modal(document.getElementById('timetableModal'));
+  timetableModal.show();
+});
+
+
+
+function renderTimetableModal(data) {
+  const container = document.getElementById("timetable-modal-body");
+  container.innerHTML = ""; // clear previous
+
+  if (data.length === 0) {
+    container.innerHTML = "<div class='text-muted'>No Ongoing schedule found.</div>";
+    return;
+  }
+
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const timeSlots = [];
+  const scheduleMap = {};
+
+  data.forEach(({ subject, time }) => {
+    const [dayPart, ...timeParts] = time.split(" ");
+    const timePart = timeParts.join(" ");
+    if (!scheduleMap[dayPart]) scheduleMap[dayPart] = {};
+    scheduleMap[dayPart][timePart] = subject;
+    if (!timeSlots.includes(timePart)) timeSlots.push(timePart);
+  });
+
+  timeSlots.sort();
+
+  let html = "<table class='table table-bordered'><thead><tr><th>Time</th>";
+  days.forEach(day => {
+    html += `<th>${day}</th>`;
+  });
+  html += "</tr></thead><tbody>";
+
+  timeSlots.forEach(slot => {
+    html += `<tr><td>${slot}</td>`;
+    days.forEach(day => {
+      const subject = scheduleMap[day]?.[slot] || "";
+      html += `<td>${subject}</td>`;
+    });
+    html += "</tr>";
+  });
+
+  html += "</tbody></table>";
+  container.innerHTML = html;
+}
+
 
 </script>
 
