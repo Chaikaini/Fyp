@@ -69,6 +69,12 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       text-align: center;
+      cursor: pointer; /* 添加鼠标指针样式 */
+      text-decoration: none; /* 移除下划线 */
+      color: inherit; /* 保持颜色不变 */
+    }
+    .card:hover {
+      opacity: 0.8; /* 鼠标悬停时稍微透明 */
     }
     .card h3 {
       margin: 0;
@@ -95,6 +101,7 @@
     }
     .chart-container {
       margin-top: 50px;
+      cursor: pointer; /* 图表区域添加鼠标指针样式 */
     }
     canvas {
       max-width: 100%;
@@ -123,7 +130,7 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -148,14 +155,6 @@
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
             </a>
@@ -174,40 +173,40 @@
     <!-- Main Cards -->
     <div class="row">
       <div class="col-md-3">
-        <div class="card card-children">
+        <a href="children.list.html" class="card card-children">
           <div class="card-inner">
             <h3>CHILDREN</h3>
             <i class="fas fa-users"></i>
           </div>
           <h1 id="total-children">0</h1>
-        </div>
-      </div>
+        </a>
+      </div> 
       <div class="col-md-3">
-        <div class="card card-parent">
+        <a href="parent list.html" class="card card-parent">
           <div class="card-inner">
             <h3>PARENTS</h3>
             <i class="fas fa-users"></i>
           </div>
           <h1 id="total-parents">0</h1>
-        </div>
+        </a>
       </div>
       <div class="col-md-3">
-        <div class="card card-subject">
+        <a href="admin subject.html" class="card card-subject">
           <div class="card-inner">
             <h3>SUBJECTS</h3>
             <i class="fas fa-book"></i>
           </div>
           <h1 id="total-subjects">0</h1>
-        </div>
+        </a>
       </div>
       <div class="col-md-3">
-        <div class="card card-staff">
+        <a href="admin staff.html" class="card card-staff">
           <div class="card-inner">
             <h3>TEACHERS</h3>
             <i class="fas fa-user"></i>
           </div>
           <h1 id="total-users">0</h1>
-        </div>
+        </a>
       </div>
     </div>
 
@@ -215,13 +214,13 @@
     <div class="row">
       <!-- Subject Enrollment Bar Chart -->
       <div class="col-md-6">
-        <div class="chart-container">
+        <div class="chart-container" id="subjectsChartContainer">
           <canvas id="subjectsChart"></canvas>
         </div>
       </div>
       <!-- Children by Year Bar Chart -->
       <div class="col-md-6">
-        <div class="chart-container">
+        <div class="chart-container" id="childrenByYearChartContainer">
           <canvas id="childrenByYearChart"></canvas>
         </div>
       </div>
@@ -314,6 +313,16 @@
                 y: { beginAtZero: true, title: { display: true, text: 'Number of Children' } }
               }
             }
+          });
+
+          // Add click event for Subject Enrollment Chart
+          document.getElementById('subjectsChartContainer').addEventListener('click', () => {
+            window.location.href = 'admin subject.html'; // Redirect to Subject List
+          });
+
+          // Add click event for Children by Year Chart
+          document.getElementById('childrenByYearChartContainer').addEventListener('click', () => {
+            window.location.href = 'children.list.html'; // Redirect to Children List
           });
         })
         .catch(error => {
