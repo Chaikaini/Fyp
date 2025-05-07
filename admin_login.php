@@ -15,12 +15,12 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
+    $email = trim(strtolower($_POST['email'])); // Normalize email
     $password = $_POST['password'];
     $role = $_POST['role'];
 
     if ($role === 'Admin') {
-        $stmt_admin = $conn->prepare("SELECT admin_id, admin_name, admin_password FROM admin WHERE admin_email = ?");
+        $stmt_admin = $conn->prepare("SELECT admin_id, admin_name, admin_password FROM admin WHERE LOWER(admin_email) = ?");
         $stmt_admin->bind_param("s", $email);
         $stmt_admin->execute();
         $result_admin = $stmt_admin->get_result();
@@ -45,14 +45,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Admin account not found']);
             exit;
         }
+        $stmt_admin->close();
     } elseif ($role === 'Teacher') {
-        $stmt_teacher = $conn->prepare("SELECT teacher_id, teacher_name, teacher_password FROM teacher WHERE teacher_email = ?");
+        $stmt_teacher = $conn->prepare("SELECT teacher_id, teacher_name, teacher_password, teacher_status FROM teacher WHERE LOWER(teacher_email) = ?");
         $stmt_teacher->bind_param("s", $email);
         $stmt_teacher->execute();
         $result_teacher = $stmt_teacher->get_result();
 
         if ($result_teacher->num_rows === 1) {
             $teacher = $result_teacher->fetch_assoc();
+            $status = trim(strtolower($teacher['teacher_status'])); // Normalize status
+            // Log the status for debugging (remove this in production)
+            error_log("Teacher status for email $email: $status");
+            if ($status !== 'active') {
+                echo json_encode(['success' => false, 'message' => 'Teacher account is inactive']);
+                exit;
+            }
             if (password_verify($password, $teacher['teacher_password'])) {
                 unset($_SESSION['admin_id'], $_SESSION['admin_name'], $_SESSION['admin_email']);
 
@@ -71,13 +79,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Teacher account not found']);
             exit;
         }
+        $stmt_teacher->close();
     } else {
         echo json_encode(['success' => false, 'message' => 'Invalid role selected']);
         exit;
     }
 
-    $stmt_admin->close();
-    $stmt_teacher->close();
     $conn->close();
     exit;
 }
