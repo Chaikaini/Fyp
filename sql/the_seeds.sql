@@ -69,8 +69,12 @@ CREATE TABLE `cart` (
   `parent_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `child_id` int(11) NOT NULL,
+  `child_name` varchar(100),
+  `subject_name` varchar(100),
+  `price` decimal(10,2),
   `subject_id` varchar(20) NOT NULL,
-  `teacher_id` int(11) NOT NULL
+  `teacher_id` int(11) NOT NULL,
+  `deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -418,6 +422,9 @@ ALTER TABLE `cart`
   ADD KEY `child_id` (`child_id`),
   ADD KEY `subject_id` (`subject_id`),
   ADD KEY `teacher_id` (`teacher_id`);
+
+ALTER TABLE `cart` 
+  ADD UNIQUE KEY `unique_cart` (`parent_id`, `child_id`, `subject_id`);
 
 --
 -- Indexes for table `child`
