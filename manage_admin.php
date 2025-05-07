@@ -86,10 +86,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 if (isset($_GET['action']) && $_GET['action'] === 'searchAdmins' && isset($_GET['query'])) {
     $query = $conn->real_escape_string($_GET['query']);
+    $status = isset($_GET['status']) ? $conn->real_escape_string($_GET['status']) : '';
 
     $sql = "SELECT teacher_id AS id, teacher_name AS name, teacher_gender AS gender, teacher_email AS email, teacher_phone_number AS phone, teacher_address AS address, teacher_join_date AS join_date, teacher_status AS status  
             FROM teacher 
             WHERE teacher_name LIKE '%$query%'";
+
+    if (!empty($status)) {
+        $sql .= " AND teacher_status = '$status'";
+    }
 
     $result = $conn->query($sql);
     $admins = [];
