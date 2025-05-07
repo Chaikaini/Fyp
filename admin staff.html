@@ -63,6 +63,10 @@
     }
     .table-container .fa-edit, .table-container .fa-trash-alt {
       color: #007BFF;
+      margin-right: 10px;
+    }
+    .table-container .fa-trash-alt {
+      color: #DC3545;
     }
     .pointer-cursor {
       cursor: pointer;
@@ -94,6 +98,20 @@
       display: flex;
       align-items: center;
     }
+    .status-active {
+      color: #28A745 !important; 
+      font-weight: bold;
+      background-color: transparent;
+    }
+    .status-inactive {
+      color: #DC3545 !important; 
+      font-weight: bold;
+      background-color: transparent; 
+    }
+    .table-striped > tbody > tr:nth-child(odd) td,
+    .table-striped > tbody > tr:nth-child(even) td {
+      background-color: #fff;
+    }
   </style>
 </head>
 <body> 
@@ -110,7 +128,7 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -322,9 +340,10 @@
                 <td>${admin.phone}</td>
                 <td>${admin.address}</td>
                 <td>${admin.join_date}</td>
-                <td>${admin.status}</td>
+                <td class="${admin.status === 'Active' ? 'status-active' : 'status-inactive'}">${admin.status}</td>
                 <td>
                   <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${admin.id}"></i>
+                  <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${admin.id}"></i>
                 </td>
               `;
               table.appendChild(row);
@@ -351,7 +370,34 @@
           const modal = new bootstrap.Modal(document.getElementById("editTeacherModal"));
           modal.show();
         }
+
+        if (event.target.classList.contains("delete-btn")) {
+          const id = event.target.getAttribute("data-id");
+          deleteAdmin(id);
+        }
       });
+
+      function deleteAdmin(id) {
+        const data = {
+          action: "deleteAdmin",
+          id: id
+        };
+
+        fetch("manage_admin.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        })
+          .then(res => res.json())
+          .then(response => {
+            if (response.success) {
+              fetchAdmins();
+            } else {
+              console.error("Delete failed:", response.message);
+            }
+          })
+          .catch(error => console.error("Error:", error));
+      }
 
       document.getElementById("editTeacherForm").addEventListener("submit", function (e) {
         e.preventDefault();
@@ -454,9 +500,10 @@
                   <td>${admin.phone}</td>
                   <td>${admin.address}</td>
                   <td>${admin.join_date}</td>
-                  <td>${admin.status}</td>
+                  <td class="${admin.status === 'Active' ? 'status-active' : 'status-inactive'}">${admin.status}</td>
                   <td>
                     <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${admin.id}"></i>
+                    <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${admin.id}"></i>
                   </td>
                 `;
                 table.appendChild(row);
