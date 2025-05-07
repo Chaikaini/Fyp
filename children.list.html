@@ -92,7 +92,7 @@
       gap: 10px;
       padding: 15px;
     }
-  </style>
+  </style> 
 </head>
 <body>
   <!-- Sidebar -->
@@ -108,7 +108,7 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -132,14 +132,6 @@
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
@@ -220,7 +212,7 @@
             </div>
             <div class="mb-3">
               <label for="edit_child_birthday" class="form-label">Birthday</label>
-              <input type="date" class="form-control" id="edit_child_birthday" required>
+              <input type="date" class="form-control" id="edit_child_birthday" disabled>
             </div>
             <div class="mb-3">
               <label for="edit_child_school" class="form-label">School</label>
@@ -251,6 +243,17 @@
       icon.classList.toggle('fa-chevron-down');
       icon.classList.toggle('fa-chevron-up');
     });
+
+    function calculateBirthdayFromIC(ic) {
+      if (ic && ic.length >= 6) {
+        const year = parseInt(ic.substring(0, 2));
+        const month = ic.substring(2, 4);
+        const day = ic.substring(4, 6);
+        const fullYear = year >= 0 && year <= 24 ? `20${year}` : `19${year}`;
+        return `${fullYear}-${month}-${day}`;
+      }
+      return '';
+    }
 
     function fetchRegistrations() {
       fetch('fetch_children.php')
@@ -349,6 +352,12 @@
           alert('Error deleting record. Please try again.');
         });
       }
+    });
+
+    document.getElementById('edit_child_kidNumber').addEventListener('input', function() {
+      const ic = this.value;
+      const birthday = calculateBirthdayFromIC(ic);
+      document.getElementById('edit_child_birthday').value = birthday;
     });
 
     document.getElementById('saveChanges').addEventListener('click', function() {
