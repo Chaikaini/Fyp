@@ -247,6 +247,12 @@
     display: none;
      }
 
+     .readonly-email {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    cursor: not-allowed;
+    }
+
      .required {
     color: red;
     }
@@ -491,8 +497,8 @@
     </div>
 
     <div class="form-group">
-        <label for="email">Email <span class="required">*</span></label>
-        <input type="email" id="email" name="parent_email" readonly>
+        <label for="email">Email </label>
+        <input type="email" class="form-control readonly-email" id="email" name="parent_email" readonly title="Email Unchangeable">
     </div>
 
     <div class="form-group">
