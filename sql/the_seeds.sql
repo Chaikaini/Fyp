@@ -396,6 +396,21 @@ CREATE TABLE `teacher_comment` (
   `teacher_comment_created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
+
+--
+-- Table structure for table `credit_cards`
+--
+
+CREATE TABLE credit_cards (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    parent_id INT NOT NULL,
+    card_number VARCHAR(255) NOT NULL, -- 加密存储
+    expiry_date VARCHAR(5) NOT NULL,  -- 格式 MM/YY
+    last_four VARCHAR(4) NOT NULL,    -- 最后四位用于显示
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (parent_id) REFERENCES parent(parent_id)
+);
 --
 -- Indexes for dumped tables
 --
