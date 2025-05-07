@@ -81,3 +81,14 @@ Stack trace:
 [2025-05-07 17:25:13] Successfully deleted parent_id: 3
 [2025-05-07 17:25:16] Delete request received for parent_id: 4
 [2025-05-07 17:25:16] Successfully deleted parent_id: 4
+[07-May-2025 17:42:44 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the seeds' in C:\xampp\htdocs\Fyp\fetch_parents.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_parents.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_parents.php on line 19
+[2025-05-07 17:42:46] Unexpected error: Unknown database 'the seeds'
+[07-May-2025 17:42:47 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the seeds' in C:\xampp\htdocs\Fyp\fetch_parents.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_parents.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_parents.php on line 19

@@ -70,9 +70,12 @@
     .table-container .fa-edit {
       color: #007BFF;
     }
+    .table-container .fa-trash-alt {
+      color: #DC3545;
+    }
     .pointer-cursor {
       cursor: pointer;
-    }
+    } 
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -103,6 +106,27 @@
       margin-top: 10px;
       display: none;
     }
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: auto;
+      max-width: 500px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+      z-index: 1000;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+    .notification.success {
+      background-color: #28a745;
+    }
+    .notification.error {
+      background-color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -117,9 +141,9 @@
       <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
-      <li class="nav-item"><a href="admin subject.php" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
+      <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -138,19 +162,14 @@
 
   <!-- Main Content -->
   <div id="main-content">
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
     <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
@@ -182,12 +201,12 @@
               <th>Subject Name</th>
               <th>Year</th>
               <th>Price</th>
-              <th>Description</th>
               <th>Image</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="subjectTable">
+            <tr><td colspan="6" class="text-center">Loading subjects...</td></tr>
           </tbody>
         </table>
       </div>
@@ -306,10 +325,46 @@
     </div>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this subject (ID: <span id="deleteSubjectId"></span>)?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Notification function
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 5000);
+    }
+
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
+      const icon = document.getElementById('reportIcon');
+      icon.classList.toggle('fa-chevron-down');
+      icon.classList.toggle('fa-chevron-up');
     });
 
     function showError(modalId, message) {
@@ -342,16 +397,15 @@
           const table = document.getElementById("subjectTable");
           table.innerHTML = "";
 
-          if (data.success && data.subjects && data.subjects.length > 0) {
+          if (data.success && Array.isArray(data.subjects) && data.subjects.length > 0) {
             data.subjects.forEach(subject => {
               let row = document.createElement("tr");
               row.innerHTML = `
-                <td>${subject.subject_id}</td>
-                <td>${subject.subject_name}</td>
-                <td>${subject.year}</td>
-                <td>RM ${subject.subject_price}</td>
-                <td>${subject.subject_description || 'N/A'}</td>
-                <td><a href="#" class="image-link" data-image="${subject.subject_image}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">${subject.subject_image || 'No Image'}</a></td>
+                <td>${subject.subject_id || 'N/A'}</td>
+                <td>${subject.subject_name || 'N/A'}</td>
+                <td>${subject.year || 'N/A'}</td>
+                <td>RM ${subject.subject_price ? Number(subject.subject_price).toFixed(2) : '0.00'}</td>
+                <td><a href="#" class="image-link" data-image="${subject.subject_image || ''}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">${subject.subject_image ? subject.subject_image.split('/').pop() : 'No Image'}</a></td>
                 <td>
                   <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${subject.subject_id}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${subject.subject_id}"></i>
@@ -366,27 +420,78 @@
                 document.getElementById('imagePreview').src = imageSrc || '';
               });
             });
+
+            // Rebind delete button event listeners
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+              btn.removeEventListener('click', handleDelete); // Prevent multiple bindings
+              btn.addEventListener('click', handleDelete);
+            });
           } else {
-            table.innerHTML = `<tr><td colspan="7" class="text-center">No subjects found: ${data.message || 'Empty result'}</td></tr>`;
+            const message = data.message || (data.success ? 'No subjects found' : 'Invalid response format');
+            table.innerHTML = `<tr><td colspan="6" class="text-center">${message}</td></tr>`;
+            if (!data.success) {
+              showNotification(`Failed to load subjects: ${message}`, 'error');
+            }
           }
         })
         .catch(error => {
           console.error("Fetch Subjects Error:", error);
-          document.getElementById("subjectTable").innerHTML = `<tr><td colspan="7" class="text-center">Error loading subjects: ${error.message}</td></tr>`;
+          showNotification("Error loading subjects: " + error.message, "error");
+          document.getElementById("subjectTable").innerHTML = `<tr><td colspan="6" class="text-center">Error loading subjects: ${error.message}</td></tr>`;
         });
     }
 
     function populateEditModal(subjectData) {
-      document.getElementById('editSubjectId').value = subjectData.subject_id;
-      document.getElementById('editSubjectName').value = subjectData.subject_name;
-      document.getElementById('editYear').value = subjectData.year;
-      document.getElementById('editPrice').value = subjectData.subject_price;
+      document.getElementById('editSubjectId').value = subjectData.subject_id || '';
+      document.getElementById('editSubjectName').value = subjectData.subject_name || '';
+      document.getElementById('editYear').value = subjectData.year || '';
+      document.getElementById('editPrice').value = subjectData.subject_price || '';
       document.getElementById('editDescription').value = subjectData.subject_description || '';
       document.getElementById('currentImageLink').href = subjectData.subject_image || '#';
-      document.getElementById('currentImageLink').textContent = subjectData.subject_image || 'No Image';
+      document.getElementById('currentImageLink').textContent = subjectData.subject_image ? subjectData.subject_image.split('/').pop() : 'No Image';
+    }
+
+    // Handle delete button click
+    function handleDelete(event) {
+      const subjectId = event.target.getAttribute('data-id');
+      if (!subjectId) {
+        console.error('Subject ID not found');
+        showNotification('Failed to delete: Subject ID missing', 'error');
+        return;
+      }
+      document.getElementById('deleteSubjectId').textContent = subjectId;
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+      deleteModal.show();
+
+      // Remove existing listeners to prevent multiple bindings
+      const confirmDeleteBtn = document.getElementById('confirmDelete');
+      const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
+      confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
+
+      // Add new listener for confirm delete
+      newConfirmDeleteBtn.addEventListener('click', () => {
+        fetch(`manage_subject.php?action=deleteSubject&id=${subjectId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              fetchSubjects();
+              showNotification('Subject successfully deleted!', 'success');
+              deleteModal.hide();
+            } else {
+              showNotification(`Failed to delete subject: ${data.message || 'Unknown error'}`, 'error');
+              deleteModal.hide();
+            }
+          })
+          .catch(error => {
+            console.error('Delete Error:', error);
+            showNotification('Error deleting subject: ' + error.message, 'error');
+            deleteModal.hide();
+          });
+      });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+      console.log("DOM loaded, fetching subjects...");
       fetchSubjects();
 
       // Clear error messages when modals are closed
@@ -394,23 +499,6 @@
       document.getElementById('editSubjectModal').addEventListener('hidden.bs.modal', () => clearError('editSubjectModal'));
 
       document.getElementById("subjectTable").addEventListener("click", function (event) {
-        if (event.target.classList.contains("delete-btn")) {
-          let subjectId = event.target.getAttribute("data-id");
-          fetch(`manage_subject.php?action=deleteSubject&id=${subjectId}`)
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                fetchSubjects();
-              } else {
-                showError('addSubjectModal', data.message);
-              }
-            })
-            .catch(error => {
-              console.error("Delete Error:", error);
-              showError('addSubjectModal', "Error deleting subject");
-            });
-        }
-
         if (event.target.classList.contains("edit-btn")) {
           let subjectId = event.target.getAttribute("data-id");
           fetch(`manage_subject.php?action=getSubjects&subject_id=${subjectId}`)
@@ -423,12 +511,12 @@
                 clearError('editSubjectModal');
                 new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
               } else {
-                showError('editSubjectModal', data.message);
+                showNotification(`Failed to load subject: ${data.message || 'Unknown error'}`, 'error');
               }
             })
             .catch(error => {
               console.error("Edit Fetch Error:", error);
-              showError('editSubjectModal', "Error loading subject for edit");
+              showNotification("Error loading subject for edit: " + error.message, "error");
             });
         }
       });
@@ -443,10 +531,12 @@
 
         if (firstChar !== '1' && firstChar !== '2') {
           showError('addSubjectModal', "Subject ID must start with '1' or '2'");
+          showNotification("Subject ID must start with '1' or '2'", 'error');
           return;
         }
         if ((firstChar === '1' && year !== 'Year 1') || (firstChar === '2' && year !== 'Year 2')) {
           showError('addSubjectModal', "Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
+          showNotification("Subject ID and Year mismatch", 'error');
           return;
         }
 
@@ -468,16 +558,19 @@
             console.log("Add Subject Response:", data);
             if (data.success) {
               fetchSubjects();
+              showNotification("Subject successfully added!", "success");
               document.getElementById("subjectForm").reset();
               let modal = bootstrap.Modal.getInstance(document.getElementById("addSubjectModal"));
               modal.hide();
             } else {
               showError('addSubjectModal', data.message);
+              showNotification(`Failed to add subject: ${data.message || 'Unknown error'}`, 'error');
             }
           })
           .catch(error => {
             console.error("Add Subject Error:", error);
             showError('addSubjectModal', "Error adding subject");
+            showNotification("Error adding subject: " + error.message, "error");
           });
       });
 
@@ -491,10 +584,12 @@
 
         if (firstChar !== '1' && firstChar !== '2') {
           showError('editSubjectModal', "Subject ID must start with '1' or '2'");
+          showNotification("Subject ID must start with '1' or '2'", 'error');
           return;
         }
         if ((firstChar === '1' && year !== 'Year 1') || (firstChar === '2' && year !== 'Year 2')) {
           showError('editSubjectModal', "Subject ID starting with '1' must have Year 1, and '2' must have Year 2");
+          showNotification("Subject ID and Year mismatch", 'error');
           return;
         }
 
@@ -519,15 +614,18 @@
             console.log("Update Subject Response:", data);
             if (data.success) {
               fetchSubjects();
+              showNotification("Subject successfully updated!", "success");
               let modal = bootstrap.Modal.getInstance(document.getElementById("editSubjectModal"));
               modal.hide();
             } else {
               showError('editSubjectModal', data.message);
+              showNotification(`Failed to update subject: ${data.message || 'Unknown error'}`, 'error');
             }
           })
           .catch(error => {
             console.error("Update Subject Error:", error);
             showError('editSubjectModal', "Error updating subject");
+            showNotification("Error updating subject: " + error.message, "error");
           });
       });
 
