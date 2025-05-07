@@ -124,7 +124,7 @@
               <li><a class="dropdown-item" href="admin teacher_profile.html">Profile</a></li>
               <li><a class="dropdown-item" href="admin login.html">Logout</a></li>
             </ul>
-          </li>
+          </li> 
         </ul>
       </div>
     </nav>
@@ -196,6 +196,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
 window.addEventListener("DOMContentLoaded", function () {
   const tbody = document.getElementById("schedule-table-body");
   tbody.innerHTML = "<tr><td colspan='7' class='text-center text-muted'>Loading your schedule...</td></tr>";
