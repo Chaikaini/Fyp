@@ -421,9 +421,8 @@
               });
             });
 
-            // Rebind delete button event listeners
             document.querySelectorAll('.delete-btn').forEach(btn => {
-              btn.removeEventListener('click', handleDelete); // Prevent multiple bindings
+              btn.removeEventListener('click', handleDelete);
               btn.addEventListener('click', handleDelete);
             });
           } else {
@@ -451,7 +450,6 @@
       document.getElementById('currentImageLink').textContent = subjectData.subject_image ? subjectData.subject_image.split('/').pop() : 'No Image';
     }
 
-    // Handle delete button click
     function handleDelete(event) {
       const subjectId = event.target.getAttribute('data-id');
       if (!subjectId) {
@@ -463,12 +461,10 @@
       const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
       deleteModal.show();
 
-      // Remove existing listeners to prevent multiple bindings
       const confirmDeleteBtn = document.getElementById('confirmDelete');
       const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
       confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
 
-      // Add new listener for confirm delete
       newConfirmDeleteBtn.addEventListener('click', () => {
         fetch(`manage_subject.php?action=deleteSubject&id=${subjectId}`)
           .then(response => response.json())
@@ -494,7 +490,6 @@
       console.log("DOM loaded, fetching subjects...");
       fetchSubjects();
 
-      // Clear error messages when modals are closed
       document.getElementById('addSubjectModal').addEventListener('hidden.bs.modal', () => clearError('addSubjectModal'));
       document.getElementById('editSubjectModal').addEventListener('hidden.bs.modal', () => clearError('editSubjectModal'));
 
@@ -563,13 +558,13 @@
               let modal = bootstrap.Modal.getInstance(document.getElementById("addSubjectModal"));
               modal.hide();
             } else {
-              showError('addSubjectModal', data.message);
+              showError('addSubjectModal', data.message || 'Failed to add subject');
               showNotification(`Failed to add subject: ${data.message || 'Unknown error'}`, 'error');
             }
           })
           .catch(error => {
             console.error("Add Subject Error:", error);
-            showError('addSubjectModal', "Error adding subject");
+            showError('addSubjectModal', "Error adding subject: " + error.message);
             showNotification("Error adding subject: " + error.message, "error");
           });
       });
@@ -618,13 +613,13 @@
               let modal = bootstrap.Modal.getInstance(document.getElementById("editSubjectModal"));
               modal.hide();
             } else {
-              showError('editSubjectModal', data.message);
+              showError('editSubjectModal', data.message || 'Failed to update subject');
               showNotification(`Failed to update subject: ${data.message || 'Unknown error'}`, 'error');
             }
           })
           .catch(error => {
             console.error("Update Subject Error:", error);
-            showError('editSubjectModal', "Error updating subject");
+            showError('editSubjectModal', "Error updating subject: " + error.message);
             showNotification("Error updating subject: " + error.message, "error");
           });
       });

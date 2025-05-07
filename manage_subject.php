@@ -14,6 +14,17 @@ try {
     exit;
 }
 
+// Check if admin_id column exists in subject table
+function hasAdminIdColumn($pdo) {
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM subject LIKE 'admin_id'");
+        return $stmt->rowCount() > 0;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
+$hasAdminId = hasAdminIdColumn($pdo);
 $action = $_GET['action'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -33,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
                     "year" => $row["year"],
-                    "subject_price" => $row["subject_price"],
+                    "subject_price" => (float)$row["subject_price"],
                     "subject_description" => $row["subject_description"],
                     "subject_image" => $row["subject_image"]
                 ];
@@ -87,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "subject_id" => $row["subject_id"],
                     "subject_name" => $row["subject_name"],
                     "year" => $row["year"],
-                    "subject_price" => $row["subject_price"],
+                    "subject_price" => (float)$row["subject_price"],
                     "subject_description" => $row["subject_description"],
                     "subject_image" => $row["subject_image"]
                 ];
@@ -153,16 +164,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Image file is required");
             }
 
-            $stmt = $pdo->prepare("INSERT INTO subject (subject_id, subject_name, year, subject_price, subject_description, subject_image) 
-                                   VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->execute([
-                $subjectId,
-                $_POST['subject_name'],
-                $year,
-                $_POST['subject_price'],
-                $_POST['subject_description'] ?: null,
-                $imagePath
-            ]);
+            if ($hasAdminId) {
+                $sql = "INSERT INTO subject (subject_id, admin_id, subject_name, year, subject_price, subject_description, subject_image) 
+                        VALUES (?, 11111, ?, ?, ?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $subjectId,
+                    $_POST['subject_name'],
+                    $year,
+                    $_POST['subject_price'],
+                    $_POST['subject_description'] ?: null,
+                    $imagePath
+                ]);
+            } else {
+                $sql = "INSERT INTO subject (subject_id, subject_name, year, subject_price, subject_description, subject_image) 
+                        VALUES (?, ?, ?, ?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    $subjectId,
+                    $_POST['subject_name'],
+                    $year,
+                    $_POST['subject_price'],
+                    $_POST['subject_description'] ?: null,
+                    $imagePath
+                ]);
+            }
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
             // Clean up uploaded file if it exists
@@ -197,8 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $imagePath = handleFileUpload($_FILES['image']);
             }
 
-            $sql = "UPDATE subject 
-                    SET subject_name = ?, year = ?, subject_price = ?, subject_description = ?";
+            $sql = "UPDATE subject SET subject_name = ?, year = ?, subject_price = ?, subject_description = ?";
             $params = [
                 $_POST['subject_name'],
                 $year,
