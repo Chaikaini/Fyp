@@ -269,9 +269,9 @@ function loadRegistrations(subjectId, classId) {
   .then(res => res.json())
   .then(data => {
     const table = document.getElementById('registrationTable');
-    table.innerHTML = ''; // 清空表格
+    table.innerHTML = ''; 
     if (data.length === 0) {
-      table.innerHTML = '<tr><td colspan="8" class="text-center">没有找到注册信息</td></tr>';
+      table.innerHTML = '<tr><td colspan="8" class="text-center">No registration information found</td></tr>';
       return;
     }
     data.forEach(item => {
