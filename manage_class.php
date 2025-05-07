@@ -20,7 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'getClasses') {
         try {
             $sql = "
-                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
+                SELECT 
+                    c.*, 
+                    s.subject_name, 
+                    p.part_id, 
+                    p.part_name, 
+                    t.teacher_id, 
+                    t.teacher_name,
+                    (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
@@ -31,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$_GET['class_id']]);
             } else {
-                $stmt = $pdo->query($sql);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute();
             }
             $classes = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -47,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
-                    "enrolled" => $row["class_enrolled"],
+                    "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
                 ];
             }
@@ -111,7 +119,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $term = $_GET['term'] ?? '';
         try {
             $sql = "
-                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
+                SELECT 
+                    c.*, 
+                    s.subject_name, 
+                    p.part_id, 
+                    p.part_name, 
+                    t.teacher_id, 
+                    t.teacher_name,
+                    (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
@@ -144,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
-                    "enrolled" => $row["class_enrolled"],
+                    "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
                 ];
             }
@@ -352,22 +367,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $childId = $input['child_id'] ?? '';
         if ($classId && $childId) {
             try {
-                // Check if class exists
-                $stmt = $pdo->prepare("SELECT class_capacity, class_enrolled FROM class WHERE class_id = ?");
+                // Check if class exists and get capacity
+                $stmt = $pdo->prepare("SELECT class_capacity FROM class WHERE class_id = ?");
                 $stmt->execute([$classId]);
                 $class = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!$class) {
                     throw new Exception("Class ID does not exist");
                 }
-                if ($class['class_enrolled'] >= $class['class_capacity']) {
+
+                // Check current enrollment dynamically
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
+                $stmt->execute([$classId]);
+                $currentEnrolled = $stmt->fetchColumn();
+
+                if ($currentEnrolled >= $class['class_capacity']) {
                     throw new Exception("Class is already full");
                 }
 
+                // Register the student
                 $stmt = $pdo->prepare("INSERT INTO registration_class (class_id, child_id) VALUES (?, ?)");
                 $stmt->execute([$classId, $childId]);
-
-                $stmt = $pdo->prepare("UPDATE class SET class_enrolled = class_enrolled + 1 WHERE class_id = ?");
-                $stmt->execute([$classId]);
 
                 echo json_encode(["success" => true]);
             } catch (Exception $e) {
@@ -385,6 +404,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$classId]);
             if ($stmt->fetchColumn() == 0) {
                 throw new Exception("Class ID does not exist");
+            }
+
+            // Check if new capacity is sufficient
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
+            $stmt->execute([$classId]);
+            $currentEnrolled = $stmt->fetchColumn();
+            if ($input['capacity'] < $currentEnrolled) {
+                throw new Exception("New capacity cannot be less than current enrollment ($currentEnrolled)");
             }
 
             $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, class_term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
