@@ -26,8 +26,8 @@ try {
     $child_id = null;
 
     if (!empty($child_name)) {
-        $stmt = $conn->prepare("SELECT child_id FROM child WHERE child_name = ?");
-        $stmt->bind_param("s", $child_name);
+        $stmt = $conn->prepare("SELECT child_id FROM child WHERE child_name = ? AND parent_id = ?");
+        $stmt->bind_param("si", $child_name, $_SESSION['parent_id']);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -49,13 +49,23 @@ try {
     // 验证 teacher_id 是否存在
     $teacher_id = $data['teacher_id'];
     $stmt = $conn->prepare("SELECT teacher_id FROM teacher WHERE teacher_id = ?");
-    $stmt->bind_param("i", $teacher_id);  
+    $stmt->bind_param("i", $teacher_id);
     $stmt->execute();
     if (!$stmt->get_result()->fetch_assoc()) {
         throw new Exception("Teacher not found", 404);
     }
 
-    // 检查是否已经存在相同记录（parent_id, child_name, subject_id）
+    // 检查 registration_class 表中是否已存在 (child_id, subject_id) 的记录
+    $stmt = $conn->prepare("SELECT registration_id FROM registration_class WHERE child_id = ? AND subject_id = ?");
+    $stmt->bind_param("ii", $child_id, $data['subject_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        throw new Exception("This child has already registered for this subject", 400);
+    }
+
+    // 检查是否已经存在相同记录（parent_id, child_name, subject_id）在 cart 表
     $stmt = $conn->prepare("SELECT cart_id, deleted FROM cart WHERE parent_id = ? AND child_name = ? AND subject_id = ?");
     $stmt->bind_param("isi", $_SESSION['parent_id'], $child_name, $data['subject_id']);
     $stmt->execute();

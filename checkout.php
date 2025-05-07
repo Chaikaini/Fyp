@@ -3,8 +3,8 @@ session_start();
 header('Content-Type: application/json');
 
 $servername = "127.0.0.1";
-$username = "root"; 
-$password = ""; 
+$username = "root";
+$password = "";
 $dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -22,13 +22,13 @@ if (!isset($_SESSION['parent_id'])) {
 
 $parent_id = $_SESSION['parent_id'];
 
-// 联表查询
 $stmt = $conn->prepare("
-    SELECT c.cart_id, c.class_id, c.subject_id, c.price, c.teacher_id,
+    SELECT c.cart_id, c.class_id, c.subject_id, c.price, c.teacher_id, c.child_id,
            s.subject_name, s.subject_image,
            t.teacher_name,
            ch.child_name,
-           cl.class_time
+           cl.class_time,
+           cl.class_id AS class_id
     FROM cart c
     LEFT JOIN subject s ON c.subject_id = s.subject_id
     LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
