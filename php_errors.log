@@ -54,3 +54,15 @@ Stack trace:
 [2025-05-07 16:48:17] Cannot delete child_id 1: Associated exam results exist
 [2025-05-07 16:49:07] Delete request received: {"action":"delete","child_id":"1"}
 [2025-05-07 16:49:07] Cannot delete child_id 1: Associated exam results exist
+[2025-05-07 16:56:33] Successfully updated teacher_id: 12123
+[2025-05-07 16:56:38] Successfully updated teacher_id: 12123
+[2025-05-07 16:58:24] Delete request received for teacher_id: 12345
+[2025-05-07 16:58:24] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:01:16] Delete request received for teacher_id: 12345
+[2025-05-07 17:01:16] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:08:28] Delete request received for teacher_id: 12345
+[2025-05-07 17:08:28] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:08:32] Successfully updated teacher_id: 12345
+[2025-05-07 17:08:44] Successfully added teacher: chaikaini@gmail.com
+[2025-05-07 17:08:48] Delete request received for teacher_id: 12358
+[2025-05-07 17:08:48] Successfully deleted teacher_id: 12358
