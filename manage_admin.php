@@ -82,6 +82,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         exit;
     }
+
+    if ($postData["action"] === "deleteAdmin") {
+        $teacher_id = $postData["id"];
+
+        $stmt = $conn->prepare("DELETE FROM teacher WHERE teacher_id = ?");
+        $stmt->bind_param("i", $teacher_id);
+
+        if ($stmt->execute()) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Delete failed: " . $stmt->error]);
+        }
+        exit;
+    }
 }
 
 if (isset($_GET['action']) && $_GET['action'] === 'searchAdmins' && isset($_GET['query'])) {
