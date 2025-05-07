@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 06, 2025 at 03:27 PM
+-- Generation Time: May 07, 2025 at 06:20 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -69,9 +69,9 @@ CREATE TABLE `cart` (
   `parent_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `child_id` int(11) NOT NULL,
-  `child_name` varchar(100),
-  `subject_name` varchar(100),
-  `price` decimal(10,2),
+  `child_name` varchar(100) DEFAULT NULL,
+  `subject_name` varchar(100) DEFAULT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
   `subject_id` varchar(20) NOT NULL,
   `teacher_id` int(11) NOT NULL,
   `deleted` tinyint(1) DEFAULT 0
@@ -332,6 +332,7 @@ INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `c
 
 CREATE TABLE `subject` (
   `subject_id` varchar(20) NOT NULL,
+  `admin_id` int(11) NOT NULL,
   `subject_name` varchar(100) NOT NULL,
   `year` text NOT NULL,
   `subject_price` decimal(8,2) NOT NULL,
@@ -343,13 +344,13 @@ CREATE TABLE `subject` (
 -- Dumping data for table `subject`
 --
 
-INSERT INTO `subject` (`subject_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`) VALUES
-('11132', 'Math', 'Year 1', 510.00, '-', 'img/math.jpg'),
-('11245', 'English', 'Year 1', 510.00, '-', 'img/english.jpg'),
-('11351', 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
-('22134', 'Math', 'Year 2', 510.00, '-', 'img/math.jpg'),
-('22345', 'Melayu', 'Year 2', 510.00, '-', 'img/malay1.jpg'),
-('22534', 'English', 'Year 2', 510.00, '-', 'img/english.jpg');
+INSERT INTO `subject` (`subject_id`, `admin_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`) VALUES
+('11132', 11111, 'Math', 'Year 1', 510.00, '-', 'img/math.jpg'),
+('11245', 11111, 'English', 'Year 1', 510.00, '-', 'img/english.jpg'),
+('11351', 11111, 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
+('22134', 11111, 'Math', 'Year 2', 510.00, '-', 'img/math.jpg'),
+('22345', 11111, 'Melayu', 'Year 2', 510.00, '-', 'img/malay1.jpg'),
+('22534', 11111, 'English', 'Year 2', 510.00, '-', 'img/english.jpg');
 
 -- --------------------------------------------------------
 
@@ -417,14 +418,12 @@ ALTER TABLE `attendance`
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`cart_id`),
+  ADD UNIQUE KEY `unique_cart` (`parent_id`,`child_id`,`subject_id`),
   ADD KEY `parent_id` (`parent_id`),
   ADD KEY `class_id` (`class_id`),
   ADD KEY `child_id` (`child_id`),
   ADD KEY `subject_id` (`subject_id`),
   ADD KEY `teacher_id` (`teacher_id`);
-
-ALTER TABLE `cart` 
-  ADD UNIQUE KEY `unique_cart` (`parent_id`, `child_id`, `subject_id`);
 
 --
 -- Indexes for table `child`
@@ -510,7 +509,8 @@ ALTER TABLE `registration_class`
 -- Indexes for table `subject`
 --
 ALTER TABLE `subject`
-  ADD PRIMARY KEY (`subject_id`);
+  ADD PRIMARY KEY (`subject_id`),
+  ADD KEY `fk_subject_admin` (`admin_id`);
 
 --
 -- Indexes for table `teacher`
@@ -688,6 +688,12 @@ ALTER TABLE `registration_class`
   ADD CONSTRAINT `registration_class_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
   ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
   ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
+
+--
+-- Constraints for table `subject`
+--
+ALTER TABLE `subject`
+  ADD CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `teacher_comment`

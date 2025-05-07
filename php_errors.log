@@ -54,3 +54,41 @@ Stack trace:
 [2025-05-07 16:48:17] Cannot delete child_id 1: Associated exam results exist
 [2025-05-07 16:49:07] Delete request received: {"action":"delete","child_id":"1"}
 [2025-05-07 16:49:07] Cannot delete child_id 1: Associated exam results exist
+[2025-05-07 16:56:33] Successfully updated teacher_id: 12123
+[2025-05-07 16:56:38] Successfully updated teacher_id: 12123
+[2025-05-07 16:58:24] Delete request received for teacher_id: 12345
+[2025-05-07 16:58:24] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:01:16] Delete request received for teacher_id: 12345
+[2025-05-07 17:01:16] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:08:28] Delete request received for teacher_id: 12345
+[2025-05-07 17:08:28] Cannot delete teacher_id 12345: Associated exam results exist
+[2025-05-07 17:08:32] Successfully updated teacher_id: 12345
+[2025-05-07 17:08:44] Successfully added teacher: chaikaini@gmail.com
+[2025-05-07 17:08:48] Delete request received for teacher_id: 12358
+[2025-05-07 17:08:48] Successfully deleted teacher_id: 12358
+[2025-05-07 17:11:26] Successfully added teacher: chaikaini@gmail.com
+[2025-05-07 17:11:31] Delete request received for teacher_id: 12359
+[2025-05-07 17:11:31] Successfully deleted teacher_id: 12359
+[2025-05-07 17:18:30] Successfully updated second contact for parent_id: 1
+[2025-05-07 17:18:35] Successfully updated parent_id: 1
+[2025-05-07 17:18:42] Successfully updated parent_id: 2
+[2025-05-07 17:18:45] Delete request received for parent_id: 1
+[2025-05-07 17:18:45] Cannot delete parent_id 1: Associated child records exist
+[2025-05-07 17:23:03] Successfully updated second contact for parent_id: 1
+[2025-05-07 17:23:07] Delete request received for parent_id: 1
+[2025-05-07 17:23:07] Cannot delete parent_id 1: Associated child records exist
+[2025-05-07 17:25:13] Delete request received for parent_id: 3
+[2025-05-07 17:25:13] Successfully deleted parent_id: 3
+[2025-05-07 17:25:16] Delete request received for parent_id: 4
+[2025-05-07 17:25:16] Successfully deleted parent_id: 4
+[07-May-2025 17:42:44 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the seeds' in C:\xampp\htdocs\Fyp\fetch_parents.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_parents.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_parents.php on line 19
+[2025-05-07 17:42:46] Unexpected error: Unknown database 'the seeds'
+[07-May-2025 17:42:47 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the seeds' in C:\xampp\htdocs\Fyp\fetch_parents.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_parents.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_parents.php on line 19
