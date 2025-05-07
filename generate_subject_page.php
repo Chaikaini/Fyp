@@ -8,12 +8,12 @@ if (!isset($_SESSION['parent_id'])) {
     exit;
 }
 
-// 启动会话（支持消息提示，类似 product_detail.php）
+// Start session (for message prompts)
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 数据库连接（使用 PDO）
+// Database connection (using PDO)
 try {
     $pdo = new PDO("mysql:host=localhost;dbname=the seeds", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -22,14 +22,14 @@ try {
     die("Database Connection Failed: " . $e->getMessage());
 }
 
-// 获取 subject_id
+// Get subject_id
 $subject_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($subject_id <= 0) {
-    die("Can not find the subject ID");
+    die("Cannot find the subject ID");
 }
 
-// 查询主题详情和平均评分
+// Query subject details and average rating
 try {
     $stmt = $pdo->prepare("
         SELECT s.*, 
@@ -41,16 +41,15 @@ try {
     $subject = $stmt->fetch();
 
     if (!$subject) {
-        die("未找到主题");
+        die("Subject not found");
     }
 } catch (PDOException $e) {
-    die("数据库查询失败: " . $e->getMessage());
+    die("Database query failed: " . $e->getMessage());
 }
 
-// 设置默认值
+// Set default values
 $subject = array_merge([
     'subject_name' => 'Unknown Subject',
-    'teacher_id' => 0,
     'subject_price' => '0.00',
     'avg_rating' => 0,
     'subject_description' => 'No description available',
@@ -58,22 +57,25 @@ $subject = array_merge([
     'year' => 'Year 1'
 ], $subject);
 
-// 获取教师姓名
+// Get teacher name for Part A (default display for Part A)
 $teacher_name = "Unknown Teacher";
-if ($subject['teacher_id']) {
-    try {
-        $stmt = $pdo->prepare("SELECT teacher_name FROM teacher WHERE teacher_id = ?");
-        $stmt->execute([$subject['teacher_id']]);
-        $teacher = $stmt->fetch();
-        if ($teacher) {
-            $teacher_name = $teacher['teacher_name'];
-        }
-    } catch (PDOException $e) {
-        error_log("查询教师失败: " . $e->getMessage());
+try {
+    $stmt = $pdo->prepare("
+        SELECT c.teacher_id, t.teacher_name 
+        FROM class c 
+        LEFT JOIN teacher t ON c.teacher_id = t.teacher_id 
+        WHERE c.subject_id = ? AND c.part_id = 1
+    ");
+    $stmt->execute([$subject_id]);
+    $class = $stmt->fetch();
+    if ($class && $class['teacher_name']) {
+        $teacher_name = $class['teacher_name'];
     }
+} catch (PDOException $e) {
+    error_log("Failed to query teacher: " . $e->getMessage());
 }
 
-// 显示会话消息
+// Display session message
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
 unset($_SESSION['message']);
 ?>
@@ -165,12 +167,14 @@ unset($_SESSION['message']);
         .green {
             background-color: #73cf67;
             color: white;
+            cursor: pointer;
         }
 
         .gray {
             background-color: #d3d3d3;
             color: #888;
             pointer-events: none;
+            cursor: not-allowed;
         }
 
         .popup {
@@ -450,7 +454,7 @@ unset($_SESSION['message']);
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="#" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
@@ -470,14 +474,14 @@ unset($_SESSION['message']);
         </div>
     </nav>
 
-    <!-- 图标栏 -->
+    <!-- Icon Bar -->
     <div class="icon-bar">
         <a href="notification.html"><i class="fas fa-bell"></i></a>
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
     </div>
 
-    <!-- 面包屑导航 -->
+    <!-- Breadcrumb Navigation -->
     <div class="breadcrumb-container">
         <h2><?= htmlspecialchars($subject['subject_name']) ?></h2>
         <ul class="breadcrumb">
@@ -489,7 +493,7 @@ unset($_SESSION['message']);
         </ul>
     </div>
 
-    <!-- 主要内容 -->
+    <!-- Main Content -->
     <div class="container my-5">
         <?php if ($message): ?>
             <div class="error"><?= htmlspecialchars($message) ?></div>
@@ -523,21 +527,20 @@ unset($_SESSION['message']);
                 </div>
                 <div class="class-info">
                     <p id="teacher"><strong>Teacher: </strong> <?= htmlspecialchars($teacher_name) ?></p>
-                    <input type="hidden" id="teacherId" value="<?= htmlspecialchars($subject['teacher_id']) ?>">
                     <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['subject_price']) ?></p>
                 </div>
                 <div class="time-slot-container">
-                    <div class="time-slot green" id="partA">
+                    <div class="time-slot" id="partA">
                         <strong>Part A</strong> (January - June)
                     </div>
-                    <div class="time-slot gray" id="partB">
-                        <strong>Part B</strong> (July - December) (No open)
+                    <div class="time-slot" id="partB">
+                        <strong>Part B</strong> (July - December)
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 弹窗 -->
+        <!-- Popup -->
         <div class="popup" id="popup">
             <div class="popup-content">
                 <span class="close-btn" id="closePopup">×</span>
@@ -569,22 +572,22 @@ unset($_SESSION['message']);
             </div>
         </div>
 
-        <!-- 课程概述 -->
+        <!-- Subject Overview -->
         <div class="subject-overview">
             <h2>Subject Overview</h2>
             <p><?= nl2br(htmlspecialchars($subject['subject_description'])) ?></p>
         </div>
 
-        <!-- 评论部分 -->
+        <!-- Review Section -->
         <div class="review-section">
             <h2>Parent Reviews</h2>
             <div id="review-list">
-                <!-- 评论将通过 JavaScript 动态加载 -->
+                <!-- Reviews will be loaded dynamically via JavaScript -->
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
+    <!-- Footer -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
@@ -628,7 +631,7 @@ unset($_SESSION['message']);
             <div class="copyright">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Rights Reserved.
                     </div>
                     <div class="col-md-6 text-center text-md-end"></div>
                 </div>
@@ -647,7 +650,7 @@ unset($_SESSION['message']);
     <script src="lib/waypoints.min.js"></script>
     <script src="lib/owl.carousel.min.js"></script>
 
-    <!-- Template Javascript -->
+    <!-- Template JavaScript -->
     <script src="js/main.js"></script>
     <script>
         let selectedClassInfo = null;
@@ -661,195 +664,203 @@ unset($_SESSION['message']);
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Received data:', data);
                     if (!data.success) {
                         console.error('Server error:', data.error);
                         return;
                     }
 
-                    const courses = data.data;
+                    const currentSubjectId = "<?= $subject_id ?>"; // Ensure string
+                    const partA = (data.data.partA || []).find(c => c.subject_id == currentSubjectId);
+                    const partB = (data.data.partB || []).find(c => c.subject_id == currentSubjectId);
 
-                    courses.forEach(course => {
-                        if (course.part_id === 1) course.part = "Part A";
-                        else if (course.part_id === 2) course.part = "Part B";
-                    });
+                    console.log('Filtered Part A:', partA);
+                    console.log('Filtered Part B:', partB);
 
-                    const partA = courses.find(c => c.part === 'Part A');
-                    const partB = courses.find(c => c.part === 'Part B');
-
-                    if (partA) {
-                        const partAElement = document.getElementById('partA');
-                        if (partA.class_status.toLowerCase() === 'available') {
-                            partAElement.classList.remove('gray', 'disabled');
-                            partAElement.classList.add('green');
+                    function setupTimeSlot(element, course) {
+                        if (!element || !course) {
+                            console.warn('Invalid element or course:', { element, course });
+                            return;
+                        }
+                        
+                        element.classList.remove('green', 'gray');
+                        const isAvailable = course.class_status.toLowerCase() === 'available';
+                        
+                        if (isAvailable) {
+                            element.classList.add('green');
+                            element.addEventListener('click', function() {
+                                console.log('Time slot clicked:', course);
+                                selectedClassInfo = {
+                                    class_id: course.class_id,
+                                    capacity: course.class_capacity,
+                                    enrolled: course.class_enrolled,
+                                    teacher_id: course.teacher_id
+                                };
+                                updatePopup(course);
+                            });
                         } else {
-                            partAElement.classList.add('disabled');
+                            element.classList.add('gray');
+                            element.style.pointerEvents = 'none';
                         }
                     }
 
-                    if (partB) {
-                        const partBElement = document.getElementById('partB');
-                        if (partB.class_status.toLowerCase() === 'available') {
-                            partBElement.classList.remove('gray', 'disabled');
-                            partBElement.classList.add('green');
-                        } else {
-                            partBElement.classList.add('disabled');
-                        }
-                    }
+                    const partAElement = document.getElementById('partA');
+                    const partBElement = document.getElementById('partB');
+                    console.log('Part A element:', partAElement);
+                    console.log('Part B element:', partBElement);
 
-                    document.getElementById('partA').addEventListener('click', function () {
-                        if (!partA || partA.class_status.toLowerCase() !== 'available') return;
-                        selectedClassInfo = {
-                            class_id: partA.class_id || 'N/A',
-                            capacity: partA.class_capacity,
-                            enrolled: partA.class_enrolled
-                        };
-                        updatePopup(partA);
-                    });
-
-                    document.getElementById('partB').addEventListener('click', function () {
-                        if (!partB || partB.class_status.toLowerCase() !== 'available') return;
-                        selectedClassInfo = {
-                            class_id: partB.class_id || 'N/A',
-                            capacity: partB.class_capacity,
-                            enrolled: partB.class_enrolled
-                        };
-                        updatePopup(partB);
-                    });
-
-                    document.getElementById('closePopup').addEventListener('click', function () {
-                        document.getElementById('popup').style.display = 'none';
-                    });
+                    setupTimeSlot(partAElement, partA);
+                    setupTimeSlot(partBElement, partB);
 
                     function updatePopup(course) {
-                        const monthText = course.part_id === 1 ? "January - June" : "July - December";
+                        if (!course) {
+                            console.warn('No course provided');
+                            return;
+                        }
+                        
+                        console.log('Updating popup with course:', course);
+                        const monthText = course.part_id == 1 ? "January - June" : "July - December";
                         document.getElementById('popupMonth').textContent = monthText;
                         document.getElementById('popupTime').textContent = course.class_time || 'Not set';
-                        const enrolled = course.class_enrolled ?? 0;
-                        const capacity = course.class_capacity ?? 0;
+                        const enrolled = course.class_enrolled || 0;
+                        const capacity = course.class_capacity || 0;
                         document.getElementById('popupchildren').textContent = `${enrolled} / ${capacity}`;
-                        document.getElementById('popup').style.display = 'flex';
+                        const popup = document.getElementById('popup');
+                        popup.style.display = 'flex';
+                        console.log('Popup display set to:', popup.style.display);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('加载课程数据失败，请刷新页面重试');
+                    alert('Failed to load class data, please refresh the page and try again');
                 });
 
-            let addToCartButton = document.getElementById("addToCart");
-            addToCartButton.disabled = true;
-
-            let select = document.getElementById("childrenSelect");
-            select.addEventListener("change", function() {
-                if (select.value) {
-                    addToCartButton.disabled = false;
-                } else {
-                    addToCartButton.disabled = true;
-                }
+            document.getElementById('closePopup').addEventListener('click', function() {
+                console.log('Closing popup');
+                document.getElementById('popup').style.display = 'none';
             });
-
-            //add to cart function 
-            document.getElementById("addToCart").addEventListener("click", async function() {
-    try {
-        // 准备数据
-        const cartItem = {
-            subject_id: <?= json_encode($subject_id) ?>,
-            subject_name: document.getElementById("subjectName").innerText.trim(),
-            price: parseFloat(document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim()),
-            child_name: document.getElementById("childrenSelect").value.trim(),
-            class_id: selectedClassInfo?.class_id || null,
-            teacher_id: document.getElementById("teacherId").value  // 添加 teacher_id
-        };
-
-        console.log("Sending:", cartItem);  // 调试日志
-
-        // 验证
-        if (!cartItem.child_name || cartItem.child_name === "Choose") {
-            throw new Error("Please select a child");
-        }
-        if (isNaN(cartItem.price)) {
-            throw new Error("Invalid price");
-        }
-
-        // 发送请求
-        const response = await fetch('save_cart.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cartItem)
         });
 
-        console.log("Response status:", response.status);  // 调试日志
+        let addToCartButton = document.getElementById("addToCart");
+        addToCartButton.disabled = true;
 
-        if (!response.ok) {
-            const err = await response.json().catch(() => null);
-            throw new Error(err?.message || `HTTP error ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Response data:", data);  // 调试日志
-
-        if (data.status !== 'success') {
-            throw new Error(data.message || "Operation failed");
-        }
-
-        showToast(data.message || "Added to cart successfully!");
-
-    } catch (error) {
-        console.error("Add to cart error:", error);
-        showToast(error.message || "An error occurred", true);
-    }
-});
-
-
-            // Toast 通知
-            function showToast(message, isError = false) {
-                let toast = document.getElementById("successToast");
-                toast.innerText = message;
-                toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-                toast.style.display = "block";
-                toast.style.opacity = "1";
-                setTimeout(() => {
-                    toast.style.opacity = "0";
-                    setTimeout(() => { toast.style.display = "none"; }, 500);
-                }, 3000);
+        let select = document.getElementById("childrenSelect");
+        select.addEventListener("change", function() {
+            if (select.value) {
+                addToCartButton.disabled = false;
+            } else {
+                addToCartButton.disabled = true;
             }
+        });
 
-            // 设置评分星星
-            const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
-            setRating(avgRating);
+        // Add to cart function
+        document.getElementById("addToCart").addEventListener("click", async function() {
+            try {
+                // Prepare data
+                const cartItem = {
+                    subject_id: <?= json_encode($subject_id) ?>,
+                    subject_name: document.getElementById("subjectName").innerText.trim(),
+                    price: parseFloat(document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim()),
+                    child_name: document.getElementById("childrenSelect").value.trim(),
+                    class_id: selectedClassInfo?.class_id || null,
+                    teacher_id: selectedClassInfo?.teacher_id || null
+                };
 
-            // 获取孩子数据
-            fetch('get_child.php')
-                .then(response => response.json())
-                .then(data => {
-                    let select = document.getElementById("childrenSelect");
-                    select.innerHTML = '<option value="">Choose</option>';
-                    if (Array.isArray(data) && data.length > 0) {
-                        const subjectYear = <?= intval(str_replace('Year ', '', $subject['year'])) ?>;
-                        data.forEach(child => {
-                            if (child.child_year === subjectYear) {
-                                let option = document.createElement("option");
-                                option.value = child.child_name;
-                                option.textContent = child.child_name;
-                                select.appendChild(option);
-                            }
-                        });
-                        if (select.options.length === 1) {
+                console.log("Sending:", cartItem); // Debug log
+
+                // Validation
+                if (!cartItem.child_name || cartItem.child_name === "Choose") {
+                    throw new Error("Please select a child");
+                }
+                if (isNaN(cartItem.price)) {
+                    throw new Error("Invalid price");
+                }
+                if (!cartItem.class_id || !cartItem.teacher_id) {
+                    throw new Error("No valid class selected");
+                }
+
+                // Send request
+                const response = await fetch('save_cart.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cartItem)
+                });
+
+                console.log("Response status:", response.status); // Debug log
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => null);
+                    throw new Error(err?.message || `HTTP error ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Response data:", data); // Debug log
+
+                if (data.status !== 'success') {
+                    throw new Error(data.message || "Operation failed");
+                }
+
+                showToast(data.message || "Added to cart successfully!");
+
+            } catch (error) {
+                console.error("Add to cart error:", error);
+                showToast(error.message || "An error occurred", true);
+            }
+        });
+
+        // Toast notification
+        function showToast(message, isError = false) {
+            let toast = document.getElementById("successToast");
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => { toast.style.display = "none"; }, 500);
+            }, 3000);
+        }
+
+        // Set rating stars
+        const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
+        setRating(avgRating);
+
+        // Fetch children data
+        fetch('get_child.php')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Children data:', data); // Debug log
+                let select = document.getElementById("childrenSelect");
+                select.innerHTML = '<option value="">Choose</option>';
+                if (Array.isArray(data) && data.length > 0) {
+                    const subjectYear = <?= intval(str_replace('Year ', '', $subject['year'])) ?>;
+                    data.forEach(child => {
+                        if (child.child_year === subjectYear) {
                             let option = document.createElement("option");
-                            option.textContent = "No matching children found";
-                            option.disabled = true;
+                            option.value = child.child_name;
+                            option.textContent = child.child_name;
                             select.appendChild(option);
                         }
-                    } else {
+                    });
+                    if (select.options.length === 1) {
                         let option = document.createElement("option");
-                        option.textContent = "No children found";
+                        option.textContent = "No matching children found";
                         option.disabled = true;
                         select.appendChild(option);
+                        showToast("No children match the subject year. Please add a child in your profile.", true);
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching children:', error);
-                });
-        });
+                } else {
+                    let option = document.createElement("option");
+                    option.textContent = "No children found";
+                    option.disabled = true;
+                    select.appendChild(option);
+                    showToast("No children found. Please add a child in your profile.", true);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching children:', error);
+                showToast("Failed to load children data", true);
+            });
 
         function setRating(rating) {
             const stars = document.querySelectorAll('.stars-container .star');
@@ -870,7 +881,7 @@ unset($_SESSION['message']);
             }
         }
 
-        // 获取评论
+        // Fetch reviews
         function fetchReviews() {
             const subject_id = <?= $subject_id ?>;
             const url = `get_comments.php?subject_id=${subject_id}`;
