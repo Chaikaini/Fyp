@@ -92,6 +92,27 @@
       gap: 10px;
       padding: 15px;
     }
+    .notification {
+      position: fixed;
+      top: 20px; /* Position at top */
+      left: 50%;
+      transform: translateX(-50%); /* Center horizontally */
+      width: auto;
+      max-width: 500px; /* Limit width */
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+      z-index: 1000;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+    .notification.success {
+      background-color: #28a745;
+    }
+    .notification.error {
+      background-color: #dc3545;
+    }
   </style> 
 </head>
 <body>
@@ -103,7 +124,7 @@
     <ul class="nav flex-column">
       <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
       <li class="nav-item"><a href="admin staff.html" class="nav-link"><i class="fas fa-user"></i> <span>Teacher List</span></a></li>
-      <li class="nav-item"><a href="children.list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
+      <li class="nav-item"><a href="children_list.html" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Children List</span></a></li>
       <li class="nav-item"><a href="parent list.html" class="nav-link"><i class="fas fa-users"></i> <span>Parent List</span></a></li>
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
@@ -127,6 +148,9 @@
 
   <!-- Main Content -->
   <div id="main-content">
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
     <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
@@ -232,18 +256,51 @@
     </div>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this child (ID: <span id="deleteChildId"></span>)?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Sidebar toggle
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
 
+    // Report menu toggle
     document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function() {
       const icon = document.getElementById('reportIcon');
       icon.classList.toggle('fa-chevron-down');
       icon.classList.toggle('fa-chevron-up');
     });
 
+    // Notification function
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 5000); // Extended to 5s for readability
+    }
+
+    // Calculate birthday from IC
     function calculateBirthdayFromIC(ic) {
       if (ic && ic.length >= 6) {
         const year = parseInt(ic.substring(0, 2));
@@ -255,57 +312,75 @@
       return '';
     }
 
+    // Create table cell
+    function createCell(text) {
+      const cell = document.createElement('td');
+      cell.textContent = text || ''; // Safely set text content
+      return cell;
+    }
+
+    // Render table rows
+    function renderTable(data) {
+      console.log('Rendering data:', data); // Debug: Log data received
+      const tableBody = document.getElementById('registrationTable');
+      tableBody.innerHTML = '';
+      if (!data || data.length === 0) {
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 9;
+        cell.className = 'text-center text-muted no-results';
+        cell.textContent = 'No children found';
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+      } else {
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          row.appendChild(createCell(item.child_id));
+          row.appendChild(createCell(item.child_name));
+          row.appendChild(createCell(item.parent_name || 'N/A')); // Handle null parent_name
+          row.appendChild(createCell(item.child_gender));
+          row.appendChild(createCell(item.child_kidNumber));
+          row.appendChild(createCell(item.child_birthday));
+          row.appendChild(createCell(item.child_school));
+          row.appendChild(createCell(item.child_year));
+          const actionCell = document.createElement('td');
+          actionCell.innerHTML = `
+            <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"></i>
+            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-child-id="${item.child_id}"></i>
+          `;
+          row.appendChild(actionCell);
+          tableBody.appendChild(row);
+        });
+      }
+    }
+
+    // Fetch all children
     function fetchRegistrations() {
+      console.log('Fetching data from fetch_children.php'); // Debug: Log fetch attempt
       fetch('fetch_children.php')
         .then(response => {
+          console.log('Fetch response status:', response.status); // Debug: Log response status
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           return response.json();
         })
         .then(data => {
-          const tableBody = document.getElementById('registrationTable');
-          tableBody.innerHTML = '';
-          if (data.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td colspan="9" class="text-center text-muted no-results">No children found</td>
-            `;
-            tableBody.appendChild(row);
-          } else {
-            data.forEach(item => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${item.child_id}</td>
-                <td>${item.child_name}</td>
-                <td>${item.parent_name}</td>
-                <td>${item.child_gender}</td>
-                <td>${item.child_kidNumber}</td>
-                <td>${item.child_birthday}</td>
-                <td>${item.child_school}</td>
-                <td>${item.child_year}</td>
-                <td>
-                  <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"></i>
-                  <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i>
-                </td>
-              `;
-              tableBody.appendChild(row);
-            });
-          }
+          console.log('Data received:', data); // Debug: Log received data
+          renderTable(data);
         })
         .catch(error => {
-          console.error('Error fetching data:', error);
-          const tableBody = document.getElementById('registrationTable');
-          tableBody.innerHTML = `
-            <tr>
-              <td colspan="9" class="text-center text-danger no-results">Error loading data. Please try again.</td>
-            </tr>
-          `;
+          console.error('Error fetching data:', error); // Debug: Log error
+          showNotification('Failed to load children data: ' + error.message, 'error');
+          renderTable([]);
         });
     }
 
+    // Handle table actions (edit/delete)
     document.querySelector('table').addEventListener('click', function(event) {
       const row = event.target.closest('tr');
+      if (!row) return;
+
       if (event.target.classList.contains('edit-btn')) {
         const childData = {
           child_id: row.cells[0].textContent,
@@ -326,40 +401,95 @@
         document.getElementById('edit_child_school').value = childData.child_school;
         document.getElementById('edit_child_year').value = childData.child_year;
       } else if (event.target.classList.contains('delete-btn')) {
-        const registrationId = row.querySelector('td:first-child').textContent;
+        const childId = event.target.dataset.childId;
+        if (!childId) {
+          console.error('Child ID not found in delete button dataset');
+          showNotification('Failed to delete: Child ID missing.', 'error');
+          return;
+        }
+        document.getElementById('deleteChildId').textContent = childId;
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
 
-        fetch('fetch_children.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `child_id=${registrationId}`
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            fetchRegistrations();
-          } else {
-            console.error('Deletion failed:', data);
-            alert('Deletion failed: ' + (data.error || 'Unknown error'));
-          }
-        })
-        .catch(error => {
-          console.error('Error deleting record:', error);
-          alert('Error deleting record. Please try again.');
+        // Remove any existing listeners to prevent multiple bindings
+        const confirmDeleteBtn = document.getElementById('confirmDelete');
+        const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
+        confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
+
+        // Add new listener for confirm delete
+        newConfirmDeleteBtn.addEventListener('click', function() {
+          const requestBody = `action=delete&child_id=${encodeURIComponent(childId)}`;
+          console.log('Sending delete request:', {
+            url: 'fetch_children.php',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: requestBody
+          }); // Debug: Log full request details
+          fetch('fetch_children.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: requestBody
+          })
+            .then(response => {
+              console.log('Delete response status:', response.status); // Debug: Log response status
+              // Capture raw response text for debugging
+              return response.text().then(text => ({
+                status: response.status,
+                ok: response.ok,
+                text: text
+              }));
+            })
+            .then(({ status, ok, text }) => {
+              console.log('Delete response text:', text); // Debug: Log raw response
+              if (!ok) {
+                throw new Error(`HTTP error! Status: ${status}, Response: ${text || 'No response'}`);
+              }
+              let data;
+              try {
+                data = JSON.parse(text);
+              } catch (e) {
+                throw new Error(`Invalid JSON response: ${text || 'Empty response'}`);
+              }
+              console.log('Delete response data:', data); // Debug: Log parsed data
+              if (data.success) {
+                fetchRegistrations();
+                showNotification('Child successfully deleted!', 'success');
+                deleteModal.hide();
+              } else {
+                // Simplify error message for user
+                let errorMessage = data.error || 'Unknown error';
+                if (errorMessage.includes('exam_result')) {
+                  errorMessage = 'Cannot delete child due to associated exam results.';
+                } else if (errorMessage.includes('registration')) {
+                  errorMessage = 'Cannot delete child due to associated registrations.';
+                }
+                showNotification(`Deletion failed: ${errorMessage}`, 'error');
+                deleteModal.hide(); // Close modal on failure
+              }
+            })
+            .catch(error => {
+              console.error('Error deleting record:', error); // Debug: Log error
+              let errorMessage = error.message;
+              if (errorMessage.includes('exam_result')) {
+                errorMessage = 'Cannot delete child due to associated exam results.';
+              } else if (errorMessage.includes('registration')) {
+                errorMessage = 'Cannot delete child due to associated registrations.';
+              }
+              showNotification(`Failed to delete child: ${errorMessage}`, 'error');
+              deleteModal.hide(); // Close modal on error
+            });
         });
       }
     });
 
+    // Update birthday on kidNumber change
     document.getElementById('edit_child_kidNumber').addEventListener('input', function() {
       const ic = this.value;
       const birthday = calculateBirthdayFromIC(ic);
       document.getElementById('edit_child_birthday').value = birthday;
     });
 
+    // Save changes in edit modal
     document.getElementById('saveChanges').addEventListener('click', function() {
       const updatedData = {
         child_id: document.getElementById('edit_child_id').value,
@@ -370,6 +500,11 @@
         child_school: document.getElementById('edit_child_school').value,
         child_year: document.getElementById('edit_child_year').value
       };
+
+      if (!updatedData.child_name || !updatedData.child_kidNumber || !updatedData.child_school || !updatedData.child_year) {
+        showNotification('Please fill in all required fields.', 'error');
+        return;
+      }
 
       fetch('fetch_children.php', {
         method: 'POST',
@@ -386,22 +521,50 @@
           if (data.success) {
             fetchRegistrations();
             bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+            showNotification('Child successfully updated!', 'success');
           } else {
-            console.error('Update failed:', data);
-            alert('Update failed: ' + (data.error || 'Unknown error'));
+            showNotification(`Update failed: ${data.error || 'Unknown error'}`, 'error');
           }
         })
         .catch(error => {
           console.error('Error updating record:', error);
-          alert('Error updating record. Please try again.');
+          showNotification('Failed to update child: ' + error.message, 'error');
         });
+    });
+
+    // Debounced search
+    let searchTimeout;
+    document.getElementById('search').addEventListener('input', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const searchTerm = this.value.trim();
+        if (searchTerm === '') {
+          fetchRegistrations();
+        } else {
+          fetch('fetch_children.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `search_term=${encodeURIComponent(searchTerm)}`
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => renderTable(data))
+            .catch(error => {
+              console.error('Error searching data:', error);
+              showNotification('Failed to search children: ' + error.message, 'error');
+              renderTable([]);
+            });
+        }
+      }, 300); // 300ms debounce
     });
 
     document.getElementById('search-btn').addEventListener('click', function(event) {
       event.preventDefault();
-
       const searchTerm = document.getElementById('search').value.trim();
-
       if (searchTerm === '') {
         fetchRegistrations();
       } else {
@@ -410,54 +573,22 @@
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `search_term=${encodeURIComponent(searchTerm)}`
         })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const tableBody = document.getElementById('registrationTable');
-          tableBody.innerHTML = '';
-          if (data.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td colspan="9" class="text-center text-muted no-results">No results found</td>
-            `;
-            tableBody.appendChild(row);
-          } else {
-            data.forEach(item => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${item.child_id}</td>
-                <td>${item.child_name}</td>
-                <td>${item.parent_name}</td>
-                <td>${item.child_gender}</td>
-                <td>${item.child_kidNumber}</td>
-                <td>${item.child_birthday}</td>
-                <td>${item.child_school}</td>
-                <td>${item.child_year}</td>
-                <td>
-                  <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"></i>
-                  <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"></i>
-                </td>
-              `;
-              tableBody.appendChild(row);
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error searching data:', error);
-          const tableBody = document.getElementById('registrationTable');
-          tableBody.innerHTML = `
-            <tr>
-              <td colspan="9" class="text-center text-danger no-results">Error searching data. Please try again.</td>
-            </tr>
-          `;
-        });
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => renderTable(data))
+          .catch(error => {
+            console.error('Error searching data:', error);
+            showNotification('Failed to search children: ' + error.message, 'error');
+            renderTable([]);
+          });
       }
     });
 
+    // Initial fetch
     fetchRegistrations();
   </script>
 </body>
