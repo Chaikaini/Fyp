@@ -1,0 +1,56 @@
+[07-May-2025 16:23:06 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`exam_result`, CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`)) in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('DELETE FROM chi...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:23:11 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`exam_result`, CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`)) in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('DELETE FROM chi...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:28:02 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:28:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:28:09 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:28:14 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:28:21 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:112
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(112): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 112
+[07-May-2025 16:34:20 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'the seeds.registration' doesn't exist in C:\xampp\htdocs\Fyp\fetch_children.php:129
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\fetch_children.php(129): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\fetch_children.php on line 129
+[2025-05-07 16:38:25] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:38:25] Unexpected error: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`exam_result`, CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`))
+[2025-05-07 16:38:33] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:38:33] Unexpected error: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`exam_result`, CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`))
+[2025-05-07 16:41:23] Delete request received: {"action":"delete","child_id":"4"}
+[2025-05-07 16:41:23] Successfully deleted child_id 4
+[2025-05-07 16:43:01] Delete request received: {"action":"delete","child_id":"3"}
+[2025-05-07 16:43:01] Successfully deleted child_id 3
+[2025-05-07 16:43:04] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:43:04] Cannot delete child_id 1: Associated exam results exist
+[2025-05-07 16:43:09] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:43:09] Cannot delete child_id 1: Associated exam results exist
+[2025-05-07 16:48:17] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:48:17] Cannot delete child_id 1: Associated exam results exist
+[2025-05-07 16:49:07] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-07 16:49:07] Cannot delete child_id 1: Associated exam results exist
