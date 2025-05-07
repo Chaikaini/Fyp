@@ -328,7 +328,7 @@ document.getElementById('subjectSelect').addEventListener('change', function () 
   } else {
     document.getElementById('classSelect').innerHTML = '<option value="">Select Class</option>';
     document.getElementById('classSelect').disabled = true;
-    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">Please select subject and class first</td></tr>';
   }
 });
 
@@ -336,7 +336,7 @@ document.getElementById('classSelect').addEventListener('change', function () {
   const subjectId = document.getElementById('subjectSelect').value;
   const classId = this.value;
   if (!subjectId || !classId) {
-    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">Please select subject and class first</td></tr>';
   }
 });
 
@@ -348,7 +348,7 @@ document.getElementById('search-btn').addEventListener('click', function () {
     loadRegistrations(subjectId, classId);
   } else {
     alert('Please select both a subject and a class.');
-    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">请先选择科目和班级</td></tr>';
+    document.getElementById('registrationTable').innerHTML = '<tr><td colspan="8" class="text-center">Please select subject and class first</td></tr>';
   }
 });
 
