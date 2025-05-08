@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 08:09 AM
+-- Generation Time: May 08, 2025 at 09:03 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -201,24 +201,24 @@ INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `teacher_id
 
 CREATE TABLE `notification` (
   `notification_id` int(11) NOT NULL,
-  `sender_id` int(11) NOT NULL,
+  `sender_id` varchar(50) NOT NULL,
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class',
   `subject_id` varchar(20) DEFAULT NULL,
   `class_id` varchar(20) DEFAULT NULL,
   `notification_title` varchar(255) NOT NULL,
   `notification_content` text NOT NULL,
   `notification_document` varchar(255) DEFAULT NULL,
-  `notification_created_at` datetime DEFAULT current_timestamp(),
-  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class'
+  `notification_created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notification`
 --
 
-INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`, `recipient_type`) VALUES
-(0, 0, NULL, NULL, '1', '1', NULL, '2025-05-08 10:32:50', 'Parent'),
-(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30', 'Class'),
-(2, 12345, '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07', 'Class');
+INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
+(1, '12345', 'Class', '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
+(2, '12345', 'Class', '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
+(3, '11111', 'Parent', NULL, NULL, '123', '123', NULL, '2025-05-08 14:44:33');
 
 -- --------------------------------------------------------
 
@@ -229,19 +229,21 @@ INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class
 CREATE TABLE `notification_receiver` (
   `receiver_id` int(11) NOT NULL,
   `notification_id` int(11) NOT NULL,
-  `parent_id` int(11) NOT NULL,
-  `read_status` varchar(10) DEFAULT 'unread',
+  `parent_id` int(11) DEFAULT NULL,
   `teacher_id` int(11) DEFAULT NULL,
-  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class'
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class',
+  `read_status` enum('read','unread') NOT NULL DEFAULT 'unread'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notification_receiver`
 --
 
-INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `read_status`, `teacher_id`, `recipient_type`) VALUES
-(1, 1, 1, 'read', NULL, 'Class'),
-(2, 2, 1, 'read', NULL, 'Class');
+INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `teacher_id`, `recipient_type`, `read_status`) VALUES
+(1, 1, 1, NULL, 'Class', 'read'),
+(2, 2, 1, NULL, 'Class', 'read'),
+(3, 3, 1, NULL, 'Parent', 'unread'),
+(4, 3, 2, NULL, 'Parent', 'unread');
 
 -- --------------------------------------------------------
 
@@ -489,8 +491,8 @@ ALTER TABLE `exam_result`
 --
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`notification_id`),
-  ADD KEY `fk_subject` (`subject_id`),
-  ADD KEY `fk_class` (`class_id`);
+  ADD KEY `subject_id` (`subject_id`),
+  ADD KEY `class_id` (`class_id`);
 
 --
 -- Indexes for table `notification_receiver`
@@ -499,7 +501,7 @@ ALTER TABLE `notification_receiver`
   ADD PRIMARY KEY (`receiver_id`),
   ADD KEY `notification_id` (`notification_id`),
   ADD KEY `parent_id` (`parent_id`),
-  ADD KEY `fk_teacher_id` (`teacher_id`);
+  ADD KEY `teacher_id` (`teacher_id`);
 
 --
 -- Indexes for table `parent`
@@ -556,6 +558,18 @@ ALTER TABLE `credit_cards`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `notification`
+--
+ALTER TABLE `notification`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `notification_receiver`
+--
+ALTER TABLE `notification_receiver`
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- Constraints for dumped tables
 --
 
@@ -566,10 +580,19 @@ ALTER TABLE `credit_cards`
   ADD CONSTRAINT `credit_cards_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
 
 --
+-- Constraints for table `notification`
+--
+ALTER TABLE `notification`
+  ADD CONSTRAINT `notification_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
+  ADD CONSTRAINT `notification_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
+
+--
 -- Constraints for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  ADD CONSTRAINT `fk_teacher_id` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `notification_receiver_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`notification_id`),
+  ADD CONSTRAINT `notification_receiver_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  ADD CONSTRAINT `notification_receiver_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
