@@ -522,8 +522,7 @@ ALTER TABLE `exam_result`
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`notification_id`),
   ADD KEY `fk_subject` (`subject_id`),
-  ADD KEY `fk_class` (`class_id`),
-  ADD KEY `fk_sender` (`sender_id`);
+  ADD KEY `fk_class` (`class_id`);
 
 --
 -- Indexes for table `notification_receiver`
@@ -637,7 +636,7 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
@@ -749,7 +748,6 @@ ALTER TABLE `exam_result`
 --
 ALTER TABLE `notification`
   ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --

@@ -314,17 +314,23 @@ document.getElementById("notificationForm").addEventListener("submit", function 
         return res.json();
     })
     .then(msg => {
-        if (msg.success) {
-            showToast(msg.message);  
-        } else {
-            showToast(msg.error || 'An error occurred', true);  
-        }
+    if (msg.success) {
+        showToast(msg.message);  
+    } else {
+        showToast(msg.error || 'An error occurred', true);  
+    }
 
-        this.reset();
-        const modal = bootstrap.Modal.getInstance(document.getElementById("sendNotificationModal"));
-        modal.hide();
-        loadNotifications();
-    })
+    this.reset();
+
+    document.activeElement.blur();
+
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById("sendNotificationModal"));
+    modal.hide();
+
+    loadNotifications();
+})
+
     .catch(error => {
         console.error('Error:', error);
         showToast(error.message || 'An error occurred while sending the notification. Please try again.', true); 
