@@ -24,17 +24,17 @@ $parent_id = $_SESSION['parent_id'];
 
 // Check if user has previous enrollments
 $hasPreviousEnrollment = false;
-$enrollmentCheckStmt = $conn->prepare("
-    SELECT COUNT(*) as count 
-    FROM enrollment 
-    WHERE parent_id = ?
-");
+$enrollmentCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM enrollment WHERE parent_id = ?");
 $enrollmentCheckStmt->bind_param("i", $parent_id);
 $enrollmentCheckStmt->execute();
 $result = $enrollmentCheckStmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hasPreviousEnrollment = $row['count'] > 0;
+    // Debug: Log the count to verify
+    error_log("Enrollment count for parent_id $parent_id: " . $row['count']);
+} else {
+    error_log("No enrollment records found for parent_id $parent_id");
 }
 $enrollmentCheckStmt->close();
 
@@ -60,6 +60,9 @@ if ($result->num_rows > 0) {
 $stmt->close();
 
 $conn->close();
+
+// Debug: Log the value of $hasPreviousEnrollment
+error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'));
 ?>
 
 <!DOCTYPE html>
@@ -382,7 +385,6 @@ $conn->close();
         .hidden-row {
             display: none !important;
         }
-
     </style>
 </head>
 
@@ -444,15 +446,15 @@ $conn->close();
         <h2>Checkout</h2>
         <div id="cart-container"></div>
 
-         <div class="total-amount">
+        <div class="total-amount">
             <h4>Payment Details</h4>
             <div class="amount-detail">
                 <p>Subject Fee:</p>
                 <p id="subject-fee">RM0</p>
             </div>
-            <div class="amount-detail <?php echo $hasPreviousEnrollment ? 'hidden-row' : ''; ?>" id="enrollment-fee-row">
+            <div class="amount-detail" id="enrollment-fee-row">
                 <p>Enrollment Fee:</p>
-                <p>RM100</p>
+                <p id="enrollment-fee-amount">RM100</p>
             </div>
             <div class="amount-detail">
                 <h5><p><b>Total Amount:</b></p></h5>
@@ -526,8 +528,8 @@ $conn->close();
     </div>
 
     <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            // 初始化支付方法字段
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize payment method fields
             const tngRadio = document.getElementById("tng");
             const creditCardRadio = document.getElementById("creditcard");
             const phoneNumberField = document.getElementById("phone-number-field");
@@ -536,11 +538,11 @@ $conn->close();
             const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
             const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
 
-            // 设置初始状态
+            // Set initial state
             phoneNumberField.style.display = "none";
             creditCardField.style.display = "none";
 
-            // 处理支付方法切换
+            // Handle payment method toggles
             tngRadio.addEventListener("change", function() {
                 phoneNumberField.style.display = tngRadio.checked ? "block" : "none";
                 creditCardField.style.display = "none";
@@ -589,11 +591,8 @@ $conn->close();
                     console.log("Cart Data:", data);
                     const container = document.getElementById("cart-container");
                     let totalAmount = 0;
-                    
-                    // 从PHP传递的值决定是否显示注册费
-                    const showEnrollmentFee = <?php echo $hasPreviousEnrollment ? 'false' : 'true'; ?>;
-                    const enrollmentFee = showEnrollmentFee ? 100 : 0;
-                    
+                    const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
+                    let enrollmentFee = hasPreviousEnrollment ? 0 : 100;
                     container.innerHTML = "";
                     data.forEach(item => {
                         totalAmount += parseFloat(item.price);
@@ -617,12 +616,27 @@ $conn->close();
                         `;
                         container.innerHTML += courseItem;
                     });
-                    
-                    document.getElementById("subject-fee").innerText = `RM${totalAmount}`;
-                    document.getElementById("total-amount").innerText = `RM${totalAmount + enrollmentFee}`;
+
+                    // Update Subject Fee
+                    document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
+
+                    // Debug: Log enrollment status
+                    console.log("Has Previous Enrollment:", hasPreviousEnrollment);
+                    console.log("Enrollment Fee:", enrollmentFee);
+
+                    // Update Enrollment Fee visibility
+                    const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
+                    if (hasPreviousEnrollment) {
+                        enrollmentFeeRow.classList.add('hidden-row');
+                    } else {
+                        enrollmentFeeRow.classList.remove('hidden-row');
+                    }
+
+                    // Update Total Amount
+                    document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
                 })
                 .catch(error => console.error("Error fetching cart data:", error));
-
+        });
 
         async function validateForm() {
             const tngSelected = document.getElementById('tng').checked;
@@ -677,7 +691,19 @@ $conn->close();
                 teacher_id: item.getAttribute("data-teacher-id")
             }));
             const cartIds = cartItems.map(item => item.cart_id).join(",");
-            const totalAmount = document.getElementById("total-amount").innerText.replace("RM", "").trim();
+
+            // 获取课程总价
+            let subjectTotal = 0;
+            for (const item of cartItems) {
+                const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
+                const priceData = await priceResponse.json();
+                subjectTotal += parseFloat(priceData.price);
+            }
+
+            // 从PHP获取是否首次注册
+            const isFirstEnrollment = <?php echo $hasPreviousEnrollment ? 'false' : 'true'; ?>;
+            const enrollmentFee = isFirstEnrollment ? 100 : 0;
+            const totalAmount = subjectTotal + enrollmentFee;
 
             if (cartItems.length === 0) {
                 showToast("No items in cart.", "error");
@@ -705,6 +731,8 @@ $conn->close();
 
             const orderData = {
                 cart_items: cartItems,
+                subject_total: subjectTotal,
+                enrollment_fee: enrollmentFee,
                 total_amount: totalAmount,
                 payment_method: paymentMethod,
                 cart_ids: cartIds,

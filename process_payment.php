@@ -23,26 +23,26 @@ if (!$parent_id) {
     exit;
 }
 
-// 检查用户是否有历史注册记录 [新增代码]
+// Check if user has previous enrollments
 $hasPreviousEnrollment = false;
-$enrollmentCheckStmt = $conn->prepare("
-    SELECT COUNT(*) as count 
-    FROM enrollment 
-    WHERE parent_id = ?
-");
+$enrollmentCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM enrollment WHERE parent_id = ?");
 $enrollmentCheckStmt->bind_param("i", $parent_id);
 $enrollmentCheckStmt->execute();
 $result = $enrollmentCheckStmt->get_result();
 if ($result->num_rows > 0) {
-    $hasPreviousEnrollment = $result->fetch_assoc()['count'] > 0;
+    $row = $result->fetch_assoc();
+    $hasPreviousEnrollment = $row['count'] > 0;
+} else {
+    $hasPreviousEnrollment = false;
 }
 $enrollmentCheckStmt->close();
+error_log("hasPreviousEnrollment in process_payment.php: " . ($hasPreviousEnrollment ? 'true' : 'false'));
 
 // Get data from the request
 $cart_items = $data["cart_items"] ?? [];
-$subjectTotal = 0; // [修改] 改为计算课程总价
+$subjectTotal = 0;
 
-// 计算课程总价 [新增代码]
+// Calculate subject total
 foreach ($cart_items as $item) {
     $priceStmt = $conn->prepare("SELECT subject_price FROM subject WHERE subject_id = ?");
     $priceStmt->bind_param("i", $item["subject_id"]);
@@ -54,7 +54,7 @@ foreach ($cart_items as $item) {
     $priceStmt->close();
 }
 
-// 动态计算总金额 [修改]
+// Dynamic total amount
 $enrollmentFee = $hasPreviousEnrollment ? 0 : 100;
 $total_amount = $subjectTotal + $enrollmentFee;
 
@@ -89,21 +89,32 @@ try {
     }
     $payment_id = $conn->insert_id;
 
-    // 如果是首次注册，记录到enrollment表 [新增代码]
+    // Record enrollment if first time
     if (!$hasPreviousEnrollment) {
         foreach ($cart_items as $item) {
-            $stmt = $conn->prepare("
-                INSERT INTO enrollment (parent_id, class_id, child_id)
-                VALUES (?, ?, ?)
-            ");
-            $stmt->bind_param("isi", $parent_id, $item['class_id'], $item['child_id']);
+            $class_id = $conn->real_escape_string($item['class_id']);
+            $child_id = (int)$item['child_id'];
+            $stmt = $conn->prepare("INSERT INTO enrollment (parent_id, class_id, child_id) VALUES (?, ?, ?)");
+            $stmt->bind_param("isi", $parent_id, $class_id, $child_id);
             if (!$stmt->execute()) {
+                error_log("Enrollment insert failed: " . $stmt->error . " for parent_id=$parent_id, class_id=$class_id, child_id=$child_id");
                 throw new Exception("Failed to record enrollment: " . $stmt->error);
             }
         }
     }
 
-    // Insert registration_class records for each cart item
+    // Update class_enrolled in class table
+    foreach ($cart_items as $item) {
+        $class_id = $conn->real_escape_string($item['class_id']);
+        $stmt = $conn->prepare("UPDATE class SET class_enrolled = class_enrolled + 1 WHERE class_id = ?");
+        $stmt->bind_param("s", $class_id);
+        if (!$stmt->execute()) {
+            error_log("Failed to update class_enrolled: " . $stmt->error . " for class_id=$class_id");
+            throw new Exception("Failed to update class_enrolled: " . $stmt->error);
+        }
+    }
+
+    // Insert registration_class records
     foreach ($cart_items as $item) {
         $class_id = $conn->real_escape_string($item["class_id"]);
         $child_id = (int)$item["child_id"];
@@ -126,12 +137,10 @@ try {
         $expiry_date = $conn->real_escape_string($card_details['expiry_date']);
         $last_four = substr($card_details['card_number'], -4);
 
-        // Delete existing card
         $stmt = $conn->prepare("DELETE FROM credit_cards WHERE parent_id = ?");
         $stmt->bind_param("i", $parent_id);
         $stmt->execute();
 
-        // Insert new card
         $stmt = $conn->prepare("INSERT INTO credit_cards (parent_id, card_number, expiry_date, last_four) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("isss", $parent_id, $card_number, $expiry_date, $last_four);
         if (!$stmt->execute()) {
