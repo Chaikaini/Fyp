@@ -329,7 +329,8 @@ CREATE TABLE `payment` (
   `payment_method` varchar(50) NOT NULL,
   `master_card_number` varchar(16) DEFAULT NULL,
   `payment_status` enum('Pending','Completed','Failed') NOT NULL,
-  `payment_time` timestamp NOT NULL DEFAULT current_timestamp()
+  `payment_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `enrollment_fee` DECIMAL(10,2) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
