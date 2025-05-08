@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['role']) && !empty($_SESSION['role'])) {
+if (!isset($_SESSION['role']) || empty($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
@@ -70,6 +70,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (empty($teacher_password)) {
             $teacher_password = "admin123";
+        }
+
+        // Server-side password strength validation
+        if (strlen($teacher_password) < 8) {
+            logError("Add teacher failed: Password too short for email $teacher_email");
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters long']);
+            exit;
+        }
+
+        $hasLower = preg_match('/[a-z]/', $teacher_password);
+        $hasUpper = preg_match('/[A-Z]/', $teacher_password);
+        $hasNumber = preg_match('/\d/', $teacher_password);
+        $hasSpecial = preg_match('/[!@#$%^&*(),.?":{}|<>]/', $teacher_password);
+        $strength = $hasLower + $hasUpper + $hasNumber + $hasSpecial;
+
+        if ($strength < 2) {
+            logError("Add teacher failed: Password too weak for email $teacher_email");
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Password is too weak. Include at least two types: lowercase, uppercase, numbers, or special characters']);
+            exit;
         }
 
         // Check for duplicate email

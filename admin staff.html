@@ -133,6 +133,34 @@
     .notification.error {
       background-color: #dc3545;
     }
+    .password-strength {
+      margin-top: 5px;
+    }
+    .password-strength-text {
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    .progress {
+      height: 10px;
+    }
+    .progress-bar.weak {
+      background-color: #dc3545;
+    }
+    .progress-bar.medium {
+      background-color: #ffc107;
+    }
+    .progress-bar.strong {
+      background-color: #28a745;
+    }
+    .progress-bar.very-strong {
+      background-color: #17a2b8;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body> 
@@ -267,6 +295,12 @@
             <div class="mb-3">
               <label for="adminPassword" class="form-label">Password</label>
               <input type="password" class="form-control" id="adminPassword" required>
+              <div class="password-strength">
+                <div class="progress">
+                  <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div id="password-strength-text" class="password-strength-text"></div>
+              </div>
             </div> 
             <div class="mb-3">
               <label for="adminStatus" class="form-label">Status</label>
@@ -277,8 +311,9 @@
               </select>
             </div>                             
             <div class="d-flex justify-content-center">
-              <button type="submit" class="btn btn-primary w-100" id="saveAdminBtn">Save</button>
+              <button type="submit" class="btn btn-primary w-100" id="saveAdminBtn" disabled>Save</button>
             </div>
+            <div class="error-message" id="addErrorMessage"></div>
           </form>
         </div>
       </div>
@@ -376,22 +411,86 @@
         }, 5000);
       }
 
+      // Error message function for add modal
+      function showAddError(message) {
+        const errorDiv = document.getElementById('addErrorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+      }
+
+      function clearAddError() {
+        const errorDiv = document.getElementById('addErrorMessage');
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+      }
+
+      // Password strength evaluation
+      function evaluatePasswordStrength(password) {
+        let strength = 0;
+        const hasLower = /[a-z]/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+        const length = password.length;
+
+        if (hasLower) strength++;
+        if (hasUpper) strength++;
+        if (hasNumber) strength++;
+        if (hasSpecial) strength++;
+
+        if (length >= 12) strength += 1;
+        else if (length < 8) strength = Math.min(strength, 1);
+
+        let strengthLevel = 'weak';
+        let strengthText = '';
+        let progressWidth = 0;
+        let progressClass = 'weak';
+
+        if (length === 0) {
+          strengthLevel = 'none';
+          strengthText = 'Enter a password';
+          progressWidth = 0;
+        } else if (length < 8) {
+          strengthLevel = 'weak';
+          strengthText = 'Weak: Must be at least 8 characters';
+          progressWidth = 25;
+        } else if (strength <= 2) {
+          strengthLevel = 'weak';
+          strengthText = 'Weak: Add uppercase, numbers, or special characters';
+          progressWidth = 25;
+        } else if (strength === 3) {
+          strengthLevel = 'medium';
+          strengthText = 'Medium: Add special characters for stronger password';
+          progressWidth = 50;
+          progressClass = 'medium';
+        } else if (strength === 4) {
+          strengthLevel = 'strong';
+          strengthText = 'Strong: Good password!';
+          progressWidth = 75;
+          progressClass = 'strong';
+        } else {
+          strengthLevel = 'very-strong';
+          strengthText = 'Very Strong: Excellent password!';
+          progressWidth = 100;
+          progressClass = 'very-strong';
+        }
+
+        return { strengthLevel, strengthText, progressWidth, progressClass };
+      }
+
       // Fetch all teachers
       function fetchAdmins() {
         const addBtn = document.getElementById("addAdminBtn");
-        addBtn.style.display = "block"; // Ensure button is always visible
-        console.log("Fetching admins..."); // Debug log
+        addBtn.style.display = "block";
 
         fetch("manage_admin.php?action=getAdmins")
           .then(response => {
-            console.log("Fetch response status:", response.status); // Debug log
             if (!response.ok) {
               throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
           })
           .then(data => {
-            console.log("Fetch response data:", data); // Debug log
             const table = document.getElementById("staffTable");
             table.innerHTML = "";
 
@@ -419,13 +518,11 @@
                 table.appendChild(row);
               });
             }
-            console.log("addAdminBtn display:", addBtn.style.display); // Debug log
           })
           .catch(error => {
             console.error("Error fetching teachers:", error);
             showNotification("Failed to load teachers: " + error.message, "error");
-            addBtn.style.display = "block"; // Ensure button remains visible on error
-            console.log("addAdminBtn display on error:", addBtn.style.display); // Debug log
+            addBtn.style.display = "block";
           });
       }
 
@@ -457,12 +554,10 @@
           const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
           deleteModal.show();
 
-          // Remove existing listeners to prevent multiple bindings
           const confirmDeleteBtn = document.getElementById("confirmDelete");
           const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
           confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
 
-          // Add new listener for confirm delete
           newConfirmDeleteBtn.addEventListener("click", function () {
             const data = {
               action: "deleteAdmin",
@@ -544,9 +639,18 @@
           });
       });
 
-      // Add teacher (original logic with added notification)
+      // Add teacher
       document.getElementById("adminForm").addEventListener("submit", function (event) {
         event.preventDefault();
+
+        const password = document.getElementById("adminPassword").value;
+        const { strengthLevel } = evaluatePasswordStrength(password);
+
+        if (strengthLevel !== 'medium' && strengthLevel !== 'strong' && strengthLevel !== 'very-strong') {
+          showAddError("Password is too weak. Please use a stronger password.");
+          showNotification("Password is too weak", "error");
+          return;
+        }
 
         let data = {
           action: "addAdmin",
@@ -557,7 +661,7 @@
           address: document.getElementById("adminAddress").value,
           join_date: document.getElementById("adminJoinDate").value,
           status: document.getElementById("adminStatus").value,
-          password: document.getElementById("adminPassword").value
+          password: password
         };
 
         fetch("manage_admin.php", {
@@ -571,17 +675,48 @@
               fetchAdmins();
               showNotification("Teacher successfully added!", "success");
               document.getElementById("adminForm").reset();
+              document.getElementById('password-strength-bar').style.width = '0%';
+              document.getElementById('password-strength-bar').className = 'progress-bar';
+              document.getElementById('password-strength-text').textContent = '';
+              document.getElementById('saveAdminBtn').disabled = true;
+              clearAddError();
               let modal = bootstrap.Modal.getInstance(document.getElementById("addAdminModal"));
               modal.hide();
             } else {
+              showAddError(data.message || "Failed to add teacher");
               showNotification(`Failed to add teacher: ${data.message || "Unknown error"}`, "error");
-              console.error("Add failed:", data.message);
             }
           })
           .catch(error => {
             console.error("Error:", error);
+            showAddError("Failed to add teacher");
             showNotification(`Failed to add teacher: ${error.message}`, "error");
           });
+      });
+
+      // Real-time password strength check
+      document.getElementById('adminPassword').addEventListener('input', function () {
+        const password = this.value;
+        const { strengthLevel, strengthText, progressWidth, progressClass } = evaluatePasswordStrength(password);
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthTextEl = document.getElementById('password-strength-text');
+        const saveButton = document.getElementById('saveAdminBtn');
+
+        strengthBar.style.width = `${progressWidth}%`;
+        strengthBar.className = `progress-bar ${progressClass}`;
+        strengthTextEl.textContent = strengthText;
+
+        saveButton.disabled = strengthLevel !== 'medium' && strengthLevel !== 'strong' && strengthLevel !== 'very-strong';
+      });
+
+      // Clear password strength and error when modal closes
+      document.getElementById('addAdminModal').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('adminForm').reset();
+        document.getElementById('password-strength-bar').style.width = '0%';
+        document.getElementById('password-strength-bar').className = 'progress-bar';
+        document.getElementById('password-strength-text').textContent = '';
+        document.getElementById('saveAdminBtn').disabled = true;
+        clearAddError();
       });
 
       // Search teachers
