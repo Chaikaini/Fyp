@@ -118,7 +118,7 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -142,14 +142,6 @@
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
@@ -190,15 +182,17 @@
             <form id="notificationForm" enctype="multipart/form-data">
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="subject_id" class="form-label">Subject</label>
-                  <select class="form-select form-select-sm" name="subject_id" id="subject_id" required>
-                    <option value="">-- Select Subject --</option>
+                  <label for="recipient_type" class="form-label">Recipient Type</label>
+                  <select class="form-select form-select-sm" name="recipient_type" id="recipient_type" required>
+                    <option value="">-- Select Recipient Type --</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Parent">Parent</option>
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label for="class_id" class="form-label">Class</label>
-                  <select class="form-select form-select-sm" name="class_id" id="class_id" required>
-                    <option value="">-- Select Class --</option>
+                  <label for="recipient_id" class="form-label">Recipient</label>
+                  <select class="form-select form-select-sm" name="recipient_id" id="recipient_id" required>
+                    <option value="">-- Select Recipient --</option>
                   </select>
                 </div>
               </div>
@@ -229,160 +223,183 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    document.getElementById('toggleSidebar').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('collapsed');
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+      // Sidebar toggle
+      document.getElementById('toggleSidebar').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
 
-    function showError(message) {
-      const errorDiv = document.getElementById('formErrorMessage');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-    }
+      // Report menu toggle
+      document.querySelector('[data-bs-toggle="collapse"]').addEventListener('click', function () {
+        const icon = document.getElementById('reportIcon');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+      });
 
-    function clearError() {
-      const errorDiv = document.getElementById('formErrorMessage');
-      errorDiv.textContent = '';
-      errorDiv.style.display = 'none';
-    }
-
-    function showToast(message, isError = false) {
-      let toast = document.getElementById('successToast');
-      if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'successToast';
-        toast.className = 'toast-message';
-        document.body.appendChild(toast);
+      // Error handling
+      function showError(message) {
+        const errorDiv = document.getElementById('formErrorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
       }
-      toast.innerText = message;
-      toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
-      toast.style.display = 'block';
-      toast.style.opacity = '1';
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => { toast.style.display = 'none'; }, 500);
-      }, 3000);
-    }
 
-    function loadSubjects() {
-      fetch('manage_notification.php?action=subject')
-        .then(res => res.json())
-        .then(subjects => {
-          const subjectSelect = document.getElementById('subject_id');
-          subjectSelect.innerHTML = '<option value="">-- Select Subject --</option>';
-          subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject.subject_id;
-            option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
-            subjectSelect.appendChild(option);
-          });
-        })
-        .catch(err => {
-          console.error('Error loading subjects:', err);
-          showError('Error loading subjects');
-        });
-    }
+      function clearError() {
+        const errorDiv = document.getElementById('formErrorMessage');
+        errorDiv.textContent = '';
+        errorDiv.style.display = 'none';
+      }
 
-    document.getElementById('subject_id').addEventListener('change', function () {
-      const subjectId = this.value;
-      const classSelect = document.getElementById('class_id');
-      classSelect.innerHTML = '<option value="">-- Select Class --</option>';
-      if (subjectId) {
-        fetch(`manage_notification.php?action=class&subject_id=${subjectId}`)
-          .then(res => res.json())
-          .then(classes => {
-            classes.forEach(cls => {
-              const option = document.createElement('option');
-              option.value = cls.class_id;
-              option.textContent = cls.class_id;
-              classSelect.appendChild(option);
+      // Toast notification
+      function showToast(message, isError = false) {
+        let toast = document.getElementById('successToast');
+        if (!toast) {
+          toast = document.createElement('div');
+          toast.id = 'successToast';
+          toast.className = 'toast-message';
+          document.body.appendChild(toast);
+        }
+        toast.innerText = message;
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.style.display = 'block';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => { toast.style.display = 'none'; }, 500);
+        }, 3000);
+      }
+
+      // Load recipients based on type
+      function loadRecipients(recipientType) {
+        const recipientSelect = document.getElementById('recipient_id');
+        recipientSelect.innerHTML = '<option value="">-- Select Recipient --</option>';
+        if (recipientType) {
+          fetch(`manage_notification.php?action=recipients&recipient_type=${recipientType}`)
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to load recipients');
+              return res.json();
+            })
+            .then(recipients => {
+              // Add "All" option
+              const allOption = document.createElement('option');
+              allOption.value = 'all';
+              allOption.textContent = 'All';
+              recipientSelect.appendChild(allOption);
+              // Add individual recipients
+              recipients.forEach(recipient => {
+                const option = document.createElement('option');
+                option.value = recipient.id;
+                option.textContent = `${recipient.id} - ${recipient.name}`;
+                recipientSelect.appendChild(option);
+              });
+            })
+            .catch(err => {
+              console.error('Error loading recipients:', err);
+              showError('Error loading recipients');
             });
+        }
+      }
+
+      // Update recipient dropdown when type changes
+      document.getElementById('recipient_type').addEventListener('change', function () {
+        const recipientType = this.value;
+        loadRecipients(recipientType);
+      });
+
+      // Load notifications
+      function loadNotifications() {
+        fetch('manage_notification.php?action=getNotifications')
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to load notifications');
+            return res.json();
+          })
+          .then(data => {
+            const container = document.getElementById('notification-list');
+            container.innerHTML = '';
+            if (data.length === 0) {
+              container.innerHTML = '<div class="text-muted text-center">No announcements sent yet.</div>';
+            } else {
+              data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
+              data.forEach(n => {
+                const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
+                let recipientInfo = '';
+                if (n.recipient_type === 'Class') {
+                  recipientInfo = `<p class="card-text mb-1"><strong>To Class:</strong> ${n.class_id}</p>`;
+                } else {
+                  const recipientNames = n.recipients.length === 0 ? 'All' : n.recipients.map(r => `${r.recipient_name} (${r.recipient_id})`).join(', ');
+                  recipientInfo = `
+                    <p class="card-text mb-1"><strong>Recipient Type:</strong> ${n.recipient_type}</p>
+                    <p class="card-text mb-1"><strong>Recipients:</strong> ${recipientNames}</p>
+                  `;
+                }
+                const block = document.createElement('div');
+                block.className = 'card mb-3 shadow-sm';
+                block.innerHTML = `
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div><strong>${n.sender_name}</strong></div>
+                      <small class="text-muted">${time}</small>
+                    </div>
+                    <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
+                    ${recipientInfo}
+                    <p class="card-text">${n.notification_content}</p>
+                    ${n.notification_document ? `
+                      <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
+                        <i class="fas fa-paperclip me-1"></i>View Attachment
+                      </a>
+                    ` : ''}
+                  </div>
+                `;
+                container.appendChild(block);
+              });
+            }
           })
           .catch(err => {
-            console.error('Error loading classes:', err);
-            showError('Error loading classes');
+            console.error('Error loading notifications:', err);
+            showError('Error loading notifications');
           });
       }
-    });
 
-    function loadNotifications() {
-      fetch('manage_notification.php?action=getNotifications')
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById('notification-list');
-          container.innerHTML = '';
-          if (data.length === 0) {
-            container.innerHTML = '<div class="text-muted text-center">No announcements sent yet.</div>';
-          } else {
-            data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
-            data.forEach(n => {
-              const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
-              const block = document.createElement('div');
-              block.className = 'card mb-3 shadow-sm';
-              block.innerHTML = `
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div><strong>${n.sender_name}</strong></div>
-                    <small class="text-muted">${time}</small>
-                  </div>
-                  <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
-                  <p class="card-text mb-1"><strong>To Class:</strong> ${n.class_id}</p>
-                  <p class="card-text">${n.notification_content}</p>
-                  ${n.notification_document ? `
-                    <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
-                      <i class="fas fa-paperclip me-1"></i>View Attachment
-                    </a>
-                  ` : ''}
-                </div>
-              `;
-              container.appendChild(block);
-            });
-          }
+      // Handle form submission
+      document.getElementById('notificationForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        clearError();
+        const formData = new FormData(this);
+        console.log('Form Data:', Object.fromEntries(formData)); // Debug form data
+        fetch('manage_notification.php', {
+          method: 'POST',
+          body: formData
         })
-        .catch(err => {
-          console.error('Error loading notifications:', err);
-          showError('Error loading notifications');
-        });
-    }
+          .then(res => {
+            if (!res.ok) {
+              return res.json().then(err => Promise.reject(err));
+            }
+            return res.json();
+          })
+          .then(msg => {
+            if (msg.success) {
+              showToast(msg.message);
+              this.reset();
+              const modal = bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal'));
+              modal.hide();
+              loadNotifications();
+            } else {
+              showError(msg.error || 'An error occurred while sending the notification');
+            }
+          })
+          .catch(error => {
+            console.error('Fetch Error:', error);
+            showError(error.message || 'An error occurred while sending the notification');
+          });
+      });
 
-    document.getElementById('notificationForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      clearError();
-      const formData = new FormData(this);
-      fetch('manage_notification.php', {
-        method: 'POST',
-        body: formData
-      })
-        .then(res => {
-          if (!res.ok) {
-            return res.json().then(err => Promise.reject(err));
-          }
-          return res.json();
-        })
-        .then(msg => {
-          if (msg.success) {
-            showToast(msg.message);
-            this.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal'));
-            modal.hide();
-            loadNotifications();
-          } else {
-            showError(msg.error || 'An error occurred');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          showError(error.error || 'An error occurred while sending the notification');
-        });
-    });
+      // Reset form on modal close
+      document.getElementById('sendNotificationModal').addEventListener('hidden.bs.modal', () => {
+        clearError();
+        document.getElementById('notificationForm').reset();
+        document.getElementById('recipient_id').innerHTML = '<option value="">-- Select Recipient --</option>';
+      });
 
-    document.getElementById('sendNotificationModal').addEventListener('hidden.bs.modal', () => {
-      clearError();
-      document.getElementById('notificationForm').reset();
-      document.getElementById('class_id').innerHTML = '<option value="">-- Select Class --</option>';
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-      loadSubjects();
+      // Initial load
       loadNotifications();
     });
   </script>

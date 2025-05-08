@@ -92,3 +92,6 @@ Stack trace:
 #0 C:\xampp\htdocs\Fyp\fetch_parents.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the seeds')
 #1 {main}
   thrown in C:\xampp\htdocs\Fyp\fetch_parents.php on line 19
+[2025-05-08 03:51:48] Successfully added teacher: chaikaini@gmail.com
+[2025-05-08 03:51:52] Delete request received for teacher_id: 12348
+[2025-05-08 03:51:52] Successfully deleted teacher_id: 12348

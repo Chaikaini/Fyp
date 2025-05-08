@@ -20,7 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'getClasses') {
         try {
             $sql = "
-                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
+                SELECT 
+                    c.*, 
+                    s.subject_name, 
+                    p.part_id, 
+                    p.part_name, 
+                    t.teacher_id, 
+                    t.teacher_name,
+                    (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
@@ -31,7 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$_GET['class_id']]);
             } else {
-                $stmt = $pdo->query($sql);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute();
             }
             $classes = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -47,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
-                    "enrolled" => $row["class_enrolled"],
+                    "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
                 ];
             }
@@ -59,6 +67,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $classId = $_GET['id'] ?? '';
         if ($classId) {
             try {
+                // Check if class has registered students
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
+                $stmt->execute([$classId]);
+                $registrationCount = $stmt->fetchColumn();
+
+                if ($registrationCount > 0) {
+                    echo json_encode(["success" => false, "message" => "Cannot delete class with registered students"]);
+                    exit;
+                }
+
+                // Check if class exists
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE class_id = ?");
+                $stmt->execute([$classId]);
+                if ($stmt->fetchColumn() == 0) {
+                    echo json_encode(["success" => false, "message" => "Class ID does not exist"]);
+                    exit;
+                }
+
                 $stmt = $pdo->prepare("DELETE FROM class WHERE class_id = ?");
                 $stmt->execute([$classId]);
                 echo json_encode(["success" => true]);
@@ -90,17 +116,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
     } elseif ($action === 'searchClasses') {
         $searchQuery = $_GET['class_id'] ?? '';
+        $term = $_GET['term'] ?? '';
         try {
             $sql = "
-                SELECT c.*, s.subject_name, p.part_id, p.part_name, t.teacher_id, t.teacher_name
+                SELECT 
+                    c.*, 
+                    s.subject_name, 
+                    p.part_id, 
+                    p.part_name, 
+                    t.teacher_id, 
+                    t.teacher_name,
+                    (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
                 JOIN teacher t ON c.teacher_id = t.teacher_id
-                WHERE c.class_id LIKE :search OR s.subject_name LIKE :search
+                WHERE 1=1
             ";
+            $params = [];
+            if ($searchQuery) {
+                $sql .= " AND (c.class_id LIKE ? OR s.subject_name LIKE ?)";
+                $params[] = "%$searchQuery%";
+                $params[] = "%$searchQuery%";
+            }
+            if ($term) {
+                $sql .= " AND c.class_term = ?";
+                $params[] = $term;
+            }
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([':search' => "%$searchQuery%"]);
+            $stmt->execute($params);
             $classes = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $classes[] = [
@@ -115,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "time" => $row["class_time"],
                     "capacity" => $row["class_capacity"],
-                    "enrolled" => $row["class_enrolled"],
+                    "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
                 ];
             }
@@ -148,6 +192,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } catch (Exception $e) {
             echo json_encode(["success" => false, "message" => "Error fetching years: " . $e->getMessage()]);
         }
+    } elseif ($action === 'getTerms') {
+        try {
+            $stmt = $pdo->query("SELECT DISTINCT class_term FROM class ORDER BY class_term");
+            $terms = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $terms[] = $row["class_term"];
+            }
+            echo json_encode(["success" => true, "terms" => $terms]);
+        } catch (Exception $e) {
+            echo json_encode(["success" => false, "message" => "Error fetching terms: " . $e->getMessage()]);
+        }
     } elseif ($action === 'getNextClassId') {
         try {
             $subjectId = $_GET['subject_id'] ?? '';
@@ -171,24 +226,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 exit;
             }
 
-            // Map subject_id to abbreviation
+            // Get subject_name and determine abbreviation
             $stmt = $pdo->prepare("SELECT subject_name FROM subject WHERE subject_id = ?");
             $stmt->execute([$subjectId]);
             $subjectName = $stmt->fetchColumn();
-            $abbreviation = '';
-            if ($subjectName === 'Math') $abbreviation = 'Mat';
-            elseif ($subjectName === 'English') $abbreviation = 'Eng';
-            elseif ($subjectName === 'Melayu') $abbreviation = 'Mly';
-            else {
-                echo json_encode(["success" => false, "message" => "Unsupported subject"]);
+            if (!$subjectName) {
+                echo json_encode(["success" => false, "message" => "Subject name not found"]);
                 exit;
+            }
+
+            // Use predefined abbreviations for Math, English, Melayu; otherwise, take first 3 letters
+            $abbreviation = '';
+            switch ($subjectName) {
+                case 'Math':
+                    $abbreviation = 'Mat';
+                    break;
+                case 'English':
+                    $abbreviation = 'Eng';
+                    break;
+                case 'Melayu':
+                    $abbreviation = 'Mly';
+                    break;
+                default:
+                    // Clean subject name: remove non-alphabetic characters, convert to lowercase
+                    $cleanSubjectName = preg_replace('/[^a-zA-Z]/', '', $subjectName);
+                    if (empty($cleanSubjectName)) {
+                        echo json_encode(["success" => false, "message" => "Subject name contains no valid letters"]);
+                        exit;
+                    }
+                    // Take first 3 letters (or all if less than 3)
+                    $abbreviation = substr($cleanSubjectName, 0, 3);
+                    // Capitalize first letter
+                    $abbreviation = ucfirst(strtolower($abbreviation));
+                    break;
             }
 
             // Map year to first digit
             $yearDigit = '';
-            if ($year === 'Year 1') $yearDigit = '0';
-            elseif ($year === 'Year 2') $yearDigit = '2';
-            else {
+            if ($year === 'Year 1') {
+                $yearDigit = '0';
+            } elseif ($year === 'Year 2') {
+                $yearDigit = '2';
+            } else {
                 echo json_encode(["success" => false, "message" => "Unsupported year"]);
                 exit;
             }
@@ -201,12 +280,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $nextNumber = 1;
             if ($lastClassId) {
-                $numberPart = substr($lastClassId, 4, 3); // Extract the last 3 digits (e.g., "001" from "Mat0001")
+                $numberPart = substr($lastClassId, strlen($prefix), 3); // Extract the last 3 digits
                 $currentNumber = (int)$numberPart;
                 $nextNumber = $currentNumber + 1;
             }
 
-            $nextClassId = $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT); // e.g., "Mat0003"
+            $nextClassId = $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT); // e.g., "Sci0001"
             echo json_encode(["success" => true, "class_id" => $nextClassId]);
         } catch (Exception $e) {
             echo json_encode(["success" => false, "message" => "Error generating class ID: " . $e->getMessage()]);
@@ -249,6 +328,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $subjectId = $input['subject_id'];
             $year = $input['year'];
+            $classId = $input['class_id'];
             $firstChar = substr($subjectId, 0, 1);
 
             if ($firstChar !== '1' && $firstChar !== '2') {
@@ -258,15 +338,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Subject ID starting with '$firstChar' must have " . ($firstChar === '1' ? 'Year 1' : 'Year 2'));
             }
 
+            // Check if class_id already exists
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE class_id = ?");
+            $stmt->execute([$classId]);
+            if ($stmt->fetchColumn() > 0) {
+                throw new Exception("Class ID already exists");
+            }
+
             $stmt = $pdo->prepare("INSERT INTO class (class_id, subject_id, part_id, teacher_id, class_term, year, class_time, class_capacity, class_enrolled, class_status)
                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");
             $stmt->execute([
-                $input['class_id'],
-                $input['subject_id'],
+                $classId,
+                $subjectId,
                 $input['part'],
                 $input['teacher_id'],
                 $input['class_term'],
-                $input['year'],
+                $year,
                 $input['time'],
                 $input['capacity'],
                 $input['status']
@@ -280,11 +367,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $childId = $input['child_id'] ?? '';
         if ($classId && $childId) {
             try {
+                // Check if class exists and get capacity
+                $stmt = $pdo->prepare("SELECT class_capacity FROM class WHERE class_id = ?");
+                $stmt->execute([$classId]);
+                $class = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$class) {
+                    throw new Exception("Class ID does not exist");
+                }
+
+                // Check current enrollment dynamically
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
+                $stmt->execute([$classId]);
+                $currentEnrolled = $stmt->fetchColumn();
+
+                if ($currentEnrolled >= $class['class_capacity']) {
+                    throw new Exception("Class is already full");
+                }
+
+                // Register the student
                 $stmt = $pdo->prepare("INSERT INTO registration_class (class_id, child_id) VALUES (?, ?)");
                 $stmt->execute([$classId, $childId]);
-
-                $stmt = $pdo->prepare("UPDATE class SET class_enrolled = class_enrolled + 1 WHERE class_id = ?");
-                $stmt->execute([$classId]);
 
                 echo json_encode(["success" => true]);
             } catch (Exception $e) {
@@ -295,6 +397,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($input['action'] === 'updateClass') {
         try {
+            $classId = $input['class_id'];
+
+            // Check if class exists
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE class_id = ?");
+            $stmt->execute([$classId]);
+            if ($stmt->fetchColumn() == 0) {
+                throw new Exception("Class ID does not exist");
+            }
+
+            // Check if new capacity is sufficient
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
+            $stmt->execute([$classId]);
+            $currentEnrolled = $stmt->fetchColumn();
+            if ($input['capacity'] < $currentEnrolled) {
+                throw new Exception("New capacity cannot be less than current enrollment ($currentEnrolled)");
+            }
+
             $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, class_term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
             $stmt->execute([
                 $input['part'],
@@ -303,7 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input['time'],
                 $input['capacity'],
                 $input['status'],
-                $input['class_id']
+                $classId
             ]);
             echo json_encode(["success" => true]);
         } catch (Exception $e) {
