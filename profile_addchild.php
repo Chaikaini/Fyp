@@ -29,9 +29,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $child_year = $_POST['child_year'] ?? '';  
     $parent_id = $_SESSION['parent_id']; 
 
-    
-    $sql = "INSERT INTO child (parent_id, child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+    // default image path
+    $child_image = 'img/user.jpg';
+
+    // handle image upload
+    if (isset($_FILES['child_image']) && $_FILES['child_image']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'uploads/child/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $tmpName = $_FILES['child_image']['tmp_name'];
+        $fileName = uniqid('child_', true) . '.' . pathinfo($_FILES['child_image']['name'], PATHINFO_EXTENSION);
+        $destination = $uploadDir . $fileName;
+
+        if (move_uploaded_file($tmpName, $destination)) {
+            $child_image = $destination;
+        }
+    }
+
+    $sql = "INSERT INTO child (parent_id, child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year, child_image) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
     if ($stmt === false) {
@@ -39,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-    $stmt->bind_param("isssssi", $parent_id, $child_name, $child_gender, $child_kidNumber, $child_birthday, $child_school, $child_year);
+    $stmt->bind_param("isssssis", $parent_id, $child_name, $child_gender, $child_kidNumber, $child_birthday, $child_school, $child_year, $child_image);
 
     if ($stmt->execute()) {
         echo json_encode(["success" => true, "message" => "Child information added successfully!"]);

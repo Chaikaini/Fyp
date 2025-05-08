@@ -223,29 +223,47 @@
         display: inline-block;
     }
     .avatar-section {
-       text-align: center;
-       margin-bottom: 20px;
-       margin-top: 30px;
-   }
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 30px;
+}
 
-    .avatar-container {
+    .profile-image-wrapper {
         width: 120px;
         height: 120px;
+        display: inline-block; 
+        position: relative;    
+    }
+
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
         border-radius: 50%;
-        overflow: hidden;
-        border: 2px solid #ccc;
-        display: inline-block;
+        border: 2px solid #dee2e6; 
     }
 
-    .avatar-container img {
-       width: 100%;
-       height: 100%;
-       object-fit: cover;
+    .overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 32px;
+        height: 32px;
+        background-color: #f8f9fa; 
+        border-radius: 50%;
+        border: 1px solid #6c757d; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
-    #avatar-upload {
-    display: none;
-     }
+    .camera-icon {
+        font-size: 1.2rem;
+        color: #212529; 
+    }
+
 
      .readonly-email {
     background-color: #e9ecef;
@@ -468,13 +486,17 @@
             <h3>My Information</h3>
 
             <div class="avatar-section">
+            <div class="profile-image-wrapper">
                 <label for="avatar-upload">
-                    <div class="avatar-container">
-                        <img src="img/user.jpg" alt="User Avatar" id="user-avatar">
-                    </div>
+                <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
+                <div class="overlay" title="Click to change image">
+                    <i class="fas fa-camera camera-icon"></i>
+                </div>
                 </label>
                 <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
             </div>
+            </div>
+
             
             <form>
             <div class="form-group">
@@ -507,7 +529,7 @@
     </div>
 
     <div class="form-group">
-        <label for="phone-num-2">Emergency Phone Number</label>
+        <label for="phone-num-2">Phone Number 2</label>
         <input type="text" id="phone-num-2" name="phone_number2">
     </div>
 
@@ -646,19 +668,22 @@
         </div>
     </div>
 
-   <!-- Add Child Modal -->
+ <!-- Add Child Modal -->
 <div id="addChildModal" class="modal">
     <div class="modal-content pointer-cursor">
         <span class="close" onclick="closeModal()">&times;</span>
         <h3>Add Child Information</h3>
 
         <div class="avatar-section">
-            <label for="avatar-upload">
-                <div class="avatar-container">
-                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar">
-                </div>
-            </label>
-            <input type="file" id="avatar-upload" accept="image/*">
+            <div class="profile-image-wrapper">
+                <label for="avatar-upload">
+                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
+                    <div class="overlay" title="Click to change image">
+                        <i class="fas fa-camera camera-icon"></i>
+                    </div>
+                </label>
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+            </div>
         </div>
 
         <form id="addChildForm" method="post" action="profile_addchild.php">
@@ -675,13 +700,13 @@
                 </select>
             </div>
             <div class="form-group">
-            <label for="kidNumber">My Kid Number</label>
-            <input type="text" id="kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
-        </div>
-        <div class="form-group">
-            <label for="birthday">Birthday</label>
-            <input type="date" id="birthday" name="child_birthday" readonly>
-        </div>
+                <label for="kidNumber">My Kid Number</label>
+                <input type="text" id="kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
+            </div>
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <input type="date" id="birthday" name="child_birthday" readonly>
+            </div>
             <div class="form-group">
                 <label for="school">School</label>
                 <input type="text" id="school" name="child_school">
@@ -698,6 +723,7 @@
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
+
         <div id="successToast" class="toast">Add child information successfully!</div>
     </div>
 </div>
@@ -709,13 +735,17 @@
         <h3>Edit Child Information</h3>
 
         <div class="avatar-section">
+        <div class="profile-image-wrapper" style="position: relative;">
             <label for="avatar-upload">
-                <div class="avatar-container">
-                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar">
-                </div>
+            <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
+            <div class="overlay" title="Click to change image">
+                <i class="fas fa-camera camera-icon"></i>
+            </div>
             </label>
-            <input type="file" id="avatar-upload" accept="image/*">
+            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
         </div>
+        </div>
+
 
         <form id="childForm" method="post" action="profile_editchild.php">
         <input type="hidden" name="child_id" id="childId">
@@ -1079,13 +1109,27 @@ window.addEventListener('click', function(event) {
   }
 });
 
-document.getElementById("avatar-upload").addEventListener("change", function(event) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById("user-avatar").src = e.target.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-});
+  // 处理点击头像上传图片的事件
+  document.querySelector('.overlay').addEventListener('click', function () {
+        document.getElementById('avatar-upload').click();
+    });
+
+    // 处理文件选择事件，更新头像
+    document.getElementById('avatar-upload').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        // 确保文件是图片
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // 更新头像图片
+                document.getElementById('user-avatar').src = e.target.result;
+            };
+            reader.readAsDataURL(file); // 读取文件为 Data URL
+        } else {
+            alert('Please select a valid image file.');
+        }
+    });
 
 
 // delete modal
