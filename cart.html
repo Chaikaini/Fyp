@@ -47,26 +47,23 @@
         }
 
         .breadcrumb-container {
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #ccc;
-    display: flex;
-    flex-direction: column; /* 让内容垂直排列 */
-    align-items: flex-start; /* 左对齐 */
-}
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            flex-direction: column; /* 让内容垂直排列 */
+            align-items: flex-start; /* 左对齐 */
+        }
 
-.breadcrumb-container h2 {
-    margin-bottom: 10px; /* 增加与面包屑导航的间距 */
-}
+        .breadcrumb-container h2 {
+            margin-bottom: 10px; /* 增加与面包屑导航的间距 */
+        }
 
-.breadcrumb-container .breadcrumb {
-    display: flex;
-    gap: 5px;
-    font-size: 14px;
-}
-
-
-
+        .breadcrumb-container .breadcrumb {
+            display: flex;
+            gap: 5px;
+            font-size: 14px;
+        }
 
         .breadcrumb-container .breadcrumb li {
             color: #555;
@@ -111,11 +108,13 @@
     
         .cart-item-details {
             flex-grow: 1;
-            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
         }
     
         .cart-item-details h5 {
             margin: 0;
+            margin-bottom: 10px;
         }
     
         .cart-item-details p {
@@ -213,21 +212,20 @@
         }
 
         .notification-badge {
-        position: absolute;
-        top: 5px; 
-        right: 10px; 
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        border-radius: 50%;
-        display: none; 
-        z-index: 1000;
-    }
-    .notification-icon {
-        position: relative; 
-    }
+            position: absolute;
+            top: 5px; 
+            right: 10px; 
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none; 
+            z-index: 1000;
+        }
+        .notification-icon {
+            position: relative; 
+        }
     </style>
-    
 </head>
 
 <body>
@@ -267,7 +265,7 @@
         <h1>Shopping Cart</h1>
         <ul class="breadcrumb">
         <li><a href="member.html">Home</a></li>
-        <li>&gt;</li>
+        <li>></li>
         <li>Shopping Cart</li>
         </ul>
         </div>
@@ -295,7 +293,7 @@
     
         <!-- Popup for editing -->
         <div class="popup-info">
-            <div class="popup-close">&times;</div>
+            <div class="popup-close">×</div>
             <div class="popup-row">
                 <span class="popup-label">Month:</span>
                 <span class="popup-value" id="popupMonth"></span>
@@ -312,11 +310,14 @@
                 <span class="popup-label">Children:</span>
                 <span class="popup-value">
                     <select id="childrenSelect">
-                        <option value="1">Yuna</option> 
+                        <option value="1"></option> 
                         <option value="2"></option>
                         <option value="3"></option>
                     </select>
                 </span>
+            </div>
+            <div class="popup-row">
+                <button class="btn-add" onclick="saveChanges()">Save Changes</button>
             </div>
         </div>
 
@@ -327,226 +328,265 @@
         
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-        fetch('get_notification.php')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Notifications data:', data); 
+        let currentCartId = null;
+        let availableChildren = [];
 
-            // check if there are any unread notifications
-            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                console.log('Unread notifications found!');
-                const badge = document.querySelector('.notification-badge');
-                if (badge) {
-                    badge.style.display = 'block'; //show the red dot
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('get_notification.php')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notifications data:', data); 
+
+                // check if there are any unread notifications
+                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                    console.log('Unread notifications found!');
+                    const badge = document.querySelector('.notification-badge');
+                    if (badge) {
+                        badge.style.display = 'block'; //show the red dot
+                    }
+                } else {
+                    console.log('No unread notifications');
                 }
-            } else {
-                console.log('No unread notifications');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
-    });
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+            });
 
-
-        // Sample cart items data
-
-        document.addEventListener('DOMContentLoaded', function() {
-    loadCartData();
-});
-
-function loadCartData() {
-    // 发送 GET 请求获取购物车数据
-    fetch('get_cart.php', {
-        method: 'GET'
-    })
-    .then(response => response.json())
-    .then(data => {
-        let cart = data.cart;
-
-        // 获取购物车容器和总价格元素
-        let cartContainer = document.querySelector('.cart-items');
-        let totalPriceElement = document.getElementById('total-price');
-
-        // 如果购物车为空，显示空购物车提示
-        if (cart.length === 0) {
-            cartContainer.innerHTML = "<p>Your cart is empty.</p>";
-            totalPriceElement.textContent = "0";
-            return;
-        }
-
-        cartContainer.innerHTML = '';  // 清空现有购物车显示
-        let totalPrice = 0;
-
-        // 遍历购物车数据并动态生成 HTML
-        cart.forEach((item, index) => {
-            // 如果 cart item 已经软删除，跳过此项
-            if (item.deleted == 1) {
-                return;  // 跳过软删除的项
-            }
-
-            let itemPrice = parseFloat(item.price);
-            totalPrice += itemPrice;
-
-            // 创建 cart-item 元素
-            let cartItem = document.createElement('div');
-            cartItem.classList.add('cart-item');
-
-            // 格式化 capacity 显示为 "class_enrolled/class_capacity"
-            let capacityDisplay = `${item.class_enrolled}/${item.class_capacity}`;
-
-            cartItem.innerHTML = `
-                <div class="cart-item-details">
-                    <h5>${item.subject_name}</h5>
-                    <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name} Image" class="cart-item-image">
-                    <p>Child: ${item.child_name ? item.child_name : 'Not specified'}</p> <!-- Default to 'Not specified' -->
-                    <p>Capacity: ${capacityDisplay}</p> <!-- Display capacity as "1/30" -->
-                    <p>Price: RM ${itemPrice.toFixed(2)}</p>
-                </div>
-                <div class="cart-item-actions">
-                    <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, ${item.subject_id}, '${item.child_name}')"></i>
-                </div>
-            `;
-
-            cartContainer.appendChild(cartItem);
+            loadCartData();
+            loadChildren();
         });
 
-        // 更新总价
-        totalPriceElement.textContent = totalPrice.toFixed(2); // 显示总价
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-
-function removeFromCart(cartId, subjectId, childName) {
-    fetch('remove_cart.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            subject_id: subjectId,
-            child_name: childName
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Response:', data);
-        if (data.status === 'success') {
-            loadCartData();  // Reload cart after deletion
-        } else {
-            alert('Error: ' + data.message);
+        function loadChildren() {
+            fetch('get_children.php')
+            .then(response => response.json())
+            .then(data => {
+                availableChildren = data.children || [];
+                const childrenSelect = document.getElementById('childrenSelect');
+                childrenSelect.innerHTML = ''; // Clear existing options
+                availableChildren.forEach(child => {
+                    const option = document.createElement('option');
+                    option.value = child.child_id;
+                    option.textContent = child.name;
+                    childrenSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching children:', error));
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
 
+        function loadCartData() {
+            fetch('get_cart.php', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                let cart = data.cart;
 
+                let cartContainer = document.querySelector('.cart-items');
+                let totalPriceElement = document.getElementById('total-price');
 
+                if (cart.length === 0) {
+                    cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+                    totalPriceElement.textContent = "0";
+                    return;
+                }
 
-document.getElementById("checkoutButton").addEventListener("click", function() {
-    window.location.href = "check.php";  // 跳转到 check.html 页面
-});
+                cartContainer.innerHTML = '';
+                let totalPrice = 0;
 
+                cart.forEach((item, index) => {
+                    if (item.deleted == 1) {
+                        return;
+                    }
 
-</script>
+                    let itemPrice = parseFloat(item.price);
+                    totalPrice += itemPrice;
 
+                    let cartItem = document.createElement('div');
+                    cartItem.classList.add('cart-item');
 
-        <!-- Footer Start -->
-        <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-            <div class="container py-5">
-                <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="text-white mb-3">Quick Link</h4>
-                        <a class="btn btn-link" href="">About Us</a>
-                        <a class="btn btn-link" href="">Contact Us</a>
-                        <a class="btn btn-link" href="">Privacy Policy</a>
-                        <a class="btn btn-link" href="">Terms & Condition</a>
-                        <a class="btn btn-link" href="">FAQs & Help</a>
+                    let capacityDisplay = `${item.class_enrolled}/${item.class_capacity}`;
+
+                    cartItem.innerHTML = `
+                        <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name} Image" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <h5>${item.subject_name}</h5>
+                            <p>Child: ${item.child_name ? item.child_name : 'Not specified'}</p>
+                            <p>Capacity: ${capacityDisplay}</p>
+                            <p>Price: RM ${itemPrice.toFixed(2)}</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${item.part_id}, '${item.class_time}', '${capacityDisplay}', ${item.child_id})"></i>
+                            <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, ${item.subject_id}, '${item.child_name}')"></i>
+                        </div>
+                    `;
+
+                    cartContainer.appendChild(cartItem);
+                });
+
+                totalPriceElement.textContent = totalPrice.toFixed(2);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function editCartItem(cartId, partId, classTime, capacity, childId) {
+            currentCartId = cartId;
+            const monthText = partId == 1 ? "January - June" : partId == 2 ? "July - December" : "Not specified";
+            document.getElementById('popupMonth').textContent = monthText;
+            document.getElementById('popupTime').textContent = classTime || 'Not specified';
+            document.getElementById('popupCapacity').textContent = capacity || 'Not specified';
+            const childrenSelect = document.getElementById('childrenSelect');
+            childrenSelect.value = childId || '';
+            document.querySelector('.popup-info').style.display = 'block';
+        }
+
+        function saveChanges() {
+            const newChildId = document.getElementById('childrenSelect').value;
+
+            fetch('update_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cart_id: currentCartId,
+                    child_id: newChildId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    loadCartData();
+                    document.querySelector('.popup-info').style.display = 'none';
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function removeFromCart(cartId, subjectId, childName) {
+            fetch('remove_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject_id: subjectId,
+                    child_name: childName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Response:', data);
+                if (data.status === 'success') {
+                    loadCartData();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        document.querySelector('.popup-close').addEventListener('click', function() {
+            document.querySelector('.popup-info').style.display = 'none';
+        });
+
+        document.getElementById("checkoutButton").addEventListener("click", function() {
+            window.location.href = "check.php";
+        });
+    </script>
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Quick Link</h4>
+                    <a class="btn btn-link" href="">About Us</a>
+                    <a class="btn btn-link" href="">Contact Us</a>
+                    <a class="btn btn-link" href="">Privacy Policy</a>
+                    <a class="btn btn-link" href="">Terms & Condition</a>
+                    <a class="btn btn-link" href="">FAQs & Help</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
+                    <div class="d-flex pt-2">
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
+                        <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="text-white mb-3">Contact</h4>
-                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
-                        <div class="d-flex pt-2">
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="text-white mb-3">Gallery</h4>
-                        <div class="row g-2 pt-2">
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                            </div>
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                            </div>
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                            </div>
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                            </div>
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                            </div>
-                            <div class="col-4">
-                                <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="text-white mb-3">Newsletter</h4>
-                        <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
-                        <div class="position-relative mx-auto" style="max-width: 400px;">
-                            <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
-                            <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
-                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-3">Newsletter</h4>
+                    <p>Dolor amet sit justo amet elitr clita ipsum elitr est.</p>
+                    <div class="position-relative mx-auto" style="max-width: 400px;">
+                        <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Your email">
+                        <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">SignUp</button>
                     </div>
                 </div>
             </div>
-            <div class="container">
-                <div class="copyright">
-                    <div class="row">
-                        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                            &copy; <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        © <a class="border-bottom" href="#">Your Site Name</a>, All Right Reserved.
     
-                            <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                            Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
-                        </div>
-                        <div class="col-md-6 text-center text-md-end">
-                            <div class="footer-menu">
-                                <a href="">Home</a>
-                                <a href="">Cookies</a>
-                                <a href="">Help</a>
-                                <a href="">FQAs</a>
-                            </div>
+                        <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <div class="footer-menu">
+                            <a href="">Home</a>
+                            <a href="">Cookies</a>
+                            <a href="">Help</a>
+                            <a href="">FQAs</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Footer End -->
+    </div>
+    <!-- Footer End -->
     
-    
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-     <!-- JavaScript Libraries -->
-     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

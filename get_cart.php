@@ -8,9 +8,10 @@ try {
         throw new Exception("Unauthorized", 401);
     }
 
-    // 查询购物车数据，包括 class_capacity、class_enrolled、child_name 和 subject_image
+    // 查询购物车数据，包括 class_capacity、class_enrolled、child_name、subject_image、part_id 和 class_time
     $stmt = $conn->prepare("
-        SELECT c.*, s.subject_name, s.subject_image, ch.child_name, cl.class_capacity, cl.class_enrolled 
+        SELECT c.*, s.subject_name, s.subject_image, ch.child_name, 
+               cl.class_capacity, cl.class_enrolled, cl.part_id, cl.class_time
         FROM cart c
         LEFT JOIN subject s ON c.subject_id = s.subject_id
         LEFT JOIN child ch ON c.child_id = ch.child_id
