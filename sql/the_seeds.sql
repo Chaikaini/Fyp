@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 09:36 AM
+-- Generation Time: May 08, 2025 at 09:53 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -187,8 +187,9 @@ INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `teacher_id
 CREATE TABLE `notification` (
   `notification_id` int(11) NOT NULL,
   `sender_id` int(11) NOT NULL,
-  `subject_id` varchar(20) NOT NULL,
-  `class_id` varchar(20) NOT NULL,
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL,
+  `subject_id` varchar(20) DEFAULT NULL,
+  `class_id` varchar(20) DEFAULT NULL,
   `notification_title` varchar(255) NOT NULL,
   `notification_content` text NOT NULL,
   `notification_document` varchar(255) DEFAULT NULL,
@@ -199,9 +200,10 @@ CREATE TABLE `notification` (
 -- Dumping data for table `notification`
 --
 
-INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
-(2, 12345, '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07');
+INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
+(1, 11111, 'Parent', '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
+(2, 11111, 'Parent', '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
+(3, 11111, 'Parent', NULL, NULL, '123', '123', NULL, '2025-05-08 15:51:06');
 
 -- --------------------------------------------------------
 
@@ -212,17 +214,21 @@ INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class
 CREATE TABLE `notification_receiver` (
   `receiver_id` int(11) NOT NULL,
   `notification_id` int(11) NOT NULL,
-  `parent_id` int(11) NOT NULL,
-  `read_status` varchar(10) DEFAULT 'unread'
+  `parent_id` int(11) DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL,
+  `read_status` enum('unread','read') DEFAULT 'unread'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notification_receiver`
 --
 
-INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `read_status`) VALUES
-(1, 1, 1, 'read'),
-(2, 2, 1, 'read');
+INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `teacher_id`, `recipient_type`, `read_status`) VALUES
+(1, 1, 1, NULL, 'Parent', 'read'),
+(2, 2, 1, NULL, 'Parent', 'read'),
+(3, 3, 1, NULL, 'Parent', 'unread'),
+(4, 3, 2, NULL, 'Parent', 'unread');
 
 -- --------------------------------------------------------
 
@@ -379,8 +385,7 @@ INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_
 (12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
 (12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
-(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Active', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di'),
-(12348, 'Ms. Lily', 'Female', 'chaikaini@gmail.com', NULL, '0178238204', '123', '2025-06-05', 'Active', '$2y$10$4zbKomiZVT4iLuf8mmfrpupLr71UXXL6JEA71LojW88YOoVlzU.2C');
+(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Active', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
 
@@ -465,7 +470,8 @@ ALTER TABLE `exam_result`
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`notification_id`),
   ADD KEY `fk_subject` (`subject_id`),
-  ADD KEY `fk_class` (`class_id`);
+  ADD KEY `fk_class` (`class_id`),
+  ADD KEY `fk_sender` (`sender_id`);
 
 --
 -- Indexes for table `notification_receiver`
@@ -473,7 +479,8 @@ ALTER TABLE `notification`
 ALTER TABLE `notification_receiver`
   ADD PRIMARY KEY (`receiver_id`),
   ADD KEY `notification_id` (`notification_id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `teacher_id` (`teacher_id`);
 
 --
 -- Indexes for table `parent`
@@ -566,13 +573,13 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `parent`
@@ -602,7 +609,7 @@ ALTER TABLE `registration_class`
 -- AUTO_INCREMENT for table `teacher`
 --
 ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12349;
+  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12350;
 
 --
 -- AUTO_INCREMENT for table `teacher_comment`
@@ -663,15 +670,17 @@ ALTER TABLE `exam_result`
 -- Constraints for table `notification`
 --
 ALTER TABLE `notification`
-  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_sender` FOREIGN KEY (`sender_id`) REFERENCES `admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  ADD CONSTRAINT `notification_receiver_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`notification_id`),
-  ADD CONSTRAINT `notification_receiver_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
+  ADD CONSTRAINT `notification_receiver_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`notification_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notification_receiver_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `notification_receiver_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `payment`
