@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 06:20 PM
+-- Generation Time: May 08, 2025 at 08:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -159,6 +159,21 @@ CREATE TABLE `comments` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `credit_cards`
+--
+
+CREATE TABLE `credit_cards` (
+  `id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `card_number` varchar(255) NOT NULL,
+  `expiry_date` varchar(5) NOT NULL,
+  `last_four` varchar(4) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `exam_result`
 --
 
@@ -187,21 +202,23 @@ INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `teacher_id
 CREATE TABLE `notification` (
   `notification_id` int(11) NOT NULL,
   `sender_id` int(11) NOT NULL,
-  `subject_id` varchar(20) NOT NULL,
-  `class_id` varchar(20) NOT NULL,
+  `subject_id` varchar(20) DEFAULT NULL,
+  `class_id` varchar(20) DEFAULT NULL,
   `notification_title` varchar(255) NOT NULL,
   `notification_content` text NOT NULL,
   `notification_document` varchar(255) DEFAULT NULL,
-  `notification_created_at` datetime DEFAULT current_timestamp()
+  `notification_created_at` datetime DEFAULT current_timestamp(),
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notification`
 --
 
-INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
-(2, 12345, '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07');
+INSERT INTO `notification` (`notification_id`, `sender_id`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`, `recipient_type`) VALUES
+(0, 0, NULL, NULL, '1', '1', NULL, '2025-05-08 10:32:50', 'Parent'),
+(1, 12345, '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30', 'Class'),
+(2, 12345, '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07', 'Class');
 
 -- --------------------------------------------------------
 
@@ -213,16 +230,18 @@ CREATE TABLE `notification_receiver` (
   `receiver_id` int(11) NOT NULL,
   `notification_id` int(11) NOT NULL,
   `parent_id` int(11) NOT NULL,
-  `read_status` varchar(10) DEFAULT 'unread'
+  `read_status` varchar(10) DEFAULT 'unread',
+  `teacher_id` int(11) DEFAULT NULL,
+  `recipient_type` enum('Teacher','Parent','Class') NOT NULL DEFAULT 'Class'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `notification_receiver`
 --
 
-INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `read_status`) VALUES
-(1, 1, 1, 'read'),
-(2, 2, 1, 'read');
+INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `read_status`, `teacher_id`, `recipient_type`) VALUES
+(1, 1, 1, 'read', NULL, 'Class'),
+(2, 2, 1, 'read', NULL, 'Class');
 
 -- --------------------------------------------------------
 
@@ -396,21 +415,6 @@ CREATE TABLE `teacher_comment` (
   `teacher_comment_created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
-
---
--- Table structure for table `credit_cards`
---
-
-CREATE TABLE credit_cards (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    parent_id INT NOT NULL,
-    card_number VARCHAR(255) NOT NULL, -- 加密存储
-    expiry_date VARCHAR(5) NOT NULL,  -- 格式 MM/YY
-    last_four VARCHAR(4) NOT NULL,    -- 最后四位用于显示
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (parent_id) REFERENCES parent(parent_id)
-);
 --
 -- Indexes for dumped tables
 --
@@ -465,6 +469,13 @@ ALTER TABLE `comments`
   ADD KEY `subject_id` (`subject_id`);
 
 --
+-- Indexes for table `credit_cards`
+--
+ALTER TABLE `credit_cards`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `parent_id` (`parent_id`);
+
+--
 -- Indexes for table `exam_result`
 --
 ALTER TABLE `exam_result`
@@ -487,7 +498,8 @@ ALTER TABLE `notification`
 ALTER TABLE `notification_receiver`
   ADD PRIMARY KEY (`receiver_id`),
   ADD KEY `notification_id` (`notification_id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `fk_teacher_id` (`teacher_id`);
 
 --
 -- Indexes for table `parent`
@@ -534,189 +546,30 @@ ALTER TABLE `teacher`
   ADD PRIMARY KEY (`teacher_id`);
 
 --
--- Indexes for table `teacher_comment`
---
-ALTER TABLE `teacher_comment`
-  ADD PRIMARY KEY (`teacher_comment_id`),
-  ADD KEY `child_id` (`child_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `attendance`
+-- AUTO_INCREMENT for table `credit_cards`
 --
-ALTER TABLE `attendance`
-  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `cart`
---
-ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `child`
---
-ALTER TABLE `child`
-  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `comments`
---
-ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `exam_result`
---
-ALTER TABLE `exam_result`
-  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `notification`
---
-ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `notification_receiver`
---
-ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `parent`
---
-ALTER TABLE `parent`
-  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `part`
---
-ALTER TABLE `part`
-  MODIFY `part_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `payment`
---
-ALTER TABLE `payment`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `registration_class`
---
-ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `teacher`
---
-ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12348;
-
---
--- AUTO_INCREMENT for table `teacher_comment`
---
-ALTER TABLE `teacher_comment`
-  MODIFY `teacher_comment_id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `credit_cards`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `attendance`
+-- Constraints for table `credit_cards`
 --
-ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registration_class` (`registration_id`);
-
---
--- Constraints for table `cart`
---
-ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `cart_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `cart_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
-
---
--- Constraints for table `child`
---
-ALTER TABLE `child`
-  ADD CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `class`
---
-ALTER TABLE `class`
-  ADD CONSTRAINT `class_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`);
-
---
--- Constraints for table `comments`
---
-ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
-
---
--- Constraints for table `exam_result`
---
-ALTER TABLE `exam_result`
-  ADD CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `exam_result_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `exam_result_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
-
---
--- Constraints for table `notification`
---
-ALTER TABLE `notification`
-  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `credit_cards`
+  ADD CONSTRAINT `credit_cards_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
 
 --
 -- Constraints for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  ADD CONSTRAINT `notification_receiver_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`notification_id`),
-  ADD CONSTRAINT `notification_receiver_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
-
---
--- Constraints for table `payment`
---
-ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
-
---
--- Constraints for table `registration_class`
---
-ALTER TABLE `registration_class`
-  ADD CONSTRAINT `registration_class_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `registration_class_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `registration_class_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `registration_class_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
-  ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
-
---
--- Constraints for table `subject`
---
-ALTER TABLE `subject`
-  ADD CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE;
-
---
--- Constraints for table `teacher_comment`
---
-ALTER TABLE `teacher_comment`
-  ADD CONSTRAINT `teacher_comment_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `teacher_comment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `teacher_comment_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `fk_teacher_id` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
