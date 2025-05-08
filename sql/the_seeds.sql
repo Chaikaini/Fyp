@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 01:41 PM
+-- Generation Time: May 08, 2025 at 03:27 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -99,6 +99,7 @@ CREATE TABLE `child` (
   `child_birthday` date NOT NULL,
   `child_school` varchar(100) NOT NULL,
   `child_year` int(11) NOT NULL,
+  `child_image` varchar(255) NOT NULL,
   `child_register_date` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -106,9 +107,9 @@ CREATE TABLE `child` (
 -- Dumping data for table `child`
 --
 
-INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_register_date`) VALUES
-(1, 1, 'Yuna', 'Female', '180909-01-7788', '2018-09-09', 'Kulai 1', 1, '2025-04-29 12:26:05'),
-(2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'Kulai 2', 1, '2025-04-29 12:26:05');
+INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_image`, `child_register_date`) VALUES
+(1, 1, 'Yuna', 'Female', '180909-01-7788', '2018-09-09', 'Kulai 1', 1, '', '2025-04-29 12:26:05'),
+(2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'Kulai 2', 1, '', '2025-04-29 12:26:05');
 
 -- --------------------------------------------------------
 
@@ -282,6 +283,7 @@ CREATE TABLE `parent` (
   `phone_number2` varchar(20) DEFAULT NULL,
   `parent_relationship` enum('Mother','Father','Guardian') NOT NULL,
   `parent_gender` enum('Male','Female') NOT NULL,
+  `parent_image` varchar(255) NOT NULL,
   `parent_name2` varchar(100) NOT NULL,
   `parent_relationship2` enum('Mother','Father','Guardian') NOT NULL,
   `parent_num2` varchar(20) NOT NULL,
@@ -292,9 +294,9 @@ CREATE TABLE `parent` (
 -- Dumping data for table `parent`
 --
 
-INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
-(1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
-(2, 'Ali', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm');
+INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_image`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
+(1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', '', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
+(2, 'Ali', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', '', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm');
 
 -- --------------------------------------------------------
 
@@ -330,17 +332,17 @@ CREATE TABLE `payment` (
   `master_card_number` varchar(16) DEFAULT NULL,
   `payment_status` enum('Pending','Completed','Failed') NOT NULL,
   `payment_time` timestamp NOT NULL DEFAULT current_timestamp(),
-  `enrollment_fee` DECIMAL(10,2) NOT NULL DEFAULT 0
+  `enrollment_fee` decimal(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `payment`
 --
 
-INSERT INTO `payment` (`payment_id`, `parent_id`, `payment_total_amount`, `payment_method`, `master_card_number`, `payment_status`, `payment_time`) VALUES
-(1, 1, 510.00, 'Credit Card', '111111111', 'Completed', '2025-04-17 07:25:04'),
-(2, 2, 510.00, 'Credit Card', '11111111', 'Completed', '2025-04-17 11:56:09'),
-(3, 1, 510.00, 'Credit Card', '222222', 'Completed', '2025-04-20 08:47:33');
+INSERT INTO `payment` (`payment_id`, `parent_id`, `payment_total_amount`, `payment_method`, `master_card_number`, `payment_status`, `payment_time`, `enrollment_fee`) VALUES
+(1, 1, 510.00, 'Credit Card', '111111111', 'Completed', '2025-04-17 07:25:04', 0.00),
+(2, 2, 510.00, 'Credit Card', '11111111', 'Completed', '2025-04-17 11:56:09', 0.00),
+(3, 1, 510.00, 'Credit Card', '222222', 'Completed', '2025-04-20 08:47:33', 0.00);
 
 -- --------------------------------------------------------
 
