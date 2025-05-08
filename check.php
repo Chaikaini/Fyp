@@ -31,7 +31,6 @@ $result = $enrollmentCheckStmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hasPreviousEnrollment = $row['count'] > 0;
-    // Debug: Log the count to verify
     error_log("Enrollment count for parent_id $parent_id: " . $row['count']);
 } else {
     error_log("No enrollment records found for parent_id $parent_id");
@@ -61,7 +60,6 @@ $stmt->close();
 
 $conn->close();
 
-// Debug: Log the value of $hasPreviousEnrollment
 error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'));
 ?>
 
@@ -75,26 +73,15 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <meta content="The Seeds Learning Centre, checkout" name="keywords">
     <meta content="The Seeds Learning Centre | Checkout" name="description">
 
-    <!-- Favicon -->
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
-
-    <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- Libraries Stylesheet -->
     <link href="lib/animate.min.css" rel="stylesheet">
     <link href="lib/owl.carousel.min.css" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
     <style>
         .icon-bar {
@@ -206,36 +193,41 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             margin-top: 20px;
         }
 
+        .payment-option-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
         .payment-method label {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
             font-size: 16px;
             cursor: pointer;
             width: 100%;
         }
 
-        .payment-method img {
+        .payment-method i {
             margin-right: 10px;
-            width: 24px;
-            height: 24px;
+            font-size: 24px;
         }
 
         .option-content {
             display: flex;
             align-items: center;
-            flex-grow: 1; /* Ensure option-content takes up remaining space */
+            flex-grow: 1;
         }
 
-        #phone-number-field, #credit-card-field {
+        #credit-card-field {
             display: none;
-            margin-top: 5px;
-            margin-left: 0; /* Remove padding-left to avoid horizontal shift */
-        }
-
-        .phone-input {
-            display: block;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
         }
 
         .credit-card-input {
@@ -245,16 +237,16 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         }
 
         .credit-card-input input {
-            border: none;
-            border-bottom: 1px solid lightgray;
-            background-color: #f0f0f0;
-            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
             outline: none;
+            font-size: 14px;
         }
 
         .credit-card-input input:focus {
-            border-bottom: 2px solid #15ca39;
-            background-color: white;
+            border-color: #15ca39;
+            box-shadow: 0 0 5px rgba(21, 202, 57, 0.3);
         }
 
         .saved-card {
@@ -263,6 +255,19 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #f9f9f9;
+        }
+
+        .security-note {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        .security-note i {
+            margin-right: 5px;
+            color: #15ca39;
         }
 
         .payment {
@@ -335,11 +340,12 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             background-color: #28a745;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 50px;
             font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+            width: 100%;
         }
 
         button:hover {
@@ -363,23 +369,58 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         }
 
         .toast {
+            display: none;
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.8);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            text-align: center;
+            width: 300px;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.error .toast-image {
+            content: url('img/payment_ns.png');
+        }
+
+        .toast.success .toast-image {
+            content: url('img/payment_s.png');
+        }
+
+        .toast-image {
+            width: 80px;
+            height: 80px;
+            margin: 10px auto;
+        }
+
+        .toast-message {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .toast-close {
+            background-color: #15ca39;
             color: white;
-            padding: 10px 20px;
+            border: none;
+            padding: 10px 50px;
+            font-size: 16px;
             border-radius: 5px;
-            font-size: 14px;
-            z-index: 9999;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
         }
 
-        .toast.success {
-            background-color: green;
-        }
-
-        .toast.error {
-            background-color: red;
+        .toast-close:hover {
+            background-color: #14a631;
         }
 
         .hidden-row {
@@ -389,15 +430,12 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 </head>
 
 <body>
-    <!-- Spinner Start -->
     <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
         <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
             <span class="sr-only">Loading...</span>
         </div>
     </div>
-    <!-- Spinner End -->
 
-    <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
@@ -416,9 +454,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
-    <!-- Navbar End -->
 
-    <!-- Icon Bar Start -->
     <div class="icon-bar">
         <a href="notification.php" class="notification-icon">
             <i class="fas fa-bell"></i>
@@ -427,9 +463,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
     </div>
-    <!-- Icon Bar End -->
 
-    <!-- Breadcrumb Section -->
     <div class="breadcrumb-container">
         <h1>Checkout</h1>
         <ul class="breadcrumb">
@@ -441,7 +475,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         </ul>
     </div>
 
-    <!-- Payment Start -->
     <div class="containerp">
         <h2>Checkout</h2>
         <div id="cart-container"></div>
@@ -465,32 +498,19 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <hr>
 
         <div class="payment-info">
-            <h4>Choose Your Payment Method</h4>
+            <h4>Step 1: Choose Your Payment Method</h4>
             <div class="payment-method">
-                <br>
-                <label for="tng" class="payment-option">
-                    <div class="option-content">
-                        <img src="img/tng.png" alt="Touch 'n Go" class="payment-icon"> Touch 'n Go eWallet
-                    </div>
-                    <input type="radio" id="tng" name="payment" value="tng">
-                </label>
-                <div id="phone-number-field" style="display: none;">
-                    <label>Your phone number:</label>
-                    <div class="phone-input">
-                        <span>+60 <?php echo !empty($userPhoneNumber) ? htmlspecialchars($userPhoneNumber) : 'Phone number not found'; ?></span>
-                        <input type="hidden" id="phone-number" name="phone-number" 
-                               value="<?php echo !empty($userPhoneNumber) ? htmlspecialchars($userPhoneNumber) : ''; ?>">
-                    </div>
+                <div class="payment-option-card">
+                    <label for="creditcard" class="payment-option">
+                        <div class="option-content">
+                            <i class="fas fa-credit-card"></i>
+                            Credit Card
+                        </div>
+                        <input type="radio" id="creditcard" name="payment" value="creditcard">
+                    </label>
                 </div>
-                <br>
-                <label for="creditcard" class="payment-option">
-                    <div class="option-content">
-                        <img src="img/creditcard.png" alt="Credit Card" class="payment-icon"> Credit Card
-                    </div>
-                    <input type="radio" id="creditcard" name="payment" value="creditcard">
-                </label>
-                <div id="credit-card-field" style="display: none;">
-                    <label>Credit Card Details:</label>
+                <div id="credit-card-field">
+                    <label>Step 2: Enter Credit Card Details</label>
                     <?php if ($savedCard): ?>
                         <div class="saved-card">
                             <label>
@@ -509,15 +529,18 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         <input type="text" id="cvv" placeholder="CVV" maxlength="3">
                         <label><input type="checkbox" id="save-card" checked> Save card for future payments</label>
                     </div>
+                    <div class="security-note">
+                        <i class="fas fa-lock"></i>
+                        Your payment information is securely encrypted.
+                    </div>
                 </div>
             </div>
         </div>
         <div class="payment">
-            <button type="submit" onclick="validateForm()">Payment</button>
+            <button type="button">Confirm Payment</button>
         </div>
     </div>
 
-    <!-- Payment Confirmation Modal -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <img id="payment_picture" src="" alt="Payment Status" class="payment_picture">
@@ -527,30 +550,20 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         </div>
     </div>
 
+    <div id="toast" class="toast"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize payment method fields
-            const tngRadio = document.getElementById("tng");
             const creditCardRadio = document.getElementById("creditcard");
-            const phoneNumberField = document.getElementById("phone-number-field");
             const creditCardField = document.getElementById("credit-card-field");
             const newCardInput = document.getElementById("new-card-input");
             const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
             const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
 
-            // Set initial state
-            phoneNumberField.style.display = "none";
             creditCardField.style.display = "none";
-
-            // Handle payment method toggles
-            tngRadio.addEventListener("change", function() {
-                phoneNumberField.style.display = tngRadio.checked ? "block" : "none";
-                creditCardField.style.display = "none";
-            });
 
             creditCardRadio.addEventListener("change", function() {
                 creditCardField.style.display = creditCardRadio.checked ? "block" : "none";
-                phoneNumberField.style.display = "none";
             });
 
             if (newCardOption) {
@@ -562,7 +575,11 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 });
             }
 
-            // Fetch notifications
+            const paymentButton = document.querySelector('.payment button');
+            if (paymentButton) {
+                paymentButton.addEventListener('click', validateForm);
+            }
+
             fetch('get_notification.php')
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -584,7 +601,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     console.error('Fetch error:', error);
                 });
 
-            // Fetch cart data
             fetch("checkout.php")
                 .then(response => response.json())
                 .then(data => {
@@ -617,14 +633,11 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         container.innerHTML += courseItem;
                     });
 
-                    // Update Subject Fee
                     document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
 
-                    // Debug: Log enrollment status
                     console.log("Has Previous Enrollment:", hasPreviousEnrollment);
                     console.log("Enrollment Fee:", enrollmentFee);
 
-                    // Update Enrollment Fee visibility
                     const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
                     if (hasPreviousEnrollment) {
                         enrollmentFeeRow.classList.add('hidden-row');
@@ -632,31 +645,41 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         enrollmentFeeRow.classList.remove('hidden-row');
                     }
 
-                    // Update Total Amount
                     document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
                 })
                 .catch(error => console.error("Error fetching cart data:", error));
         });
 
         async function validateForm() {
-            const tngSelected = document.getElementById('tng').checked;
-            const creditCardSelected = document.getElementById('creditcard').checked;
-            const paymentMethod = tngSelected ? "TNG" : creditCardSelected ? "Credit Card" : "";
+            console.log("validateForm called");
+
+            const creditCardRadio = document.getElementById('creditcard');
+            if (!creditCardRadio) {
+                showToast("Payment options are not available. Please try again later.", "error");
+                return;
+            }
+            const creditCardSelected = creditCardRadio.checked;
+            const paymentMethod = creditCardSelected ? "Credit Card" : "";
+            
+            console.log("creditCardSelected:", creditCardSelected);
+            console.log("Payment Method:", paymentMethod);
 
             if (!paymentMethod) {
+                console.log("No payment method selected");
                 showToast("Please select a payment method.", "error");
+                setTimeout(() => {
+                    const toasts = document.querySelectorAll('.toast');
+                    console.log("Toast elements in DOM after 100ms:", toasts);
+                    toasts.forEach(toast => {
+                        console.log("Toast styles:", window.getComputedStyle(toast));
+                    });
+                }, 100);
+                await new Promise(resolve => setTimeout(resolve, 100));
                 return;
             }
 
-            let phoneNumber = "";
             let cardDetails = null;
-            if (tngSelected) {
-                phoneNumber = document.getElementById('phone-number').value;
-                if (!phoneNumber) {
-                    showToast("Phone number is required for TNG payment.", "error");
-                    return;
-                }
-            } else if (creditCardSelected) {
+            if (creditCardSelected) {
                 const useSavedCard = document.querySelector('input[name="card-option"][value="saved"]')?.checked;
                 if (!useSavedCard) {
                     const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
@@ -692,7 +715,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             }));
             const cartIds = cartItems.map(item => item.cart_id).join(",");
 
-            // 获取课程总价
             let subjectTotal = 0;
             for (const item of cartItems) {
                 const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
@@ -700,7 +722,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 subjectTotal += parseFloat(priceData.price);
             }
 
-            // 从PHP获取是否首次注册
             const isFirstEnrollment = <?php echo $hasPreviousEnrollment ? 'false' : 'true'; ?>;
             const enrollmentFee = isFirstEnrollment ? 100 : 0;
             const totalAmount = subjectTotal + enrollmentFee;
@@ -710,7 +731,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 return;
             }
 
-            // 检查购物车中的每个 (child_id, subject_id) 是否已经注册
             try {
                 const response = await fetch("check_registration.php", {
                     method: "POST",
@@ -736,7 +756,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 total_amount: totalAmount,
                 payment_method: paymentMethod,
                 cart_ids: cartIds,
-                phone: phoneNumber,
                 card_details: cardDetails
             };
 
@@ -766,20 +785,26 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         }
 
         function showToast(message, type) {
-            const toastContainer = document.createElement('div');
-            toastContainer.classList.add('toast', type);
-            toastContainer.style.position = 'fixed';
-            toastContainer.style.top = '20px';
-            toastContainer.style.right = '20px';
-            toastContainer.style.padding = '15px';
-            toastContainer.style.borderRadius = '5px';
-            toastContainer.style.color = 'white';
-            toastContainer.style.zIndex = '9999';
-            toastContainer.style.backgroundColor = type === 'error' ? 'red' : 'green';
-            toastContainer.innerText = message;
-            document.body.appendChild(toastContainer);
+            console.log("Showing toast:", message, type);
+            if (!document.body) {
+                console.error("Document body is not available.");
+                return;
+            }
+            const toast = document.getElementById('toast');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <img src="" alt="Toast Image" class="toast-image">
+                <div class="toast-message">${message}</div>
+                <button class="toast-close" onclick="this.parentElement.classList.remove('show')">OK</button>
+            `;
+            if (type === 'error') {
+                toast.querySelector('.toast-image').src = 'img/payment_ns.png';
+            } else if (type === 'success') {
+                toast.querySelector('.toast-image').src = 'img/payment_s.png';
+            }
+            toast.classList.add('show');
             setTimeout(() => {
-                toastContainer.remove();
+                toast.classList.remove('show');
             }, 3000);
         }
 
@@ -805,7 +830,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         }
     </script>
 
-    <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
@@ -857,20 +881,15 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             </div>
         </div>
     </div>
-    <!-- Footer End -->
 
-    <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-    <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="lib/wow.min.js"></script>
     <script src="lib/easing.min.js"></script>
     <script src="lib/waypoints.min.js"></script>
     <script src="lib/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
     <script src="js/main.js"></script>
 </body>
 </html>
