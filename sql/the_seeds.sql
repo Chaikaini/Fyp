@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 09:53 AM
+-- Generation Time: May 08, 2025 at 01:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,7 +42,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_address`, `admin_phone_number`, `admin_password`) VALUES
-(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$PhNMXqvL088UzhUx8aQcb.LsNktY4hOo5CZX9qeTPqP3KtQOXoxiW');
+(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$lQlGrowkkRVMDwrfxWOTveKgHOLxPIdZgaz/qrMs6lJkCIvPEaM/e');
 
 -- --------------------------------------------------------
 
@@ -76,6 +76,13 @@ CREATE TABLE `cart` (
   `teacher_id` int(11) NOT NULL,
   `deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `child_name`, `subject_name`, `price`, `subject_id`, `teacher_id`, `deleted`) VALUES
+(1, 1, 'Mat0001', 1, 'Yuna', NULL, 510.00, '11132', 12123, 1);
 
 -- --------------------------------------------------------
 
@@ -154,6 +161,35 @@ CREATE TABLE `comments` (
   `comment_rating` int(11) DEFAULT NULL,
   `comment_text` text DEFAULT NULL,
   `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `credit_cards`
+--
+
+CREATE TABLE `credit_cards` (
+  `id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `card_number` varchar(255) NOT NULL,
+  `expiry_date` varchar(5) NOT NULL,
+  `last_four` varchar(4) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `enrollment`
+--
+
+CREATE TABLE `enrollment` (
+  `enrollment_id` int(11) NOT NULL,
+  `parent_id` int(11) NOT NULL,
+  `class_id` varchar(20) NOT NULL,
+  `child_id` int(11) NOT NULL,
+  `enrollment_date` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -385,7 +421,7 @@ INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_
 (12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
 (12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
-(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Active', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
+(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
 
@@ -454,6 +490,22 @@ ALTER TABLE `comments`
   ADD KEY `parent_id` (`parent_id`),
   ADD KEY `class_id` (`class_id`),
   ADD KEY `subject_id` (`subject_id`);
+
+--
+-- Indexes for table `credit_cards`
+--
+ALTER TABLE `credit_cards`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `parent_id` (`parent_id`);
+
+--
+-- Indexes for table `enrollment`
+--
+ALTER TABLE `enrollment`
+  ADD PRIMARY KEY (`enrollment_id`),
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `class_id` (`class_id`),
+  ADD KEY `child_id` (`child_id`);
 
 --
 -- Indexes for table `exam_result`
@@ -549,7 +601,7 @@ ALTER TABLE `attendance`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `child`
@@ -564,6 +616,18 @@ ALTER TABLE `comments`
   MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `credit_cards`
+--
+ALTER TABLE `credit_cards`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `enrollment`
+--
+ALTER TABLE `enrollment`
+  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `exam_result`
 --
 ALTER TABLE `exam_result`
@@ -573,7 +637,7 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
@@ -657,6 +721,20 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
   ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
   ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
+
+--
+-- Constraints for table `credit_cards`
+--
+ALTER TABLE `credit_cards`
+  ADD CONSTRAINT `credit_cards_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
+
+--
+-- Constraints for table `enrollment`
+--
+ALTER TABLE `enrollment`
+  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
+  ADD CONSTRAINT `enrollment_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`);
 
 --
 -- Constraints for table `exam_result`

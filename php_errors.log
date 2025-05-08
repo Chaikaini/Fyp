@@ -109,3 +109,7 @@ Stack trace:
 [2025-05-08 09:51:50] No rows deleted for teacher_id 12349: Record not found
 [2025-05-08 09:52:29] Delete request received for teacher_id: 12348
 [2025-05-08 09:52:29] Successfully deleted teacher_id: 12348
+[2025-05-08 10:05:23] Successfully updated teacher_id: 12233
+[2025-05-08 10:05:30] Successfully updated teacher_id: 12347
+[2025-05-08 10:05:50] Delete request received: {"action":"delete","child_id":"1"}
+[2025-05-08 10:05:50] Cannot delete child_id 1: Associated exam results exist
