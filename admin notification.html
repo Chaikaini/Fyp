@@ -361,6 +361,20 @@
         e.preventDefault();
         clearError();
 
+        // Debug FormData
+        const formData = new FormData(this);
+        console.log('FormData contents:');
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}: ${value}`);
+        }
+
+        // Validate recipient_type
+        const recipientType = formData.get('recipient_type');
+        if (!['Teacher', 'Parent'].includes(recipientType)) {
+          showError('Please select a valid recipient type (Teacher or Parent)');
+          return;
+        }
+
         // Validate file size (e.g., max 5MB)
         const fileInput = document.getElementById('notification_document');
         if (fileInput.files.length > 0) {
@@ -371,7 +385,6 @@
           }
         }
 
-        const formData = new FormData(this);
         fetch('manage_notification.php', {
           method: 'POST',
           body: formData

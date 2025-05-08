@@ -5,24 +5,6 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 header("Content-Type: application/json");
 
-if (isset($_GET['action']) && $_GET['action'] === 'test') {
-    $response = [
-        "session_set" => isset($_SESSION['role']) && isset($_SESSION['admin_id']),
-        "session_role" => $_SESSION['role'] ?? 'not set',
-        "session_admin_id" => $_SESSION['admin_id'] ?? 'not set',
-        "php_version" => phpversion(),
-        "mysql_available" => extension_loaded('mysqli') ? "Yes" : "No"
-    ];
-    $conn = new mysqli("127.0.0.1", "root", "", "the seeds");
-    $response["db_connection"] = $conn->connect_error ? "Failed: " . $conn->connect_error : "Success";
-    if (!$conn->connect_error) {
-        $conn->close();
-    }
-    echo json_encode($response);
-    ob_end_flush();
-    exit;
-}
-
 $conn = new mysqli("127.0.0.1", "root", "", "the seeds");
 if ($conn->connect_error) {
     error_log("Database connection failed: " . $conn->connect_error);
@@ -30,10 +12,29 @@ if ($conn->connect_error) {
     ob_end_flush();
     exit;
 }
+$conn->set_charset("utf8mb4");
 
+// Handle test action
+if (isset($_GET['action']) && $_GET['action'] === 'test') {
+    $response = [
+        "session_set" => isset($_SESSION['role']) && isset($_SESSION['admin_id']),
+        "session_role" => $_SESSION['role'] ?? 'not set',
+        "session_admin_id" => $_SESSION['admin_id'] ?? 'not set',
+        "php_version" => phpversion(),
+        "mysql_available" => extension_loaded('mysqli') ? "Yes" : "No",
+        "db_connection" => $conn->connect_error ? "Failed: " . $conn->connect_error : "Success"
+    ];
+    echo json_encode($response);
+    $conn->close();
+    ob_end_flush();
+    exit;
+}
+
+// Check authentication
 if (!isset($_SESSION['role']) || !isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'Admin') {
     error_log("Unauthorized access attempt by " . ($_SESSION['admin_id'] ?? 'unknown'));
     echo json_encode(["success" => false, "error" => "Unauthorized access"]);
+    $conn->close();
     ob_end_flush();
     exit;
 }
@@ -42,20 +43,25 @@ $admin_id = $_SESSION['admin_id'];
 $sender_id = $admin_id;
 error_log("Setting sender_id: $sender_id");
 
+// Handle recipients request
 if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['recipient_type'])) {
     $recipient_type = $_GET['recipient_type'];
+    error_log("Fetching recipients for recipient_type: $recipient_type");
     if ($recipient_type === 'Teacher') {
         $stmt = $conn->prepare("SELECT teacher_id AS id, teacher_name AS name FROM teacher");
     } elseif ($recipient_type === 'Parent') {
         $stmt = $conn->prepare("SELECT parent_id AS id, parent_name AS name FROM parent");
     } else {
+        error_log("Invalid recipient type: $recipient_type");
         echo json_encode(["success" => false, "error" => "Invalid recipient type"]);
+        $conn->close();
         ob_end_flush();
         exit;
     }
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
         echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        $conn->close();
         ob_end_flush();
         exit;
     }
@@ -67,7 +73,14 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
     }
     echo json_encode($recipients);
     $stmt->close();
-} elseif (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
+    $conn->close();
+    ob_end_flush();
+    exit;
+}
+
+// Handle get notifications request
+if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
+    error_log("Fetching notifications for sender_id: $sender_id");
     $stmt = $conn->prepare("
         SELECT n.notification_id, n.sender_id, n.recipient_type, n.subject_id, n.class_id, n.notification_title, 
                n.notification_content, n.notification_document, n.notification_created_at, a.admin_name AS sender_name,
@@ -89,10 +102,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
         echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        $conn->close();
         ob_end_flush();
         exit;
     }
-    $stmt->bind_param("i", $sender_id);
+    $stmt->bind_param("s", $sender_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $notifications = [];
@@ -136,26 +150,34 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
     }
     echo json_encode($notifications);
     $stmt->close();
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Log all POST data for debugging
-    error_log("POST data received: " . json_encode($_POST));
+    $conn->close();
+    ob_end_flush();
+    exit;
+}
 
+// Handle POST request for sending notification
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("POST request received: " . json_encode($_POST));
+    
     $recipient_type = $_POST['recipient_type'] ?? '';
     $recipient_id = $_POST['recipient_id'] ?? '';
     $notification_title = $_POST['notification_title'] ?? '';
     $notification_content = $_POST['notification_content'] ?? '';
     $documentPath = null;
 
+    // Validate inputs
     if (empty($recipient_type) || empty($recipient_id) || empty($notification_title) || empty($notification_content)) {
         error_log("Missing required fields: recipient_type=$recipient_type, recipient_id=$recipient_id, title=$notification_title, content=$notification_content");
         echo json_encode(['success' => false, 'error' => 'All required fields must be filled']);
+        $conn->close();
         ob_end_flush();
         exit;
     }
 
     if (!in_array($recipient_type, ['Teacher', 'Parent'])) {
         error_log("Invalid recipient type: $recipient_type");
-        echo json_encode(['success' => false, 'error' => 'Invalid recipient type']);
+        echo json_encode(['success' => false, 'error' => 'Invalid recipient type. Must be Teacher or Parent']);
+        $conn->close();
         ob_end_flush();
         exit;
     }
@@ -198,6 +220,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
 
         error_log("Recipient IDs for $recipient_type: " . implode(", ", $recipient_ids));
 
+        // Handle file upload
         if (isset($_FILES['notification_document']) && $_FILES['notification_document']['error'] == UPLOAD_ERR_OK) {
             $uploadDir = 'Uploads/';
             if (!file_exists($uploadDir)) {
@@ -216,11 +239,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
             $documentPath = $targetFile;
         }
 
+        // Insert into notification table
+        error_log("Inserting notification with recipient_type: $recipient_type");
         $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document, subject_id, class_id) VALUES (?, ?, ?, ?, ?, NULL, NULL)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
-        $stmt->bind_param("iisss", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath);
+        $stmt->bind_param("issss", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath);
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert notification: " . $stmt->error);
         }
@@ -231,6 +256,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
         error_log("Inserted notification: notification_id=$notification_id, sender_id=$sender_id, recipient_type=$recipient_type");
         $stmt->close();
 
+        // Verify inserted recipient_type
+        $stmt = $conn->prepare("SELECT recipient_type FROM notification WHERE notification_id = ?");
+        $stmt->bind_param("i", $notification_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        error_log("Verified recipient_type in notification: " . ($row['recipient_type'] ?? 'NULL'));
+        $stmt->close();
+
+        // Insert into notification_receiver table
         $stmt = $conn->prepare("INSERT INTO notification_receiver (notification_id, parent_id, teacher_id, recipient_type, read_status) VALUES (?, ?, ?, ?, ?)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
@@ -247,17 +282,32 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
         }
         $stmt->close();
 
+        // Verify inserted recipient_type in notification_receiver
+        $stmt = $conn->prepare("SELECT recipient_type FROM notification_receiver WHERE notification_id = ?");
+        $stmt->bind_param("i", $notification_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            error_log("Verified recipient_type in notification_receiver: " . ($row['recipient_type'] ?? 'NULL'));
+        }
+        $stmt->close();
+
         $conn->commit();
         echo json_encode(['success' => true, 'message' => 'Announcement successfully sent']);
     } catch (Exception $e) {
         $conn->rollback();
-        error_log("Transaction failed: " . $e->getMessage());
+        error_log("Transaction failed: " . $e->getMessage() . "\nStack trace: " . $e->getTraceAsString());
         echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
-} else {
-    echo json_encode(["success" => false, "error" => "Invalid request"]);
+    $conn->close();
+    ob_end_flush();
+    exit;
 }
 
+// Handle invalid requests
+error_log("Invalid request received: method={$_SERVER['REQUEST_METHOD']}, action=" . ($_GET['action'] ?? 'none'));
+echo json_encode(["success" => false, "error" => "Invalid request. Please specify a valid action (e.g., ?action=getNotifications)"]);
 $conn->close();
 ob_end_flush();
+exit;
 ?>
