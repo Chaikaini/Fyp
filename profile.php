@@ -668,24 +668,23 @@
         </div>
     </div>
 
-   <!-- Add Child Modal -->
+ <!-- Add Child Modal -->
 <div id="addChildModal" class="modal">
     <div class="modal-content pointer-cursor">
         <span class="close" onclick="closeModal()">&times;</span>
         <h3>Add Child Information</h3>
 
         <div class="avatar-section">
-        <div class="profile-image-wrapper">
-            <label for="avatar-upload">
-            <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
-            <div class="overlay" title="Click to change image">
-                <i class="fas fa-camera camera-icon"></i>
+            <div class="profile-image-wrapper">
+                <label for="avatar-upload">
+                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
+                    <div class="overlay" title="Click to change image">
+                        <i class="fas fa-camera camera-icon"></i>
+                    </div>
+                </label>
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
             </div>
-            </label>
-            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
         </div>
-        </div>
-
 
         <form id="addChildForm" method="post" action="profile_addchild.php">
             <div class="form-group">
@@ -701,13 +700,13 @@
                 </select>
             </div>
             <div class="form-group">
-            <label for="kidNumber">My Kid Number</label>
-            <input type="text" id="kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
-        </div>
-        <div class="form-group">
-            <label for="birthday">Birthday</label>
-            <input type="date" id="birthday" name="child_birthday" readonly>
-        </div>
+                <label for="kidNumber">My Kid Number</label>
+                <input type="text" id="kidNumber" name="child_kidNumber" placeholder="000000-00-0000">
+            </div>
+            <div class="form-group">
+                <label for="birthday">Birthday</label>
+                <input type="date" id="birthday" name="child_birthday" readonly>
+            </div>
             <div class="form-group">
                 <label for="school">School</label>
                 <input type="text" id="school" name="child_school">
@@ -724,6 +723,7 @@
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
+
         <div id="successToast" class="toast">Add child information successfully!</div>
     </div>
 </div>
@@ -1109,17 +1109,27 @@ window.addEventListener('click', function(event) {
   }
 });
 
-document.querySelector('.overlay').addEventListener('click', function () {
-    document.getElementById('avatar-upload').click();
-});
+  // 处理点击头像上传图片的事件
+  document.querySelector('.overlay').addEventListener('click', function () {
+        document.getElementById('avatar-upload').click();
+    });
 
-document.getElementById('avatar-upload').addEventListener('change', function (event) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        document.getElementById('user-avatar').src = e.target.result;
-    };
-    reader.readAsDataURL(event.target.files[0]);
-});
+    // 处理文件选择事件，更新头像
+    document.getElementById('avatar-upload').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+
+        // 确保文件是图片
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // 更新头像图片
+                document.getElementById('user-avatar').src = e.target.result;
+            };
+            reader.readAsDataURL(file); // 读取文件为 Data URL
+        } else {
+            alert('Please select a valid image file.');
+        }
+    });
 
 
 // delete modal
