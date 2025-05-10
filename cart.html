@@ -175,7 +175,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 1000;
+            z-index: 10000 !important;
         }
     
         .popup-close {
@@ -189,26 +189,6 @@
     
         .popup-close:hover {
             color: #f00;
-        }
-    
-        .popup-row {
-            margin-bottom: 15px;
-        }
-    
-        .popup-label {
-            font-weight: bold;
-            color: #333;
-        }
-    
-        .popup-value {
-            color: #555;
-        }
-    
-        #childrenSelect {
-            width: 100%;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
         }
 
         .notification-badge {
@@ -294,27 +274,27 @@
         <!-- Popup for editing -->
         <div class="popup-info">
             <div class="popup-close">×</div>
-            <div class="popup-row">
+            <div class="popup-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <span class="popup-label">Month:</span>
                 <span class="popup-value" id="popupMonth"></span>
             </div>
-            <div class="popup-row">
+            <div class="popup-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <span class="popup-label">Time:</span>
                 <span class="popup-value" id="popupTime"></span>
             </div>
-            <div class="popup-row">
+            <div class="popup-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <span class="popup-label">Capacity:</span>
                 <span class="popup-value" id="popupCapacity"></span>
             </div>
-            <div class="popup-row">
+            <div class="popup-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <span class="popup-label">Children:</span>
                 <span class="popup-value">
-                    <select id="childrenSelect">
-                        <option value="">Select a child</option>
+                    <select id="childrenSelect" style="width: 150px; padding: 5px; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box;">
+                        <option value="" disabled hidden selected>Select a child</option>
                     </select>
                 </span>
             </div>
-            <div class="popup-row">
+            <div class="popup-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
                 <button class="btn-add" onclick="saveChanges()">Save Changes</button>
             </div>
         </div>
@@ -354,43 +334,40 @@
             loadCartData();
         });
 
-        function loadChildren(year) {
+        async function loadChildren(year) {
             console.log('Loading children for year:', year);
-            if (!year) {
-                console.error('No year provided');
-                const childrenSelect = document.getElementById('childrenSelect');
-                childrenSelect.innerHTML = '<option value="">No children available</option>';
+            const childrenSelect = document.getElementById('childrenSelect');
+            
+            if (!year || year === null || isNaN(year)) {
+                console.error('Invalid year provided:', year);
                 return;
             }
 
-            fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`)
-            .then(response => {
+            try {
+                const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
                 console.log('Children data received:', data);
-                availableChildren = Array.isArray(data) ? data : [];
-                const childrenSelect = document.getElementById('childrenSelect');
-                childrenSelect.innerHTML = '<option value="">Select a child</option>';
 
+                availableChildren = Array.isArray(data) ? data : [];
                 if (availableChildren.length === 0) {
-                    childrenSelect.innerHTML = '<option value="">No children found for Year ' + year + '</option>';
+                    console.warn('No children available');
+                    childrenSelect.innerHTML = '<option value="" disabled hidden selected>No children available</option>';
                     return;
                 }
 
+                // 保留默认选项，只添加动态选项
+                childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
                 availableChildren.forEach(child => {
                     const option = document.createElement('option');
                     option.value = child.child_id;
-                    option.textContent = `${child.child_name} (Year ${child.child_year})`;
+                    option.textContent = `${child.child_name} (Year ${year})`; // 格式化为 "Name (Year X)"
                     childrenSelect.appendChild(option);
                 });
-            })
-            .catch(error => {
-                console.error('Error fetching children:', error);
-                const childrenSelect = document.getElementById('childrenSelect');
-                childrenSelect.innerHTML = '<option value="">Error loading children</option>';
-            });
+            } catch (error) {
+                console.error('Error loading children:', error);
+                childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
+            }
         }
 
         function loadCartData() {
@@ -403,6 +380,10 @@
             })
             .then(data => {
                 console.log('Cart data received:', data);
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Failed to load cart data');
+                }
+
                 let cart = data.cart || [];
                 let cartContainer = document.querySelector('.cart-items');
                 let totalPriceElement = document.getElementById('total-price');
@@ -422,25 +403,34 @@
                     }
 
                     let itemPrice = parseFloat(item.price);
+                    if (isNaN(itemPrice)) {
+                        console.warn(`Invalid price for item ${item.cart_id}: ${item.price}`);
+                        itemPrice = 0;
+                    }
                     totalPrice += itemPrice;
 
-                    let capacityDisplay = `${item.class_enrolled}/${item.class_capacity}`;
+                    let capacityDisplay = `${item.class_enrolled || 0}/${item.class_capacity || 0}`;
+                    let classTime = JSON.stringify(item.class_time || '').slice(1, -1);
+                    let childName = JSON.stringify(item.child_name || '').slice(1, -1);
+                    let childId = item.child_id || '';
+                    let partId = item.part_id !== undefined ? item.part_id : null;
+                    let year = item.year ? parseInt(item.year.replace('Year ', '')) : null;
 
                     let cartItem = document.createElement('div');
                     cartItem.classList.add('cart-item');
 
                     cartItem.innerHTML = `
-                        <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name} Image" class="cart-item-image">
+                        <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name || 'Unknown Subject'} Image" class="cart-item-image">
                         <div class="cart-item-details">
-                            <h5>${item.subject_name}</h5>
-                            <p>Child: ${item.child_name ? item.child_name : 'Not specified'}</p>
+                            <h5>${item.subject_name || 'Unknown Subject'}</h5>
+                            <p>Child: ${childName || 'Not specified'}</p>
                             <p>Capacity: ${capacityDisplay}</p>
                             <p>Price: RM ${itemPrice.toFixed(2)}</p>
-                            <p>Year: ${item.year || 'Not specified'}</p>
+                            <p>Year: ${year !== null ? year : 'Not specified'}</p>
                         </div>
                         <div class="cart-item-actions">
-                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${item.part_id}, '${item.class_time}', '${capacityDisplay}', '${item.child_id || ''}', ${item.year || 'null'})"></i>
-                            <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, ${item.subject_id}, '${item.child_name || ''}')"></i>
+                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year})"></i>
+                            <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, ${item.subject_id || 'null'}, '${childName}')"></i>
                         </div>
                     `;
 
@@ -451,27 +441,29 @@
             })
             .catch(error => {
                 console.error('Error loading cart:', error);
-                document.querySelector('.cart-items').innerHTML = "<p>Error loading cart.</p>";
+                document.querySelector('.cart-items').innerHTML = `<p>Error loading cart: ${error.message}</p>`;
             });
         }
 
-        function editCartItem(cartId, partId, classTime, capacity, childId, year) {
+        async function editCartItem(cartId, partId, classTime, capacity, childId, year) {
             console.log('Editing cart item:', { cartId, partId, classTime, capacity, childId, year });
             currentCartId = cartId;
+
             const monthText = partId == 1 ? "January - June" : partId == 2 ? "July - December" : "Not specified";
             document.getElementById('popupMonth').textContent = monthText;
             document.getElementById('popupTime').textContent = classTime || 'Not specified';
             document.getElementById('popupCapacity').textContent = capacity || 'Not specified';
-            
-            loadChildren(year);
-            
-            setTimeout(() => {
-                const childrenSelect = document.getElementById('childrenSelect');
-                childrenSelect.value = childId || '';
-                console.log('Selected child ID:', childrenSelect.value);
-            }, 500);
-            
-            document.querySelector('.popup-info').style.display = 'block';
+            console.log('Popup content set:', { monthText, classTime, capacity });
+
+            await loadChildren(year);
+
+            const childrenSelect = document.getElementById('childrenSelect');
+            childrenSelect.value = childId || '';
+            console.log('Selected child ID:', childrenSelect.value);
+
+            const popup = document.querySelector('.popup-info');
+            popup.style.display = 'block';
+            console.log('Popup display set to:', popup.style.display);
         }
 
         function saveChanges() {
@@ -483,39 +475,10 @@
             }
 
             console.log('Saving changes for cart_id:', currentCartId, 'with child_id:', newChildId);
-            // Placeholder: Update the frontend locally (since update_cart.php is not available)
             const selectedChild = availableChildren.find(child => child.child_id == newChildId);
             alert(`Updated cart item ${currentCartId} with child: ${selectedChild ? selectedChild.child_name : 'Unknown'}`);
-            loadCartData(); // Refresh cart to reflect any local changes
+            loadCartData();
             document.querySelector('.popup-info').style.display = 'none';
-
-            // If you want to implement server-side updates, create update_cart.php and uncomment the following:
-            /*
-            fetch('update_cart.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    cart_id: currentCartId,
-                    child_id: newChildId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Update response:', data);
-                if (data.status === 'success') {
-                    loadCartData();
-                    document.querySelector('.popup-info').style.display = 'none';
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error updating cart:', error);
-                alert('Error updating cart.');
-            });
-            */
         }
 
         function removeFromCart(cartId, subjectId, childName) {
@@ -579,7 +542,7 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <       <h4 class="text-white mb-3">Gallery</h4>
+                    <h4 class="text-white mb-3">Gallery</h4>
                     <div class="row g-2 pt-2">
                         <div class="col-4">
                             <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
