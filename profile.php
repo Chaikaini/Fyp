@@ -675,16 +675,16 @@
         <h3>Add Child Information</h3>
 
         <div class="avatar-section">
-            <div class="profile-image-wrapper">
-                <label for="avatar-upload">
-                    <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
-                    <div class="overlay" title="Click to change image">
-                        <i class="fas fa-camera camera-icon"></i>
-                    </div>
-                </label>
-                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+        <div class="profile-image-wrapper">
+            <div class="image-container">
+                <img src="img/user.jpg" alt="User Avatar" id="child-avatar-preview" class="profile-img">
+                <div class="overlay" title="Click to change image" onclick="document.getElementById('child-avatar-upload').click()">
+                    <i class="fas fa-camera camera-icon"></i>
+                </div>
             </div>
+            <input type="file" id="child-avatar-upload" name="child_image" accept="image/*" style="display: none;">
         </div>
+    </div>
 
         <form id="addChildForm" method="post" action="profile_addchild.php">
             <div class="form-group">
@@ -735,15 +735,15 @@
         <h3>Edit Child Information</h3>
 
         <div class="avatar-section">
-        <div class="profile-image-wrapper" style="position: relative;">
-            <label for="avatar-upload">
-            <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
-            <div class="overlay" title="Click to change image">
-                <i class="fas fa-camera camera-icon"></i>
+            <div class="profile-image-wrapper" style="position: relative;">
+                <div class="image-container">
+                    <img src="img/user.jpg" alt="User Avatar" id="edit-child-avatar-preview" class="profile-img">
+                    <div class="overlay" title="Click to change image" onclick="document.getElementById('edit-child-avatar-upload').click()">
+                        <i class="fas fa-camera camera-icon"></i>
+                    </div>
+                </div>
+                <input type="file" id="edit-child-avatar-upload" name="edit_child_image" accept="image/*" style="display: none;">
             </div>
-            </label>
-            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-        </div>
         </div>
 
 
@@ -1109,27 +1109,33 @@ window.addEventListener('click', function(event) {
   }
 });
 
-  // 处理点击头像上传图片的事件
-  document.querySelector('.overlay').addEventListener('click', function () {
-        document.getElementById('avatar-upload').click();
-    });
+ // add child modal's image preview
+document.getElementById('child-avatar-upload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('child-avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select a valid image file.');
+    }
+});
 
-    // 处理文件选择事件，更新头像
-    document.getElementById('avatar-upload').addEventListener('change', function (event) {
-        const file = event.target.files[0];
-
-        // 确保文件是图片
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // 更新头像图片
-                document.getElementById('user-avatar').src = e.target.result;
-            };
-            reader.readAsDataURL(file); // 读取文件为 Data URL
-        } else {
-            alert('Please select a valid image file.');
-        }
-    });
+// edit child modal's image preview
+document.getElementById('edit-child-avatar-upload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('edit-child-avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select a valid image file.');
+    }
+});
 
 
 // delete modal
@@ -1194,7 +1200,7 @@ function showToast(message, isError = false) {
 }
 
 // edit modal
-function openEditModal(name, gender, kidNumber, birthday, school, year, childId) {
+function openEditModal(name, gender, kidNumber, birthday, school, year, childId, avatar) {
     console.log("Opening edit modal with childId:", childId); 
 
     document.getElementById("childName").value = name;
@@ -1202,7 +1208,11 @@ function openEditModal(name, gender, kidNumber, birthday, school, year, childId)
     document.getElementById("editkidNumber").value = kidNumber;
     document.getElementById("childBirthday").value = birthday;
     document.getElementById("childSchool").value = school;
-    document.getElementById("childId").value = childId; 
+    document.getElementById("childId").value = childId;
+
+    // Set avatar preview
+    const avatarPreview = document.getElementById("edit-child-avatar-preview");
+    avatarPreview.src = avatar ? `uploads/${avatar}` : 'img/user.jpg';
 
     let yearSelect = document.getElementById("childYear");
     for (let i = 0; i < yearSelect.options.length; i++) {
@@ -1219,9 +1229,11 @@ document.getElementById("childForm").addEventListener("submit", function (event)
     event.preventDefault();
 
     let formData = new FormData(this);
-
-    for (let [key, value] of formData.entries()) {
-        console.log(key, value);
+    
+    // Add file input to formData if exists
+    const fileInput = document.getElementById('edit-child-avatar-upload');
+    if (fileInput.files.length > 0) {
+        formData.append('child_avatar', fileInput.files[0]);
     }
 
     fetch("profile_editchild.php", {
@@ -1389,7 +1401,8 @@ function fetchChildrenInfo() {
                         <td>${child.child_year}</td>
                         <td>
                             <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
-                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', '${child.child_year}', '${child.child_id}')"></i>
+                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', 
+                               '${child.child_year}', '${child.child_id}', '${child.avatar}')"></i>
                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"  data-child-id="${child.child_id}"></i>
 
                         </td>
