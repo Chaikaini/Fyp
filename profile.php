@@ -1273,22 +1273,45 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     event.preventDefault();
 
     let formData = new FormData(this);
+    
+    // Validate required fields
+    const requiredFields = ['child_name', 'child_gender', 'child_kidNumber', 'child_birthday', 'child_school', 'child_year'];
+    for (let field of requiredFields) {
+        if (!formData.get(field)) {
+            showToast(`Error: ${field.replace('child_', '')} is required`, true);
+            return;
+        }
+    }
+
+    // Add file if exists
+    const fileInput = document.getElementById('child-avatar-upload');
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('child_image', fileInput.files[0]);
+    }
 
     fetch("profile_addchild.php", {
         method: "POST",
-        body: formData,
-        credentials: "include"  
+        body: formData
     })
-    .then(response => response.json()) 
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            showToast("Child information added successfully!");
+            showToast(data.message || "Child information added successfully!");
+            document.getElementById('addChildModal').style.display = 'none';
             setTimeout(() => { location.reload(); }, 2000);
         } else {
-            showToast("Error: " + data.error, true);
+            showToast("Error: " + (data.error || "Failed to add child"), true);
         }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("Error: " + error.message, true);
+    });
 });
 
 
