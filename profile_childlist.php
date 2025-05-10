@@ -21,7 +21,7 @@ if (!isset($_SESSION['parent_id'])) {
 $parent_id = $_SESSION['parent_id']; 
 
 // check parent child information
-$sql = "SELECT child_id, child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year FROM child WHERE parent_id = ?";
+$sql = "SELECT child_id, child_name, child_gender, child_kidNumber, child_birthday, child_school, child_year, child_image FROM child WHERE parent_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $parent_id); 
 $stmt->execute();

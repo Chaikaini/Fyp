@@ -885,10 +885,6 @@
         };
 
 
-        document.addEventListener("DOMContentLoaded", function () {
-    fetchUserEmail();
-});
-
 // add another contact
 document.getElementById('add-contact-btn').addEventListener('click', function () {
     const extraContact = document.getElementById('additional-contact');
@@ -1200,8 +1196,10 @@ function showToast(message, isError = false) {
 }
 
 // edit modal
-function openEditModal(name, gender, kidNumber, birthday, school, year, childId, avatar) {
+function openEditModal(name, gender, kidNumber, birthday, school, year, childId, childImage) {
+    // use to check debug log
     console.log("Opening edit modal with childId:", childId); 
+    console.log("Child image path:", childImage); 
 
     document.getElementById("childName").value = name;
     document.getElementById("childGender").value = gender;
@@ -1210,9 +1208,23 @@ function openEditModal(name, gender, kidNumber, birthday, school, year, childId,
     document.getElementById("childSchool").value = school;
     document.getElementById("childId").value = childId;
 
-    // Set avatar preview
+    // Set avatar preview with correct path
     const avatarPreview = document.getElementById("edit-child-avatar-preview");
-    avatarPreview.src = avatar ? `uploads/${avatar}` : 'img/user.jpg';
+    
+    // Check if childImage contains the full path
+    if (childImage && childImage.includes('uploads/child_images/')) {
+        avatarPreview.src = childImage;
+    } else if (childImage) {
+        avatarPreview.src = `uploads/child_images/${childImage}`;
+    } else {
+        avatarPreview.src = "img/user.jpg";
+    }
+
+    // Add error handling for image loading
+    avatarPreview.onerror = function() {
+        console.error("Failed to load image:", this.src);
+        this.src = "img/user.jpg"; // Fallback to default image
+    };
 
     let yearSelect = document.getElementById("childYear");
     for (let i = 0; i < yearSelect.options.length; i++) {
@@ -1233,7 +1245,7 @@ document.getElementById("childForm").addEventListener("submit", function (event)
     // Add file input to formData if exists
     const fileInput = document.getElementById('edit-child-avatar-upload');
     if (fileInput.files.length > 0) {
-        formData.append('child_avatar', fileInput.files[0]);
+        formData.append('child_image', fileInput.files[0]);
     }
 
     fetch("profile_editchild.php", {
@@ -1261,22 +1273,45 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     event.preventDefault();
 
     let formData = new FormData(this);
+    
+    // Validate required fields
+    const requiredFields = ['child_name', 'child_gender', 'child_kidNumber', 'child_birthday', 'child_school', 'child_year'];
+    for (let field of requiredFields) {
+        if (!formData.get(field)) {
+            showToast(`Error: ${field.replace('child_', '')} is required`, true);
+            return;
+        }
+    }
+
+    // Add file if exists
+    const fileInput = document.getElementById('child-avatar-upload');
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append('child_image', fileInput.files[0]);
+    }
 
     fetch("profile_addchild.php", {
         method: "POST",
-        body: formData,
-        credentials: "include"  
+        body: formData
     })
-    .then(response => response.json()) 
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            showToast("Child information added successfully!");
+            showToast(data.message || "Child information added successfully!");
+            document.getElementById('addChildModal').style.display = 'none';
             setTimeout(() => { location.reload(); }, 2000);
         } else {
-            showToast("Error: " + data.error, true);
+            showToast("Error: " + (data.error || "Failed to add child"), true);
         }
     })
-    .catch(error => console.error("Error:", error));
+    .catch(error => {
+        console.error("Error:", error);
+        showToast("Error: " + error.message, true);
+    });
 });
 
 
@@ -1386,12 +1421,16 @@ function fetchChildrenInfo() {
     fetch("profile_childlist.php")
         .then(response => response.json())
         .then(data => {
+            console.log("Received child data:", data); // Add debug log
             const tbody = document.querySelector("#children-info-content tbody");
             tbody.innerHTML = ""; 
 
             if (data.status === "success") {
                 data.data.forEach(child => {
                     const row = document.createElement("tr");
+                    // Clean up the image path before passing it
+                    const imagePath = child.child_image ? child.child_image.replace(/^uploads\/child_images\//, '') : '';
+                    
                     row.innerHTML = `
                         <td>${child.child_name}</td>
                         <td>${child.child_gender}</td>
@@ -1401,10 +1440,12 @@ function fetchChildrenInfo() {
                         <td>${child.child_year}</td>
                         <td>
                             <i class="pointer-cursor fas fa-edit text-warning edit-btn" 
-                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', '${child.child_kidNumber}','${child.child_birthday}', '${child.child_school}', 
-                               '${child.child_year}', '${child.child_id}', '${child.avatar}')"></i>
-                           <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn"  data-child-id="${child.child_id}"></i>
-
+                               onclick="openEditModal('${child.child_name}', '${child.child_gender}', 
+                               '${child.child_kidNumber}','${child.child_birthday}', 
+                               '${child.child_school}', '${child.child_year}', 
+                               '${child.child_id}', '${imagePath}')"></i>
+                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
+                               data-child-id="${child.child_id}"></i>
                         </td>
                     `;
                     tbody.appendChild(row);
