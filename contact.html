@@ -20,7 +20,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
-
     <!-- Libraries Stylesheet -->
     <link href="lib/animate.min.css" rel="stylesheet">
     <link href="lib/owl.carousel.min.css" rel="stylesheet">
@@ -32,35 +31,103 @@
     <link href="css/style.css" rel="stylesheet">
 
     <style>
-        .map{
+        .map {
             height: 300px;
-            border:0;
+            border: 0;
         }
 
-        .logo{
-            width: 50px; 
+        .logo {
+            width: 50px;
             height: 50px;
         }
 
-        .textarea{
-            height: 150px；
+        .textarea {
+            height: 150px;
         }
 
         .notification-badge {
-        position: absolute;
-        top: 5px; 
-        right: 10px; 
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        border-radius: 50%;
-        display: none; 
-        z-index: 1000;
-    }
-    .notification-icon {
-        position: relative; 
-    }
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
 
+        .notification-icon {
+            position: relative;
+        }
+
+        .icon-bar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #caccce;
+        }
+
+        .icon-bar a {
+            margin: 0 15px;
+            color: #000000;
+            font-size: 24px;
+            transition: color 0.3s ease;
+        }
+
+        .icon-bar a:hover {
+            color: #73cf67;
+        }
+
+        .inbox-modal {
+            display: none;
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 15px 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+            border: 1px solid #ccc;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        .inbox-modal strong {
+            font-size: 18px;
+        }
+
+        .inbox-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .inbox-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .navbar-color {
+            color: #28a745;
+        }
     </style>
 </head>
 
@@ -73,23 +140,19 @@
     </div>
     <!-- Spinner End -->
 
-     <!-- Navbar Start -->
+    <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="#" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
     <!-- Navbar End -->
@@ -97,14 +160,13 @@
     <!-- Icon Bar Start -->
     <div class="icon-bar">
         <a href="notification.php" class="notification-icon">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge" style="display: none;"></span>
-      </a>
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" style="display: none;"></span>
+        </a>
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
     </div>
     <!-- Icon Bar End -->
-
 
     <!-- Header Start -->
     <div class="container-fluid bg-primary py-5 mb-5 page-header">
@@ -113,7 +175,7 @@
                 <div class="col-lg-10 text-center">
                     <h1 class="display-3 text-white animated slideInDown">Contact Us</h1>
                     <nav aria-label="breadcrumb">
-                        
+                        <!-- 可以添加面包屑导航 -->
                     </nav>
                 </div>
             </div>
@@ -121,155 +183,130 @@
     </div>
     <!-- Header End -->
 
+    <!-- Contact Start -->
+    <div class="container-fluid p-0">
+        <!-- Full-Screen Map -->
+        <iframe 
+            class="map position-relative w-100"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2549.857659110996!2d103.596182!3d1.6501033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7974ad97a0d1%3A0x59e8bcb06dcece99!2sThe%20Seeds%20Learning%20Centre!5e0!3m2!1sen!2smy!4v1700000000000"
+            frameborder="0"
+            allowfullscreen=""
+            aria-hidden="false"
+            tabindex="0">
+        </iframe>
+    </div>
 
-  <!-- Contact Start -->
-<div class="container-fluid p-0">
-    <!-- Full-Screen Map -->
-    <iframe 
-        class="map position-relative w-100"
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2549.857659110996!2d103.596182!3d1.6501033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7974ad97a0d1%3A0x59e8bcb06dcece99!2sThe%20Seeds%20Learning%20Centre!5e0!3m2!1sen!2smy!4v1700000000000"
-        frameborder="0"
-        allowfullscreen=""
-        aria-hidden="false"
-        tabindex="0">
-    </iframe>
-</div>
-
-<div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-    <div class="d-flex align-items-center mb-3">
-        <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-            <i class="fa fa-map-marker-alt text-white"></i>
-        </div>
-        <div class="ms-3">
-            <h5 class="text-primary">Office</h5>
-            <p class="mb-0">5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
+                        <i class="fa fa-map-marker-alt text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Office</h5>
+                        <p class="mb-0">5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
+                        <i class="fa fa-phone-alt text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Mobile</h5>
+                        <p class="mb-0">
+                            <a href="https://wa.me/60117758990" class="text-decoration-none text-dark" title="Chat on WhatsApp">
+                                +011 775 8990
+                                <small><i class="fab fa-whatsapp ms-1 text-success"></i></small>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
+                        <i class="fa fa-envelope-open text-white"></i>
+                    </div>
+                    <div class="ms-3">
+                        <h5 class="text-primary">Email</h5>
+                        <p class="mb-0">
+                            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry%20about%20Courses&body=Dear%20The%20Seeds%20Team,%0A%0AI%20would%20like%20to%20inquire%20about..."
+                               class="text-decoration-none text-dark"
+                               target="_blank"
+                               title="Open in Gmail">
+                               TheSeeds@gmail.com
+                               <small><i class="fas fa-envelope ms-1 text-primary"></i></small>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- 其他内容可以根据需要添加，例如联系表单 -->
         </div>
     </div>
-    <div class="d-flex align-items-center mb-3">
-        <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-            <i class="fa fa-phone-alt text-white"></i>
-        </div>
-        <div class="ms-3">
-            <h5 class="text-primary">Mobile</h5>
-            <p class="mb-0">
-                <a href="https://wa.me/60117758990" class="text-decoration-none text-dark" title="Chat on WhatsApp">
-                    +011 775 8990
-                    <small><i class="fab fa-whatsapp ms-1 text-success"></i></small>
-                </a>
-            </p>
-        </div>
-    </div>
-    <div class="d-flex align-items-center">
-        <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-            <i class="fa fa-envelope-open text-white"></i>
-        </div>
-        <div class="ms-3">
-            <h5 class="text-primary">Email</h5>
-            <p class="mb-0">
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry%20about%20Courses&body=Dear%20The%20Seeds%20Team,%0A%0AI%20would%20like%20to%20inquire%20about..."
-                   class="text-decoration-none text-dark"
-                   target="_blank"
-                   title="Open in Gmail">
-                   TheSeeds@gmail.com
-                   <small><i class="fas fa-envelope ms-1 text-primary"></i></small>
-                </a>
-            </p>
-        </div>
-    </div>
-</div>
-            
-<script>
-    function sendEmail() {
-        if (navigator.userAgent.includes('Chrome')) {
-            window.open('https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry');
-        } else {
-            window.location.href = 'mailto:TheSeeds@gmail.com?subject=Enquiry';
-        }
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-    fetch('get_notification.php')
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Notifications data:', data); 
+    <!-- Contact End -->
 
-        //check if there have notification is unread
-        if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-            console.log('Unread notifications found!');
-            const badge = document.querySelector('.notification-badge');
-            if (badge) {
-                badge.style.display = 'block'; //show red dot
-            }
-        } else {
-            console.log('No unread notifications');
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-    });
-});
-    </script>
-    
-<!-- Contact End -->
-
-  <!-- Footer Start -->
-<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-  <div class="container py-5">
-    <div class="row g-5">
-      <div class="col-lg-3 col-md-6">
-        <h4 class="text-white mb-4">Quick Link</h4>
-        <a class="btn btn-link" href="about.html">About Us</a><br>
-        <a class="btn btn-link" href="contact.html">Contact Us</a>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <h4 class="text-white mb-4">Contact</h4>
-        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
-        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
-        <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-      </div>
-      <div class="col-lg-3 col-md-6">
-        <h4 class="text-white mb-4">Gallery</h4>
-        <div class="row g-2 pt-2">
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-          </div>
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-          </div>
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-          </div>
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-          </div>
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-          </div>
-          <div class="col-4">
-            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-          </div>
-        </div>
-      </div>
+    <!-- Inbox Message Modal -->
+    <div id="inboxModal" class="inbox-modal">
+        <strong>You have a new notification.</strong><br>
+        <a href="notification.php" class="inbox-link">View Notifications</a>
     </div>
-  </div>
-  <div class="container">
-    <div class="copyright">
-      <div class="row">
-        <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-          &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
-        </div>
-        <div class="col-md-6 text-center text-md-end">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Footer End -->
 
-<!-- Back to Top -->
-<a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Quick Link</h4>
+                    <a class="btn btn-link" href="about.html">About Us</a><br>
+                    <a class="btn btn-link" href="contact.html">Contact Us</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -281,6 +318,116 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        function sendEmail() {
+            if (navigator.userAgent.includes('Chrome')) {
+                window.open('https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry');
+            } else {
+                window.location.href = 'mailto:TheSeeds@gmail.com?subject=Enquiry';
+            }
+        }
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php');
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+                
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                    // Show icon-bar for logged-in users
+                    document.querySelector('.icon-bar').style.display = 'flex';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="index.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    // Hide icon-bar for non-logged-in users
+                    document.querySelector('.icon-bar').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML = `
+                    <a href="index.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                `;
+                const authButton = document.getElementById('authButton');
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+                // Hide icon-bar on error
+                document.querySelector('.icon-bar').style.display = 'none';
+            }
+        }
+
+        // Load notifications (only for logged-in users)
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('check_login.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch login status');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.isLoggedIn) {
+                        fetch('get_notification.php')
+                            .then(response => {
+                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Notifications data:', data);
+                                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                                    console.log('Unread notifications found!');
+                                    const badge = document.querySelector('.notification-badge');
+                                    if (badge) {
+                                        badge.style.display = 'block';
+                                    }
+                                    const modal = document.getElementById('inboxModal');
+                                    if (modal) {
+                                        modal.style.display = 'block';
+                                        setTimeout(() => {
+                                            modal.style.display = 'none';
+                                        }, 8000);
+                                    } else {
+                                        console.error('Modal element with id "inboxModal" not found.');
+                                    }
+                                } else {
+                                    console.log('No unread notifications');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking login status for notifications:', error);
+                });
+        });
+
+        // Load navigation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNavigation();
+        });
+    </script>
 </body>
 
 </html>
