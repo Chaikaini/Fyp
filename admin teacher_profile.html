@@ -495,7 +495,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
      // Real-time password strength check
-     
     document.getElementById('new-password').addEventListener('input', function () {
       const password = this.value;
       const { strengthLevel, strengthText, progressWidth, progressClass } = evaluatePasswordStrength(password);

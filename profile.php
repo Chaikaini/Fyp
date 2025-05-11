@@ -415,7 +415,13 @@
   padding: 0;
   cursor: pointer;
 }
-    </style>
+
+  .progress-bar.weak { background-color: #dc3545; }
+  .progress-bar.medium { background-color: #ffc107; }
+  .progress-bar.strong { background-color: #28a745; }
+  .progress-bar.very-strong { background-color: #007bff; }
+
+</style>
     
 </head>
 
@@ -574,30 +580,43 @@
         <input type="text" id="contact-phone" name="additional_contact_phone">
     </div>
 </div>
-                <h3>Reset Password</h3>
-                
-                <div class="form-group">
-                    <label for="current-password">Current Password</label>
-                    <input type="password" id="current-password" autocomplete="new-password" placeholder="Enter current password">
-                    <span id="current-password-error" class="error-message"></span>
-                </div>
-                <div class="form-group">
-                    <label for="new-password">New Password</label>
-                    <input type="password" id="new-password" placeholder="Enter new password">
-                </div>
-                <div class="form-group">
-                    <label for="confirm-password">Confirm Password</label>
-                   <input type="password" id="confirm-password" placeholder="Confirm new password">
-                   <span id="new-password-error" class="error-message"></span>
-                </div>
 
-                <div class="form-group">
-                    <button type="submit">Save Changes</button>
-                </div>
-            </form>
-            <div id="success-message" class="success-message" style="display: none;"></div>
+
+
+        <h3>Reset Password</h3>
+        
+        <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" autocomplete="new-password" placeholder="Enter current password">
+            <span id="current-password-error" class="error-message"></span>
         </div>
-    
+        <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password">
+
+                <!-- password strength check -->
+            <div class="password-strength mt-2">
+            <div class="progress">
+                <div id="password-strength-bar" class="progress-bar" role="progressbar" 
+                    style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div id="password-strength-text" class="password-strength-text small mt-1"></div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm new password">
+            <span id="new-password-error" class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+            <button type="submit">Save Changes</button>
+        </div>
+    </form>
+    <div id="success-message" class="success-message" style="display: none;"></div>
+</div>
+
     
     
     <div class="profile-content" id="children-info-content">
@@ -1382,6 +1401,88 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => console.error("Error fetching profile:", error));
 });
 
+ // Password strength evaluation
+    function evaluatePasswordStrength(password) {
+      let strength = 0;
+      const hasLower = /[a-z]/.test(password);
+      const hasUpper = /[A-Z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+      const length = password.length;
+
+      // Count character types
+      if (hasLower) strength++;
+      if (hasUpper) strength++;
+      if (hasNumber) strength++;
+      if (hasSpecial) strength++;
+
+      // Adjust based on length
+      if (length >= 12) strength += 1;
+      else if (length < 8) strength = Math.min(strength, 1);
+
+      // Determine strength level
+      let strengthLevel = 'weak';
+      let strengthText = '';
+      let progressWidth = 0;
+      let progressClass = 'weak';
+
+      if (length === 0) {
+        strengthLevel = 'none';
+        strengthText = 'Enter a password';
+        progressWidth = 0;
+      } else if (length < 8) {
+        strengthLevel = 'weak';
+        strengthText = 'Weak: Must be at least 8 characters';
+        progressWidth = 25;
+      } else if (strength <= 2) {
+        strengthLevel = 'weak';
+        strengthText = 'Weak: Add uppercase, numbers, or special characters';
+        progressWidth = 25;
+      } else if (strength === 3) {
+        strengthLevel = 'medium';
+        strengthText = 'Medium: Add special characters for stronger password';
+        progressWidth = 50;
+        progressClass = 'medium';
+      } else if (strength === 4) {
+        strengthLevel = 'strong';
+        strengthText = 'Strong: Good password!';
+        progressWidth = 75;
+        progressClass = 'strong';
+      } else {
+        strengthLevel = 'very-strong';
+        strengthText = 'Very Strong: Excellent password!';
+        progressWidth = 100;
+        progressClass = 'very-strong';
+      }
+
+      return { strengthLevel, strengthText, progressWidth, progressClass };
+    }
+
+  // Real-time password strength check
+    document.getElementById('new-password').addEventListener('input', function () {
+        const password = this.value;
+        const { strengthLevel, strengthText, progressWidth, progressClass } = evaluatePasswordStrength(password);
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthTextEl = document.getElementById('password-strength-text');
+        const saveButton = document.querySelector('form button[type="submit"]');
+
+        strengthBar.style.width = `${progressWidth}%`;
+        strengthBar.className = `progress-bar ${progressClass}`;
+        strengthTextEl.textContent = strengthText;
+
+        // Enable/disable save button based on password strength
+        if (strengthLevel !== 'medium' && strengthLevel !== 'strong' && strengthLevel !== 'very-strong') {
+            saveButton.disabled = true;
+            saveButton.style.opacity = '0.5';
+            saveButton.style.cursor = 'not-allowed';
+        } else {
+            saveButton.disabled = false;
+            saveButton.style.opacity = '1';
+            saveButton.style.cursor = 'pointer';
+        }
+    });
+
+
 document.querySelector("form").addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -1426,18 +1527,32 @@ document.querySelector("form").addEventListener("submit", async function (event)
         }
 
         // if update successful clear the line and alert successful message
-        if (result.status === "success") {
+         if (result.status === "success") {
+            // Reset form fields
             document.getElementById("current-password").value = "";
             document.getElementById("new-password").value = "";
             document.getElementById("confirm-password").value = "";
+            
+            // Reset password strength indicators
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthTextEl = document.getElementById('password-strength-text');
+            strengthBar.style.width = "0%";
+            strengthBar.className = "progress-bar";
+            strengthTextEl.textContent = "";
+            
+            // Reset error messages
+            document.getElementById("current-password-error").textContent = "";
+            document.getElementById("new-password-error").textContent = "";
 
+            // Show and hide success message
             successMessage.textContent = "Profile updated successfully!";
             successMessage.style.display = "block";
-            successMessage.style.color = "green"; // green color successful message
+            successMessage.style.color = "green";
 
-            // after 6 second hide the successful message
+            // Hide success message after delay
             setTimeout(() => {
                 successMessage.style.display = "none";
+                successMessage.textContent = "";
             }, 6000);
         }
     } catch (error) {

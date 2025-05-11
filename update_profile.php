@@ -57,6 +57,24 @@ $conn->begin_transaction();
 
 try {
     if (!empty($current_password) && !empty($new_password)) {
+
+
+         // Password strength checks
+        if (strlen($new_password) < 8) {
+            throw new Exception('New password must be at least 8 characters long');
+        }
+
+        $hasLower = preg_match('/[a-z]/', $new_password);
+        $hasUpper = preg_match('/[A-Z]/', $new_password);
+        $hasNumber = preg_match('/\d/', $new_password);
+        $hasSpecial = preg_match('/[!@#$%^&*(),.?":{}|<>]/', $new_password);
+        $strength = $hasLower + $hasUpper + $hasNumber + $hasSpecial;
+
+        if ($strength < 2) {
+            throw new Exception('Password is too weak. Include at least two types: lowercase, uppercase, numbers, or special characters');
+        }
+        
+        // check current password
         $stmt = $conn->prepare("SELECT parent_password FROM parent WHERE parent_id = ?");
         $stmt->bind_param("i", $parent_id);
         $stmt->execute();
