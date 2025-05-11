@@ -160,7 +160,7 @@
               <i class="fas fa-bell"></i>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
+              <li><a class="dropdown-item" href="teacher_notification.php">Notifications</a></li>
             </ul>
           </li>
           <li class="nav-item dropdown">
