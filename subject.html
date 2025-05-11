@@ -85,6 +85,12 @@
             text-decoration: underline;
         }
 
+        .breadcrumb-container .breadcrumb li:not(:last-child)::after {
+            content: '>';
+            margin-left: 5px;
+            color: #555;
+        }
+
         .container-main {
             display: flex;
             padding: 20px;
@@ -92,7 +98,7 @@
         }
 
         .left-panel {
-            width: 300px; /* 匹配 search-box 的总宽度 */
+            width: 300px;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -114,14 +120,14 @@
             height: 38px;
         }
 
-        .search-box .btn{
+        .search-box .btn {
             padding: 10px 20px;
             font-size: 16px;
             height: 38px;
         }
 
         .year-list select {
-            width: 280px; /* 与 search-box 宽度一致 */
+            width: 280px;
             padding: 8px 10px;
             border-radius: 5px;
             background-color: #f8f9fa;
@@ -145,8 +151,8 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;  /* 改为水平滚动 */
-            flex: 1; /* 占据剩余空间 */
+            overflow-x: auto;
+            flex: 1;
         }
 
         .subject-card {
@@ -184,104 +190,112 @@
         }
 
         .stars-container .star {
-        width: 20px;
-        height: 20px;
-        background-color: #ddd;
-        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-        margin-right: 5px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+            width: 20px;
+            height: 20px;
+            background-color: #ddd;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            margin-right: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
 
-    .stars-container .yellow {
-        background-color: gold;
-    }
+        .stars-container .yellow {
+            background-color: gold;
+        }
 
-    .stars-container .half {
-        background: linear-gradient(to right, gold 50%, #ddd 50%);
-    }
+        .stars-container .half {
+            background: linear-gradient(to right, gold 50%, #ddd 50%);
+        }
 
-    .stars-container .half-4-8 {
-        background: linear-gradient(to right, gold 65%, #ddd 35%); 
-    }
+        .stars-container .half-4-8 {
+            background: linear-gradient(to right, gold 65%, #ddd 35%);
+        }
 
-    .rating-text {
-        font-size: 14px;
-        color: #666;
-        margin-top: 5px;
-        text-align: center;
-    }
+        .rating-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
 
+        #resultsContainer {
+            display: none;
+        }
 
-#resultsContainer {
-    display: none; /* 初始隐藏 */
-}
+        .search-results {
+            display: flex !important;
+            flex-direction: row !important;
+        }
 
-.search-results {
-    display: flex !important;
-    flex-direction: row !important;
-}
+        .search-active .subject-grid {
+            display: none;
+        }
 
-.search-active .subject-grid {
-    display: none;
-}
+        .search-active #resultsContainer {
+            display: flex;
+        }
 
-.search-active #resultsContainer {
-    display: flex;
-}
+        .toast-message {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgb(171, 241, 187);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
 
-    /* Toast 样式（ */
-    .toast-message {
-        position: fixed;
-        top: 10%;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgb(171, 241, 187);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        font-size: 16px;
-        font-weight: bold;
-         z-index: 1000;
-        text-align: center;
-        transition: opacity 0.5s ease-in-out;
-    }
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
 
-    .notification-badge {
-        position: absolute;
-        top: 5px;
-        right: 10px; 
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        border-radius: 50%;
-        display: none; 
-        z-index: 1000;
-    }
-    .notification-icon {
-        position: relative; 
-    }
+        .notification-icon {
+            position: relative;
+        }
 
+        .navbar-color {
+            color: #28a745;
+        }
+
+        /* 删除箭头相关的样式 */
+        /* #authButton .fa-arrow-right {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        #authButton.loaded .fa-arrow-right {
+            opacity: 1;
+        } */
     </style>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="#" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="member.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="#" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
 
@@ -299,11 +313,10 @@
             <h1>Subject</h1>
             <ul class="breadcrumb">
                 <li><a href="member.html">Home</a></li>
-                <li>&gt;</li>
                 <li>Subject</li>
             </ul>
         </div>
-        </div>
+    </div>
 
     <div class="container-main">
         <div class="left-panel">
@@ -312,494 +325,395 @@
                 <button id="searchButton" class="btn btn-outline-success" type="submit">Search</button>
             </div>
             <div class="year-list">
-                <select id="yearSelect" onchange="showSubjects(this.value)">
+                <select id="yearSelect">
                     <option value="">Select Year</option>
                 </select>
             </div>
         </div>
-        <div class="subject-grid" id="subjectGrid"></div>
+        <div class="subject-grid" id="subjectGrid">
+            <p>Loading...</p> <!-- 初始加载提示 -->
+        </div>
         <div id="resultsContainer"></div>
         <div id="successToast" class="toast-message" style="display: none;"></div>
     </div>
-    
 
-    <script>
-
-   // Initialize with current year from URL or empty
-const urlParams = new URLSearchParams(window.location.search);
-let defaultYear = urlParams.get('year') || '';
-console.log('Initial URL:', window.location.href);
-console.log('defaultYear value:', defaultYear);
-
-// Toast function
-function showToast(message, isError = false) {
-    let toast = document.getElementById("successToast");
-    toast.innerText = message;
-    toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-    toast.style.display = "block";
-    toast.style.opacity = "1";
-    setTimeout(() => {
-        toast.style.opacity = "0";
-        setTimeout(() => { toast.style.display = "none"; }, 500);
-    }, 3000);
-}
-
-// Load years into dropdown
-function loadYears() {
-    fetch('get_years.php')
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Years data:', data);
-            const yearSelect = document.getElementById('yearSelect');
-            yearSelect.innerHTML = '<option value="">Select Year</option>';
-
-            if (!data || data.length === 0) {
-                console.warn('No years available');
-                yearSelect.innerHTML += '<option value="">No years available</option>';
-                return;
-            }
-
-            data.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearSelect.appendChild(option);
-            });
-
-            // 保持 defaultYear 为空，不自动选择
-            showSubjects(defaultYear);
-        })
-        .catch(error => {
-            console.error('Error loading years:', error);
-            document.getElementById('yearSelect').innerHTML = 
-                '<option value="">Error loading years</option>';
-        });
-}
-
-// Highlight selected year
-function highlightSelectedYear(selectedYear) {
-    const yearSelect = document.getElementById('yearSelect');
-    yearSelect.value = selectedYear;
-}
-
-// Load subjects for a year
-function showSubjects(year) {
-    console.log('showSubjects called with year:', year);
-    history.pushState(null, '', `?year=${encodeURIComponent(year)}`);
-    document.getElementById('resultsContainer').style.display = 'none';
-    document.getElementById('subjectGrid').style.display = 'flex';
-    document.body.classList.remove('search-active');
-
-    const subjectGrid = document.getElementById('subjectGrid');
-    subjectGrid.innerHTML = '';
-
-    if (!year) {
-        subjectGrid.innerHTML = '<p>Please select a year</p>';
-        return;
-    }
-
-    fetch(`subject.php?year=${encodeURIComponent(year)}`)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
-            return response.json();
-        })
-        .then(data => {
-            subjectGrid.innerHTML = '';
-            if (!data || data.length === 0) {
-                subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
-                return;
-            }
-
-            data.forEach(subject => {
-                const card = document.createElement('div');
-                card.className = 'subject-card';
-                const rating = parseFloat(subject.rating) || 0;
-                const fullStars = Math.floor(rating);
-                const hasHalfStar = rating % 1 >= 0.5;
-                let starsHtml = '';
-                for (let i = 0; i < fullStars; i++) {
-                    starsHtml += '<span class="star yellow"></span>';
-                }
-                if (hasHalfStar) {
-                    starsHtml += '<span class="star half"></span>';
-                }
-                for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-                    starsHtml += '<span class="star"></span>';
-                }
-
-                card.innerHTML = `
-                    <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
-                    <h5>${subject.name}</h5>
-                    <div class="stars-container">${starsHtml}</div>
-                    <div class="rating-text">${rating.toFixed(1)}</div>
-                `;
-                card.onclick = () => window.location.href = `generate_subject_page.php?id=${subject.subject_id}`;
-                subjectGrid.appendChild(card);
-            });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
-        });
-}
-
-// Initial loading
-document.addEventListener('DOMContentLoaded', function() {
-    // 清理 URL 参数
-    if (window.location.search && !document.getElementById('yearSelect').value) {
-        defaultYear = '';
-        history.pushState(null, '', 'subject.html');
-        console.log('URL cleaned, new defaultYear:', defaultYear);
-    }
-
-    loadYears();
-
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-
-    searchButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        performSearch(searchInput.value.trim());
-    });
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            performSearch(searchInput.value.trim());
-        }
-    });
-
-    // Notification badge
-    fetch('get_notification.php')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Notifications data:', data);
-            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                console.log('Unread notifications found!');
-                const badge = document.querySelector('.notification-badge');
-                if (badge) {
-                    badge.style.display = 'block';
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
-});
-
-function performSearch(query) {
-    if (!query) {
-        showToast('Please enter a search term!', true);
-        return;
-    }
-    if (query.length < 2) {
-        showToast('Please enter at least 2 characters to search.', true);
-        return;
-    }
-
-    document.body.classList.add('search-active');
-    document.getElementById('subjectGrid').style.display = 'none';
-    const resultsContainer = document.getElementById('resultsContainer');
-    resultsContainer.style.display = 'flex';
-    resultsContainer.innerHTML = '<div class="search-results"></div>';
-
-    fetch(`search.php?query=${encodeURIComponent(query)}`)
-        .then(response => {
-            if (!response.ok) throw new Error('Network error');
-            return response.json();
-        })
-        .then(data => {
-            const resultsGrid = document.querySelector('.search-results');
-            resultsGrid.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
-            } else {
-                const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
-                uniqueData.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'subject-card';
-                    const rating = parseFloat(item.rating) || 0;
-                    const fullStars = Math.floor(rating);
-                    const hasHalfStar = rating % 1 >= 0.5;
-                    let starsHtml = '';
-                    for (let i = 0; i < fullStars; i++) {
-                        starsHtml += '<span class="star yellow"></span>';
-                    }
-                    if (hasHalfStar) {
-                        starsHtml += '<span class="star half"></span>';
-                    }
-                    for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-                        starsHtml += '<span class="star"></span>';
-                    }
-
-                    card.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
-                        <h5>${item.name}</h5>
-                        <div class="stars-container">${starsHtml}</div>
-                        <div class="rating-text">${rating.toFixed(1)} (${item.year})</div>
-                    `;
-                    card.onclick = () => window.location.href = `generate_subject_page.php?id=${item.subject_id}`;
-                    resultsGrid.appendChild(card);
-                });
-            }
-            document.getElementById('searchInput').value = '';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
-            document.getElementById('searchInput').value = '';
-        });
-}
-
-function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('resultsContainer').style.display = 'none';
-    document.getElementById('subjectGrid').style.display = 'flex';
-    const selectedYear = document.getElementById('yearSelect').value || defaultYear;
-    showSubjects(selectedYear);
-}
-
-        document.addEventListener('DOMContentLoaded', function() {
-        fetch('get_notification.php')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Notifications data:', data); 
-
-            // check if there are any unread notifications
-            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                console.log('Unread notifications found!');
-                const badge = document.querySelector('.notification-badge');
-                if (badge) {
-                    badge.style.display = 'block'; //show the red dot
-                }
-            } else {
-                console.log('No unread notifications');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
-    });
-    </script>
-
-
-     
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
-          <div class="row g-5">
-            <div class="col-lg-3 col-md-6">
-              <h4 class="text-white mb-4">Quick Link</h4>
-              <a class="btn btn-link" href="about.html">About Us</a><br>
-              <a class="btn btn-link" href="contact.html">Contact Us</a>
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Quick Link</h4>
+                    <a class="btn btn-link" href="about.html">About Us</a><br>
+                    <a class="btn btn-link" href="contact.html">Contact Us</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-3 col-md-6">
-              <h4 class="text-white mb-4">Contact</h4>
-              <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
-              <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
-              <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-            </div>
-            <div class="col-lg-3 col-md-6">
-              <h4 class="text-white mb-4">Gallery</h4>
-              <div class="row g-2 pt-2">
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                </div>
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                </div>
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                </div>
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-                </div>
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-                </div>
-                <div class="col-4">
-                  <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
         <div class="container">
-          <div class="copyright">
-            <div class="row">
-              <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
-              </div>
-              <div class="col-md-6 text-center text-md-end">
-              </div>
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <!-- Footer End -->
-    
-    
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-    
-    
-        <!-- JavaScript Libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="lib/wow.min.js"></script>
-        <script src="lib/easing.min.js"></script>
-        <script src="lib/waypoints.min.js"></script>
-        <script src="lib/owl.carousel.min.js"></script>
-    
-        <!-- Template Javascript -->
-        <script src="js/main.js"></script>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow.min.js"></script>
+    <script src="lib/easing.min.js"></script>
+    <script src="lib/waypoints.min.js"></script>
+    <script src="lib/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
     <script>
-
-     /*   document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const year = urlParams.get('year') || 'Year 1'; // 获取 URL 参数
-
-    function showSubjects(year) {
-        fetch(`subject.php?year=${year}`)
-            .then(response => response.json())
-            .then(data => {
-                const subjectGrid = document.getElementById('subjectGrid');
-                subjectGrid.innerHTML = ''; // 清空现有内容
-
-                data.forEach(subject => {
-                    const card = document.createElement('div');
-                    card.className = 'subject-card';
-                    card.innerHTML = `
-                        <img src="${subject.image}" alt="${subject.name}">
-                        <h5>${subject.name}</h5>
-                        <p>${subject.rating}⭐</p>
-                        <a href="${subject.page}"></a>
-                    `;
-                    card.onclick = function () {
-                    window.location.href = subject.page;
-                    };
-                    subjectGrid.appendChild(card);
+        // Protect page from unauthorized access
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('check_login.php', { credentials: 'include' })
+                .then(response => {
+                    if (!response.ok) {
+                        console.error('Fetch failed with status:', response.status);
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Login check response:', data);
+                    if (!data.isLoggedIn) {
+                        window.location.href = 'login.html';
+                    } else {
+                        loadNavigation();
+                        loadYears(); // 加载年份
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching login status:', error);
+                    showToast('Failed to check login status. Please try again.', true);
                 });
-            })
-            .catch(error => {
-                console.error('获取数据失败:', error);
+
+            // 绑定搜索和年份选择事件
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const yearSelect = document.getElementById('yearSelect');
+
+            searchButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                performSearch(searchInput.value.trim());
             });
-    }
 
-    showSubjects(year); // 初始加载
-});
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch(searchInput.value.trim());
+                }
+            });
 
-function renderSubjects(subjectsData) {
-    Object.keys(subjectsData).forEach(year => {
-        const container = document.getElementById(year);
-        if (container) {
-            subjectsData[year].forEach(subject => {
-                const card = document.createElement("div");
-                card.classList.add("subject-card");
+            yearSelect.addEventListener('change', () => {
+                console.log('Year selected:', yearSelect.value);
+                showSubjects(yearSelect.value);
+            });
 
-                card.innerHTML = `
-                    <img src="${subject.image}" alt="${subject.name}">
-                        <h5>${subject.name}</h5>
-                        <p>${subject.rating}⭐</p>
-                        <a href="${subject.page}"></a>
+            // Notification badge
+            fetch('get_notification.php')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notifications data:', data);
+                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                        console.log('Unread notifications found!');
+                        const badge = document.querySelector('.notification-badge');
+                        if (badge) {
+                            badge.style.display = 'block';
+                        }
+                    } else {
+                        console.log('No unread notifications');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                });
+        });
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php', { credentials: 'include' });
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+                
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                    // 移除动态添加 loaded 类
+                    // authButton.classList.add('loaded');
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    // authButton.classList.add('loaded');
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
                 `;
-
-                container.appendChild(card);
-            });
-        }
-    });  
-}    */
-
-
-   /* document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const resultsContainer = document.getElementById('resultsContainer');
-
-    if (!searchInput || !searchButton || !resultsContainer) {
-        console.error('Required elements not found.');
-        return;
-    }
-
-    // Handle search button click
-    searchButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        const searchQuery = searchInput.value.trim();
-
-        if (searchQuery) {
-            console.log('Searching for:', searchQuery); // Debugging log
-            search(searchQuery);
-        } else {
-            alert('Please enter a search term!');
-        }
-    });
-
-    // Handle 'Enter' key press in search input
-    searchInput.addEventListener('keypress', function (event) {
-        if (event.key === 'Enter') {
-            const searchQuery = searchInput.value.trim();
-            if (searchQuery) {
-                console.log('Searching for:', searchQuery); // Debugging log
-                search(searchQuery);
-            } else {
-                alert('Please enter a search term!');
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+                // authButton.classList.add('loaded');
             }
         }
-    });
 
-    // Function to perform the search
-    function search(query) {
-        fetch(`search.php?query=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Search result:', data); // Debugging log
-                if (data.status === 'success') {
-                    const results = data.data;
-                    displayResults(results);
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Function to display search results
-    function displayResults(results) {
-        resultsContainer.innerHTML = ''; // Clear existing results
-
-        if (results.length === 0) {
-            resultsContainer.innerHTML = '<p>No results found.</p>';
-        } else {
-            results.forEach(item => {
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('result-item');
-                resultItem.innerHTML = `
-                    <div class="subject-card">
-                        <img src="${item.image}" alt="${item.name}">
-                        <h5>${item.name}</h5>
-                        <p>${item.year}</p>
-                        <p>Price: RM ${item.price}</p>
-                        <a href="${item.page}">More details</a>
-                    </div>
-                `;
-                resultsContainer.appendChild(resultItem);
-            });
+        // Toast function
+        function showToast(message, isError = false) {
+            let toast = document.getElementById("successToast");
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
+            toast.style.display = "block";
+            toast.style.opacity = "1";
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                setTimeout(() => { toast.style.display = "none"; }, 500);
+            }, 3000);
         }
-    }
-});
-*/
 
+        // Load years into dropdown
+        function loadYears() {
+            console.log('Loading years...');
+            fetch('get_years.php', { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Years data:', data);
+                    const yearSelect = document.getElementById('yearSelect');
+                    yearSelect.innerHTML = '<option value="">Select Year</option>';
 
-        </script>
+                    if (!data || data.length === 0) {
+                        console.warn('No years available');
+                        yearSelect.innerHTML += '<option value="">No years available</option>';
+                        return;
+                    }
+
+                    data.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+
+                    const urlParams = new URLSearchParams(window.location.search);
+                    let defaultYear = urlParams.get('year') || '';
+                    console.log('Default year from URL:', defaultYear);
+                    if (defaultYear && data.includes(defaultYear)) {
+                        yearSelect.value = defaultYear;
+                        showSubjects(defaultYear);
+                    } else {
+                        showSubjects('');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading years:', error);
+                    document.getElementById('yearSelect').innerHTML = 
+                        '<option value="">Error loading years</option>';
+                });
+        }
+
+        // Load subjects for a year
+        function showSubjects(year) {
+            console.log('showSubjects called with year:', year);
+            history.pushState(null, '', `?year=${encodeURIComponent(year || '')}`);
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('subjectGrid').style.display = 'flex';
+            document.body.classList.remove('search-active');
+
+            const subjectGrid = document.getElementById('subjectGrid');
+            subjectGrid.innerHTML = '<p>Loading...</p>';
+
+            if (!year) {
+                subjectGrid.innerHTML = '<p>Please select a year to view subjects</p>';
+                return;
+            }
+
+            fetch(`subject.php?year=${encodeURIComponent(year)}`, { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Fetched subjects data:', data);
+                    subjectGrid.innerHTML = '';
+                    if (!data || data.length === 0) {
+                        subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
+                        return;
+                    }
+
+                    data.forEach(subject => {
+                        const card = document.createElement('div');
+                        card.className = 'subject-card';
+                        const rating = parseFloat(subject.rating) || 0;
+                        const fullStars = Math.floor(rating);
+                        const hasHalfStar = rating % 1 >= 0.5;
+                        let starsHtml = '';
+                        for (let i = 0; i < fullStars; i++) {
+                            starsHtml += '<span class="star yellow"></span>';
+                        }
+                        if (hasHalfStar) {
+                            starsHtml += '<span class="star half"></span>';
+                        }
+                        for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                            starsHtml += '<span class="star"></span>';
+                        }
+
+                        card.innerHTML = `
+                            <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                            <h5>${subject.name}</h5>
+                            <div class="stars-container">${starsHtml}</div>
+                            <div class="rating-text">${rating.toFixed(1)}</div>
+                        `;
+                        card.onclick = () => window.location.href = `generate_subject_page.php?id=${subject.subject_id}`;
+                        subjectGrid.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching subjects:', error);
+                    subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
+                });
+        }
+
+        // Search functionality
+        function performSearch(query) {
+            if (!query) {
+                showToast('Please enter a search term!', true);
+                return;
+            }
+            if (query.length < 2) {
+                showToast('Please enter at least 2 characters to search.', true);
+                return;
+            }
+
+            document.body.classList.add('search-active');
+            document.getElementById('subjectGrid').style.display = 'none';
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.style.display = 'flex';
+            resultsContainer.innerHTML = '<div class="search-results"><p>Loading...</p></div>';
+
+            fetch(`search.php?query=${encodeURIComponent(query)}`, { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    const resultsGrid = document.querySelector('.search-results');
+                    resultsGrid.innerHTML = '';
+
+                    if (!data || data.length === 0) {
+                        resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
+                    } else {
+                        const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
+                        uniqueData.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'subject-card';
+                            const rating = parseFloat(item.rating) || 0;
+                            const fullStars = Math.floor(rating);
+                            const hasHalfStar = rating % 1 >= 0.5;
+                            let starsHtml = '';
+                            for (let i = 0; i < fullStars; i++) {
+                                starsHtml += '<span class="star yellow"></span>';
+                            }
+                            if (hasHalfStar) {
+                                starsHtml += '<span class="star half"></span>';
+                            }
+                            for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                                starsHtml += '<span class="star"></span>';
+                            }
+
+                            card.innerHTML = `
+                                <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
+                                <h5>${item.name}</h5>
+                                <div class="stars-container">${starsHtml}</div>
+                                <div class="rating-text">${rating.toFixed(1)} (${item.year})</div>
+                            `;
+                            card.onclick = () => window.location.href = `generate_subject_page.php?id=${item.subject_id}`;
+                            resultsGrid.appendChild(card);
+                        });
+                    }
+                    document.getElementById('searchInput').value = '';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
+                    document.getElementById('searchInput').value = '';
+                });
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('subjectGrid').style.display = 'flex';
+            const selectedYear = document.getElementById('yearSelect').value || '';
+            showSubjects(selectedYear);
+        }
+    </script>
 </body>
 </html>
