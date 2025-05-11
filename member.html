@@ -158,7 +158,7 @@
         }
 
         .subject-display {
-            padding: 40px 0;
+            padding: 60px 0; /* Adjusted to match index.html */
         }
 
         .subject-grid {
@@ -166,6 +166,9 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 25px;
             margin-top: 30px;
+            max-width: 1200px; /* Added to match index.html */
+            margin-left: auto; /* Added to match index.html */
+            margin-right: auto; /* Added to match index.html */
         }
 
         .subject-card {
@@ -183,14 +186,14 @@
         }
 
         .subject-header {
-            height: 160px;
-            position: relative;
+            position: relative; /* Adjusted to match index.html */
             overflow: hidden;
         }
 
         .subject-image {
             width: 100%;
-            height: 100%;
+            height: auto;
+            max-height: 300px; /* Adjusted to match index.html */
             object-fit: cover;
             transition: transform 0.5s;
         }
@@ -221,12 +224,9 @@
             margin-bottom: 8px;
             color: #2c3e50;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Adjusted to match index.html */
             align-items: center;
-        }
-
-        .subject-name {
-            flex: 1;
+            gap: 8px; /* Added spacing between year labels */
         }
 
         .subject-year {
@@ -235,64 +235,12 @@
             padding: 3px 10px;
             border-radius: 15px;
             font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .subject-price {
-            font-size: 16px;
-            color: #e74c3c;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .subject-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .feature-tag {
-            background: #ecf0f1;
-            color: #7f8c8d;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 12px;
         }
 
         /* Different subject badge colors */
         .math-card .subject-year { background: #e74c3c; }
         .english-card .subject-year { background: #3498db; }
         .melayu-card .subject-year { background: #2ecc71; }
-
-        .math-card .feature-tag { background: #ffebee; color: #e74c3c; }
-        .english-card .feature-tag { background: #e3f2fd; color: #1976d2; }
-        .melayu-card .feature-tag { background: #e8f5e9; color: #2e7d32; }
-
-        /* Grade filter */
-        .grade-filter {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            padding: 8px 20px;
-            border-radius: 30px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            color: #495057;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .filter-btn:hover, .filter-btn.active {
-            background: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
 
         .section-intro {
             max-width: 700px;
@@ -412,12 +360,6 @@
     <div class="subject-display text-center wow fadeInUp">
         <h3 class="section-title bg-white text-center text-primary px-3">Our Academic Programs</h3>
         <p class="section-intro">We offer comprehensive learning programs tailored to different grade levels, ensuring each student receives age-appropriate education.</p>
-        
-        <div class="grade-filter">
-            <button class="filter-btn active" data-filter="all">All Grades</button>
-            <button class="filter-btn" data-filter="Year 1">Year 1</button>
-            <button class="filter-btn" data-filter="Year 2">Year 2</button>
-        </div>
         
         <div class="subject-grid" id="subjectContainer">
             <!-- Dynamic content loaded here -->
@@ -563,18 +505,6 @@
         }
 
         // Load subjects dynamically
-        const subjectFeatures = {
-            'math': ['Problem Solving', 'Weekly Tests', 'Math Olympiad'],
-            'english': ['Reading', 'Writing', 'Speaking'],
-            'melayu': ['Tatabahasa', 'Karangan', 'Kosa Kata']
-        };
-
-        const subjectDescriptions = {
-            'math': 'Develop logical thinking and problem-solving skills through our structured math program.',
-            'english': 'Enhance English proficiency with our interactive language learning approach.',
-            'melayu': 'Master Bahasa Melayu with our comprehensive language program.'
-        };
-
         async function loadSubjects() {
             try {
                 const response = await fetch('get_subjects.php');
@@ -584,45 +514,40 @@
                 const container = document.getElementById('subjectContainer');
                 container.innerHTML = '';
                 
-                subjects.forEach(subject => {
-                    const subjectKey = subject.subject_name.toLowerCase();
+                // Group subjects by subject_name
+                const groupedSubjects = subjects.reduce((acc, subject) => {
+                    const subjectName = subject.subject_name.toLowerCase();
+                    if (!acc[subjectName]) {
+                        acc[subjectName] = [];
+                    }
+                    acc[subjectName].push(subject);
+                    return acc;
+                }, {});
+
+                // Limit to 3 unique subject names to match index.html
+                const subjectNames = Object.keys(groupedSubjects).slice(0, 3);
+
+                subjectNames.forEach(subjectName => {
+                    const subjectGroup = groupedSubjects[subjectName];
                     const card = document.createElement('div');
-                    card.className = `subject-card ${subjectKey}-card`;
-                    card.dataset.year = subject.year;
-                    
+                    card.className = `subject-card ${subjectName}-card`;
+
+                    // Collect all years for this subject
+                    const years = subjectGroup.map(subject => subject.year).sort();
+
                     card.innerHTML = `
                         <div class="subject-header">
-                            <img src="${subject.subject_image}" alt="${subject.subject_name}" class="subject-image">
-                            <div class="subject-badge">${subject.subject_price}/term</div>
+                            <img src="${subjectGroup[0].subject_image}" alt="${subjectGroup[0].subject_name}" class="subject-image">
+                            <div class="subject-badge">RM ${subjectGroup[0].subject_price}/term</div>
                         </div>
                         <div class="subject-content">
                             <div class="subject-title">
-                                <span class="subject-name">${subject.subject_name}</span>
-                                <span class="subject-year">${subject.year}</span>
-                            </div>
-                            <div class="subject-price">RM ${subject.subject_price}</div>
-                            <p>${subject.subject_description === '-' ? subjectDescriptions[subjectKey] || 'Comprehensive learning program' : subject.subject_description}</p>
-                            <div class="subject-features">
-                                ${subjectFeatures[subjectKey]?.map(feature => 
-                                    `<span class="feature-tag">${feature}</span>`
-                                ).join('')}
+                                ${years.map(year => `<span class="subject-year">${year}</span>`).join('')}
                             </div>
                         </div>
                     `;
                     
                     container.appendChild(card);
-                });
-                
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
-                        
-                        const filter = this.dataset.filter;
-                        document.querySelectorAll('.subject-card').forEach(card => {
-                            card.style.display = (filter === 'all' || card.dataset.year === filter) ? 'block' : 'none';
-                        });
-                    });
                 });
                 
             } catch (error) {
