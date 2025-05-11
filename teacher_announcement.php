@@ -131,6 +131,21 @@
     
 }
 
+   .notification-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background-color: red;
+      border-radius: 50%;
+      display: none;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
     
 </style>
 
@@ -156,9 +171,10 @@
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link" href="teacher_notification.php" id="notifications">
-              <i class="fas fa-bell"></i>
-            </a>
+              <a class="nav-link" href="teacher_notification.php" id="notifications">
+                  <i class="fas fa-bell"></i>
+                  <span class="notification-badge" id="notificationBadge"></span>
+              </a>
           </li>
            
           </li>
