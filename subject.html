@@ -7,6 +7,10 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre, subject" name="keywords">
     <meta content="The Seeds Learning Centre | Subject" name="description">
+    <!-- 禁用缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -270,16 +274,6 @@
         .navbar-color {
             color: #28a745;
         }
-
-        /* 删除箭头相关的样式 */
-        /* #authButton .fa-arrow-right {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        #authButton.loaded .fa-arrow-right {
-            opacity: 1;
-        } */
     </style>
 </head>
 
@@ -406,31 +400,12 @@
     <script src="js/main.js"></script>
 
     <script>
-        // Protect page from unauthorized access
+        // Protect page from unauthorized access and handle page load
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('check_login.php', { credentials: 'include' })
-                .then(response => {
-                    if (!response.ok) {
-                        console.error('Fetch failed with status:', response.status);
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Login check response:', data);
-                    if (!data.isLoggedIn) {
-                        window.location.href = 'login.html';
-                    } else {
-                        loadNavigation();
-                        loadYears(); // 加载年份
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching login status:', error);
-                    showToast('Failed to check login status. Please try again.', true);
-                });
+            checkLoginStatus();
 
-            // 绑定搜索和年份选择事件
+
+            // Bind search and year select events
             const searchInput = document.getElementById('searchInput');
             const searchButton = document.getElementById('searchButton');
             const yearSelect = document.getElementById('yearSelect');
@@ -453,7 +428,7 @@
             });
 
             // Notification badge
-            fetch('get_notification.php')
+            fetch('get_notification.php', { cache: 'no-store' })
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
@@ -461,27 +436,44 @@
                 .then(data => {
                     console.log('Notifications data:', data);
                     if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                        console.log('Unread notifications found!');
                         const badge = document.querySelector('.notification-badge');
-                        if (badge) {
-                            badge.style.display = 'block';
-                        }
-                    } else {
-                        console.log('No unread notifications');
+                        if (badge) badge.style.display = 'block';
                     }
                 })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                });
+                .catch(error => console.error('Fetch error:', error));
         });
+
+        // Check login status and load content
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('check_login.php', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                console.log('Login check response:', data);
+
+                if (!data.isLoggedIn) {
+                    window.location.href = 'login.html';
+                } else {
+                    loadNavigation();
+                    loadYears();
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                showToast('Failed to check login status. Please try again.', true);
+                window.location.href = 'login.html';
+            }
+        }
 
         // Load navigation dynamically
         async function loadNavigation() {
             try {
-                const response = await fetch('check_login.php', { credentials: 'include' });
+                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
                 if (!response.ok) throw new Error('Failed to fetch login status');
                 const data = await response.json();
-                
+
                 const navLinks = document.getElementById('navLinks');
                 const authButton = document.getElementById('authButton');
 
@@ -495,8 +487,6 @@
                     `;
                     authButton.textContent = 'Log out';
                     authButton.href = 'logout.php';
-                    // 移除动态添加 loaded 类
-                    // authButton.classList.add('loaded');
                 } else {
                     navLinks.innerHTML = `
                         <a href="888.html" class="nav-item nav-link">Home</a>
@@ -505,7 +495,6 @@
                     `;
                     authButton.textContent = 'Log in';
                     authButton.href = 'login.html';
-                    // authButton.classList.add('loaded');
                 }
             } catch (error) {
                 console.error('Error fetching login status:', error);
@@ -518,7 +507,6 @@
                 `;
                 authButton.textContent = 'Log in';
                 authButton.href = 'login.html';
-                // authButton.classList.add('loaded');
             }
         }
 
@@ -573,8 +561,7 @@
                 })
                 .catch(error => {
                     console.error('Error loading years:', error);
-                    document.getElementById('yearSelect').innerHTML = 
-                        '<option value="">Error loading years</option>';
+                    document.getElementById('yearSelect').innerHTML = '<option value="">Error loading years</option>';
                 });
         }
 
