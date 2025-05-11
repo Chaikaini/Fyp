@@ -144,7 +144,7 @@
     <ul class="nav flex-column">
       <li class="nav-item"><a href="admin teacher.php" class="nav-link"><i class="fas fa-calendar"></i> <span>My schedule</span></a></li> 
       <li class="nav-item"><a href="teacher_classes.php" class="nav-link"><i class="fas fa-chalkboard-teacher"></i> <span>Classes</span></a></li>
-      <li class="nav-item"><a href="teacher_notification.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
+      <li class="nav-item"><a href="teacher_announcement.php" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>    
     </ul>
   </nav>
 
@@ -264,7 +264,7 @@
     });
 
     function loadSubjects() {
-  fetch("teacher_notification_data.php?action=subject")
+  fetch("teacher_announcement_data.php?action=subject")
     .then(res => res.json())
     .then(subjects => {
       const subjectSelect = document.getElementById("subject_id");
@@ -284,7 +284,7 @@ document.getElementById("subject_id").addEventListener("change", function () {
   const classSelect = document.getElementById("class_id");
   classSelect.innerHTML = "<option value=''>-- Select Class --</option>";
   if (subjectId) {
-    fetch(`teacher_notification_data.php?action=class&subject_id=${subjectId}`)
+    fetch(`teacher_announcement_data.php?action=class&subject_id=${subjectId}`)
       .then(res => res.json())
       .then(classes => {
         classes.forEach(cls => {
@@ -303,7 +303,7 @@ document.getElementById("notificationForm").addEventListener("submit", function 
     e.preventDefault();
     const formData = new FormData(this);
 
-    fetch("teacher_notificationlist.php", {
+    fetch("teacher_announcementlist.php", {
         method: "POST",
         body: formData
     })
@@ -362,7 +362,7 @@ function showToast(message, isError = false) {
 
 
 function loadNotifications() {
-  fetch("teacher_get_notification.php")
+  fetch("teacher_get_announcement.php")
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById("notification-list");
