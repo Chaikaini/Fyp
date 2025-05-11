@@ -7,6 +7,10 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre,contact us" name="keywords">
     <meta content="The Seeds Learning Centre | Contact us" name="description">
+    <!-- 禁用缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
     <!-- Favicon -->
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
@@ -32,7 +36,7 @@
     <style>
         .star-rating {
             display: flex;
-            flex-direction: row-reverse;
+            flex-direction: row Buttersverse;
             justify-content: center;
         }
 
@@ -63,40 +67,58 @@
         }
 
         .notification-badge {
-        position: absolute;
-        top: 5px; 
-        right: 10px; 
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        border-radius: 50%;
-        display: none; 
-        z-index: 1000;
-    }
-    .notification-icon {
-        position: relative; 
-    }
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .toast-message {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .navbar-color {
+            color: #28a745;
+        }
     </style>
 </head>
 
 <body>
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="member.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="#" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
     <!-- Navbar End -->
@@ -150,11 +172,11 @@
                 <div class="mb-4">
                     <label class="form-label">Your Rating</label>
                     <div class="star-rating">
-                        <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
-                        <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
-                        <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
-                        <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
-                        <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+                        <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                        <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                        <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                        <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                        <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -174,67 +196,269 @@
     </div>
     <!-- Comment Section End -->
 
+    <!-- Toast Notification -->
+    <div id="successToast" class="toast-message" style="display: none;"></div>
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Quick Link</h4>
+                    <a class="btn btn-link" href="about.html">About Us</a><br>
+                    <a class="btn btn-link" href="contact.html">Contact Us</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow.min.js"></script>
+    <script src="lib/easing.min.js"></script>
+    <script src="lib/waypoints.min.js"></script>
+    <script src="lib/owl.carousel.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
+
     <!-- JavaScript -->
     <script>
-        document.getElementById('submitComment').addEventListener('click', function () {
-            const year = document.getElementById('year').value;
-            const subject = document.getElementById('subject').value;
-            const rating = document.querySelector('input[name="rating"]:checked');
-            const comment = document.getElementById('comment').value;
-    
-            let valid = true;
-            document.querySelectorAll('.error-message').forEach(msg => msg.remove());
-    
-            if (!rating) {
-                valid = false;
-                const ratingError = document.createElement('div');
-                ratingError.classList.add('error-message');
-                ratingError.style.color = 'red';
-                ratingError.textContent = 'Please select a rating!';
-                document.querySelector('.star-rating').appendChild(ratingError);
+        // Protect page from unauthorized access and handle page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded, checking login status...');
+            checkLoginStatus();
+
+            // Notification badge
+            fetch('get_notification.php', { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Notifications data:', data);
+                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                        console.log('Unread notifications found!');
+                        const badge = document.querySelector('.notification-badge');
+                        if (badge) {
+                            badge.style.display = 'block';
+                        }
+                    } else {
+                        console.log('No unread notifications');
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error for notifications:', error);
+                });
+
+            // Comment submission logic
+            document.getElementById('submitComment').addEventListener('click', function() {
+                const year = document.getElementById('year').value;
+                const subject = document.getElementById('subject').value;
+                const rating = document.querySelector('input[name="rating"]:checked');
+                const comment = document.getElementById('comment').value;
+
+                let valid = true;
+                document.querySelectorAll('.error-message').forEach(msg => msg.remove());
+
+                if (!rating) {
+                    valid = false;
+                    const ratingError = document.createElement('div');
+                    ratingError.classList.add('error-message');
+                    ratingError.style.color = 'red';
+                    ratingError.textContent = 'Please select a rating!';
+                    document.querySelector('.star-rating').appendChild(ratingError);
+                }
+
+                if (!comment.trim()) {
+                    valid = false;
+                    const commentError = document.createElement('div');
+                    commentError.classList.add('error-message');
+                    commentError.style.color = 'red';
+                    commentError.textContent = 'Please enter a comment!';
+                    document.getElementById('comment').after(commentError);
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('class_id', year);
+                formData.append('subject_id', subject);
+                formData.append('comment_rating', rating.value);
+                formData.append('comment_text', comment);
+
+                fetch('submit_comment.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Comment submitted:', data);
+                    loadComments();
+                    document.getElementById('year').value = 'Year 1';
+                    document.getElementById('subject').value = '';
+                    document.getElementById('comment').value = '';
+                    document.querySelector('input[name="rating"]:checked').checked = false;
+                })
+                .catch(error => console.error('Error submitting comment:', error));
+            });
+        });
+
+        // Check login status and load content
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('check_login.php', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+                const data = await response.json();
+                console.log('Login check response:', data);
+
+                if (!data.hasOwnProperty('isLoggedIn')) {
+                    throw new Error('Invalid response: isLoggedIn field missing');
+                }
+
+                if (!data.isLoggedIn) {
+                    console.log('User not logged in, redirecting to login.html');
+                    window.location.href = 'login.html';
+                } else {
+                    console.log('User logged in, loading navigation and comments');
+                    loadNavigation();
+                    loadComments();
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                showToast('Failed to check login status. Please try again.', true);
+                window.location.href = 'login.html';
             }
-    
-            if (!comment.trim()) {
-                valid = false;
-                const commentError = document.createElement('div');
-                commentError.classList.add('error-message');
-                commentError.style.color = 'red';
-                commentError.textContent = 'Please enter a comment!';
-                document.getElementById('comment').after(commentError);
+        }
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+                if (!response.ok) throw new Error(`Failed to fetch login status: ${response.status}`);
+                const data = await response.json();
+                console.log('Navigation login check response:', data);
+
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (!navLinks || !authButton) {
+                    throw new Error('navLinks or authButton element not found');
+                }
+
+                if (data.isLoggedIn) {
+                    console.log('Setting navigation for logged-in user');
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link active">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                    console.log('authButton set to Log out, href:', authButton.href);
+                } else {
+                    console.log('Setting navigation for logged-out user');
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    console.log('authButton set to Log in, href:', authButton.href);
+                }
+            } catch (error) {
+                console.error('Error loading navigation:', error);
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                if (navLinks && authButton) {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                }
+                showToast('Failed to load navigation. Please try again.', true);
             }
-    
-            if (!valid) {
+        }
+
+        // Toast function
+        function showToast(message, isError = false) {
+            let toast = document.getElementById('successToast');
+            if (!toast) {
+                console.error('Toast element not found');
                 return;
             }
-    
-            const formData = new FormData();
-            formData.append('class_id', year);
-            formData.append('subject_id', subject);
-            formData.append('comment_rating', rating.value);
-            formData.append('comment_text', comment);
-    
-            fetch('submit_comment.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.text())
-            .then(data => {
-                loadComments(); 
-                document.getElementById('year').value = 'Year 1';
-                document.getElementById('subject').value = '';
-                document.getElementById('comment').value = '';
-                document.querySelector('input[name="rating"]:checked').checked = false;
-            })
-            .catch(error => console.error('Error submitting comment:', error));
-        });
-    
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            toast.style.display = 'block';
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => { toast.style.display = 'none'; }, 500);
+            }, 3000);
+        }
+
+        // Load comments
         function loadComments() {
-            fetch('get_comments.php')
+            fetch('get_comments.php', { cache: 'no-store' })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Comments data:', data);
                     const commentsContainer = document.getElementById('comments');
                     commentsContainer.innerHTML = '';
-    
+
                     data.forEach(comment => {
                         const commentElement = document.createElement('div');
                         commentElement.classList.add('comment-box');
@@ -247,89 +471,12 @@
                         commentsContainer.appendChild(commentElement);
                     });
                 })
-                .catch(error => console.error('Error loading comments:', error));
+                .catch(error => {
+                    console.error('Error loading comments:', error);
+                    showToast('Failed to load comments. Please try again.', true);
+                });
         }
-    
-        window.onload = loadComments;
-
-        document.addEventListener('DOMContentLoaded', function() {
-        fetch('get_notification.php')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Notifications data:', data); 
-
-            //check if there have notification is unread
-            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                console.log('Unread notifications found!');
-                const badge = document.querySelector('.notification-badge');
-                if (badge) {
-                    badge.style.display = 'block'; //show red dot
-                }
-            } else {
-                console.log('No unread notifications');
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
-    });
-    </script>    
-    <!-- Footer Start -->
-<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-    <div class="container py-5">
-      <div class="row g-5">
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Quick Link</h4>
-          <a class="btn btn-link" href="about.html">About Us</a><br>
-          <a class="btn btn-link" href="contact.html">Contact Us</a>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Contact</h4>
-          <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
-          <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
-          <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-        </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Gallery</h4>
-          <div class="row g-2 pt-2">
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="container">
-      <div class="copyright">
-        <div class="row">
-          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-            &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
-          </div>
-          <div class="col-md-6 text-center text-md-end">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Footer End -->
+    </script>
 </body>
 
 </html>
