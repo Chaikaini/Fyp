@@ -42,14 +42,18 @@ $notification_sql = "
         n.notification_document,
         n.notification_created_at,
         nr.read_status,
-        t.teacher_name AS sender_name,  
-        s.subject_name                 
-    FROM notification_receiver nr
-    JOIN notification n ON nr.notification_id = n.notification_id
-    JOIN teacher t ON n.sender_id = t.teacher_id  
-    JOIN subject s ON n.subject_id = s.subject_id  
-    WHERE nr.parent_id = ?  
-    ORDER BY n.notification_created_at DESC
+        CASE 
+            WHEN n.sender_id IN (SELECT admin_id FROM admin) THEN a.admin_name
+            ELSE t.teacher_name
+        END AS sender_name,
+            COALESCE(s.subject_name, 'General Announcement') as subject_name                 
+            FROM notification_receiver nr
+            JOIN notification n ON nr.notification_id = n.notification_id
+            LEFT JOIN teacher t ON n.sender_id = t.teacher_id  
+            LEFT JOIN admin a ON n.sender_id = a.admin_id
+            LEFT JOIN subject s ON n.subject_id = s.subject_id  
+            WHERE nr.parent_id = ?  
+            ORDER BY n.notification_created_at DESC
 ";
 $notif_stmt = $conn->prepare($notification_sql);
 $notif_stmt->bind_param("i", $parent_id);  
