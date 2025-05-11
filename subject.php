@@ -1,5 +1,9 @@
 <?php
 header('Content-Type: application/json');
+header('Cache-Control: no-cache, no-store, must-revalidate'); // 防止缓存
+header('Pragma: no-cache');
+header('Expires: 0');
+
 include 'db_connect.php';
 
 $year = isset($_GET['year']) ? $_GET['year'] : '';
