@@ -423,7 +423,7 @@ CREATE TABLE `teacher` (
 INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
 (12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan pueri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
 (12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
