@@ -19,7 +19,8 @@ if (!isset($_SESSION['parent_id'])) {
 
 $parent_id = $_SESSION['parent_id'];
 
-$sql = "SELECT parent_name, ic_number, parent_email, parent_address, phone_number, phone_number2, parent_relationship, parent_gender, parent_password, parent_name2, parent_relationship2, parent_num2
+$sql = "SELECT parent_name, ic_number, parent_email, parent_address, phone_number, phone_number2, parent_relationship, parent_gender, parent_password, 
+       parent_image, parent_name2, parent_relationship2, parent_num2
         FROM parent 
         WHERE parent_id = ?";
 
