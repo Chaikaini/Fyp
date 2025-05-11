@@ -87,7 +87,21 @@
       font-weight: bold;
     }
 
-    
+   .notification-badge {
+    position: absolute;
+    top: -5px;  
+    right: -5px; 
+    width: 10px; 
+    height: 10px; 
+    background-color: #ff0000;
+    border-radius: 50%;
+    display: none;
+    border: 2px solid #fff;
+}
+
+    .nav-item {
+        position: relative;
+    }
     
 
 
@@ -115,10 +129,12 @@
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-         <li class="nav-item dropdown">
-            <a class="nav-link" href="teacher_notification.php" id="notifications">
-                <i class="fas fa-bell"></i>
-            </a>
+        
+            <li class="nav-item dropdown">
+                <a class="nav-link" href="teacher_notification.php" id="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notificationBadge"></span>
+                </a>
             </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
@@ -220,6 +236,32 @@
           console.error('Error:', error);
         });
     }
+
+        function checkUnreadNotifications() {
+            fetch("teacher_get_notification.php?check_unread=true")
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notificationBadge');
+                    console.log('Unread count:', data.unread_count); 
+                    if (data.unread_count && data.unread_count > 0) {
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking notifications:', error);
+                });
+        }
+
+        // check for unread notifications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+            checkUnreadNotifications();
+            
+            // every 30 seconds check for unread notifications
+            setInterval(checkUnreadNotifications, 30000);
+        });
 
    
 
