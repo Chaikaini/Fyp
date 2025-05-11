@@ -31,13 +31,12 @@
     <link href="css/style.css" rel="stylesheet">
 
     <style>
-
         .icon-bar {
             display: flex;
             justify-content: flex-end;
-            padding: 10px 0;
+            padding: 10px 15px;
             background-color: #f8f9fa;
-            border-bottom: 1px solid #caccce;
+            border-top: 1px solid #caccce;
         }
 
         .icon-bar a {
@@ -62,18 +61,16 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            filter: brightness(0.7) saturate(1); /* 稍微调暗背景以提升文字可读性 */
+            filter: brightness(0.7) saturate(1);
         }
 
         /* 调整标题和介绍内容的容器 */
         .page-header-content {
-            max-width: 800px; /* 增加宽度以适应更长内容 */
+            max-width: 800px;
             padding: 20px;
             border-radius: 10px;
             text-align: left;
-            
         }
-
 
         /* 调整标题样式，确保在背景图片上可读 */
         .page-header-content h1.main-title {
@@ -225,19 +222,65 @@
         }
 
         .notification-badge {
-        position: absolute;
-        top: 5px; 
-        right: 10px; 
-        width: 10px;
-        height: 10px;
-        background-color: red;
-        border-radius: 50%;
-        display: none; 
-        z-index: 1000;
-    }
-    .notification-icon {
-        position: relative; 
-    }
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
+
+        .notification-icon {
+            position: relative;
+        }
+
+        .inbox-modal {
+            display: none;
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 15px 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+            border: 1px solid #ccc;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        .inbox-modal strong {
+            font-size: 18px;
+        }
+
+        .inbox-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .inbox-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
 
         /* 响应式调整 */
         @media (max-width: 768px) {
@@ -245,7 +288,7 @@
                 height: 700px;
             }
             .page-header-content {
-                max-width: 100%; /* 移动端全宽 */
+                max-width: 100%;
                 padding: 15px;
                 text-align: center;
             }
@@ -276,42 +319,38 @@
             }
         }
 
-
-    /* 小标题样式（带绿色装饰线）*/
-    .section-title {
-    position: relative;      /* 相对定位，用于装饰线的定位 */
-    display: inline-block;   /* 让标题宽度根据内容自动调整 */
-    margin-bottom: 40px;     /* 底部留白 */
-    text-align: center;      /* 文字居中 */
-    color: #000000;         /* 黑色文字 */
-    padding: 0 60px;        
-    }
-
-    /* 用伪元素（:before和:after）添加装饰线 */
-    .section-title:before,
-    .section-title:after {
-    content: "";            /* 必须内容（空字符串）*/
-    position: absolute;     /* 绝对定位（相对于.section-title）*/
-    height: 2px;            /* 线的高度 */
-    border-bottom: 2px solid #28a745; /* 绿色实线（颜色可调）*/
-    top: 50%;               /* 垂直居中 */
-    width: 50px;            /* 线的长度 */
+        /* 小标题样式（带绿色装饰线） */
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #000000;
+            padding: 0 60px;
         }
 
-    /* 左侧线条：从标题左侧向外延伸 */
-    .section-title:before {
-    right: calc(100% - 15px); /* 从标题左侧边缘向左延伸 */
+        .section-title:before,
+        .section-title:after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            border-bottom: 2px solid #28a745;
+            top: 50%;
+            width: 50px;
         }
 
-    /* 右侧线条：从标题右侧向外延伸 */
-    .section-title:after {
-    left: calc(100% - 15px); /* 从标题右侧边缘向右延伸 */
+        .section-title:before {
+            right: calc(100% - 15px);
         }
 
+        .section-title:after {
+            left: calc(100% - 15px);
+        }
 
-
-
-        </style>
+        .navbar-color {
+            color: #28a745;
+        }
+    </style>
 </head>
 
 <body>
@@ -325,22 +364,17 @@
 
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
-              
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="#" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
     <!-- Navbar End -->
@@ -356,12 +390,11 @@
     </div>
     <!-- Icon Bar End -->
 
-     
-     <!-- Header Start -->
-     <div class="container-fluid page-header mb-5">
+    <!-- Header Start -->
+    <div class="container-fluid page-header mb-5">
         <div class="container py-5">
             <div class="row justify-content-start">
-                <div class="col-lg-10 ">
+                <div class="col-lg-10">
                     <div class="page-header-content animated slideInDown">
                         <h1 class="main-title">About Us</h1>
                         <h1 class="sub-title">The Seeds Learning Centre</h1>
@@ -374,60 +407,61 @@
     </div>
     <!-- Header End -->
 
-   <!-- About Start -->
-<div class="container-xxl py-5">
-    <div class="container">
-        <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
-            <h5 class="section-title">Your Child's Success Starts Here</h5>
-            
-            <!-- Features Section -->
-            <div class="row g-4 mb-5">
-                <!-- Teacher Card -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front text-center">
-                                <i class="fas fa-chalkboard-teacher fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
-                                <h5>Qualified Educators</h5>
-                                <p>5+ years experience</p>
-                            </div>
-                            <div class="flip-card-back text-center">
-                                <h5>Experienced Teachers</h5>
-                                <p>All our teachers have minimum 5 years teaching experience, with specialized training in their subjects to ensure quality education.</p>
+    <!-- About Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
+                <h5 class="section-title">Your Child's Success Starts Here</h5>
+                
+                <!-- Features Section -->
+                <div class="row g-4 mb-5">
+                    <!-- Teacher Card -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front text-center">
+                                    <i class="fas fa-chalkboard-teacher fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                    <h5>Qualified Educators</h5>
+                                    <p>5+ years experience</p>
+                                </div>
+                                <div class="flip-card-back text-center">
+                                    <h5>Experienced Teachers</h5>
+                                    <p>All our teachers have minimum 5 years teaching experience, with specialized training in their subjects to ensure quality education.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Classroom Card -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front text-center">
-                                <i class="fas fa-school fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
-                                <h5>Optimal Classes</h5>
-                                <p>30 students per class</p>
-                            </div>
-                            <div class="flip-card-back text-center">
-                                <h5>Effective Class Size</h5>
-                                <p>Our classes have 30 students, maintaining the perfect balance between group learning and individual attention.</p>
+                    
+                    <!-- Classroom Card -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front text-center">
+                                    <i class="fas fa-school fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                    <h5>Optimal Classes</h5>
+                                    <p>30 students per class</p>
+                                </div>
+                                <div class="flip-card-back text-center">
+                                    <h5>Effective Class Size</h5>
+                                    <p>Our classes have 30 students, maintaining the perfect balance between group learning and individual attention.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Curriculum Card -->
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="flip-card" onclick="this.classList.toggle('flipped')">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front text-center">
-                                <i class="fas fa-book-open fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
-                                <h5>Core Subjects</h5>
-                                <p>Focused learning</p>
-                            </div>
-                            <div class="flip-card-back text-center">
-                                <h5>Essential Curriculum</h5>
-                                <p>We specialize in core subjects: Mathematics, Science, English and Bahasa Malaysia, covering key concepts thoroughly.</p>
+                    
+                    <!-- Curriculum Card -->
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                            <div class="flip-card-inner">
+                                <div class="flip-card-front text-center">
+                                    <i class="fas fa-book-open fa-3x" style="color: #28a745; margin-bottom: 15px;"></i>
+                                    <h5>Core Subjects</h5>
+                                    <p>Focused learning</p>
+                                </div>
+                                <div class="flip-card-back text-center">
+                                    <h5>Essential Curriculum</h5>
+                                    <p>We specialize in core subjects: Mathematics, Science, English and Bahasa Malaysia, covering key concepts thoroughly.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -435,38 +469,43 @@
             </div>
         </div>
     </div>
-</div>
 
-                      <!-- Activities Section -->
-                      <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
-                        <h5 class="section-title">Fun Beyond Learning</h5>
-                        <p class="mb-4">At The Seeds Learning Centre, we believe in holistic development. Apart from academic tutoring, we organize fun and educational activities for our students (subject to availability and conditions).</p>
-                        <div class="row g-4">
-                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                                <div class="feature-card">
-                                    <img src="img/orchard.jpg" alt="Visiting an Orchard" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                                    <h5>Visiting an Orchard</h5>
-                                    <p>We take students to a local orchard to explore nature, learn about fruits, and understand the importance of agriculture (available during harvest season).</p>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                                <div class="feature-card">
-                                    <img src="img/christmas.jpg" alt="Playing and Eating with Kids" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                                    <h5>Celebrating Christmas</h5>
-                                    <p>We organize fun playtime and shared meals with students, fostering friendship and joy in a relaxed environment.</p>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                                <div class="feature-card">
-                                    <img src="img/newyear.jpg" alt="Playing at the Park" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
-                                    <h5>Playing at the Park</h5>
-                                    <p>We take students to a local park for fun outdoor play, encouraging physical activity and social bonding (organized during New Year festivities).</p>
-                                </div>
-                            </div>
+    <!-- Activities Section -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center wow fadeInUp mb-5" data-wow-delay="0.1s">
+                <h5 class="section-title">Fun Beyond Learning</h5>
+                <p class="mb-4">At The Seeds Learning Centre, we believe in holistic development. Apart from academic tutoring, we organize fun and educational activities for our students (subject to availability and conditions).</p>
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="feature-card">
+                            <img src="img/orchard.jpg" alt="Visiting an Orchard" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                            <h5>Visiting an Orchard</h5>
+                            <p>We take students to a local orchard to explore nature, learn about fruits, and understand the importance of agriculture (available during harvest season).</p>
                         </div>
                     </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="feature-card">
+                            <img src="img/christmas.jpg" alt="Playing and Eating with Kids" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                            <h5>Celebrating Christmas</h5>
+                            <p>We organize fun playtime and shared meals with students, fostering friendship and joy in a relaxed environment.</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="feature-card">
+                            <img src="img/newyear.jpg" alt="Playing at the Park" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">
+                            <h5>Playing at the Park</h5>
+                            <p>We take students to a local park for fun outdoor play, encouraging physical activity and social bonding (organized during New Year festivities).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <!-- Call to Action Section -->
+    <!-- Call to Action Section -->
+    <div class="container-xxl py-5">
+        <div class="container">
             <div class="cta-section wow fadeInUp" data-wow-delay="0.1s">
                 <h3>Join The Seeds Learning Centre Today!</h3>
                 <p>Contact us to learn more about our programs or to schedule a free consultation.</p>
@@ -475,86 +514,66 @@
         </div>
     </div>
     <!-- About End -->
-    <script>
-   document.addEventListener('DOMContentLoaded', function() {
-    fetch('get_notification.php')
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Notifications data:', data); 
 
-        //check if there have notification is unread
-        if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-            console.log('Unread notifications found!');
-            const badge = document.querySelector('.notification-badge');
-            if (badge) {
-                badge.style.display = 'block'; //show red dot
-            }
-        } else {
-            console.log('No unread notifications');
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-    });
-});
-    </script>
+    <!-- Inbox Message Modal -->
+    <div id="inboxModal" class="inbox-modal">
+        <strong>You have a new notification.</strong><br>
+        <a href="notification.php" class="inbox-link">View Notifications</a>
+    </div>
 
     <!-- Footer Start -->
-<div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
-    <div class="container py-5">
-      <div class="row g-5">
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Quick Link</h4>
-          <a class="btn btn-link" href="about.html">About Us</a><br>
-          <a class="btn btn-link" href="contact.html">Contact Us</a>
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Quick Link</h4>
+                    <a class="btn btn-link" href="about.html">About Us</a><br>
+                    <a class="btn btn-link" href="contact.html">Contact Us</a>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="text-white mb-4">Gallery</h4>
+                    <div class="row g-2 pt-2">
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
+                        </div>
+                        <div class="col-4">
+                            <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Contact</h4>
-          <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
-          <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
-          <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
+        <div class="container">
+            <div class="copyright">
+                <div class="row">
+                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                        © <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-          <h4 class="text-white mb-4">Gallery</h4>
-          <div class="row g-2 pt-2">
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-2.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-3.jpg" alt="">
-            </div>
-            <div class="col-4">
-              <img class="img-fluid bg-light p-1" src="img/course-1.jpg" alt="">
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-    <div class="container">
-      <div class="copyright">
-        <div class="row">
-          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-            &copy; <a class="border-bottom" href="#">The Seeds Learning Centre</a>, All Right Reserved.
-          </div>
-          <div class="col-md-6 text-center text-md-end">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Footer End -->
+    <!-- Footer End -->
 
     <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
@@ -569,6 +588,108 @@
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php');
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+                
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                    // Show icon-bar for logged-in users
+                    document.querySelector('.icon-bar').style.display = 'flex';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="index.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    // Hide icon-bar for non-logged-in users
+                    document.querySelector('.icon-bar').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML = `
+                    <a href="index.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                `;
+                const authButton = document.getElementById('authButton');
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+                // Hide icon-bar on error
+                document.querySelector('.icon-bar').style.display = 'none';
+            }
+        }
+
+        // Load notifications (only for logged-in users)
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('check_login.php')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch login status');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.isLoggedIn) {
+                        fetch('get_notification.php')
+                            .then(response => {
+                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Notifications data:', data);
+                                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                                    console.log('Unread notifications found!');
+                                    const badge = document.querySelector('.notification-badge');
+                                    if (badge) {
+                                        badge.style.display = 'block';
+                                    }
+                                    const modal = document.getElementById('inboxModal');
+                                    if (modal) {
+                                        modal.style.display = 'block';
+                                        setTimeout(() => {
+                                            modal.style.display = 'none';
+                                        }, 8000);
+                                    } else {
+                                        console.error('Modal element with id "inboxModal" not found.');
+                                    }
+                                } else {
+                                    console.log('No unread notifications');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking login status for notifications:', error);
+                });
+        });
+
+        // Load navigation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNavigation();
+        });
+    </script>
 </body>
 
 </html>

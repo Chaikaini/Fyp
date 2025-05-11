@@ -48,7 +48,7 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            flex-wrap: wrap; /* 确保科目可以换行 */
+            flex-wrap: wrap;
         }
 
         .grid-item {
@@ -132,150 +132,149 @@
             opacity: 1;
         }
 
-
         .subject-display {
-        padding: 40px 0;
-    }
-    
-    .subject-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 25px;
-        margin-top: 30px;
-    }
-    
-    .subject-card {
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    
-    .subject-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-    }
-    
-    .subject-header {
-        height: 160px;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .subject-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.5s;
-    }
-    
-    .subject-card:hover .subject-image {
-        transform: scale(1.05);
-    }
-    
-    .subject-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: rgba(0,0,0,0.7);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    
-    .subject-content {
-        padding: 20px;
-    }
-    
-    .subject-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #2c3e50;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .subject-name {
-        flex: 1;
-    }
-    
-    .subject-year {
-        background: #f1c40f;
-        color: white;
-        padding: 3px 10px;
-        border-radius: 15px;
-        font-size: 12px;
-        margin-left: 10px;
-    }
-    
-    .subject-price {
-        font-size: 16px;
-        color: #e74c3c;
-        font-weight: 700;
-        margin-bottom: 12px;
-    }
-    
-    .subject-features {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 15px;
-    }
-    
-    .feature-tag {
-        background: #ecf0f1;
-        color: #7f8c8d;
-        padding: 4px 10px;
-        border-radius: 15px;
-        font-size: 12px;
-    }
-    
-    /* 不同科目的标识颜色 */
-    .math-card .subject-year { background: #e74c3c; }
-    .english-card .subject-year { background: #3498db; }
-    .melayu-card .subject-year { background: #2ecc71; }
-    
-    .math-card .feature-tag { background: #ffebee; color: #e74c3c; }
-    .english-card .feature-tag { background: #e3f2fd; color: #1976d2; }
-    .melayu-card .feature-tag { background: #e8f5e9; color: #2e7d32; }
-    
-    /* 年级筛选器 */
-    .grade-filter {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 25px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .filter-btn {
-        padding: 8px 20px;
-        border-radius: 30px;
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        color: #495057;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    
-    .filter-btn:hover, .filter-btn.active {
-        background: #3498db;
-        color: white;
-        border-color: #3498db;
-    }
-    
-    .section-intro {
-        max-width: 700px;
-        margin: 0 auto 30px;
-        color: #7f8c8d;
-        line-height: 1.6;
-    }
+            padding: 40px 0;
+        }
+        
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .subject-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .subject-header {
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .subject-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .subject-card:hover .subject-image {
+            transform: scale(1.05);
+        }
+        
+        .subject-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .subject-content {
+            padding: 20px;
+        }
+        
+        .subject-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .subject-name {
+            flex: 1;
+        }
+        
+        .subject-year {
+            background: #f1c40f;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        
+        .subject-price {
+            font-size: 16px;
+            color: #e74c3c;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .subject-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .feature-tag {
+            background: #ecf0f1;
+            color: #7f8c8d;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        /* Different subject badge colors */
+        .math-card .subject-year { background: #e74c3c; }
+        .english-card .subject-year { background: #3498db; }
+        .melayu-card .subject-year { background: #2ecc71; }
+        
+        .math-card .feature-tag { background: #ffebee; color: #e74c3c; }
+        .english-card .feature-tag { background: #e3f2fd; color: #1976d2; }
+        .melayu-card .feature-tag { background: #e8f5e9; color: #2e7d32; }
+        
+        /* Grade filter */
+        .grade-filter {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 30px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .section-intro {
+            max-width: 700px;
+            margin: 0 auto 30px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
     </style>
 </head>
 
@@ -290,19 +289,17 @@
 
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="" class="nav-item nav-link">Home</a>
-                <a href="" class="nav-item nav-link">About us</a>
-                <a href="" class="nav-item nav-link">Contact us</a>
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log in<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="#" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log in<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
     <!-- Navbar End -->
@@ -316,7 +313,7 @@
                         <img src="img/announcemant1.jpg" class="custom-image" alt="Announcement 1">
                     </div>
                     <div class="carousel-item">
-                        <img src="img/announcemant 2.jpg" class="custom-image" alt="Announcement 1">
+                        <img src="img/announcemant 2.jpg" class="custom-image" alt="Announcement 2">
                     </div>
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#announcementCarousel" data-bs-slide="prev">
@@ -381,7 +378,7 @@
         </div>
         
         <div class="subject-grid" id="subjectContainer">
-            <!-- 动态加载内容 -->
+            <!-- Dynamic content loaded here -->
         </div>
     </div>
     <!-- Categories End -->
@@ -392,8 +389,8 @@
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-4">Quick Link</h4>
-                    <a class="btn btn-link" href="">About Us</a><br>
-                    <a class="btn btn-link" href="">Contact Us</a>
+                    <a class="btn btn-link" href="about.html">About Us</a><br>
+                    <a class="btn btn-link" href="contact.html">Contact Us</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-4">Contact</h4>
@@ -456,84 +453,129 @@
 
     <!-- Custom JavaScript -->
     <script>
-// Load subjects dynamically
-const subjectFeatures = {
-    'math': ['Problem Solving', 'Weekly Tests', 'Math Olympiad'],
-    'english': ['Reading', 'Writing', 'Speaking'],
-    'melayu': ['Tatabahasa', 'Karangan', 'Kosa Kata']
-};
+        // Load subjects dynamically
+        const subjectFeatures = {
+            'math': ['Problem Solving', 'Weekly Tests', 'Math Olympiad'],
+            'english': ['Reading', 'Writing', 'Speaking'],
+            'melayu': ['Tatabahasa', 'Karangan', 'Kosa Kata']
+        };
 
-// 科目描述
-const subjectDescriptions = {
-    'math': 'Develop logical thinking and problem-solving skills through our structured math program.',
-    'english': 'Enhance English proficiency with our interactive language learning approach.',
-    'melayu': 'Master Bahasa Melayu with our comprehensive language program.'
-};
+        const subjectDescriptions = {
+            'math': 'Develop logical thinking and problem-solving skills through our structured math program.',
+            'english': 'Enhance English proficiency with our interactive language learning approach.',
+            'melayu': 'Master Bahasa Melayu with our comprehensive language program.'
+        };
 
-async function loadSubjects() {
-    try {
-        const response = await fetch('get_subjects.php');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const subjects = await response.json();
-        
-        const container = document.getElementById('subjectContainer');
-        container.innerHTML = '';
-        
-        subjects.forEach(subject => {
-            const subjectKey = subject.subject_name.toLowerCase();
-            const card = document.createElement('div');
-            card.className = `subject-card ${subjectKey}-card`;
-            card.dataset.year = subject.year;
-            
-            card.innerHTML = `
-                <div class="subject-header">
-                    <img src="${subject.subject_image}" alt="${subject.subject_name}" class="subject-image">
-                    <div class="subject-badge">${subject.subject_price}/term</div>
-                </div>
-                <div class="subject-content">
-                    <div class="subject-title">
-                        <span class="subject-name">${subject.subject_name}</span>
-                        <span class="subject-year">${subject.year}</span>
-                    </div>
-                    <div class="subject-price">RM ${subject.subject_price}</div>
-                    <p>${subject.subject_description === '-' ? subjectDescriptions[subjectKey] || 'Comprehensive learning program' : subject.subject_description}</p>
-                    <div class="subject-features">
-                        ${subjectFeatures[subjectKey]?.map(feature => 
-                            `<span class="feature-tag">${feature}</span>`
-                        ).join('')}
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(card);
-        });
-        
-        // 年级筛选功能
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+        async function loadSubjects() {
+            try {
+                const response = await fetch('get_subjects.php');
+                if (!response.ok) throw new Error('Network response was not ok');
+                const subjects = await response.json();
                 
-                const filter = this.dataset.filter;
-                document.querySelectorAll('.subject-card').forEach(card => {
-                    card.style.display = (filter === 'all' || card.dataset.year === filter) ? 'block' : 'none';
+                const container = document.getElementById('subjectContainer');
+                container.innerHTML = '';
+                
+                subjects.forEach(subject => {
+                    const subjectKey = subject.subject_name.toLowerCase();
+                    const card = document.createElement('div');
+                    card.className = `subject-card ${subjectKey}-card`;
+                    card.dataset.year = subject.year;
+                    
+                    card.innerHTML = `
+                        <div class="subject-header">
+                            <img src="${subject.subject_image}" alt="${subject.subject_name}" class="subject-image">
+                            <div class="subject-badge">${subject.subject_price}/term</div>
+                        </div>
+                        <div class="subject-content">
+                            <div class="subject-title">
+                                <span class="subject-name">${subject.subject_name}</span>
+                                <span class="subject-year">${subject.year}</span>
+                            </div>
+                            <div class="subject-price">RM ${subject.subject_price}</div>
+                            <p>${subject.subject_description === '-' ? subjectDescriptions[subjectKey] || 'Comprehensive learning program' : subject.subject_description}</p>
+                            <div class="subject-features">
+                                ${subjectFeatures[subjectKey]?.map(feature => 
+                                    `<span class="feature-tag">${feature}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
                 });
-            });
-        });
-        
-    } catch (error) {
-        console.error('Error loading subjects:', error);
-        document.getElementById('subjectContainer').innerHTML = `
-            <div class="col-12 text-center py-5">
-                <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">Our Programs</h4>
-                <p>We are currently updating our program offerings</p>
-            </div>
-        `;
-    }
-}
+                
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        const filter = this.dataset.filter;
+                        document.querySelectorAll('.subject-card').forEach(card => {
+                            card.style.display = (filter === 'all' || card.dataset.year === filter) ? 'block' : 'none';
+                        });
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                document.getElementById('subjectContainer').innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Our Programs</h4>
+                        <p>We are currently updating our program offerings</p>
+                    </div>
+                `;
+            }
+        }
 
-document.addEventListener('DOMContentLoaded', loadSubjects);
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php');
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+                
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="index.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                navLinks.innerHTML = `
+                    <a href="index.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                `;
+                const authButton = document.getElementById('authButton');
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+            }
+        }
+
+        // Load subjects and navigation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSubjects();
+            loadNavigation();
+        });
     </script>
 </body>
 
