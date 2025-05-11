@@ -156,12 +156,11 @@
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
+            <a class="nav-link" href="teacher_notification.php" id="notifications">
               <i class="fas fa-bell"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="teacher_notification.php">Notifications</a></li>
-            </ul>
+          </li>
+           
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">

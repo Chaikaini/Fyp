@@ -27,7 +27,7 @@
     #sidebar a {
       color: white;
       text-decoration: none;
-      padding: 15px 15px; /* Adjusted padding for better spacing */
+      padding: 15px 15px; 
       display: block;
     }
     #sidebar a:hover {
@@ -83,53 +83,13 @@
         padding: 8px 15px; 
     }
 
-  
-
     .form-label {
       font-weight: bold;
     }
 
-    .submit-btn-container {
-      text-align: center;
-    }
-
-   
-    .notification-item {
-    border-left: 5px solid #0d6efd;
-    background-color: #f8f9fa;
-  }
-
-    .send-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    font-size: 14px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-    }
-
-    .send-btn:hover {
-    background-color: #0056b3;
-    }
-
-    .toast-message {
-    position: fixed;
-    top: 10%; 
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #155724;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    font-weight: bold;
-    z-index: 1000;
-    text-align: center;
-    transition: opacity 0.5s ease-in-out;
     
-}
+    
+
 
     
 </style>
@@ -155,14 +115,11 @@
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
+         <li class="nav-item dropdown">
+            <a class="nav-link" href="teacher_notification.php" id="notifications">
+                <i class="fas fa-bell"></i>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="teacher_notification">Notification</a></li>
-            </ul>
-          </li>
+            </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
@@ -196,13 +153,6 @@
 </body>
 
 
-     <!-- Breadcrumb Section -->
-    <div class="breadcrumb-container">
-        <h1>Notifications</h1>
-        <ul class="breadcrumb">
-            <li>Notifications</li>
-        </ul>
-    </div>
 
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -211,6 +161,66 @@
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
     
+    // loading notifications on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadNotifications();
+    });
+
+    // Sidebar toggle functionality
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+    
+    function loadNotifications() {
+      fetch("teacher_get_notification.php")
+        .then(res => res.json())
+        .then(data => {
+          const container = document.getElementById("notification-list");
+          container.innerHTML = "";
+
+          if (data.error) {
+            container.innerHTML = `<div class='text-muted text-center'>${data.error}</div>`;
+            return;
+          }
+
+          if (data.length === 0) {
+            container.innerHTML = "<div class='text-muted text-center'>No announcements yet.</div>";
+          } else {
+            // sorting based on date & time
+            data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
+
+            data.forEach(n => {
+              const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
+              const block = document.createElement("div");
+              block.className = "card mb-3 shadow-sm";
+
+              block.innerHTML = `
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div><strong>From: ${n.sender_name}</strong></div> 
+                    <small class="text-muted">${time}</small>
+                  </div>
+                  <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
+                  <p class="card-text">${n.notification_content}</p>
+                  ${n.notification_document ? `
+                    <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
+                      <i class="fas fa-paperclip me-1"></i>View Attachment
+                    </a>
+                  ` : ''}
+                </div>
+              `;
+
+              container.appendChild(block);
+            });
+          }
+        })
+        .catch(error => {
+          const container = document.getElementById("notification-list");
+          container.innerHTML = "<div class='text-danger text-center'>Error loading notifications. Please try again later.</div>";
+          console.error('Error:', error);
+        });
+    }
+
    
 
   </script>
