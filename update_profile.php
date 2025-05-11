@@ -8,7 +8,6 @@ $password = "";
 $dbname = "the seeds";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
 if ($conn->connect_error) {
     echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
     exit;
@@ -20,28 +19,43 @@ if (!isset($_SESSION['parent_id'])) {
 }
 
 $parent_id = $_SESSION['parent_id'];
-$data = json_decode(file_get_contents("php://input"), true);
 
-// get data
-$parent_name = $data['parent_name'];
-$parent_gender = $data['parent_gender'];
-$ic_number = $data['ic_number'];
-$phone_number = $data['phone_number'];
-$phone_number2 = $data['phone_number2'];
-$parent_relationship = $data['parent_relationship'];
-$parent_address = $data['parent_address'];
-$current_password = $data['current_password'];
-$new_password = $data['new_password'] ?? '';
+// processing form data
+$parent_name = $_POST['parent_name'] ?? '';
+$parent_gender = $_POST['parent_gender'] ?? '';
+$ic_number = $_POST['ic_number'] ?? '';
+$phone_number = $_POST['phone_number'] ?? '';
+$phone_number2 = $_POST['phone_number2'] ?? '';
+$parent_relationship = $_POST['parent_relationship'] ?? '';
+$parent_address = $_POST['parent_address'] ?? '';
+$current_password = $_POST['current_password'] ?? '';
+$new_password = $_POST['new_password'] ?? '';
 
-// add contact information
-$parent_name2 = $data['parent_name2'] ?? null;
-$parent_relationship2 = $data['parent_relationship2'] ?? null;
-$parent_num2 = $data['parent_num2'] ?? null;
+$parent_name2 = $_POST['parent_name2'] ?? null;
+$parent_relationship2 = $_POST['parent_relationship2'] ?? null;
+$parent_num2 = $_POST['parent_num2'] ?? null;
+
+$parent_image_path = null;
+
+if (isset($_FILES['parent_image']) && $_FILES['parent_image']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = 'uploads/parent_images/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $imageName = uniqid() . '-' . basename($_FILES['parent_image']['name']);
+    $imageTmp = $_FILES['parent_image']['tmp_name'];
+    $parent_image_path = $uploadDir . $imageName;
+
+    if (!move_uploaded_file($imageTmp, $parent_image_path)) {
+        echo json_encode(['status' => 'error', 'message' => 'Failed to upload image']);
+        exit;
+    }
+}
 
 $conn->begin_transaction();
 
 try {
-   
     if (!empty($current_password) && !empty($new_password)) {
         $stmt = $conn->prepare("SELECT parent_password FROM parent WHERE parent_id = ?");
         $stmt->bind_param("i", $parent_id);
@@ -61,27 +75,52 @@ try {
         $stmt->close();
     }
 
-   
-    $stmt = $conn->prepare("
-        UPDATE parent 
-        SET parent_name=?, parent_gender=?, ic_number=?, phone_number=?, phone_number2=?, parent_relationship=?, parent_address=?,
-            parent_name2=?, parent_relationship2=?, parent_num2=?
-        WHERE parent_id=?
-    ");
-    $stmt->bind_param(
-        "ssssssssssi",
-        $parent_name,
-        $parent_gender,
-        $ic_number,
-        $phone_number,
-        $phone_number2,
-        $parent_relationship,
-        $parent_address,
-        $parent_name2,
-        $parent_relationship2,
-        $parent_num2,
-        $parent_id
-    );
+    // update with image
+    if ($parent_image_path) {
+        $stmt = $conn->prepare("
+            UPDATE parent 
+            SET parent_name=?, parent_gender=?, ic_number=?, phone_number=?, phone_number2=?, parent_relationship=?, parent_address=?,
+                parent_name2=?, parent_relationship2=?, parent_num2=?, parent_image=?
+            WHERE parent_id=?
+        ");
+        $stmt->bind_param(
+            "sssssssssssi",
+            $parent_name,
+            $parent_gender,
+            $ic_number,
+            $phone_number,
+            $phone_number2,
+            $parent_relationship,
+            $parent_address,
+            $parent_name2,
+            $parent_relationship2,
+            $parent_num2,
+            $parent_image_path,
+            $parent_id
+        );
+    } else {// update without image
+        $stmt = $conn->prepare("
+            UPDATE parent 
+            SET parent_name=?, parent_gender=?, ic_number=?, phone_number=?, phone_number2=?, parent_relationship=?, parent_address=?,
+                parent_name2=?, parent_relationship2=?, parent_num2=?
+            WHERE parent_id=?
+        ");
+        $stmt->bind_param(
+            "ssssssssssi",
+            $parent_name,
+            $parent_gender,
+            $ic_number,
+            $phone_number,
+            $phone_number2,
+            $parent_relationship,
+            $parent_address,
+            $parent_name2,
+            $parent_relationship2,
+            $parent_num2,
+            $parent_id
+        );
+    }
+
     $stmt->execute();
     $stmt->close();
 

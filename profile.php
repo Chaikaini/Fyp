@@ -485,16 +485,17 @@
         <div class="profile-content active" id="my-info-content">
             <h3>My Information</h3>
 
+            <!-- Replace the existing avatar section with this -->
             <div class="avatar-section">
-            <div class="profile-image-wrapper">
-                <label for="avatar-upload">
-                <img src="img/user.jpg" alt="User Avatar" id="user-avatar" class="profile-img">
-                <div class="overlay" title="Click to change image">
-                    <i class="fas fa-camera camera-icon"></i>
+                <div class="profile-image-wrapper" style="position: relative;">
+                    <div class="image-container">
+                        <img src="img/user.jpg" alt="User Avatar" id="parent-avatar-preview" class="profile-img">
+                        <div class="overlay" title="Click to change image" onclick="document.getElementById('parent-avatar-upload').click()">
+                            <i class="fas fa-camera camera-icon"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="parent-avatar-upload" name="parent_image" accept="image/*" style="display: none;">
                 </div>
-                </label>
-                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
-            </div>
             </div>
 
             
@@ -596,6 +597,8 @@
             </form>
             <div id="success-message" class="success-message" style="display: none;"></div>
         </div>
+    
+    
     
     <div class="profile-content" id="children-info-content">
     <h3>Childrens Information</h3>
@@ -1105,6 +1108,21 @@ window.addEventListener('click', function(event) {
   }
 });
 
+
+// add parent modal's image preview
+document.getElementById('parent-avatar-upload').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('parent-avatar-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select a valid image file.');
+    }
+});
+
  // add child modal's image preview
 document.getElementById('child-avatar-upload').addEventListener('change', function(event) {
     const file = event.target.files[0];
@@ -1273,21 +1291,25 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     event.preventDefault();
 
     let formData = new FormData(this);
-    
+
     // Validate required fields
     const requiredFields = ['child_name', 'child_gender', 'child_kidNumber', 'child_birthday', 'child_school', 'child_year'];
     for (let field of requiredFields) {
         if (!formData.get(field)) {
-            showToast(`Error: ${field.replace('child_', '')} is required`, true);
+            showToast(`${field.replace('child_', '')} is required`, true);
             return;
         }
     }
 
-    // Add file if exists
+    // Validate avatar upload
     const fileInput = document.getElementById('child-avatar-upload');
-    if (fileInput && fileInput.files.length > 0) {
-        formData.append('child_image', fileInput.files[0]);
+    if (!fileInput || fileInput.files.length === 0) {
+        showToast("Child image is required", true);
+        return;
     }
+
+    // Add avatar file
+    formData.append('child_image', fileInput.files[0]);
 
     fetch("profile_addchild.php", {
         method: "POST",
@@ -1317,6 +1339,7 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
 
 
 
+
 document.addEventListener("DOMContentLoaded", function () {
     fetch("profile_myinfo.php")
         .then(response => response.json())
@@ -1333,6 +1356,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("contact-name").value = data.data.parent_name2;
                 document.getElementById("contact-relationship").value = data.data.parent_relationship2;
                 document.getElementById("contact-phone").value = data.data.parent_num2;
+         
+         
+                const parentAvatarPreview = document.getElementById("parent-avatar-preview");
+                if (data.data.parent_image) {
+                    // Check if the path includes the full directory structure
+                    const imagePath = data.data.parent_image.includes('uploads/parent_images/') 
+                        ? data.data.parent_image 
+                        : `uploads/parent_images/${data.data.parent_image}`;
+                    
+                    parentAvatarPreview.src = imagePath;
+                    
+                  
+                    parentAvatarPreview.onerror = function() {
+                        console.error("Failed to load parent image:", this.src);
+                        this.src = "img/user.jpg"; 
+                    };
+                } else {
+                    parentAvatarPreview.src = "img/user.jpg"; // Default image if no profile image
+                }
             } else {
                 alert("Failed to load profile: " + data.message);
             }
@@ -1344,41 +1386,32 @@ document.querySelector("form").addEventListener("submit", async function (event)
     event.preventDefault();
 
     const successMessage = document.getElementById("success-message");
-    successMessage.style.display = "none"; 
+    successMessage.style.display = "none";
 
-    // get data
-    const formData = {
-        parent_name: document.getElementById("username").value,
-        parent_gender: document.getElementById("gender").value,
-        ic_number: document.getElementById("ic-num").value,
-        phone_number: document.getElementById("phone-num-1").value,
-        phone_number2: document.getElementById("phone-num-2").value,
-        parent_relationship: document.getElementById("relationship").value,
-        parent_address: document.getElementById("address").value,
-        parent_name2: document.getElementById("contact-name").value,
-        parent_relationship2: document.getElementById("contact-relationship").value,
-        parent_num2: document.getElementById("contact-phone").value,
-        current_password: document.getElementById("current-password").value.trim(),
-        new_password: document.getElementById("new-password").value.trim(),
-        confirm_password: document.getElementById("confirm-password").value.trim(),
-    };
+    const formData = new FormData();
+    formData.append("parent_name", document.getElementById("username").value);
+    formData.append("parent_gender", document.getElementById("gender").value);
+    formData.append("ic_number", document.getElementById("ic-num").value);
+    formData.append("phone_number", document.getElementById("phone-num-1").value);
+    formData.append("phone_number2", document.getElementById("phone-num-2").value);
+    formData.append("parent_relationship", document.getElementById("relationship").value);
+    formData.append("parent_address", document.getElementById("address").value);
+    formData.append("parent_name2", document.getElementById("contact-name").value);
+    formData.append("parent_relationship2", document.getElementById("contact-relationship").value);
+    formData.append("parent_num2", document.getElementById("contact-phone").value);
+    formData.append("current_password", document.getElementById("current-password").value.trim());
+    formData.append("new_password", document.getElementById("new-password").value.trim());
+    formData.append("confirm_password", document.getElementById("confirm-password").value.trim());
 
-    document.getElementById("current-password-error").textContent = "";
-    document.getElementById("new-password-error").textContent = "";
-
-    // make sure new and confirm password match
-    if (formData.new_password || formData.current_password) {
-        if (formData.new_password !== formData.confirm_password) {
-            document.getElementById("new-password-error").textContent = "* New and Confirm password do not match";
-            return;
-        }
+    const imageFile = document.getElementById("parent-avatar-upload").files[0];
+    if (imageFile) {
+        formData.append("parent_image", imageFile);
     }
 
     try {
         const response = await fetch("update_profile.php", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
+            body: formData,
         });
 
         const result = await response.json();
@@ -1421,7 +1454,7 @@ function fetchChildrenInfo() {
     fetch("profile_childlist.php")
         .then(response => response.json())
         .then(data => {
-            console.log("Received child data:", data); // Add debug log
+            console.log("Received child data:", data); 
             const tbody = document.querySelector("#children-info-content tbody");
             tbody.innerHTML = ""; 
 
