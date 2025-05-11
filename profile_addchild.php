@@ -71,7 +71,7 @@ try {
 
         echo json_encode([
             'success' => true,
-            'message' => 'Child profile added successfully'
+            'message' => 'Child profile information added successfully',
         ]);
         
     } else {

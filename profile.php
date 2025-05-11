@@ -1291,21 +1291,25 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     event.preventDefault();
 
     let formData = new FormData(this);
-    
+
     // Validate required fields
     const requiredFields = ['child_name', 'child_gender', 'child_kidNumber', 'child_birthday', 'child_school', 'child_year'];
     for (let field of requiredFields) {
         if (!formData.get(field)) {
-            showToast(`Error: ${field.replace('child_', '')} is required`, true);
+            showToast(`${field.replace('child_', '')} is required`, true);
             return;
         }
     }
 
-    // Add file if exists
+    // Validate avatar upload
     const fileInput = document.getElementById('child-avatar-upload');
-    if (fileInput && fileInput.files.length > 0) {
-        formData.append('child_image', fileInput.files[0]);
+    if (!fileInput || fileInput.files.length === 0) {
+        showToast("Child image is required", true);
+        return;
     }
+
+    // Add avatar file
+    formData.append('child_image', fileInput.files[0]);
 
     fetch("profile_addchild.php", {
         method: "POST",
@@ -1331,6 +1335,7 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
         showToast("Error: " + error.message, true);
     });
 });
+
 
 
 
@@ -1449,7 +1454,7 @@ function fetchChildrenInfo() {
     fetch("profile_childlist.php")
         .then(response => response.json())
         .then(data => {
-            console.log("Received child data:", data); // Add debug log
+            console.log("Received child data:", data); 
             const tbody = document.querySelector("#children-info-content tbody");
             tbody.innerHTML = ""; 
 
