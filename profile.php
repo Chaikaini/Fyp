@@ -21,8 +21,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
-    <link href="lib/animate.min.css" rel="stylesheet">
-    <link href="lib/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -1156,16 +1156,20 @@ function viewTeacherInfo(teacherId, teacherName) {
     if (data.error) {
       alert(data.error);
     } else {
-      // 获取教师图片路径
+      // 修改图片路径处理逻辑
       let imagePath;
       if (data.teacher_image) {
-        // 检查是否已包含完整路径
-        imagePath = data.teacher_image.includes('uploads/teacher_images/') 
+        // 避免路径重复
+        imagePath = data.teacher_image.startsWith('uploads/') 
           ? data.teacher_image 
           : `uploads/teacher_images/${data.teacher_image}`;
       } else {
         imagePath = 'img/user.jpg';
       }
+
+      // 添加调试日志
+      console.log("Original teacher image:", data.teacher_image);
+      console.log("Processed image path:", imagePath);
 
       const content = `
         <div class="teacher-image-container text-center mb-3">
@@ -1187,9 +1191,6 @@ function viewTeacherInfo(teacherId, teacherName) {
       document.getElementById("teacherInfoModalLabel").innerText = `Teacher Info: ${teacherName}`;
       document.getElementById("teacher-info-body").innerHTML = content;
       
-      // 添加调试日志
-      console.log("Teacher image path:", imagePath);
-      
       const modal = new bootstrap.Modal(document.getElementById("teacherInfoModal"));
       modal.show();
     }
@@ -1199,7 +1200,6 @@ function viewTeacherInfo(teacherId, teacherName) {
     alert("Failed to load teacher information.");
   });
 }
-
 
 function openResultModal(child_id, class_id) {
     fetch(`learning_result_comment.php?child_id=${child_id}&class_id=${class_id}`)

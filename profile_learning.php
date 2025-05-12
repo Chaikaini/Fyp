@@ -32,19 +32,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['teacher_id'])) {
     $stmt->execute();
     $result = $stmt->get_result();
     
-    if ($teacher = $result->fetch_assoc()) {
-        // 处理教师图片路径
-        if (!empty($teacher['teacher_image'])) {
-            // 检查图片是否已经包含完整路径
-            if (!strpos($teacher['teacher_image'], 'uploads/teacher_images/')) {
-                $teacher['teacher_image'] = 'uploads/teacher_images/' . $teacher['teacher_image'];
-            }
+if ($teacher = $result->fetch_assoc()) {
+    // process teacher image
+    if (!empty($teacher['teacher_image'])) {
+        // clean up the path with repeated 
+         $image_path = str_replace('\\', '/', $teacher['teacher_image']);
+        $image_path = preg_replace('/^uploads\/teacher_images\/+/', '', $image_path);
+        $full_path = 'uploads/teacher_images/' . $image_path;
+        
+        // check if the image exists
+        if (file_exists($full_path)) {
+            $teacher['teacher_image'] = $full_path;
         } else {
             $teacher['teacher_image'] = 'img/user.jpg';
+            error_log("Teacher image not found: " . $full_path);
         }
-        
-        echo json_encode($teacher);
     } else {
+        $teacher['teacher_image'] = 'img/user.jpg';
+        error_log("No teacher image specified");
+    }
+    
+    
+    error_log("Teacher image final path: " . $teacher['teacher_image']);
+    
+    echo json_encode($teacher);
+}else {
         echo json_encode(["error" => "Teacher not found"]);
     }
     
