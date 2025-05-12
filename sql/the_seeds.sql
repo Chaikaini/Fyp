@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2025 at 06:17 AM
+-- Generation Time: May 12, 2025 at 06:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -144,8 +144,8 @@ INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_t
 ('Mat0002', '11132', 2, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Mat2001', '22134', 1, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
 ('Mat2002', '22134', 2, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly0001', '11351', 1, '12345', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
-('Mly0002', '11351', 2, '12345', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly0001', '11351', 1, '12345', '2025', 'Year 1', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
+('Mly0002', '11351', 2, '12345', '2025', 'Year 1', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
 ('Mly2001', '22345', 1, '12347', '2025', 'Year 2', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
 ('Mly2002', '22345', 2, '12347', '2025', 'Year 2', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
 
@@ -239,8 +239,8 @@ CREATE TABLE `notification` (
 --
 
 INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 11111, 'Parent', '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
-(2, 11111, 'Parent', '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
+(1, 12345, 'Class', '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
+(2, 12345, 'Class', '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
 (3, 11111, 'Parent', NULL, NULL, '123', '123', NULL, '2025-05-08 15:51:06');
 
 -- --------------------------------------------------------

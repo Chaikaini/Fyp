@@ -80,23 +80,40 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
 
 // Handle get notifications request
 if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
-    error_log("Fetching notifications for sender_id: $sender_id");
+    error_log("Fetching all notifications");
     $stmt = $conn->prepare("
-        SELECT n.notification_id, n.sender_id, n.recipient_type, n.subject_id, n.class_id, n.notification_title, 
-               n.notification_content, n.notification_document, n.notification_created_at, a.admin_name AS sender_name,
-               GROUP_CONCAT(nr.parent_id) AS parent_ids, GROUP_CONCAT(nr.teacher_id) AS teacher_ids,
-               GROUP_CONCAT(nr.recipient_type) AS recipient_types,
-               GROUP_CONCAT(CASE 
-                   WHEN nr.recipient_type = 'Teacher' THEN t.teacher_name 
-                   WHEN nr.recipient_type = 'Parent' THEN p.parent_name 
-                   WHEN nr.recipient_type = 'Class' THEN NULL
-               END) AS recipient_names
+        SELECT 
+            n.notification_id, 
+            n.sender_id, 
+            n.recipient_type, 
+            n.subject_id, 
+            n.class_id, 
+            n.notification_title, 
+            n.notification_content, 
+            n.notification_document, 
+            n.notification_created_at,
+            CASE 
+                WHEN n.sender_id IN (SELECT admin_id FROM admin) THEN 'Admin'
+                WHEN n.sender_id IN (SELECT teacher_id FROM teacher) THEN 'Teacher'
+                ELSE 'Unknown'
+            END AS sender_type,
+            CASE 
+                WHEN n.sender_id IN (SELECT admin_id FROM admin) THEN (SELECT admin_name FROM admin WHERE admin_id = n.sender_id)
+                WHEN n.sender_id IN (SELECT teacher_id FROM teacher) THEN (SELECT teacher_name FROM teacher WHERE teacher_id = n.sender_id)
+                ELSE 'Unknown Sender'
+            END AS sender_name,
+            GROUP_CONCAT(nr.parent_id) AS parent_ids, 
+            GROUP_CONCAT(nr.teacher_id) AS teacher_ids,
+            GROUP_CONCAT(nr.recipient_type) AS recipient_types,
+            GROUP_CONCAT(CASE 
+                WHEN nr.recipient_type = 'Teacher' THEN t.teacher_name 
+                WHEN nr.recipient_type = 'Parent' THEN p.parent_name 
+                WHEN nr.recipient_type = 'Class' THEN NULL
+            END) AS recipient_names
         FROM notification n
-        JOIN admin a ON n.sender_id = a.admin_id
         LEFT JOIN notification_receiver nr ON n.notification_id = nr.notification_id
         LEFT JOIN teacher t ON nr.teacher_id = t.teacher_id AND nr.recipient_type = 'Teacher'
         LEFT JOIN parent p ON nr.parent_id = p.parent_id AND nr.recipient_type = 'Parent'
-        WHERE n.sender_id = ?
         GROUP BY n.notification_id
     ");
     if (!$stmt) {
@@ -106,7 +123,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
         ob_end_flush();
         exit;
     }
-    $stmt->bind_param("s", $sender_id);
     $stmt->execute();
     $result = $stmt->get_result();
     $notifications = [];
@@ -133,10 +149,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
                 }
             }
         }
+        // Override sender_name for admin to "kaini"
+        $sender_name = $row['sender_type'] === 'Admin' ? 'kaini' : $row['sender_name'];
         $notifications[] = [
             'notification_id' => $row['notification_id'],
             'sender_id' => $row['sender_id'],
-            'sender_name' => $row['sender_name'],
+            'sender_type' => $row['sender_type'],
+            'sender_name' => $sender_name,
             'recipient_type' => $row['recipient_type'],
             'subject_id' => $row['subject_id'],
             'class_id' => $row['class_id'],
@@ -146,7 +165,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'notification_created_at' => $row['notification_created_at'],
             'recipients' => $recipients
         ];
-        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, recipient_type={$row['recipient_type']}");
+        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}");
     }
     echo json_encode($notifications);
     $stmt->close();
