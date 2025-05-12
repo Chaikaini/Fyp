@@ -416,6 +416,34 @@
   cursor: pointer;
 }
 
+
+
+.modal {
+    z-index: 1050 !important;
+}
+
+
+.teacher-image-container img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+
+.teacher-modal-dialog {
+    max-width: 1000px;
+    width: 90%; 
+}
+.teacher-info-table td, .teacher-info-table th {
+    word-break: break-word;
+    vertical-align: middle;
+}
+
+
   .progress-bar.weak { background-color: #dc3545; }
   .progress-bar.medium { background-color: #ffc107; }
   .progress-bar.strong { background-color: #28a745; }
@@ -663,6 +691,23 @@
         </div>
     </div>
     </div> 
+
+<!-- Teacher Info Modal -->
+ 
+<div class="modal fade" id="teacherInfoModal" tabindex="-1" aria-labelledby="teacherInfoModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered teacher-modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="teacherInfoModalLabel">Teacher Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="teacher-info-body">
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
     
         <div class="profile-content" id="history-content">
@@ -1059,7 +1104,11 @@ function displayLearningStatus() {
                         <td>${course.subject_name}</td>
                         <td>${course.part_name} (${course.part_duration})</td>
                         <td>${course.year}</td>
-                        <td>${course.teacher_name}</td>
+                        <td>
+                        <a href="#" onclick="viewTeacherInfo('${course.teacher_id}', '${course.teacher_name}')">
+                            ${course.teacher_name}
+                        </a>
+                        </td>
                         <td>${course.class_time}</td>
                         <td>
                             <button class="icon-button result-btn" 
@@ -1092,6 +1141,63 @@ function displayLearningStatus() {
             statusContent.innerHTML = "<p class='text-danger'>No registered class yet.</p>";
             learningStatus.style.display = "block";
         });
+}
+
+function viewTeacherInfo(teacherId, teacherName) {
+  fetch("profile_learning.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "teacher_id=" + encodeURIComponent(teacherId)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert(data.error);
+    } else {
+      // 获取教师图片路径
+      let imagePath;
+      if (data.teacher_image) {
+        // 检查是否已包含完整路径
+        imagePath = data.teacher_image.includes('uploads/teacher_images/') 
+          ? data.teacher_image 
+          : `uploads/teacher_images/${data.teacher_image}`;
+      } else {
+        imagePath = 'img/user.jpg';
+      }
+
+      const content = `
+        <div class="teacher-image-container text-center mb-3">
+          <img src="${imagePath}" 
+               alt="Teacher ${data.teacher_name}" 
+               class="rounded-circle"
+               onerror="this.onerror=null; this.src='img/user.jpg';">
+        </div>
+        <table class="table table-bordered teacher-info-table">
+          <tbody>
+            <tr><th>Name</th><td>${data.teacher_name}</td></tr>
+            <tr><th>Gender</th><td>${data.teacher_gender}</td></tr>
+            <tr><th>Email</th><td>${data.teacher_email}</td></tr>
+            <tr><th>Phone</th><td>${data.teacher_phone_number}</td></tr>
+          </tbody>
+        </table>
+      `;
+      
+      document.getElementById("teacherInfoModalLabel").innerText = `Teacher Info: ${teacherName}`;
+      document.getElementById("teacher-info-body").innerHTML = content;
+      
+      // 添加调试日志
+      console.log("Teacher image path:", imagePath);
+      
+      const modal = new bootstrap.Modal(document.getElementById("teacherInfoModal"));
+      modal.show();
+    }
+  })
+  .catch(err => {
+    console.error("Error fetching teacher info:", err);
+    alert("Failed to load teacher information.");
+  });
 }
 
 
