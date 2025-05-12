@@ -16,22 +16,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome for eye icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         body {
             margin: 0;
             font-family: 'Heebo', sans-serif;
-            display: flex;
             height: 100vh;
+            overflow: hidden;
         }
 
         .container {
             display: flex;
             width: 100%;
-            height: 100%;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
 
         .left-half {
-            width: 60%;
+            flex: 0 0 60%;
             overflow: hidden;
         }
 
@@ -40,21 +44,22 @@
             height: 100%;
             object-fit: cover;
             object-position: left;
+            display: block;
         }
 
         .right-half {
-            width: 40%;
+            flex: 0 0 40%;
             background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
+            box-sizing: border-box;
         }
 
         .logo {
-           width: 250px; 
-           margin-bottom: 10px;
+            width: 250px;
+            margin-bottom: 10px;
         }
-
 
         .login-form {
             width: 80%;
@@ -80,6 +85,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         .login-form button {
@@ -88,7 +94,7 @@
             background-color: #17a2b8;
             border: none;
             border-radius: 5px;
-            color: #000000;
+            color: #fff;
             font-size: 16px;
             cursor: pointer;
         }
@@ -120,6 +126,66 @@
         .login-form p a:hover {
             text-decoration: underline;
         }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container input {
+            padding-right: 40px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .toggle-password.fa-eye-slash {
+            color: #ff4d4d; /* Red when password is hidden */
+        }
+
+        .toggle-password.fa-eye {
+            color: #17a2b8; /* Blue when password is visible */
+        }
+
+        .password-container input[type="text"] {
+            background-color: #e8f4f8;
+            border: 1px solid #17a2b8;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-half, .right-half {
+                flex: 0 0 100%;
+                width: 100%;
+            }
+            .left-half {
+                height: 40vh;
+            }
+            .right-half {
+                height: auto;
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -131,49 +197,78 @@
         <div class="right-half">
             <div class="login-form">
                 <img src="img/the seeds2.png" alt="Logo" class="logo">
-                <h2>Welcome To The Seeds !</h2>
+                <h2>Welcome To The Seeds!</h2>
                 <p>Please login with your data.</p>
-                
+
                 <form id="loginForm">
-                    <input type="text" name="email" placeholder="Email" required>
-                    <input type="password" name="password" placeholder="Password" required>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <i class="fa fa-eye-slash toggle-password" id="togglePassword" title="Toggle password visibility" aria-label="Hide password" role="button"></i>
+                    </div>
+                    <div class="error-message" id="errorMessage" style="display: none;"></div>
                     <div class="options">
                         <a href="forgot.html">Forgot password?</a>
                     </div>
                     <button type="submit">Login</button>
-                    <p id="errorMessage" style="color: red; display: none;"></p>
                     <p>Don’t have an account? <a href="registration.html">Sign up for free</a></p>
                 </form>
-                
-                <script>
-                document.getElementById("loginForm").addEventListener("submit", function(event) {
-                    event.preventDefault(); 
-                
-                    let formData = new FormData(this);
-                
-                    fetch("login.php", {
-                        method: "POST",
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            localStorage.setItem("parent_id", data.parent_id);
-                            localStorage.setItem("parent_name", data.parent_name);
-                            localStorage.setItem("parent_email", data.parent_email);
-                            window.location.href = "member.html"; 
-                        } else {
-                            let errorMessage = document.getElementById("errorMessage");
-                            errorMessage.textContent = data.error; 
-                            errorMessage.style.display = "block";
-                        }
-                    })
-                    .catch(error => console.error("Error:", error));
-                });
-                </script>                                
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let form = this;
+            let password = document.getElementById("password").value.trim();
+            let errorMessage = document.getElementById("errorMessage");
+
+            errorMessage.style.display = "none";
+            errorMessage.innerText = "";
+
+            if (password.length === 0) {
+                errorMessage.innerText = "Password cannot be empty!";
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            let formData = new FormData(form);
+            formData.set("password", password);
+
+            fetch("login.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem("parent_id", data.parent_id);
+                    localStorage.setItem("parent_name", data.parent_name);
+                    localStorage.setItem("parent_email", data.parent_email);
+                    window.location.href = "member.html";
+                } else {
+                    errorMessage.innerText = data.error;
+                    errorMessage.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                errorMessage.innerText = "An error occurred. Please try again.";
+                errorMessage.style.display = "block";
+            });
+        });
+
+        document.getElementById("togglePassword").addEventListener("click", function() {
+            const passwordInput = document.getElementById("password");
+            const isHidden = passwordInput.getAttribute("type") === "password";
+            passwordInput.setAttribute("type", isHidden ? "text" : "password");
+            this.classList.toggle("fa-eye", isHidden);
+            this.classList.toggle("fa-eye-slash", !isHidden);
+            this.setAttribute("aria-label", isHidden ? "Show password" : "Hide password");
+        });
+    </script>
 </body>
 
 </html>
