@@ -102,6 +102,15 @@
     .nav-item {
         position: relative;
     }
+
+     .new-badge {
+        background-color:rgb(0, 255, 132);
+        color: black;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        margin-left: 8px;
+    }
     
 
 
@@ -131,10 +140,11 @@
         <ul class="navbar-nav ms-auto">
         
             <li class="nav-item dropdown">
-                <a class="nav-link" href="teacher_notification.php" id="notifications">
+                <a class="nav-link" href="#" id="notificationBell">
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge" id="notificationBadge"></span>
                 </a>
+
             </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
@@ -188,56 +198,85 @@
     });
     
     function loadNotifications() {
-      fetch("teacher_get_notification.php")
+    fetch("teacher_get_notification.php")
         .then(res => res.json())
         .then(data => {
-          const container = document.getElementById("notification-list");
-          container.innerHTML = "";
+            const container = document.getElementById("notification-list");
+            container.innerHTML = "";
 
-          if (data.error) {
-            container.innerHTML = `<div class='text-muted text-center'>${data.error}</div>`;
-            return;
-          }
+            if (data.error) {
+                container.innerHTML = `<div class='text-muted text-center'>${data.error}</div>`;
+                return;
+            }
 
-          if (data.length === 0) {
-            container.innerHTML = "<div class='text-muted text-center'>No notification yet.</div>";
-          } else {
-            // sorting based on date & time
-            data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
+            if (data.length === 0) {
+                container.innerHTML = "<div class='text-muted text-center'>No notification yet.</div>";
+            } else {
+                data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
 
-            data.forEach(n => {
-              const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
-              const block = document.createElement("div");
-              block.className = "card mb-3 shadow-sm";
+                data.forEach(n => {
+                    const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
+                    const block = document.createElement("div");
+                    block.className = "card mb-3 shadow-sm";
+                    
+                    
+                    block.onclick = function() {
+                        if (n.is_unread) {
+                            markNotificationAsRead(n.notification_id, block);
+                        }
+                    };
 
-              block.innerHTML = `
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div><strong>From: ${n.sender_name}</strong></div> 
-                    <small class="text-muted">${time}</small>
-                  </div>
-                  <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
-                  <p class="card-text">${n.notification_content}</p>
-                  ${n.notification_document ? `
-                    <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
-                      <i class="fas fa-paperclip me-1"></i>View Attachment
-                    </a>
-                  ` : ''}
-                </div>
-              `;
+                    block.innerHTML = `
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong>From: ${n.sender_name}</strong>
+                                    ${n.is_unread ? '<span class="new-badge">New</span>' : ''}
+                                </div> 
+                                <small class="text-muted">${time}</small>
+                            </div>
+                            <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
+                            <p class="card-text">${n.notification_content}</p>
+                            ${n.notification_document ? `
+                                <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
+                                    <i class="fas fa-paperclip me-1"></i>View Attachment
+                                </a>
+                            ` : ''}
+                        </div>
+                    `;
 
-              container.appendChild(block);
-            });
-          }
+                    container.appendChild(block);
+                });
+            }
         })
         .catch(error => {
-          const container = document.getElementById("notification-list");
-          container.innerHTML = "<div class='text-danger text-center'>Error loading notifications. Please try again later.</div>";
-          console.error('Error:', error);
+            const container = document.getElementById("notification-list");
+            container.innerHTML = "<div class='text-danger text-center'>Error loading notifications. Please try again later.</div>";
+            console.error('Error:', error);
         });
-    }
+}
 
-        function checkUnreadNotifications() {
+// singele notification mark as read
+function markNotificationAsRead(notificationId, element) {
+    fetch(`teacher_get_notification.php?mark_single_read=true&notification_id=${notificationId}`)
+        .then(res => res.json())
+        .then(data => {
+            // remove the "New"
+            const newBadge = element.querySelector('.new-badge');
+            if (newBadge) {
+                newBadge.remove();
+            }
+            
+            // check if the notification bell should be marked as read
+            checkUnreadNotifications();
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
+}
+
+
+ function checkUnreadNotifications() {
             fetch("teacher_get_notification.php?check_unread=true")
                 .then(res => res.json())
                 .then(data => {
@@ -262,9 +301,6 @@
             // every 30 seconds check for unread notifications
             setInterval(checkUnreadNotifications, 30000);
         });
-
-   
-
   </script>
 </body>
 </html>
