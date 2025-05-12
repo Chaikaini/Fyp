@@ -100,7 +100,7 @@
     .fertile-header .btn-outline-success {
       margin-right: 0;
     }
-    .fixed-field {
+    .fixed-field, .disabled-field {
       background-color: #e9ecef;
       cursor: not-allowed;
     }
@@ -146,7 +146,7 @@
 <body>
   <!-- Sidebar -->
   <nav id="sidebar" class="d-flex flex-column p-3">
-    <div class="sidebar-header">
+    <div class="sidebar-header"> 
       <h3>Admin Panel</h3>
     </div>
     <ul class="nav flex-column">
@@ -222,6 +222,7 @@
               <th>Term</th>
               <th>Year</th>
               <th>Time</th>
+              <th>Venue</th>
               <th>Capacity</th>
               <th>Status</th>
               <th>Actions</th>
@@ -275,7 +276,7 @@
             </div>
             <div class="mb-3">
               <label for="yearSelect" class="form-label">Year</label>
-              <select class="form-select" id="yearSelect" required>
+              <select class="form-select disabled-field" id="yearSelect" required disabled>
                 <option value="" disabled selected>Select Year</option>
                 <!-- Year options will be populated dynamically -->
               </select>
@@ -283,6 +284,10 @@
             <div class="mb-3">
               <label for="time" class="form-label">Time</label>
               <input type="text" class="form-control" id="time" required>
+            </div>
+            <div class="mb-3">
+              <label for="venue" class="form-label">Venue</label>
+              <input type="text" class="form-control" id="venue" required>
             </div>
             <div class="mb-3">
               <label for="capacity" class="form-label">Capacity</label>
@@ -293,6 +298,7 @@
               <select class="form-control" id="status" required>
                 <option value="Available">Available</option>
                 <option value="Unavailable">Unavailable</option>
+                <option value="Full">Full</option>
               </select>
             </div>
             <div class="error-message" id="addErrorMessage"></div>
@@ -350,6 +356,10 @@
               <input type="text" class="form-control" id="editTime" required>
             </div>
             <div class="mb-3">
+              <label for="editVenue" class="form-label">Venue</label>
+              <input type="text" class="form-control" id="editVenue" required>
+            </div>
+            <div class="mb-3">
               <label for="editCapacity" class="form-label">Capacity</label>
               <input type="number" class="form-control" id="editCapacity" required>
             </div>
@@ -358,6 +368,7 @@
               <select class="form-control" id="editStatus" required>
                 <option value="Available">Available</option>
                 <option value="Unavailable">Unavailable</option>
+                <option value="Full">Full</option>
               </select>
             </div>
             <div class="error-message" id="editErrorMessage"></div>
@@ -482,6 +493,7 @@
                 <td>${cls.class_term}</td>
                 <td>${cls.year}</td>
                 <td>${cls.time}</td>
+                <td>${cls.venue}</td>
                 <td>${cls.enrolled} / ${cls.capacity}</td>
                 <td class="${cls.status === 'Available' ? 'status-available' : 'status-unavailable'}">${cls.status}</td>
                 <td>
@@ -500,7 +512,7 @@
             });
           } else {
             const message = data.message || (data.success ? 'No classes found' : 'Invalid response format');
-            table.innerHTML = `<tr><td colspan="10" class="text-center">${message}</td></tr>`;
+            table.innerHTML = `<tr><td colspan="11" class="text-center">${message}</td></tr>`;
             if (!data.success) {
               showNotification(`Failed to load classes: ${message}`, 'error');
             }
@@ -509,7 +521,7 @@
         .catch(error => {
           console.error("Fetch Classes Error:", error);
           showNotification("Error loading classes: " + error.message, "error");
-          document.getElementById("classTable").innerHTML = `<tr><td colspan="10" class="text-center">Error loading classes</td></tr>`;
+          document.getElementById("classTable").innerHTML = `<tr><td colspan="11" class="text-center">Error loading classes</td></tr>`;
         });
     }
 
@@ -582,6 +594,7 @@
       document.getElementById('editTeacherSelect').value = classData.teacher_id || '';
       document.getElementById('editTerm').value = classData.class_term || '';
       document.getElementById('editTime').value = classData.time || '';
+      document.getElementById('editVenue').value = classData.venue || '';
       document.getElementById('editCapacity').value = classData.capacity || '';
       document.getElementById('editStatus').value = classData.status || 'Available';
     }
@@ -648,9 +661,11 @@
         }
         yearSelect.appendChild(yearOption);
         yearSelect.value = yearOption.value; // Auto-select the valid year
+        yearSelect.disabled = true; // Disable the year select
         generateClassId(); // Trigger class ID generation after setting year
       } else {
         yearSelect.value = '';
+        yearSelect.disabled = false; // Enable if no subject is selected
       }
     }
 
@@ -682,14 +697,16 @@
       fetchClasses();
       fetchTerms(); // Load terms on page load
 
-      // Clear error messages when modals are closed
+      // Clear error messages and reset form when modals are closed
       document.getElementById('addClassModal').addEventListener('hidden.bs.modal', () => {
         clearError('addClassModal');
         document.getElementById('classForm').reset();
         document.getElementById('classId').value = '';
-        while (document.getElementById('yearSelect').options.length > 1) {
-          document.getElementById('yearSelect').remove(1);
+        const yearSelect = document.getElementById('yearSelect');
+        while (yearSelect.options.length > 1) {
+          yearSelect.remove(1);
         }
+        yearSelect.disabled = false; // Re-enable year select
       });
       document.getElementById('editClassModal').addEventListener('hidden.bs.modal', () => clearError('editClassModal'));
       document.getElementById('deleteModal').addEventListener('hidden.bs.modal', () => {
@@ -727,6 +744,7 @@
                     teacher_id: cls.teacher_id,
                     class_term: cls.class_term,
                     time: cls.time,
+                    venue: cls.venue,
                     capacity: cls.capacity,
                     status: cls.status
                   }, partId);
@@ -774,6 +792,7 @@
           class_term: document.getElementById("class_term").value,
           year: year,
           time: document.getElementById("time").value,
+          venue: document.getElementById("venue").value,
           capacity: document.getElementById("capacity").value,
           status: document.getElementById("status").value,
         };
@@ -792,9 +811,11 @@
               showNotification("Class successfully added!", "success");
               document.getElementById("classForm").reset();
               document.getElementById('classId').value = '';
-              while (document.getElementById('yearSelect').options.length > 1) {
-                document.getElementById('yearSelect').remove(1);
+              const yearSelect = document.getElementById('yearSelect');
+              while (yearSelect.options.length > 1) {
+                yearSelect.remove(1);
               }
+              yearSelect.disabled = false;
               let modal = bootstrap.Modal.getInstance(document.getElementById("addClassModal"));
               modal.hide();
             } else {
@@ -826,6 +847,7 @@
           teacher_id: document.getElementById("editTeacherSelect").value,
           class_term: document.getElementById("editTerm").value,
           time: document.getElementById("editTime").value,
+          venue: document.getElementById("editVenue").value,
           capacity: document.getElementById("editCapacity").value,
           status: document.getElementById("editStatus").value,
         };
