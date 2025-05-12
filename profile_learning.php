@@ -80,6 +80,7 @@ SELECT
     t.teacher_id,
     t.teacher_name,
     c.class_id,
+    c.class_venue,
     c.class_time,
     p.part_name,
     p.part_duration
@@ -108,6 +109,7 @@ while ($row = $result->fetch_assoc()) {
         "teacher_id" => $row["teacher_id"],
         "teacher_name" => $row["teacher_name"],
         "class_id" => $row["class_id"],
+        "class_venue" => $row["class_venue"],
         "class_time" => $row["class_time"],
         "part_name" => $row["part_name"],
         "part_duration" => $row["part_duration"]

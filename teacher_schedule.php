@@ -34,6 +34,7 @@ $sql = "SELECT
             c.class_term,
             c.class_id,
             c.year,
+            c.class_venue,
             c.class_time,
             p.part_duration
         FROM subject s
@@ -85,6 +86,7 @@ while ($row = $result->fetch_assoc()) {
         'class_term' => $row['class_term'],
         'class_id' => $row['class_id'],
         'year' => $row['year'],
+        'class_venue' => $row['class_venue'],
         'time' => $row['class_time'],
         'part_duration' => $row['part_duration']
     ];

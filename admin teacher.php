@@ -86,6 +86,21 @@
     .search-category {
     width: 150px;
   }
+
+  .notification-badge {
+    position: absolute;
+    top: -5px;  
+    right: -5px; 
+    width: 10px; 
+    height: 10px; 
+    background-color: #ff0000;
+    border-radius: 50%;
+    display: none;
+    border: 2px solid #fff;
+}
+.nav-item {
+    position: relative; 
+}
 </style>
 
 <body>
@@ -109,11 +124,12 @@
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item dropdown">
-            <li class="nav-item dropdown">
-              <a class="nav-link" href="teacher_notification.php" id="notifications">
-                <i class="fas fa-bell"></i>
+           <li class="nav-item">
+              <a class="nav-link" href="teacher_notification.php" id="notificationBell">
+                  <i class="fas fa-bell"></i>
+                  <span class="notification-badge" id="notificationBadge"></span>
               </a>
-            </li>
+          </li>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
@@ -160,6 +176,7 @@
                 <th>Term</th>
                 <th>Class ID</th>
                 <th>Year</th>
+                <th>Class Venue</th>
                 <th>Time</th>
                 <th>Status</th>
               </tr>
@@ -305,6 +322,7 @@ function renderSchedule(data) {
           <td>${row.class_term}</td>
           <td>${row.class_id}</td>
           <td>${row.year}</td>
+          <td>${row.class_venue}</td>
           <td>${row.time}</td>
           <td class="${statusClass}">${status}</td>
         </tr>
@@ -318,14 +336,15 @@ document.getElementById("view-timetable-btn").addEventListener("click", function
   const timetableData = [];
 
   allRows.forEach(row => {
-    const status = row.cells[6].textContent.trim();
+    const status = row.cells[7].textContent.trim();  // Updated index since status is now in column 8
     if (status === "Ongoing") {
       const subject_id = row.cells[0].textContent.trim();
       const subject_name = row.cells[1].textContent.trim();
       const class_id = row.cells[3].textContent.trim();
-      const time = row.cells[5].textContent.trim(); // Example: "Monday 9:00AM - 10:00AM"
+      const class_venue = row.cells[5].textContent.trim();
+      const time = row.cells[6].textContent.trim();
 
-      const subject = `${subject_id} - ${subject_name} (${class_id})`;
+      const subject = `${subject_id} - ${subject_name} (${class_id})<br><small class="text-muted">Venue: ${class_venue}</small>`;
       timetableData.push({ subject, time });
     }
   });
@@ -335,8 +354,6 @@ document.getElementById("view-timetable-btn").addEventListener("click", function
   const timetableModal = new bootstrap.Modal(document.getElementById('timetableModal'));
   timetableModal.show();
 });
-
-
 
 function renderTimetableModal(data) {
   const container = document.getElementById("timetable-modal-body");
@@ -361,17 +378,21 @@ function renderTimetableModal(data) {
 
   timeSlots.sort();
 
-  let html = "<table class='table table-bordered'><thead><tr><th>Time</th>";
-  days.forEach(day => {
-    html += `<th>${day}</th>`;
-  });
-  html += "</tr></thead><tbody>";
+  let html = `
+    <table class='table table-bordered'>
+      <thead>
+        <tr>
+          <th>Time</th>
+          ${days.map(day => `<th>${day}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>`;
 
   timeSlots.forEach(slot => {
     html += `<tr><td>${slot}</td>`;
     days.forEach(day => {
       const subject = scheduleMap[day]?.[slot] || "";
-      html += `<td>${subject}</td>`;
+      html += `<td class="align-middle">${subject}</td>`;
     });
     html += "</tr>";
   });
@@ -379,6 +400,32 @@ function renderTimetableModal(data) {
   html += "</tbody></table>";
   container.innerHTML = html;
 }
+
+
+ function checkUnreadNotifications() {
+            fetch("teacher_get_notification.php?check_unread=true")
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notificationBadge');
+                    console.log('Unread count:', data.unread_count); 
+                    if (data.unread_count && data.unread_count > 0) {
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking notifications:', error);
+                });
+        }
+
+        // check for unread notifications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUnreadNotifications();
+            
+            // every 30 seconds check for unread notifications
+            setInterval(checkUnreadNotifications, 30000);
+        });
 
 
 </script>

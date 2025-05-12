@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment report</title>
+  <title>Payment Report</title>
   
   <!-- Favicon -->
   <link href="img/the seeds.jpg" rel="icon" type="image/png">
@@ -64,9 +64,8 @@
     .table-container .fa-edit, .table-container .fa-trash-alt {
       color: #007BFF;
     }
-
-    .pointer-cursor{
-      cursor:pointer;
+    .pointer-cursor {
+      cursor: pointer;
     }
   </style>
 </head>
@@ -84,18 +83,17 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Notification</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
-          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i> <!-- Add this icon for expand/collapse -->
+          <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
         </a>
-        <div class="collapse" id="reportMenu">
+        <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report
-            </span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
       </li>      
@@ -107,21 +105,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
-        <form class="d-flex mx-auto">
-          <input class="form-control me-2" type="date" id="start-date" />
-          <span class="mx-2">to</span>
-          <input class="form-control me-2" type="date" id="end-date" />
-          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
-        </form>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="notifications" role="button" data-bs-toggle="dropdown">
-              <i class="fas fa-bell"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifications">
-              <li><a class="dropdown-item" href="#">No new notifications</a></li>
-            </ul>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
               <i class="fas fa-user"></i>
@@ -150,10 +134,11 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Order ID</th>
-              <th>Date</th>
+              <th>Payment ID</th>
+              <th>Parent ID</th>
+              <th>Payment Method</th>
+              <th>Payment Status</th>
+              <th>Payment Time</th>
               <th>Total Amount</th>
             </tr>
           </thead>
@@ -171,64 +156,50 @@
     });
 
     document.addEventListener("DOMContentLoaded", function () {
-      fetchReportData(); // Load the default report data
+      fetchReportData(); // Load the default report data (current month)
 
-      function fetchReportData(startDate = null, endDate = null) {
-        let url = 'fetch_report.php';
-        if (startDate && endDate) {
-          url += `?start_date=${startDate}&end_date=${endDate}`;
-        }
-
-        fetch(url)
+      function fetchReportData() {
+        fetch('fetch_report.php')
           .then(response => response.json())
           .then(data => {
             updateTable(data);
-            updateDateRange(startDate, endDate);  // Update the date range based on the selected date
+            updateDateRange(); // Update the date range for the current month
           })
           .catch(error => console.error("Error fetching report data:", error));
       }
 
       function updateTable(data) {
-  let tableBody = document.querySelector("tbody");
-  tableBody.innerHTML = "";
+        let tableBody = document.querySelector("tbody");
+        tableBody.innerHTML = "";
 
-  if (data.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No records found</td></tr>`;
-    return;
-  }
+        if (data.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No records found</td></tr>`;
+          return;
+        }
 
-  data.forEach((payment, index) => {
-    let row = `<tr>
-        <td>${payment.payment_id}</td>
-        <td>${payment.parent_id}</td>
-        <td>${payment.payment_method}</td>
-        <td>${payment.payment_status}</td>
-        <td>${payment.payment_time}</td>
-        <td>RM${payment.payment_total_amount}</td>
-    </tr>`;
-    tableBody.innerHTML += row;
-  });
-}
-
-      function updateDateRange(startDate, endDate) {
-        let formattedStart = startDate ? new Date(startDate).toISOString().split('T')[0] : 'N/A';
-        let formattedEnd = endDate ? new Date(endDate).toISOString().split('T')[0] : 'N/A';
-
-        // Update the displayed date range
-        document.querySelector(".date-range span").textContent = ` ${formattedStart} to ${formattedEnd}`;
+        data.forEach((payment, index) => {
+          let row = `<tr>
+              <td>${payment.payment_id}</td>
+              <td>${payment.parent_id}</td>
+              <td>${payment.payment_method}</td>
+              <td>${payment.payment_status}</td>
+              <td>${payment.payment_time}</td>
+              <td>RM${payment.payment_total_amount}</td>
+          </tr>`;
+          tableBody.innerHTML += row;
+        });
       }
 
-      document.getElementById('search-btn').addEventListener('click', function() {
-        let startDate = document.getElementById('start-date').value;
-        let endDate = document.getElementById('end-date').value;
-        if (startDate && endDate) {
-          // If both start and end dates are selected, fetch the report data for the range
-          fetchReportData(startDate, endDate);
-        } else {
-          // If no date range is selected, fetch the default report data (current month)
-          fetchReportData();
-        }
-      });
+      function updateDateRange() {
+        let startDate = new Date();
+        startDate.setDate(1); // First day of the current month
+        let endDate = new Date();
+        let formattedStart = startDate.toISOString().split('T')[0];
+        let formattedEnd = endDate.toISOString().split('T')[0];
+
+        // Update the displayed date range
+        document.querySelector(".date-range span").textContent = `${formattedStart} to ${formattedEnd}`;
+      }
     });
   </script>
 </body>

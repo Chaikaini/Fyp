@@ -1064,6 +1064,7 @@ function displayLearningStatus() {
                             <th>Part</th>
                             <th>Year</th>
                             <th>Teacher</th>
+                            <th>Venue</th>
                             <th>Time</th>
                             <th>Result</th>
                             <th>Status</th>
@@ -1109,6 +1110,7 @@ function displayLearningStatus() {
                             ${course.teacher_name}
                         </a>
                         </td>
+                        <td>${course.class_venue}</td>
                         <td>${course.class_time}</td>
                         <td>
                             <button class="icon-button result-btn" 
@@ -1156,10 +1158,10 @@ function viewTeacherInfo(teacherId, teacherName) {
     if (data.error) {
       alert(data.error);
     } else {
-      // 修改图片路径处理逻辑
+      // image path
       let imagePath;
       if (data.teacher_image) {
-        // 避免路径重复
+        // Check if the image path starts with 'uploads/'
         imagePath = data.teacher_image.startsWith('uploads/') 
           ? data.teacher_image 
           : `uploads/teacher_images/${data.teacher_image}`;
@@ -1167,7 +1169,7 @@ function viewTeacherInfo(teacherId, teacherName) {
         imagePath = 'img/user.jpg';
       }
 
-      // 添加调试日志
+      
       console.log("Original teacher image:", data.teacher_image);
       console.log("Processed image path:", imagePath);
 
