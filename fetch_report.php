@@ -10,18 +10,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (isset($_GET['start_date']) && isset($_GET['end_date']) && !empty($_GET['start_date']) && !empty($_GET['end_date'])) {
-    $start_date = $_GET['start_date'] . " 00:00:00";
-    $end_date = $_GET['end_date'] . " 23:59:59";
-} else {
-    $start_date = date("Y-m-01 00:00:00");
-    $end_date = date("Y-m-d 23:59:59");
-}
+// Remove date range logic since search is not needed
+$start_date = date("Y-m-01 00:00:00"); // First day of current month
+$end_date = date("Y-m-d 23:59:59"); // Current date
 
 $sql = "SELECT payment_id, parent_id, payment_method, payment_status, payment_time, payment_total_amount 
         FROM payment 
         WHERE payment_time BETWEEN ? AND ? 
-        ORDER BY payment_time ASC";
+        ORDER BY payment_id ASC"; // Changed to order by payment_id
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ss", $start_date, $end_date);
@@ -34,4 +30,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 echo json_encode($data);
+
+$stmt->close();
+$conn->close();
 ?>
