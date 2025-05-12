@@ -262,7 +262,7 @@
     <script src="lib/owl.carousel.min.js"></script>
 
     <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=1.0.1"></script>
 
     <!-- JavaScript -->
     <script>
@@ -452,30 +452,30 @@
 
         // Load comments
         function loadComments() {
-            fetch('get_comments.php', { cache: 'no-store' })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Comments data:', data);
-                    const commentsContainer = document.getElementById('comments');
-                    commentsContainer.innerHTML = '';
+    fetch('get_comments.php?timestamp=' + new Date().getTime(), { cache: 'no-store' })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Comments data:', data);
+            const commentsContainer = document.getElementById('comments');
+            commentsContainer.innerHTML = '';
 
-                    data.forEach(comment => {
-                        const commentElement = document.createElement('div');
-                        commentElement.classList.add('comment-box');
-                        commentElement.innerHTML = `
-                            <p class="comment-subject">${comment.subject_id} (${comment.class_id})</p>
-                            <p>Rating: ${'⭐'.repeat(comment.comment_rating)}</p>
-                            <p>${comment.comment_text}</p>
-                            <small>${comment.comment_created_at}</small>
-                        `;
-                        commentsContainer.appendChild(commentElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading comments:', error);
-                    showToast('Failed to load comments. Please try again.', true);
-                });
-        }
+            data.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.classList.add('comment-box');
+                commentElement.innerHTML = `
+                    <p class="comment-subject">${comment.subject_id} (${comment.class_id})</p>
+                    <p>Rating: ${'⭐'.repeat(comment.comment_rating)}</p>
+                    <p>${comment.comment_text}</p>
+                    <small>${comment.comment_created_at}</small>
+                `;
+                commentsContainer.appendChild(commentElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading comments:', error);
+            showToast('Failed to load comments. Please try again.', true);
+        });
+}
     </script>
 </body>
 
