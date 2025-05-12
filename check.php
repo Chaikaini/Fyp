@@ -498,7 +498,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <hr>
 
         <div class="payment-info">
-            <h4>Payment Method</h4>
+            <h4>Step 1: Choose Your Payment Method</h4>
             <div class="payment-method">
                 <div class="payment-option-card">
                     <label for="creditcard" class="payment-option">
