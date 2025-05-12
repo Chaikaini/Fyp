@@ -7,7 +7,7 @@ $password = "";
 $dbname = "the seeds";   
 
 // Enable error reporting for debugging
-ini_set('display_errors', 0); // Hide errors in production
+ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'php_errors.log');
 
@@ -59,7 +59,6 @@ try {
         $result = $conn->query($sql);
         $row = $result->fetch_assoc();
         
-        // Get table schema for debugging
         $schemaSql = "SHOW COLUMNS FROM child";
         $schemaResult = $conn->query($schemaSql);
         $schema = [];
@@ -67,7 +66,6 @@ try {
             $schema[] = $schemaRow;
         }
         
-        // Check if registration and exam_result tables exist
         $regTableCheck = $conn->query("SHOW TABLES LIKE 'registration'");
         $examTableCheck = $conn->query("SHOW TABLES LIKE 'exam_result'");
         
@@ -96,6 +94,22 @@ try {
             sendJsonResponse(["success" => false, "error" => "Invalid IC number"]);
         }
 
+        $imagePath = null;
+        if (isset($_FILES['child_image']) && $_FILES['child_image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = 'uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $fileName = uniqid() . '_' . basename($_FILES['child_image']['name']);
+            $targetPath = $uploadDir . $fileName;
+            if (move_uploaded_file($_FILES['child_image']['tmp_name'], $targetPath)) {
+                $imagePath = $targetPath;
+            } else {
+                logError("Failed to upload image for child_id $child_id");
+                sendJsonResponse(["success" => false, "error" => "Failed to upload image"]);
+            }
+        }
+
         if ($child_id) {
             $sql = "
                 UPDATE child 
@@ -105,7 +119,8 @@ try {
                     child_kidNumber = '$child_kidNumber',
                     child_birthday = '$child_birthday',
                     child_school = '$child_school',
-                    child_year = '$child_year'
+                    child_year = '$child_year'"
+                    . ($imagePath ? ", child_image = '$imagePath'" : "") . "
                 WHERE child_id = '$child_id'
             ";
 
@@ -123,7 +138,7 @@ try {
 
     // Handle Delete Request
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
-        logError("Delete request received: " . json_encode($_POST)); // Debug: Log raw POST data
+        logError("Delete request received: " . json_encode($_POST));
         if (!isset($_POST['child_id']) || empty($_POST['child_id'])) {
             logError("Delete request failed: Child ID is missing or empty");
             sendJsonResponse(["success" => false, "error" => "Child ID is missing"]);
@@ -131,7 +146,6 @@ try {
 
         $child_id = $conn->real_escape_string($_POST['child_id']);
 
-        // Check if registration table exists and has dependencies
         $regTableCheck = $conn->query("SHOW TABLES LIKE 'registration'");
         if ($regTableCheck->num_rows > 0) {
             $checkSql = "SELECT COUNT(*) as count FROM registration WHERE child_id = '$child_id'";
@@ -147,7 +161,6 @@ try {
             }
         }
 
-        // Check if exam_result table exists and has dependencies
         $examTableCheck = $conn->query("SHOW TABLES LIKE 'exam_result'");
         if ($examTableCheck->num_rows > 0) {
             $checkSql = "SELECT COUNT(*) as count FROM exam_result WHERE child_id = '$child_id'";
@@ -163,8 +176,7 @@ try {
             }
         }
 
-        // Verify child exists
-        $verifySql = "SELECT 1 FROM child WHERE child_id = '$child_id'";
+        $verifySql = "SELECT child_image FROM child WHERE child_id = '$child_id'";
         $verifyResult = $conn->query($verifySql);
         if ($verifyResult === FALSE) {
             logError("Error verifying child_id $child_id: " . $conn->error . " | Query: $verifySql");
@@ -175,10 +187,16 @@ try {
             sendJsonResponse(["success" => false, "error" => "Child record not found"]);
         }
 
+        $row = $verifyResult->fetch_assoc();
+        $imagePath = $row['child_image'];
+        if ($imagePath && file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+
         $sql = "DELETE FROM child WHERE child_id = '$child_id'";
         if ($conn->query($sql) === TRUE) {
             if ($conn->affected_rows > 0) {
-                logError("Successfully deleted child_id $child_id"); // Debug: Log success
+                logError("Successfully deleted child_id $child_id");
                 sendJsonResponse(["success" => true]);
             } else {
                 logError("No rows deleted for child_id $child_id: Record not found during deletion");
@@ -203,7 +221,8 @@ try {
                 ch.child_kidNumber, 
                 ch.child_birthday, 
                 ch.child_school, 
-                ch.child_year
+                ch.child_year,
+                ch.child_image
             FROM child ch
             LEFT JOIN parent p ON ch.parent_id = p.parent_id
             WHERE ch.child_name LIKE '%$search_term%'
@@ -235,6 +254,7 @@ try {
             ch.child_birthday, 
             ch.child_school, 
             ch.child_year,
+            ch.child_image,
             ch.child_register_date
         FROM child ch
         LEFT JOIN parent p ON ch.parent_id = p.parent_id
@@ -249,7 +269,6 @@ try {
 
     $registrations = [];
     while ($row = $result->fetch_assoc()) {
-        // Handle birthday recalculation
         if ($row['child_kidNumber']) {
             $calculated_birthday = calculateBirthdayFromIC($row['child_kidNumber']);
             if ($calculated_birthday && $row['child_birthday'] !== $calculated_birthday) {
@@ -261,7 +280,6 @@ try {
             }
         }
 
-        // Handle year recalculation
         if ($row['child_birthday'] && $row['child_register_date']) {
             $birthYear = date("Y", strtotime($row['child_birthday']));
             $registerYear = date("Y", strtotime($row['child_register_date']));
