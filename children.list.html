@@ -61,9 +61,12 @@
       margin: 0;
       font-size: 16px;
     }
-    .table-container .fa-edit, .table-container .fa-trash-alt {
+    .table-container .fa-edit, .table-container .fa-trash-alt, .table-container .fa-eye {
       color: #007BFF;
       margin-right: 10px;
+    }
+    .table-container .fa-trash-alt {
+      color: #DC3545;
     }
     .pointer-cursor {
       cursor: pointer;
@@ -94,11 +97,11 @@
     }
     .notification {
       position: fixed;
-      top: 20px; /* Position at top */
+      top: 20px;
       left: 50%;
-      transform: translateX(-50%); /* Center horizontally */
+      transform: translateX(-50%);
       width: auto;
-      max-width: 500px; /* Limit width */
+      max-width: 500px;
       padding: 10px 20px;
       border-radius: 5px;
       display: none;
@@ -112,6 +115,11 @@
     }
     .notification.error {
       background-color: #dc3545;
+    }
+    #imagePreview {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
     }
   </style> 
 </head>
@@ -142,7 +150,7 @@
             <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>      
+      </li>       
     </ul>
   </nav>
 
@@ -190,6 +198,7 @@
               <th>Child Birthday</th>
               <th>School</th>
               <th>Year</th>
+              <th>Image</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -210,7 +219,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="editForm">
+          <form id="editForm" enctype="multipart/form-data">
             <div class="mb-3">
               <label for="edit_child_id" class="form-label">Child ID</label>
               <input type="text" class="form-control" id="edit_child_id" disabled>
@@ -246,11 +255,31 @@
               <label for="edit_child_year" class="form-label">Year</label>
               <input type="number" class="form-control" id="edit_child_year" required>
             </div>
+            <div class="mb-3">
+              <label for="edit_child_image" class="form-label">Image</label>
+              <input type="file" class="form-control" id="edit_child_image" accept="image/jpeg,image/png,image/jpg">
+              <small>Current: <a href="#" id="currentImageLink" target="_blank">View Current Image</a></small>
+            </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="saveChanges">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Preview Modal -->
+  <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="imagePreview" src="" alt="Child Image">
         </div>
       </div>
     </div>
@@ -297,7 +326,7 @@
       notification.style.display = 'block';
       setTimeout(() => {
         notification.style.display = 'none';
-      }, 5000); // Extended to 5s for readability
+      }, 5000);
     }
 
     // Calculate birthday from IC
@@ -315,19 +344,19 @@
     // Create table cell
     function createCell(text) {
       const cell = document.createElement('td');
-      cell.textContent = text || ''; // Safely set text content
+      cell.textContent = text || '';
       return cell;
     }
 
     // Render table rows
     function renderTable(data) {
-      console.log('Rendering data:', data); // Debug: Log data received
+      console.log('Rendering data:', data);
       const tableBody = document.getElementById('registrationTable');
       tableBody.innerHTML = '';
       if (!data || data.length === 0) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 9;
+        cell.colSpan = 10;
         cell.className = 'text-center text-muted no-results';
         cell.textContent = 'No children found';
         row.appendChild(cell);
@@ -337,12 +366,15 @@
           const row = document.createElement('tr');
           row.appendChild(createCell(item.child_id));
           row.appendChild(createCell(item.child_name));
-          row.appendChild(createCell(item.parent_name || 'N/A')); // Handle null parent_name
+          row.appendChild(createCell(item.parent_name || 'N/A'));
           row.appendChild(createCell(item.child_gender));
           row.appendChild(createCell(item.child_kidNumber));
           row.appendChild(createCell(item.child_birthday));
           row.appendChild(createCell(item.child_school));
           row.appendChild(createCell(item.child_year));
+          const imageCell = document.createElement('td');
+          imageCell.innerHTML = `<a href="#" class="image-link" data-image="${item.child_image || ''}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">${item.child_image ? item.child_image.split('/').pop() : 'No Image'}</a>`;
+          row.appendChild(imageCell);
           const actionCell = document.createElement('td');
           actionCell.innerHTML = `
             <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editModal"></i>
@@ -351,26 +383,34 @@
           row.appendChild(actionCell);
           tableBody.appendChild(row);
         });
+
+        // Add event listeners for image links
+        document.querySelectorAll('.image-link').forEach(link => {
+          link.addEventListener('click', () => {
+            const imageSrc = link.getAttribute('data-image');
+            document.getElementById('imagePreview').src = imageSrc || '';
+          });
+        });
       }
     }
 
     // Fetch all children
     function fetchRegistrations() {
-      console.log('Fetching data from fetch_children.php'); // Debug: Log fetch attempt
+      console.log('Fetching data from fetch_children.php');
       fetch('fetch_children.php')
         .then(response => {
-          console.log('Fetch response status:', response.status); // Debug: Log response status
+          console.log('Fetch response status:', response.status);
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           return response.json();
         })
         .then(data => {
-          console.log('Data received:', data); // Debug: Log received data
+          console.log('Data received:', data);
           renderTable(data);
         })
         .catch(error => {
-          console.error('Error fetching data:', error); // Debug: Log error
+          console.error('Error fetching data:', error);
           showNotification('Failed to load children data: ' + error.message, 'error');
           renderTable([]);
         });
@@ -390,7 +430,8 @@
           child_kidNumber: row.cells[4].textContent,
           child_birthday: row.cells[5].textContent,
           child_school: row.cells[6].textContent,
-          child_year: row.cells[7].textContent
+          child_year: row.cells[7].textContent,
+          child_image: row.cells[8].querySelector('.image-link').getAttribute('data-image')
         };
         document.getElementById('edit_child_id').value = childData.child_id;
         document.getElementById('edit_child_name').value = childData.child_name;
@@ -400,6 +441,8 @@
         document.getElementById('edit_child_birthday').value = childData.child_birthday;
         document.getElementById('edit_child_school').value = childData.child_school;
         document.getElementById('edit_child_year').value = childData.child_year;
+        document.getElementById('currentImageLink').href = childData.child_image || '#';
+        document.getElementById('currentImageLink').textContent = childData.child_image ? childData.child_image.split('/').pop() : 'No Image';
       } else if (event.target.classList.contains('delete-btn')) {
         const childId = event.target.dataset.childId;
         if (!childId) {
@@ -411,12 +454,10 @@
         const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
         deleteModal.show();
 
-        // Remove any existing listeners to prevent multiple bindings
         const confirmDeleteBtn = document.getElementById('confirmDelete');
         const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
         confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
 
-        // Add new listener for confirm delete
         newConfirmDeleteBtn.addEventListener('click', function() {
           const requestBody = `action=delete&child_id=${encodeURIComponent(childId)}`;
           console.log('Sending delete request:', {
@@ -424,15 +465,14 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: requestBody
-          }); // Debug: Log full request details
+          });
           fetch('fetch_children.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: requestBody
           })
             .then(response => {
-              console.log('Delete response status:', response.status); // Debug: Log response status
-              // Capture raw response text for debugging
+              console.log('Delete response status:', response.status);
               return response.text().then(text => ({
                 status: response.status,
                 ok: response.ok,
@@ -440,7 +480,7 @@
               }));
             })
             .then(({ status, ok, text }) => {
-              console.log('Delete response text:', text); // Debug: Log raw response
+              console.log('Delete response text:', text);
               if (!ok) {
                 throw new Error(`HTTP error! Status: ${status}, Response: ${text || 'No response'}`);
               }
@@ -450,13 +490,12 @@
               } catch (e) {
                 throw new Error(`Invalid JSON response: ${text || 'Empty response'}`);
               }
-              console.log('Delete response data:', data); // Debug: Log parsed data
+              console.log('Delete response data:', data);
               if (data.success) {
                 fetchRegistrations();
                 showNotification('Child successfully deleted!', 'success');
                 deleteModal.hide();
               } else {
-                // Simplify error message for user
                 let errorMessage = data.error || 'Unknown error';
                 if (errorMessage.includes('exam_result')) {
                   errorMessage = 'Cannot delete child due to associated exam results.';
@@ -464,11 +503,11 @@
                   errorMessage = 'Cannot delete child due to associated registrations.';
                 }
                 showNotification(`Deletion failed: ${errorMessage}`, 'error');
-                deleteModal.hide(); // Close modal on failure
+                deleteModal.hide();
               }
             })
             .catch(error => {
-              console.error('Error deleting record:', error); // Debug: Log error
+              console.error('Error deleting record:', error);
               let errorMessage = error.message;
               if (errorMessage.includes('exam_result')) {
                 errorMessage = 'Cannot delete child due to associated exam results.';
@@ -476,7 +515,7 @@
                 errorMessage = 'Cannot delete child due to associated registrations.';
               }
               showNotification(`Failed to delete child: ${errorMessage}`, 'error');
-              deleteModal.hide(); // Close modal on error
+              deleteModal.hide();
             });
         });
       }
@@ -491,25 +530,28 @@
 
     // Save changes in edit modal
     document.getElementById('saveChanges').addEventListener('click', function() {
-      const updatedData = {
-        child_id: document.getElementById('edit_child_id').value,
-        child_name: document.getElementById('edit_child_name').value,
-        child_gender: document.getElementById('edit_child_gender').value,
-        child_kidNumber: document.getElementById('edit_child_kidNumber').value,
-        child_birthday: document.getElementById('edit_child_birthday').value,
-        child_school: document.getElementById('edit_child_school').value,
-        child_year: document.getElementById('edit_child_year').value
-      };
+      const formData = new FormData();
+      formData.append('action', 'update');
+      formData.append('child_id', document.getElementById('edit_child_id').value);
+      formData.append('child_name', document.getElementById('edit_child_name').value);
+      formData.append('child_gender', document.getElementById('edit_child_gender').value);
+      formData.append('child_kidNumber', document.getElementById('edit_child_kidNumber').value);
+      formData.append('child_birthday', document.getElementById('edit_child_birthday').value);
+      formData.append('child_school', document.getElementById('edit_child_school').value);
+      formData.append('child_year', document.getElementById('edit_child_year').value);
+      const imageFile = document.getElementById('edit_child_image').files[0];
+      if (imageFile) {
+        formData.append('child_image', imageFile);
+      }
 
-      if (!updatedData.child_name || !updatedData.child_kidNumber || !updatedData.child_school || !updatedData.child_year) {
+      if (!formData.get('child_name') || !formData.get('child_kidNumber') || !formData.get('child_school') || !formData.get('child_year')) {
         showNotification('Please fill in all required fields.', 'error');
         return;
       }
 
       fetch('fetch_children.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=update&child_id=${encodeURIComponent(updatedData.child_id)}&child_name=${encodeURIComponent(updatedData.child_name)}&child_gender=${encodeURIComponent(updatedData.child_gender)}&child_kidNumber=${encodeURIComponent(updatedData.child_kidNumber)}&child_birthday=${encodeURIComponent(updatedData.child_birthday)}&child_school=${encodeURIComponent(updatedData.child_school)}&child_year=${encodeURIComponent(updatedData.child_year)}`
+        body: formData
       })
         .then(response => {
           if (!response.ok) {
@@ -559,7 +601,7 @@
               renderTable([]);
             });
         }
-      }, 300); // 300ms debounce
+      }, 300);
     });
 
     document.getElementById('search-btn').addEventListener('click', function(event) {

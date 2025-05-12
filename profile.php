@@ -21,8 +21,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
     <!-- Libraries Stylesheet -->
-    <link href="lib/animate.min.css" rel="stylesheet">
-    <link href="lib/owl.carousel.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" rel="stylesheet">
 
     <!-- Customized Bootstrap Stylesheet -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -416,6 +416,34 @@
   cursor: pointer;
 }
 
+
+
+.modal {
+    z-index: 1050 !important;
+}
+
+
+.teacher-image-container img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+
+.teacher-modal-dialog {
+    max-width: 1000px;
+    width: 90%; 
+}
+.teacher-info-table td, .teacher-info-table th {
+    word-break: break-word;
+    vertical-align: middle;
+}
+
+
   .progress-bar.weak { background-color: #dc3545; }
   .progress-bar.medium { background-color: #ffc107; }
   .progress-bar.strong { background-color: #28a745; }
@@ -663,6 +691,23 @@
         </div>
     </div>
     </div> 
+
+<!-- Teacher Info Modal -->
+ 
+<div class="modal fade" id="teacherInfoModal" tabindex="-1" aria-labelledby="teacherInfoModalLabel" aria-hidden="true">
+   <div class="modal-dialog modal-dialog-centered teacher-modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="teacherInfoModalLabel">Teacher Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="teacher-info-body">
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
     
         <div class="profile-content" id="history-content">
@@ -1059,7 +1104,11 @@ function displayLearningStatus() {
                         <td>${course.subject_name}</td>
                         <td>${course.part_name} (${course.part_duration})</td>
                         <td>${course.year}</td>
-                        <td>${course.teacher_name}</td>
+                        <td>
+                        <a href="#" onclick="viewTeacherInfo('${course.teacher_id}', '${course.teacher_name}')">
+                            ${course.teacher_name}
+                        </a>
+                        </td>
                         <td>${course.class_time}</td>
                         <td>
                             <button class="icon-button result-btn" 
@@ -1094,6 +1143,63 @@ function displayLearningStatus() {
         });
 }
 
+function viewTeacherInfo(teacherId, teacherName) {
+  fetch("profile_learning.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "teacher_id=" + encodeURIComponent(teacherId)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert(data.error);
+    } else {
+      // 修改图片路径处理逻辑
+      let imagePath;
+      if (data.teacher_image) {
+        // 避免路径重复
+        imagePath = data.teacher_image.startsWith('uploads/') 
+          ? data.teacher_image 
+          : `uploads/teacher_images/${data.teacher_image}`;
+      } else {
+        imagePath = 'img/user.jpg';
+      }
+
+      // 添加调试日志
+      console.log("Original teacher image:", data.teacher_image);
+      console.log("Processed image path:", imagePath);
+
+      const content = `
+        <div class="teacher-image-container text-center mb-3">
+          <img src="${imagePath}" 
+               alt="Teacher ${data.teacher_name}" 
+               class="rounded-circle"
+               onerror="this.onerror=null; this.src='img/user.jpg';">
+        </div>
+        <table class="table table-bordered teacher-info-table">
+          <tbody>
+            <tr><th>Name</th><td>${data.teacher_name}</td></tr>
+            <tr><th>Gender</th><td>${data.teacher_gender}</td></tr>
+            <tr><th>Email</th><td>${data.teacher_email}</td></tr>
+            <tr><th>Phone</th><td>${data.teacher_phone_number}</td></tr>
+          </tbody>
+        </table>
+      `;
+      
+      document.getElementById("teacherInfoModalLabel").innerText = `Teacher Info: ${teacherName}`;
+      document.getElementById("teacher-info-body").innerHTML = content;
+      
+      const modal = new bootstrap.Modal(document.getElementById("teacherInfoModal"));
+      modal.show();
+    }
+  })
+  .catch(err => {
+    console.error("Error fetching teacher info:", err);
+    alert("Failed to load teacher information.");
+  });
+}
 
 function openResultModal(child_id, class_id) {
     fetch(`learning_result_comment.php?child_id=${child_id}&class_id=${class_id}`)

@@ -18,18 +18,66 @@ if (!isset($_SESSION['parent_id'])) {
 }
 
 $parent_id = $_SESSION['parent_id'];
-$child_id = isset($_GET['child_id']) ? $_GET['child_id'] : '';
 
-if (empty($child_id)) {
-    echo json_encode(["error" => "No child selected"]);
+// Handle POST request for teacher info
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['teacher_id'])) {
+    $teacher_id = $_POST['teacher_id'];
+    
+    $stmt = $conn->prepare("SELECT teacher_id, teacher_name, teacher_gender, teacher_email, teacher_phone_number, teacher_image FROM teacher WHERE teacher_id = ?");
+    if (!$stmt) {
+        die(json_encode(["error" => "SQL prepare failed: " . $conn->error]));
+    }
+    
+    $stmt->bind_param("i", $teacher_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+if ($teacher = $result->fetch_assoc()) {
+    // process teacher image
+    if (!empty($teacher['teacher_image'])) {
+        // clean up the path with repeated 
+         $image_path = str_replace('\\', '/', $teacher['teacher_image']);
+        $image_path = preg_replace('/^uploads\/teacher_images\/+/', '', $image_path);
+        $full_path = 'uploads/teacher_images/' . $image_path;
+        
+        // check if the image exists
+        if (file_exists($full_path)) {
+            $teacher['teacher_image'] = $full_path;
+        } else {
+            $teacher['teacher_image'] = 'img/user.jpg';
+            error_log("Teacher image not found: " . $full_path);
+        }
+    } else {
+        $teacher['teacher_image'] = 'img/user.jpg';
+        error_log("No teacher image specified");
+    }
+    
+    
+    error_log("Teacher image final path: " . $teacher['teacher_image']);
+    
+    echo json_encode($teacher);
+}else {
+        echo json_encode(["error" => "Teacher not found"]);
+    }
+    
+    $stmt->close();
+    $conn->close();
     exit;
 }
 
-// check registration_class
+// Handle get request for learning status
+if (!isset($_GET['child_id'])) {
+    echo json_encode(["error" => "Child ID is required"]);
+    exit;
+}
+
+$child_id = $_GET['child_id'];
+
 $sql = "
 SELECT 
     s.subject_name,
     s.year,
+    t.teacher_id,
     t.teacher_name,
     c.class_id,
     c.class_time,
@@ -57,6 +105,7 @@ while ($row = $result->fetch_assoc()) {
     $classes[] = [
         "subject_name" => $row["subject_name"],
         "year" => $row["year"],
+        "teacher_id" => $row["teacher_id"],
         "teacher_name" => $row["teacher_name"],
         "class_id" => $row["class_id"],
         "class_time" => $row["class_time"],
@@ -68,4 +117,8 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 $conn->close();
 
-echo json_encode($classes);
+if (empty($classes)) {
+    echo json_encode(["message" => "No classes found for this child"]);
+} else {
+    echo json_encode($classes);
+}

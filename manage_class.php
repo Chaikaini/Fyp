@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "class_term" => $row["class_term"],
                     "year" => $row["year"],
                     "time" => $row["class_time"],
+                    "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
                     "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
@@ -158,6 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "class_term" => $row["class_term"],
                     "year" => $row["year"],
                     "time" => $row["class_time"],
+                    "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
                     "enrolled" => $row["enrolled"],
                     "status" => $row["class_status"]
@@ -345,8 +347,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Class ID already exists");
             }
 
-            $stmt = $pdo->prepare("INSERT INTO class (class_id, subject_id, part_id, teacher_id, class_term, year, class_time, class_capacity, class_enrolled, class_status)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)");
+            $stmt = $pdo->prepare("
+                INSERT INTO class (
+                    class_id, subject_id, part_id, teacher_id, class_term, year, 
+                    class_time, class_venue, class_capacity, class_enrolled, class_status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+            ");
             $stmt->execute([
                 $classId,
                 $subjectId,
@@ -355,6 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input['class_term'],
                 $year,
                 $input['time'],
+                $input['venue'],
                 $input['capacity'],
                 $input['status']
             ]);
@@ -414,12 +421,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("New capacity cannot be less than current enrollment ($currentEnrolled)");
             }
 
-            $stmt = $pdo->prepare("UPDATE class SET part_id = ?, teacher_id = ?, class_term = ?, class_time = ?, class_capacity = ?, class_status = ? WHERE class_id = ?");
+            $stmt = $pdo->prepare("
+                UPDATE class 
+                SET 
+                    part_id = ?, 
+                    teacher_id = ?, 
+                    class_term = ?, 
+                    class_time = ?, 
+                    class_venue = ?, 
+                    class_capacity = ?, 
+                    class_status = ? 
+                WHERE class_id = ?
+            ");
             $stmt->execute([
                 $input['part'],
                 $input['teacher_id'],
                 $input['class_term'],
                 $input['time'],
+                $input['venue'],
                 $input['capacity'],
                 $input['status'],
                 $classId
