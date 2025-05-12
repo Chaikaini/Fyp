@@ -326,24 +326,28 @@ INSERT INTO `part` (`part_id`, `part_name`, `part_duration`) VALUES
 --
 
 CREATE TABLE `payment` (
-  `payment_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL,
   `payment_total_amount` decimal(10,2) NOT NULL,
   `payment_method` varchar(50) NOT NULL,
-  `master_card_number` varchar(16) DEFAULT NULL,
+  `credit_card_id` int(11) NOT NULL,  -- 新增外键
   `payment_status` enum('Pending','Completed','Failed') NOT NULL,
   `payment_time` timestamp NOT NULL DEFAULT current_timestamp(),
-  `enrollment_fee` decimal(10,2) NOT NULL DEFAULT 0.00
+  `enrollment_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
+  PRIMARY KEY (`payment_id`),
+  KEY `parent_id` (`parent_id`),
+  KEY `credit_card_id` (`credit_card_id`),
+  CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 --
 -- Dumping data for table `payment`
 --
 
-INSERT INTO `payment` (`payment_id`, `parent_id`, `payment_total_amount`, `payment_method`, `master_card_number`, `payment_status`, `payment_time`, `enrollment_fee`) VALUES
-(1, 1, 510.00, 'Credit Card', '111111111', 'Completed', '2025-04-17 07:25:04', 0.00),
-(2, 2, 510.00, 'Credit Card', '11111111', 'Completed', '2025-04-17 11:56:09', 0.00),
-(3, 1, 510.00, 'Credit Card', '222222', 'Completed', '2025-04-20 08:47:33', 0.00);
+INSERT INTO `payment` (`payment_id`, `parent_id`, `payment_total_amount`, `payment_method`, `credit_card_id`, `payment_status`, `payment_time`, `enrollment_fee`) VALUES
+(1, 1, 510.00, 'Credit Card', 1, 'Completed', '2025-04-17 07:25:04', 0.00),
+(2, 2, 510.00, 'Credit Card', 2, 'Completed', '2025-04-17 11:56:09', 0.00),
+(3, 1, 510.00, 'Credit Card', 3, 'Completed', '2025-04-20 08:47:33', 0.00);
 
 -- --------------------------------------------------------
 
@@ -554,7 +558,8 @@ ALTER TABLE `part`
 --
 ALTER TABLE `payment`
   ADD PRIMARY KEY (`payment_id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD KEY `parent_id` (`parent_id`),
+  ADD KEY `credit_card_id` (`credit_card_id`);
 
 --
 -- Indexes for table `registration_class`
@@ -766,7 +771,8 @@ ALTER TABLE `notification_receiver`
 -- Constraints for table `payment`
 --
 ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
+  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
+  ADD CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards` (`id`) ON DELETE RESTRICT;
 
 --
 -- Constraints for table `registration_class`
