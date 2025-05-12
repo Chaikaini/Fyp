@@ -194,7 +194,7 @@
   
   <div class="container">
 
-    <!-- Notification -->
+    <!-- Announcement -->
     <h1 class="mb-4">Announcement</h1>
     <div class="card">
     <div class="card-header">
@@ -213,7 +213,7 @@
 </body>
 
 
-    <!-- Send Notification Modal -->
+    <!-- Send Announcement Modal -->
     <div class="modal fade" id="sendNotificationModal" tabindex="-1" aria-labelledby="sendNotificationModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">

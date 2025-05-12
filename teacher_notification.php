@@ -200,7 +200,7 @@
           }
 
           if (data.length === 0) {
-            container.innerHTML = "<div class='text-muted text-center'>No announcements yet.</div>";
+            container.innerHTML = "<div class='text-muted text-center'>No notification yet.</div>";
           } else {
             // sorting based on date & time
             data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));

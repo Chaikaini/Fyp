@@ -160,6 +160,7 @@
                 <th>Term</th>
                 <th>Class ID</th>
                 <th>Year</th>
+                <th>Class Venue</th>
                 <th>Time</th>
                 <th>Status</th>
               </tr>
@@ -305,6 +306,7 @@ function renderSchedule(data) {
           <td>${row.class_term}</td>
           <td>${row.class_id}</td>
           <td>${row.year}</td>
+          <td>${row.class_venue}</td>
           <td>${row.time}</td>
           <td class="${statusClass}">${status}</td>
         </tr>
@@ -318,14 +320,15 @@ document.getElementById("view-timetable-btn").addEventListener("click", function
   const timetableData = [];
 
   allRows.forEach(row => {
-    const status = row.cells[6].textContent.trim();
+    const status = row.cells[7].textContent.trim();  // Updated index since status is now in column 8
     if (status === "Ongoing") {
       const subject_id = row.cells[0].textContent.trim();
       const subject_name = row.cells[1].textContent.trim();
       const class_id = row.cells[3].textContent.trim();
-      const time = row.cells[5].textContent.trim(); // Example: "Monday 9:00AM - 10:00AM"
+      const class_venue = row.cells[5].textContent.trim();
+      const time = row.cells[6].textContent.trim();
 
-      const subject = `${subject_id} - ${subject_name} (${class_id})`;
+      const subject = `${subject_id} - ${subject_name} (${class_id})<br><small class="text-muted">Venue: ${class_venue}</small>`;
       timetableData.push({ subject, time });
     }
   });
@@ -335,8 +338,6 @@ document.getElementById("view-timetable-btn").addEventListener("click", function
   const timetableModal = new bootstrap.Modal(document.getElementById('timetableModal'));
   timetableModal.show();
 });
-
-
 
 function renderTimetableModal(data) {
   const container = document.getElementById("timetable-modal-body");
@@ -361,17 +362,21 @@ function renderTimetableModal(data) {
 
   timeSlots.sort();
 
-  let html = "<table class='table table-bordered'><thead><tr><th>Time</th>";
-  days.forEach(day => {
-    html += `<th>${day}</th>`;
-  });
-  html += "</tr></thead><tbody>";
+  let html = `
+    <table class='table table-bordered'>
+      <thead>
+        <tr>
+          <th>Time</th>
+          ${days.map(day => `<th>${day}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>`;
 
   timeSlots.forEach(slot => {
     html += `<tr><td>${slot}</td>`;
     days.forEach(day => {
       const subject = scheduleMap[day]?.[slot] || "";
-      html += `<td>${subject}</td>`;
+      html += `<td class="align-middle">${subject}</td>`;
     });
     html += "</tr>";
   });
