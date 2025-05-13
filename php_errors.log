@@ -113,3 +113,26 @@ Stack trace:
 [2025-05-08 10:05:30] Successfully updated teacher_id: 12347
 [2025-05-08 10:05:50] Delete request received: {"action":"delete","child_id":"1"}
 [2025-05-08 10:05:50] Cannot delete child_id 1: Associated exam results exist
+[12-May-2025 10:56:45 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`the seeds`.`comments`, CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`)) in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php:50
+Stack trace:
+#0 C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php(50): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php on line 50
+[12-May-2025 10:56:52 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`the seeds`.`comments`, CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`)) in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php:50
+Stack trace:
+#0 C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php(50): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php on line 50
+[12-May-2025 11:05:02 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`the seeds`.`comments`, CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`)) in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php:50
+Stack trace:
+#0 C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php(50): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php on line 50
+[12-May-2025 11:13:30 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`the seeds`.`comments`, CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`)) in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php:58
+Stack trace:
+#0 C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php(58): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp2\htdocs\Fyp\Fyp\submit_comment.php on line 58
+[12-May-2025 11:14:05 Europe/Berlin] Invalid request method: GET
+[12-May-2025 11:14:07 Europe/Berlin] Invalid request method: GET
+[12-May-2025 11:14:07 Europe/Berlin] Invalid request method: GET
