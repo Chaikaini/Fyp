@@ -8,8 +8,13 @@
   <!-- Favicon -->
   <link href="img/the seeds.jpg" rel="icon" type="image/png">
   
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- SheetJS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
   <style>
     body {
       display: flex;
@@ -67,6 +72,27 @@
     .pointer-cursor {
       cursor: pointer;
     }
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: auto;
+      max-width: 500px;
+      padding: 10px 20px;
+      border-radius: 5px;
+      display: none;
+      z-index: 1000;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+    }
+    .notification.success {
+      background-color: #28a745;
+    }
+    .notification.error {
+      background-color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -83,7 +109,7 @@
       <li class="nav-item"><a href="view order.html" class="nav-link"><i class="fas fa-shopping-cart"></i> <span>Registration Class List</span></a></li>
       <li class="nav-item"><a href="admin subject.html" class="nav-link"><i class="fas fa-book"></i> <span>Subject List</span></a></li>
       <li class="nav-item"><a href="admin class.html" class="nav-link"><i class="fas fa-school"></i> <span>Class List</span></a></li>
-      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> Announcement</span></a></li>
+      <li class="nav-item"><a href="admin notification.html" class="nav-link"><i class="fas fa-envelope"></i> <span>Announcement</span></a></li>
       <li class="nav-item">
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
@@ -92,8 +118,7 @@
         <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="subject enroll report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>Subject Enrollment report</span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
       </li>      
@@ -102,6 +127,9 @@
 
   <!-- Main Content -->
   <div id="main-content">
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
       <div class="container-fluid">
         <button class="btn btn-outline-secondary me-2" id="toggleSidebar"><i class="fas fa-bars"></i></button>
@@ -127,15 +155,16 @@
     </div>
     
     <div class="card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h5>Payment Report</h5>
+        <button class="btn btn-success" id="exportExcel"><i class="fas fa-file-excel"></i> Export to Excel</button>
       </div>
       <div class="card-body">
-        <table class="table table-striped">
+        <table class="table table-striped" id="paymentTable">
           <thead>
             <tr>
               <th>Payment ID</th>
-              <th>Parent ID</th>
+              <th>Parent Name</th>
               <th>Payment Method</th>
               <th>Payment Status</th>
               <th>Payment Time</th>
@@ -149,23 +178,41 @@
     </div>
   </div>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.getElementById('toggleSidebar').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('collapsed');
     });
 
+    let paymentData = []; // Store payment data globally for export
+
     document.addEventListener("DOMContentLoaded", function () {
+      // Notification function
+      function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => {
+          notification.style.display = 'none';
+        }, 5000);
+      }
+
       fetchReportData(); // Load the default report data (current month)
 
       function fetchReportData() {
         fetch('fetch_report.php')
           .then(response => response.json())
           .then(data => {
+            paymentData = data; // Store data for export
             updateTable(data);
             updateDateRange(); // Update the date range for the current month
           })
-          .catch(error => console.error("Error fetching report data:", error));
+          .catch(error => {
+            console.error("Error fetching report data:", error);
+            showNotification("Failed to fetch report data: " + error.message, "error");
+          });
       }
 
       function updateTable(data) {
@@ -180,7 +227,7 @@
         data.forEach((payment, index) => {
           let row = `<tr>
               <td>${payment.payment_id}</td>
-              <td>${payment.parent_id}</td>
+              <td>${payment.parent_name}</td>
               <td>${payment.payment_method}</td>
               <td>${payment.payment_status}</td>
               <td>${payment.payment_time}</td>
@@ -200,6 +247,34 @@
         // Update the displayed date range
         document.querySelector(".date-range span").textContent = `${formattedStart} to ${formattedEnd}`;
       }
+
+      // Export to Excel
+      document.getElementById('exportExcel').addEventListener('click', () => {
+        if (paymentData.length === 0) {
+          showNotification("No data to export", "error");
+          return;
+        }
+
+        // Prepare data for Excel
+        const excelData = paymentData.map(payment => ({
+          'Payment ID': payment.payment_id,
+          'Parent Name': payment.parent,
+          'Payment Method': payment.payment_method,
+          'Payment Status': payment.payment_status,
+          'Payment Time': payment.payment_time,
+          'Total Amount': `RM${payment.payment_total_amount}`
+        }));
+
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        
+        // Create workbook and add worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment Report');
+
+        // Generate Excel file and trigger download
+        XLSX.writeFile(workbook, `Payment_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      });
     });
   </script>
 </body>
