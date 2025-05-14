@@ -22,20 +22,20 @@ $userPhoneNumber = "";
 $savedCard = null;
 $parent_id = $_SESSION['parent_id'];
 
-// Check if user has previous enrollments
+// Check if user has previous registrations
 $hasPreviousEnrollment = false;
-$enrollmentCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM enrollment WHERE parent_id = ?");
-$enrollmentCheckStmt->bind_param("i", $parent_id);
-$enrollmentCheckStmt->execute();
-$result = $enrollmentCheckStmt->get_result();
+$registrationCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM registration_class WHERE parent_id = ?");
+$registrationCheckStmt->bind_param("i", $parent_id);
+$registrationCheckStmt->execute();
+$result = $registrationCheckStmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hasPreviousEnrollment = $row['count'] > 0;
-    error_log("Enrollment count for parent_id $parent_id: " . $row['count']);
+    error_log("Registration count for parent_id $parent_id: " . $row['count']);
 } else {
-    error_log("No enrollment records found for parent_id $parent_id");
+    error_log("No registration records found for parent_id $parent_id");
 }
-$enrollmentCheckStmt->close();
+$registrationCheckStmt->close();
 
 // Get user phone number
 $stmt = $conn->prepare("SELECT phone_number FROM parent WHERE parent_id = ?");
@@ -73,7 +73,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <meta content="The Seeds Learning Centre, checkout" name="keywords">
     <meta content="The Seeds Learning Centre | Checkout" name="description">
 
-    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+    <link href="img/the_seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
@@ -446,12 +446,12 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
+                <a href="subject.html" class="nav-item nav-link">Subjects</a>
+                <a href="about.html" class="nav-item nav-link">About Us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                <a href="comment.html" class="nav-item nav-link">Reviews</a>
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log Out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
 
@@ -469,7 +469,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <ul class="breadcrumb">
             <li><a href="Home.html">Home</a></li>
             <li>></li>
-            <li><a href="cart.html">Shopping Cart</a></li>
+            <li><a href="cart.html">Cart</a></li>
             <li>></li>
             <li>Checkout</li>
         </ul>
@@ -482,7 +482,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <div class="total-amount">
             <h4>Payment Details</h4>
             <div class="amount-detail">
-                <p>Subject Fee:</p>
+                <p>Subject Fees:</p>
                 <p id="subject-fee">RM0</p>
             </div>
             <div class="amount-detail" id="enrollment-fee-row">
@@ -506,7 +506,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                             <i class="fas fa-credit-card"></i>
                             Credit Card
                         </div>
-                        <input type="radio" id="creditcard" name="payment" value="creditcard">
+                        <input type="radio" id="creditcard" name="payment" value="Credit Card">
                     </label>
                 </div>
                 <div id="credit-card-field">
@@ -515,16 +515,16 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         <div class="saved-card">
                             <label>
                                 <input type="radio" name="card-option" value="saved" checked>
-                                Use saved card: **** **** **** <?php echo htmlspecialchars($savedCard['last_four']); ?> (Expires: <?php echo htmlspecialchars($savedCard['expiry_date']); ?>)
+                                Use Saved Card: **** **** **** <?php echo htmlspecialchars($savedCard['last_four']); ?> (Expires: <?php echo htmlspecialchars($savedCard['expiry_date']); ?>)
                             </label>
                         </div>
                         <label>
                             <input type="radio" name="card-option" value="new">
-                            Use a new card
+                            Use New Card
                         </label>
                     <?php endif; ?>
                     <div class="credit-card-input" id="new-card-input" style="<?php echo $savedCard ? 'display: none;' : ''; ?>">
-                        <input type="text" id="card-number" placeholder="Card Number (e.g. 1234 5678 9012 3456)" maxlength="19">
+                        <input type="text" id="card-number" placeholder="Card Number (e.g., 1234 5678 9012 3456)" maxlength="19">
                         <input type="text" id="expiry-date" placeholder="MM/YY" maxlength="5">
                         <input type="text" id="cvv" placeholder="CVV" maxlength="3">
                         <label><input type="checkbox" id="save-card" checked> Save card for future payments</label>
@@ -545,7 +545,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <div class="modal-content">
             <img id="payment_picture" src="" alt="Payment Status" class="payment_picture">
             <h2 id="paymentTitle">Payment Successful</h2>
-            <p id="paymentMessage">You can check your payment history in the profile page.</p>
+            <p id="paymentMessage">You can view your payment history on the profile page.</p>
             <button onclick="closeModal()">OK</button>
         </div>
     </div>
@@ -559,6 +559,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             const newCardInput = document.getElementById("new-card-input");
             const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
             const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
+            const paymentButton = document.querySelector('.payment button');
 
             creditCardField.style.display = "none";
 
@@ -575,18 +576,17 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 });
             }
 
-            const paymentButton = document.querySelector('.payment button');
             if (paymentButton) {
                 paymentButton.addEventListener('click', validateForm);
             }
 
             fetch('get_notification.php')
                 .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Notifications data:', data);
+                    console.log('Notification data:', data);
                     if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
                         console.log('Unread notifications found!');
                         const badge = document.querySelector('.notification-badge');
@@ -598,11 +598,14 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     }
                 })
                 .catch(error => {
-                    console.error('Fetch error:', error);
+                    console.error('Fetch notification error:', error);
                 });
 
             fetch("checkout.php")
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
                     console.log("Cart Data:", data);
                     const container = document.getElementById("cart-container");
@@ -652,10 +655,13 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 
         async function validateForm() {
             console.log("validateForm called");
+            const paymentButton = document.querySelector('.payment button');
+            paymentButton.disabled = true; // Prevent multiple submissions
 
             const creditCardRadio = document.getElementById('creditcard');
             if (!creditCardRadio) {
-                showToast("Payment options are not available. Please try again later.", "error");
+                showToast("Payment option unavailable. Please try again later.", "error");
+                paymentButton.disabled = false;
                 return;
             }
             const creditCardSelected = creditCardRadio.checked;
@@ -667,14 +673,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             if (!paymentMethod) {
                 console.log("No payment method selected");
                 showToast("Please select a payment method.", "error");
-                setTimeout(() => {
-                    const toasts = document.querySelectorAll('.toast');
-                    console.log("Toast elements in DOM after 100ms:", toasts);
-                    toasts.forEach(toast => {
-                        console.log("Toast styles:", window.getComputedStyle(toast));
-                    });
-                }, 100);
-                await new Promise(resolve => setTimeout(resolve, 100));
+                paymentButton.disabled = false;
                 return;
             }
 
@@ -687,14 +686,17 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     const cvv = document.getElementById('cvv').value;
                     if (!cardNumber || !/^\d{16}$/.test(cardNumber)) {
                         showToast("Please enter a valid 16-digit card number.", "error");
+                        paymentButton.disabled = false;
                         return;
                     }
                     if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
                         showToast("Please enter a valid expiry date (MM/YY).", "error");
+                        paymentButton.disabled = false;
                         return;
                     }
                     if (!cvv || !/^\d{3}$/.test(cvv)) {
-                        showToast("Please enter a valid 3-digit CVV.", "error");
+                        showToast("Please enter a valid 3-digit CVV code.", "error");
+                        paymentButton.disabled = false;
                         return;
                     }
                     cardDetails = {
@@ -717,9 +719,18 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 
             let subjectTotal = 0;
             for (const item of cartItems) {
-                const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
-                const priceData = await priceResponse.json();
-                subjectTotal += parseFloat(priceData.price);
+                try {
+                    const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
+                    if (!priceResponse.ok) throw new Error(`HTTP error! Status: ${priceResponse.status}`);
+                    const priceData = await priceResponse.json();
+                    if (!priceData.price) throw new Error(`Invalid price for subject_id ${item.subject_id}`);
+                    subjectTotal += parseFloat(priceData.price);
+                } catch (error) {
+                    console.error("Failed to fetch subject price:", error);
+                    showToast("Unable to fetch subject price: " + error.message, "error");
+                    paymentButton.disabled = false;
+                    return;
+                }
             }
 
             const isFirstEnrollment = <?php echo $hasPreviousEnrollment ? 'false' : 'true'; ?>;
@@ -727,7 +738,8 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             const totalAmount = subjectTotal + enrollmentFee;
 
             if (cartItems.length === 0) {
-                showToast("No items in cart.", "error");
+                showToast("No items in the cart.", "error");
+                paymentButton.disabled = false;
                 return;
             }
 
@@ -737,15 +749,19 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ cart_items: cartItems })
                 });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 const result = await response.json();
+                console.log("Registration check response:", result);
 
                 if (!result.success) {
-                    showToast(result.message || "Some subjects have already been registered for the selected children.", "error");
+                    showToast(result.message || "Some subjects are already registered for the selected child.", "error");
+                    paymentButton.disabled = false;
                     return;
                 }
             } catch (error) {
-                console.error("Error checking registration:", error);
-                showToast("Error checking registration status.", "error");
+                console.error("Failed to check registration status:", error);
+                showToast("Unable to check registration status: " + error.message, "error");
+                paymentButton.disabled = false;
                 return;
             }
 
@@ -755,45 +771,58 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 enrollment_fee: enrollmentFee,
                 total_amount: totalAmount,
                 payment_method: paymentMethod,
+                phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
                 cart_ids: cartIds,
                 card_details: cardDetails
             };
 
-            console.log("Order Data:", orderData);
+            console.log("Order data:", orderData);
 
-            fetch("process_payment.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Payment Response:", data);
+            try {
+                const response = await fetch("process_payment.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(orderData),
+                    signal: AbortSignal.timeout(10000) // 10-second timeout
+                });
+                console.log("Payment response status:", response.status);
+                console.log("Payment response headers:", response.headers.get("Content-Type"));
+                const responseText = await response.text(); // Get raw response text
+                console.log("Payment response text:", responseText);
+                let data;
+                try {
+                    data = JSON.parse(responseText); // Attempt JSON parsing
+                } catch (parseError) {
+                    console.error("JSON parsing failed:", parseError);
+                    throw new Error("Invalid JSON response: " + parseError.message);
+                }
+
                 if (data.success) {
-                    showPaymentModal(true);
+                    showPaymentModal(true, data.payment_id);
                     setTimeout(() => { window.location.href = "subject.html"; }, 4000);
                 } else {
                     showPaymentModal(false);
                     showToast(data.message || "Payment failed.", "error");
                 }
-            })
-            .catch(error => {
-                console.error("Error processing payment:", error);
+            } catch (error) {
+                console.error("Payment processing failed:", error);
                 showPaymentModal(false);
-                showToast("Error processing payment.", "error");
-            });
+                showToast("Payment processing failed: " + error.message, "error");
+            } finally {
+                paymentButton.disabled = false; // Re-enable button
+            }
         }
 
         function showToast(message, type) {
             console.log("Showing toast:", message, type);
             if (!document.body) {
-                console.error("Document body is not available.");
+                console.error("Document body not available.");
                 return;
             }
             const toast = document.getElementById('toast');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <img src="" alt="Toast Image" class="toast-image">
+                <img src="" alt="Toast image" class="toast-image">
                 <div class="toast-message">${message}</div>
                 <button class="toast-close" onclick="this.parentElement.classList.remove('show')">OK</button>
             `;
@@ -808,7 +837,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             }, 3000);
         }
 
-        function showPaymentModal(isSuccess) {
+        function showPaymentModal(isSuccess, paymentId = '') {
             const modal = document.getElementById("paymentModal");
             const paymentIcon = document.getElementById("payment_picture");
             const paymentTitle = document.getElementById("paymentTitle");
@@ -816,7 +845,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             if (isSuccess) {
                 paymentIcon.src = "img/payment_s.png";
                 paymentTitle.innerText = "Payment Successful";
-                paymentMessage.innerText = "You can check your payment history in the profile page.";
+                paymentMessage.innerText = `Payment ID: ${paymentId || 'Unknown'}. You can view your payment history on the profile page.`;
             } else {
                 paymentIcon.src = "img/payment_ns.png";
                 paymentTitle.innerText = "Payment Failed";
@@ -834,12 +863,12 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         <div class="container py-5">
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
-                    <h4 class="text-white mb-4">Quick Link</h4>
+                    <h4 class="text-white mb-4">Quick Links</h4>
                     <a class="btn btn-link" href="about.html">About Us</a><br>
                     <a class="btn btn-link" href="contact.html">Contact Us</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <h4 class="text-white mb-4">Contact</h4>
+                    <h4 class="text-white mb-4">Contact Info</h4>
                     <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
                     <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+011 775 8990</p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
