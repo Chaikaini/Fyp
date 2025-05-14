@@ -23,19 +23,17 @@ if (!$parent_id) {
     exit;
 }
 
-// Check if user has previous enrollments
+// Check if user has previous registrations
 $hasPreviousEnrollment = false;
-$enrollmentCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM enrollment WHERE parent_id = ?");
-$enrollmentCheckStmt->bind_param("i", $parent_id);
-$enrollmentCheckStmt->execute();
-$result = $enrollmentCheckStmt->get_result();
+$registrationCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM registration_class WHERE parent_id = ?");
+$registrationCheckStmt->bind_param("i", $parent_id);
+$registrationCheckStmt->execute();
+$result = $registrationCheckStmt->get_result();
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $hasPreviousEnrollment = $row['count'] > 0;
-} else {
-    $hasPreviousEnrollment = false;
 }
-$enrollmentCheckStmt->close();
+$registrationCheckStmt->close();
 error_log("hasPreviousEnrollment in process_payment.php: " . ($hasPreviousEnrollment ? 'true' : 'false'));
 
 // Get data from the request
@@ -73,35 +71,51 @@ if (empty($cart_items) || $total_amount <= 0 || empty($payment_method)) {
 $conn->begin_transaction();
 
 try {
-    // Insert payment record
-    $master_card_number = null;
-    if ($payment_method === "Credit Card" && $card_details) {
-        $master_card_number = substr($card_details['card_number'], -4);
+    // Initialize credit_card_id
+    $credit_card_id = null;
+
+    // Save credit card if provided and save_card is true
+    if ($card_details && $card_details['save_card'] && $payment_method === "Credit Card") {
+        $card_number = password_hash($card_details['card_number'], PASSWORD_DEFAULT);
+        $expiry_date = $conn->real_escape_string($card_details['expiry_date']);
+        $last_four = substr($card_details['card_number'], -4);
+
+        // Delete existing card for this parent
+        $stmt = $conn->prepare("DELETE FROM credit_cards WHERE parent_id = ?");
+        $stmt->bind_param("i", $parent_id);
+        $stmt->execute();
+
+        // Insert new card
+        $stmt = $conn->prepare("INSERT INTO credit_cards (parent_id, card_number, expiry_date, last_four) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $parent_id, $card_number, $expiry_date, $last_four);
+        if (!$stmt->execute()) {
+            throw new Exception("Failed to save credit card: " . $stmt->error);
+        }
+        // Get the inserted credit card ID
+        $credit_card_id = $conn->insert_id;
+    } elseif ($payment_method === "Credit Card") {
+        // Check if a saved card exists for this parent
+        $stmt = $conn->prepare("SELECT id FROM credit_cards WHERE parent_id = ? ORDER BY created_at DESC LIMIT 1");
+        $stmt->bind_param("i", $parent_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $credit_card_id = $row['id'];
+        }
     }
+
+    // Insert payment record
     $payment_status = "Completed";
     $stmt = $conn->prepare("
-        INSERT INTO payment (parent_id, payment_total_amount, payment_method, master_card_number, payment_status, enrollment_fee)
+        INSERT INTO payment (parent_id, payment_total_amount, payment_method, payment_status, enrollment_fee, credit_card_id)
         VALUES (?, ?, ?, ?, ?, ?)
     ");
-    $stmt->bind_param("idsssi", $parent_id, $total_amount, $payment_method, $master_card_number, $payment_status, $enrollmentFee);
+    $stmt->bind_param("idssii", $parent_id, $total_amount, $payment_method, $payment_status, $enrollmentFee, $credit_card_id);
     if (!$stmt->execute()) {
         throw new Exception("Failed to insert payment: " . $stmt->error);
     }
     $payment_id = $conn->insert_id;
-
-    // Record enrollment if first time
-    if (!$hasPreviousEnrollment) {
-        foreach ($cart_items as $item) {
-            $class_id = $conn->real_escape_string($item['class_id']);
-            $child_id = (int)$item['child_id'];
-            $stmt = $conn->prepare("INSERT INTO enrollment (parent_id, class_id, child_id) VALUES (?, ?, ?)");
-            $stmt->bind_param("isi", $parent_id, $class_id, $child_id);
-            if (!$stmt->execute()) {
-                error_log("Enrollment insert failed: " . $stmt->error . " for parent_id=$parent_id, class_id=$class_id, child_id=$child_id");
-                throw new Exception("Failed to record enrollment: " . $stmt->error);
-            }
-        }
-    }
 
     // Update class_enrolled in class table
     foreach ($cart_items as $item) {
@@ -128,23 +142,6 @@ try {
         $stmt->bind_param("isiiii", $parent_id, $class_id, $child_id, $subject_id, $teacher_id, $payment_id);
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert registration_class: " . $stmt->error);
-        }
-    }
-
-    // Save credit card if provided and save_card is true
-    if ($card_details && $card_details['save_card'] && $payment_method === "Credit Card") {
-        $card_number = password_hash($card_details['card_number'], PASSWORD_DEFAULT);
-        $expiry_date = $conn->real_escape_string($card_details['expiry_date']);
-        $last_four = substr($card_details['card_number'], -4);
-
-        $stmt = $conn->prepare("DELETE FROM credit_cards WHERE parent_id = ?");
-        $stmt->bind_param("i", $parent_id);
-        $stmt->execute();
-
-        $stmt = $conn->prepare("INSERT INTO credit_cards (parent_id, card_number, expiry_date, last_four) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $parent_id, $card_number, $expiry_date, $last_four);
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to save credit card: " . $stmt->error);
         }
     }
 
