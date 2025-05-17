@@ -1409,15 +1409,22 @@ document.getElementById("childForm").addEventListener("submit", function (event)
     .then(response => response.json()) 
     .then(data => {
         if (data.success) {
+            // Show success message
             showToast("Child information updated successfully!");
-            setTimeout(() => { location.reload(); }, 2000);
+
+            // Close modal
+            document.getElementById('childFormModal').style.display = "none";
+
+            // Reload page to show updated data
+            setTimeout(() => { 
+                location.reload(); 
+            }, 3000);
         } else {
             showToast("Error: " + data.error, true);
         }
     })
     .catch(error => console.error("Error:", error));
 });
-
 
 
 
