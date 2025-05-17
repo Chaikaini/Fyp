@@ -443,6 +443,15 @@
     vertical-align: middle;
 }
 
+.even-row {
+    background-color: #f2f2f2;
+}
+
+.odd-row {
+    background-color: #ffffff;
+}
+
+
 
   .progress-bar.weak { background-color: #dc3545; }
   .progress-bar.medium { background-color: #ffc107; }
@@ -1714,25 +1723,67 @@ function fetchChildrenInfo() {
 }
 
 
+// 替换现有的支付历史记录相关代码
 document.addEventListener("DOMContentLoaded", function () {
     fetch("profile_history.php")
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" && Array.isArray(data.data)) {
                 const tableBody = document.querySelector("#history-content tbody");
-                tableBody.innerHTML = ""; 
+                tableBody.innerHTML = "";
 
-                data.data.forEach(payment => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${payment.child_name}</td>
-                        <td>${payment.subject_name}</td>
-                        <td>${payment.part_name} </td>
-                        <td>${payment.payment_method}</td>
-                        <td>RM${parseFloat(payment.payment_total_amount).toFixed(2)}</td>
-                        <td>${payment.payment_time}</td>
-                    `;
-                    tableBody.appendChild(row);
+                const grouped = {};
+
+                // 分组数据
+                data.data.forEach(item => {
+                    if (!grouped[item.payment_id]) {
+                        grouped[item.payment_id] = {
+                            payment_method: item.payment_method,
+                            payment_total_amount: item.payment_total_amount,
+                            payment_time: item.payment_time,
+                            children: []
+                        };
+                    }
+                    grouped[item.payment_id].children.push({
+                        child_name: item.child_name,
+                        subject_name: item.subject_name,
+                        part_name: item.part_name
+                    });
+                });
+
+                // 按支付时间排序
+                const sortedGroups = Object.entries(grouped).sort((a, b) => {
+                    return new Date(b[1].payment_time) - new Date(a[1].payment_time);
+                });
+
+                // 插入行，使用 payment_id 的索引来决定颜色
+                sortedGroups.forEach(([payment_id, group], groupIndex) => {
+                    const rowClass = groupIndex % 2 === 0 ? 'even-row' : 'odd-row';
+                    
+                    group.children.forEach((entry, idx) => {
+                        const row = document.createElement("tr");
+                        row.classList.add(rowClass); // 使用支付组的索引来决定颜色
+
+                        row.innerHTML = `
+                            <td>${entry.child_name}</td>
+                            <td>${entry.subject_name}</td>
+                            <td>${entry.part_name}</td>
+                            ${idx === 0 ? `
+                                <td rowspan="${group.children.length}">${group.payment_method}</td>
+                                <td rowspan="${group.children.length}">RM${parseFloat(group.payment_total_amount).toFixed(2)}</td>
+                                <td rowspan="${group.children.length}">${new Date(group.payment_time).toLocaleString('en-GB', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                })}</td>
+                            ` : ''}
+                        `;
+
+                        tableBody.appendChild(row);
+                    });
                 });
             } else {
                 console.error("Failed to load payment history:", data.message);
@@ -1740,6 +1791,8 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching payment history:", error.message));
 });
+
+
 
 document.getElementById("kidNumber").addEventListener("input", function () {
             let kidNumber = this.value.trim();
