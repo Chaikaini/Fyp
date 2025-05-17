@@ -1723,7 +1723,6 @@ function fetchChildrenInfo() {
 }
 
 
-// 替换现有的支付历史记录相关代码
 document.addEventListener("DOMContentLoaded", function () {
     fetch("profile_history.php")
         .then(response => response.json())
@@ -1734,7 +1733,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const grouped = {};
 
-                // 分组数据
+                // grouping data by payment_id
                 data.data.forEach(item => {
                     if (!grouped[item.payment_id]) {
                         grouped[item.payment_id] = {
@@ -1751,39 +1750,39 @@ document.addEventListener("DOMContentLoaded", function () {
                     });
                 });
 
-                // 按支付时间排序
+                // sorting by payment_time
                 const sortedGroups = Object.entries(grouped).sort((a, b) => {
                     return new Date(b[1].payment_time) - new Date(a[1].payment_time);
                 });
 
-                // 插入行，使用 payment_id 的索引来决定颜色
+                //insert data into table
                 sortedGroups.forEach(([payment_id, group], groupIndex) => {
                     const rowClass = groupIndex % 2 === 0 ? 'even-row' : 'odd-row';
+                    const row = document.createElement("tr");
+                    row.classList.add(rowClass);
+
                     
-                    group.children.forEach((entry, idx) => {
-                        const row = document.createElement("tr");
-                        row.classList.add(rowClass); // 使用支付组的索引来决定颜色
+                    const childNames = group.children.map(c => c.child_name).join(", ");
+                    const subjectNames = group.children.map(c => c.subject_name).join(", ");
+                    const partNames = group.children.map(c => c.part_name).join(", ");
 
-                        row.innerHTML = `
-                            <td>${entry.child_name}</td>
-                            <td>${entry.subject_name}</td>
-                            <td>${entry.part_name}</td>
-                            ${idx === 0 ? `
-                                <td rowspan="${group.children.length}">${group.payment_method}</td>
-                                <td rowspan="${group.children.length}">RM${parseFloat(group.payment_total_amount).toFixed(2)}</td>
-                                <td rowspan="${group.children.length}">${new Date(group.payment_time).toLocaleString('en-GB', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                })}</td>
-                            ` : ''}
-                        `;
+                    row.innerHTML = `
+                        <td>${childNames}</td>
+                        <td>${subjectNames}</td>
+                        <td>${partNames}</td>
+                        <td>${group.payment_method}</td>
+                        <td>RM${parseFloat(group.payment_total_amount).toFixed(2)}</td>
+                        <td>${new Date(group.payment_time).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })}</td>
+                    `;
 
-                        tableBody.appendChild(row);
-                    });
+                    tableBody.appendChild(row);
                 });
             } else {
                 console.error("Failed to load payment history:", data.message);
@@ -1791,6 +1790,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching payment history:", error.message));
 });
+
 
 
 
