@@ -443,6 +443,15 @@
     vertical-align: middle;
 }
 
+.even-row {
+    background-color: #f2f2f2;
+}
+
+.odd-row {
+    background-color: #ffffff;
+}
+
+
 
   .progress-bar.weak { background-color: #dc3545; }
   .progress-bar.medium { background-color: #ffc107; }
@@ -1400,15 +1409,22 @@ document.getElementById("childForm").addEventListener("submit", function (event)
     .then(response => response.json()) 
     .then(data => {
         if (data.success) {
+            // Show success message
             showToast("Child information updated successfully!");
-            setTimeout(() => { location.reload(); }, 2000);
+
+            // Close modal
+            document.getElementById('childFormModal').style.display = "none";
+
+            // Reload page to show updated data
+            setTimeout(() => { 
+                location.reload(); 
+            }, 3000);
         } else {
             showToast("Error: " + data.error, true);
         }
     })
     .catch(error => console.error("Error:", error));
 });
-
 
 
 
@@ -1720,18 +1736,59 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             if (data.status === "success" && Array.isArray(data.data)) {
                 const tableBody = document.querySelector("#history-content tbody");
-                tableBody.innerHTML = ""; 
+                tableBody.innerHTML = "";
 
-                data.data.forEach(payment => {
+                const grouped = {};
+
+                // grouping data by payment_id
+                data.data.forEach(item => {
+                    if (!grouped[item.payment_id]) {
+                        grouped[item.payment_id] = {
+                            payment_method: item.payment_method,
+                            payment_total_amount: item.payment_total_amount,
+                            payment_time: item.payment_time,
+                            children: []
+                        };
+                    }
+                    grouped[item.payment_id].children.push({
+                        child_name: item.child_name,
+                        subject_name: item.subject_name,
+                        part_name: item.part_name
+                    });
+                });
+
+                // sorting by payment_time
+                const sortedGroups = Object.entries(grouped).sort((a, b) => {
+                    return new Date(b[1].payment_time) - new Date(a[1].payment_time);
+                });
+
+                //insert data into table
+                sortedGroups.forEach(([payment_id, group], groupIndex) => {
+                    const rowClass = groupIndex % 2 === 0 ? 'even-row' : 'odd-row';
                     const row = document.createElement("tr");
+                    row.classList.add(rowClass);
+
+                    
+                    const childNames = group.children.map(c => c.child_name).join(", ");
+                    const subjectNames = group.children.map(c => c.subject_name).join(", ");
+                    const partNames = group.children.map(c => c.part_name).join(", ");
+
                     row.innerHTML = `
-                        <td>${payment.child_name}</td>
-                        <td>${payment.subject_name}</td>
-                        <td>${payment.part_name} </td>
-                        <td>${payment.payment_method}</td>
-                        <td>RM${parseFloat(payment.payment_total_amount).toFixed(2)}</td>
-                        <td>${payment.payment_time}</td>
+                        <td>${childNames}</td>
+                        <td>${subjectNames}</td>
+                        <td>${partNames}</td>
+                        <td>${group.payment_method}</td>
+                        <td>RM${parseFloat(group.payment_total_amount).toFixed(2)}</td>
+                        <td>${new Date(group.payment_time).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })}</td>
                     `;
+
                     tableBody.appendChild(row);
                 });
             } else {
@@ -1740,6 +1797,9 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("Error fetching payment history:", error.message));
 });
+
+
+
 
 document.getElementById("kidNumber").addEventListener("input", function () {
             let kidNumber = this.value.trim();

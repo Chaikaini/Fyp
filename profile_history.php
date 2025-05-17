@@ -21,13 +21,13 @@ $parent_id = $_SESSION['parent_id'];
 
 $sql = "
 SELECT 
+    p.payment_id,
     c.child_name, 
     s.subject_name,
     p.payment_total_amount,
     p.payment_method,
     p.payment_time,
     pt.part_name
-   
 FROM registration_class rc
 JOIN child c ON rc.child_id = c.child_id
 JOIN class cls ON rc.class_id = cls.class_id
@@ -49,17 +49,14 @@ $result = $stmt->get_result();
 
 $history = [];
 while ($row = $result->fetch_assoc()) {
-
-    $formatted_date = date("d/m/Y h:i A", strtotime($row["payment_time"]));
-
     $history[] = [
+        "payment_id" => $row["payment_id"],
         "child_name" => $row["child_name"],
         "subject_name" => $row["subject_name"],
         "payment_total_amount" => $row["payment_total_amount"],
         "payment_method" => $row["payment_method"],
-        "payment_time" => $formatted_date, 
+        "payment_time" => $row["payment_time"], 
         "part_name" => $row["part_name"]
-        
     ];
 }
 

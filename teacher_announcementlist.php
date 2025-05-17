@@ -9,11 +9,11 @@ if ($conn->connect_error) {
 // Get the teacher_id from session
 $sender_id = $_SESSION['teacher_id'] ?? '';
 if (!$sender_id) {
-    die(json_encode(['error' => 'Sender ID not found. Please login.']));
+    die(json_encode(['error' => 'Teacher ID not found. Please login.']));
 }
 
 // Get form data
-$subject_id = $_POST['subject_id'] ?? ''; 
+$class_id = $_POST['subject_id'] ?? ''; 
 $class_id = $_POST['class_id'] ?? ''; 
 $notification_title = $_POST['notification_title'] ?? '';
 $notification_content = $_POST['notification_content'] ?? ''; 
@@ -36,9 +36,9 @@ if (isset($_FILES['notification_document']) && $_FILES['notification_document'][
 // Insert into notification table
 $insertNotification = $conn->prepare("
     INSERT INTO notification 
-    (sender_id, recipient_type, subject_id, class_id, notification_title, notification_content, notification_document) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)");
-$insertNotification->bind_param("sssssss", $sender_id, $recipient_type, $subject_id, $class_id, $notification_title, $notification_content, $documentPath);
+    (sender_id, recipient_type, class_id, notification_title, notification_content, notification_document) 
+    VALUES (?, ?, ?, ?, ?, ?)");
+$insertNotification->bind_param("ssssss", $sender_id, $recipient_type, $class_id, $notification_title, $notification_content, $documentPath);
 $insertNotification->execute();
 
 $notification_id = $insertNotification->insert_id;

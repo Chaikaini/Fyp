@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2025 at 06:27 AM
+-- Generation Time: May 17, 2025 at 02:37 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -47,20 +47,6 @@ INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `a
 -- --------------------------------------------------------
 
 --
--- Table structure for table `attendance`
---
-
-CREATE TABLE `attendance` (
-  `attendance_id` int(11) NOT NULL,
-  `registration_id` int(11) NOT NULL,
-  `attendance_name` varchar(100) NOT NULL,
-  `attendance_day` date NOT NULL,
-  `attendance_result` enum('Present','Absent','Late') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `cart`
 --
 
@@ -69,20 +55,8 @@ CREATE TABLE `cart` (
   `parent_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `child_id` int(11) NOT NULL,
-  `child_name` varchar(100) DEFAULT NULL,
-  `subject_name` varchar(100) DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL,
-  `subject_id` varchar(20) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
   `deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cart`
---
-
-INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `child_name`, `subject_name`, `price`, `subject_id`, `teacher_id`, `deleted`) VALUES
-(1, 1, 'Mat0001', 1, 'Yuna', NULL, 510.00, '11132', 12123, 1);
 
 -- --------------------------------------------------------
 
@@ -136,11 +110,11 @@ CREATE TABLE `class` (
 --
 
 INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `year`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', '11245', 1, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 1, 'Available'),
+('Eng0001', '11245', 1, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
 ('Eng0002', '11245', 2, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Eng2001', '22534', 1, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
 ('Eng2002', '22534', 2, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 1, 'Available'),
+('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
 ('Mat0002', '11132', 2, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Mat2001', '22134', 1, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
 ('Mat2002', '22134', 2, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
@@ -172,7 +146,7 @@ CREATE TABLE `comments` (
 --
 
 CREATE TABLE `credit_cards` (
-  `id` int(11) NOT NULL,
+  `credit_card_id` int(11) NOT NULL,
   `parent_id` int(11) NOT NULL,
   `card_number` varchar(255) NOT NULL,
   `expiry_date` varchar(5) NOT NULL,
@@ -180,21 +154,17 @@ CREATE TABLE `credit_cards` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `enrollment`
+-- Dumping data for table `credit_cards`
 --
 
-CREATE TABLE `enrollment` (
-  `enrollment_id` int(11) NOT NULL,
-  `parent_id` int(11) NOT NULL,
-  `class_id` varchar(20) NOT NULL,
-  `child_id` int(11) NOT NULL,
-  `enrollment_date` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `credit_cards` (`credit_card_id`, `parent_id`, `card_number`, `expiry_date`, `last_four`, `created_at`) VALUES
+(1, 1, '4111111111111111', '12/25', '1122', '2025-04-17 07:25:04'),
+(2, 2, '5111111111111111', '12/25', '9988', '2025-04-17 11:56:09');
+
 
 -- --------------------------------------------------------
+
 
 --
 -- Table structure for table `exam_result`
@@ -204,17 +174,9 @@ CREATE TABLE `exam_result` (
   `exam_result_id` int(11) NOT NULL,
   `child_id` int(11) DEFAULT NULL,
   `class_id` varchar(20) DEFAULT NULL,
-  `teacher_id` int(11) DEFAULT NULL,
   `exam_result_midterm` decimal(5,2) DEFAULT NULL,
   `exam_result_final` decimal(5,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `exam_result`
---
-
-INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `teacher_id`, `exam_result_midterm`, `exam_result_final`) VALUES
-(1, 1, 'Mly0001', 12345, 70.00, 77.00);
 
 -- --------------------------------------------------------
 
@@ -226,7 +188,6 @@ CREATE TABLE `notification` (
   `notification_id` int(11) NOT NULL,
   `sender_id` int(11) NOT NULL,
   `recipient_type` enum('Teacher','Parent','Class') NOT NULL,
-  `subject_id` varchar(20) DEFAULT NULL,
   `class_id` varchar(20) DEFAULT NULL,
   `notification_title` varchar(255) NOT NULL,
   `notification_content` text NOT NULL,
@@ -238,10 +199,10 @@ CREATE TABLE `notification` (
 -- Dumping data for table `notification`
 --
 
-INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `subject_id`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 12345, 'Class', '11351', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
-(2, 12345, 'Class', '11351', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
-(3, 11111, 'Parent', NULL, NULL, '123', '123', NULL, '2025-05-08 15:51:06');
+INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
+(1, 12345, 'Class', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
+(2, 12345, 'Class', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
+(3, 11111, 'Parent', NULL, '123', '123', NULL, '2025-05-08 15:51:06');
 
 -- --------------------------------------------------------
 
@@ -265,8 +226,7 @@ CREATE TABLE `notification_receiver` (
 INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `teacher_id`, `recipient_type`, `read_status`) VALUES
 (1, 1, 1, NULL, 'Parent', 'read'),
 (2, 2, 1, NULL, 'Parent', 'read'),
-(3, 3, 1, NULL, 'Parent', 'unread'),
-(4, 3, 2, NULL, 'Parent', 'unread');
+(3, 3, 1, NULL, 'Parent', 'read');
 
 -- --------------------------------------------------------
 
@@ -327,23 +287,20 @@ INSERT INTO `part` (`part_id`, `part_name`, `part_duration`) VALUES
 
 CREATE TABLE `payment` (
   `payment_id` int(11) NOT NULL,
-  `parent_id` int(11) NOT NULL,
   `payment_total_amount` decimal(10,2) NOT NULL,
   `payment_method` varchar(50) NOT NULL,
-  `master_card_number` varchar(16) DEFAULT NULL,
-  `payment_status` enum('Pending','Completed','Failed') NOT NULL,
-  `payment_time` timestamp NOT NULL DEFAULT current_timestamp(),
-  `enrollment_fee` decimal(10,2) NOT NULL DEFAULT 0.00
+  `credit_card_id` int(11) NOT NULL,
+  `payment_time` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `payment`
 --
 
-INSERT INTO `payment` (`payment_id`, `parent_id`, `payment_total_amount`, `payment_method`, `master_card_number`, `payment_status`, `payment_time`, `enrollment_fee`) VALUES
-(1, 1, 510.00, 'Credit Card', '111111111', 'Completed', '2025-04-17 07:25:04', 0.00),
-(2, 2, 510.00, 'Credit Card', '11111111', 'Completed', '2025-04-17 11:56:09', 0.00),
-(3, 1, 510.00, 'Credit Card', '222222', 'Completed', '2025-04-20 08:47:33', 0.00);
+INSERT INTO `payment` (`payment_id`, `payment_total_amount`, `payment_method`, `credit_card_id`, `payment_time`) VALUES
+(1, 510.00, 'Credit Card', 1, '2025-04-17 07:25:04'),
+(2, 510.00, 'Credit Card', 2, '2025-04-17 11:56:09'),
+(3, 510.00, 'Credit Card', 1, '2025-04-20 08:47:33');
 
 -- --------------------------------------------------------
 
@@ -356,8 +313,6 @@ CREATE TABLE `registration_class` (
   `parent_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `child_id` int(11) NOT NULL,
-  `subject_id` varchar(20) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
   `payment_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -365,10 +320,10 @@ CREATE TABLE `registration_class` (
 -- Dumping data for table `registration_class`
 --
 
-INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `child_id`, `subject_id`, `teacher_id`, `payment_id`) VALUES
-(1, 1, 'Mly0001', 1, '11351', 12345, 1),
-(2, 1, 'Eng0001', 1, '11245', 12233, 3),
-(3, 2, 'Mat0001', 2, '11132', 12123, 2);
+INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `child_id`, `payment_id`) VALUES
+(1, 1, 'Mly0001', 1, 1),
+(2, 1, 'Eng0001', 1, 2),
+(3, 2, 'Mat0001', 2, 3);
 
 -- --------------------------------------------------------
 
@@ -424,7 +379,7 @@ CREATE TABLE `teacher` (
 INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
 (12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', NULL, '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
 (12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
@@ -435,12 +390,18 @@ INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_
 
 CREATE TABLE `teacher_comment` (
   `teacher_comment_id` int(11) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
   `child_id` int(11) NOT NULL,
   `class_id` varchar(20) NOT NULL,
   `teacher_comment_text` text DEFAULT NULL,
   `teacher_comment_created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `teacher_comment`
+--
+
+INSERT INTO `teacher_comment` (`teacher_comment_id`, `child_id`, `class_id`, `teacher_comment_text`, `teacher_comment_created_at`) VALUES
+(1, 1, 'Mly0001', 'Yuna is a hard-working student.', '2025-05-17 14:34:02');
 
 --
 -- Indexes for dumped tables
@@ -453,23 +414,15 @@ ALTER TABLE `admin`
   ADD PRIMARY KEY (`admin_id`);
 
 --
--- Indexes for table `attendance`
---
-ALTER TABLE `attendance`
-  ADD PRIMARY KEY (`attendance_id`),
-  ADD KEY `registration_id` (`registration_id`);
-
---
 -- Indexes for table `cart`
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`cart_id`),
-  ADD UNIQUE KEY `unique_cart` (`parent_id`,`child_id`,`subject_id`),
+  ADD UNIQUE KEY `unique_cart` (`parent_id`,`child_id`,`class_id`),
   ADD KEY `parent_id` (`parent_id`),
   ADD KEY `class_id` (`class_id`),
-  ADD KEY `child_id` (`child_id`),
-  ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
+  ADD KEY `child_id` (`child_id`);
+
 
 --
 -- Indexes for table `child`
@@ -499,17 +452,9 @@ ALTER TABLE `comments`
 -- Indexes for table `credit_cards`
 --
 ALTER TABLE `credit_cards`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`credit_card_id`),
   ADD KEY `parent_id` (`parent_id`);
 
---
--- Indexes for table `enrollment`
---
-ALTER TABLE `enrollment`
-  ADD PRIMARY KEY (`enrollment_id`),
-  ADD KEY `parent_id` (`parent_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `child_id` (`child_id`);
 
 --
 -- Indexes for table `exam_result`
@@ -517,15 +462,13 @@ ALTER TABLE `enrollment`
 ALTER TABLE `exam_result`
   ADD PRIMARY KEY (`exam_result_id`),
   ADD KEY `child_id` (`child_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
+  ADD KEY `class_id` (`class_id`);
 
 --
 -- Indexes for table `notification`
 --
 ALTER TABLE `notification`
   ADD PRIMARY KEY (`notification_id`),
-  ADD KEY `fk_subject` (`subject_id`),
   ADD KEY `fk_class` (`class_id`);
 
 --
@@ -554,7 +497,7 @@ ALTER TABLE `part`
 --
 ALTER TABLE `payment`
   ADD PRIMARY KEY (`payment_id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD KEY `credit_card_id` (`credit_card_id`);
 
 --
 -- Indexes for table `registration_class`
@@ -564,8 +507,6 @@ ALTER TABLE `registration_class`
   ADD KEY `parent_id` (`parent_id`),
   ADD KEY `class_id` (`class_id`),
   ADD KEY `child_id` (`child_id`),
-  ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `teacher_id` (`teacher_id`),
   ADD KEY `payment_id` (`payment_id`);
 
 --
@@ -587,30 +528,23 @@ ALTER TABLE `teacher`
 ALTER TABLE `teacher_comment`
   ADD PRIMARY KEY (`teacher_comment_id`),
   ADD KEY `child_id` (`child_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `teacher_id` (`teacher_id`);
+  ADD KEY `class_id` (`class_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `attendance`
---
-ALTER TABLE `attendance`
-  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `child`
 --
 ALTER TABLE `child`
-  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `comments`
@@ -622,37 +556,30 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT for table `credit_cards`
 --
 ALTER TABLE `credit_cards`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `enrollment`
---
-ALTER TABLE `enrollment`
-  MODIFY `enrollment_id` int(11) NOT NULL AUTO_INCREMENT;
-
+  MODIFY `credit_card_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `exam_result`
 --
 ALTER TABLE `exam_result`
-  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `parent`
 --
 ALTER TABLE `parent`
-  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `part`
@@ -670,7 +597,7 @@ ALTER TABLE `payment`
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `teacher`
@@ -682,17 +609,11 @@ ALTER TABLE `teacher`
 -- AUTO_INCREMENT for table `teacher_comment`
 --
 ALTER TABLE `teacher_comment`
-  MODIFY `teacher_comment_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `teacher_comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `attendance`
---
-ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`registration_id`) REFERENCES `registration_class` (`registration_id`);
 
 --
 -- Constraints for table `cart`
@@ -700,9 +621,8 @@ ALTER TABLE `attendance`
 ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `cart_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `cart_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`);
+
 
 --
 -- Constraints for table `child`
@@ -732,27 +652,17 @@ ALTER TABLE `credit_cards`
   ADD CONSTRAINT `credit_cards_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
 
 --
--- Constraints for table `enrollment`
---
-ALTER TABLE `enrollment`
-  ADD CONSTRAINT `enrollment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `enrollment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `enrollment_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`);
-
---
 -- Constraints for table `exam_result`
 --
 ALTER TABLE `exam_result`
   ADD CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `exam_result_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `exam_result_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `exam_result_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
 
 --
 -- Constraints for table `notification`
 --
 ALTER TABLE `notification`
-  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_subject` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `notification_receiver`
@@ -766,7 +676,7 @@ ALTER TABLE `notification_receiver`
 -- Constraints for table `payment`
 --
 ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
+  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards` (`credit_card_id`);
 
 --
 -- Constraints for table `registration_class`
@@ -775,8 +685,6 @@ ALTER TABLE `registration_class`
   ADD CONSTRAINT `registration_class_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
   ADD CONSTRAINT `registration_class_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
   ADD CONSTRAINT `registration_class_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `registration_class_ibfk_4` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `registration_class_ibfk_5` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`),
   ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
 
 --
@@ -790,8 +698,7 @@ ALTER TABLE `subject`
 --
 ALTER TABLE `teacher_comment`
   ADD CONSTRAINT `teacher_comment_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `teacher_comment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `teacher_comment_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`);
+  ADD CONSTRAINT `teacher_comment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

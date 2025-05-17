@@ -35,7 +35,7 @@ foreach ($results as $entry) {
     $midterm = $entry['exam_result_midterm'];
     $final = $entry['exam_result_final'];
 
-    // Validate is the data are exist
+    // Validate if the data exists
     $checkSql = "SELECT * FROM exam_result WHERE class_id = ? AND child_id = ?";
     $checkStmt = $conn->prepare($checkSql);
     $checkStmt->bind_param("ss", $class_id, $child_id);
@@ -45,17 +45,17 @@ foreach ($results as $entry) {
     if ($checkResult->num_rows > 0) {
         // if exist then update 
         $updateSql = "UPDATE exam_result 
-                      SET exam_result_midterm = ?, exam_result_final = ?, teacher_id = ?
+                      SET exam_result_midterm = ?, exam_result_final = ?
                       WHERE class_id = ? AND child_id = ?";
         $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ddsss", $midterm, $final, $teacher_id, $class_id, $child_id);
+        $updateStmt->bind_param("ddss", $midterm, $final, $class_id, $child_id);
         $updateStmt->execute();
     } else {
         // if not exist insert new data
-        $insertSql = "INSERT INTO exam_result (class_id, child_id, exam_result_midterm, exam_result_final, teacher_id)
-                      VALUES (?, ?, ?, ?, ?)";
+        $insertSql = "INSERT INTO exam_result (class_id, child_id, exam_result_midterm, exam_result_final)
+                      VALUES (?, ?, ?, ?)";
         $insertStmt = $conn->prepare($insertSql);
-        $insertStmt->bind_param("ssdds", $class_id, $child_id, $midterm, $final, $teacher_id);
+        $insertStmt->bind_param("ssdd", $class_id, $child_id, $midterm, $final);
         $insertStmt->execute();
     }
 }

@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: application/json');
+
 $host = 'localhost';
 $user = 'root';
 $password = '';
@@ -17,12 +18,13 @@ if (empty($class_id)) {
     exit;
 }
 
-
 $sql = "SELECT 
             s.subject_name, 
+            ch.child_id,
             ch.child_name, 
             ch.child_gender, 
             ch.child_kidnumber, 
+            ch.child_image,
             p.parent_name, 
             p.phone_number,
             p.parent_relationship,
@@ -45,19 +47,25 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $data = [];
-$subject_name = null; 
+$subject_name = null;
 
 while ($row = $result->fetch_assoc()) {
-    
     if ($subject_name === null) {
         $subject_name = $row['subject_name'];
     }
 
-  
+   
+   $child_image = $row['child_image'] 
+        ? 'uploads/child_images/' . basename($row['child_image'])  // 只使用文件名部分
+        : null;
+
+   
     $data[] = [
+        'child_id' => $row['child_id'],
         'child_name' => $row['child_name'],
         'child_gender' => $row['child_gender'],
         'child_kidnumber' => $row['child_kidnumber'],
+        'child_image' => $child_image,
         'parent_name' => $row['parent_name'],
         'phone_number' => $row['phone_number'],
         'parent_relationship' => $row['parent_relationship'],
@@ -65,9 +73,8 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// no student records，but still need to get subject name
+//no student record but still need to get the subject name
 if ($subject_name === null) {
-    
     $subjectQuery = "SELECT s.subject_name FROM class c 
                      JOIN subject s ON c.subject_id = s.subject_id 
                      WHERE c.class_id = ?";
@@ -80,8 +87,6 @@ if ($subject_name === null) {
     }
 }
 
-
 echo json_encode(['subject_name' => $subject_name, 'students' => $data]);
-
 $conn->close();
 ?>
