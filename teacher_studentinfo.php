@@ -54,12 +54,18 @@ while ($row = $result->fetch_assoc()) {
         $subject_name = $row['subject_name'];
     }
 
+   
+   $child_image = $row['child_image'] 
+        ? 'uploads/child_images/' . basename($row['child_image'])  // 只使用文件名部分
+        : null;
+
+   
     $data[] = [
         'child_id' => $row['child_id'],
         'child_name' => $row['child_name'],
         'child_gender' => $row['child_gender'],
         'child_kidnumber' => $row['child_kidnumber'],
-        'child_image' => $row['child_image'],
+        'child_image' => $child_image,
         'parent_name' => $row['parent_name'],
         'phone_number' => $row['phone_number'],
         'parent_relationship' => $row['parent_relationship'],

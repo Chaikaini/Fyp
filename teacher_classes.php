@@ -126,6 +126,27 @@
 .nav-item {
     position: relative; 
 }
+.avatar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.avatar-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    background-color: #f8f9fa;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 </style>
 
 <body>
@@ -246,6 +267,13 @@
         <h5 class="modal-title" id="parentInfoModalLabel">Parent Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body text-center">
+                <div class="avatar-container">
+                    <div class="avatar-circle">
+                        <img id="parentImage" src="" alt="Parent Image" class="avatar-img">
+                    </div>
+                </div>
+       </div>
       <div class="modal-body" id="parent-info-body">
         <!-- filled by JS -->
       </div>
@@ -255,17 +283,21 @@
 
 <!-- Child Image Modal -->
 <div class="modal fade" id="childImageModal" tabindex="-1" aria-labelledby="childImageModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="childImageModalLabel">Child Image</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="childImageModalBody">
-        <!-- Image content loaded via JS -->
-      </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="childImageModalLabel">Child Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="avatar-container">
+                    <div class="avatar-circle">
+                        <img id="childImage" src="" alt="Child Image" class="avatar-img">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 
@@ -490,9 +522,11 @@ function viewStudents(classId) {
                     <tr>
                         <td>${index + 1}</td>
                         <td>
-                        <a href="#" onclick="showChildImageModal('${row.child_id}', '${row.child_name}', '${row.child_image}')">
-                            ${row.child_name}
-                        </a>
+                            <a href="#" onclick="showChildImageModal('${row.child_id}', 
+                                '${row.child_name}', 
+                                '${row.child_image ? encodeURIComponent(row.child_image) : ''}')">
+                                ${row.child_name}
+                            </a>
                         </td>
                         <td>${row.child_gender}</td>
                         <td>${row.child_kidnumber}</td>
@@ -532,15 +566,36 @@ function viewStudents(classId) {
 
 // Function to show child image in a modal
 function showChildImageModal(childId, childName, childImage) {
-    const imageUrl = childImage ? `${childImage}` : 'placeholder.jpg';
-    document.getElementById("childImageModalBody").innerHTML = `
-        <p><strong>${childName}</strong></p>
-        <img src="${imageUrl}" alt="${childName}" class="img-fluid rounded">
-    `;
     const modal = new bootstrap.Modal(document.getElementById("childImageModal"));
+    const modalTitle = document.getElementById("childImageModalLabel");
+    const modalImage = document.getElementById("childImage");
+    const avatarContainer = modalImage.parentElement;
+
+    modalTitle.innerHTML = `Image for ${childName}`;
+
+    if (childImage && childImage !== "null" && childImage !== "") {
+        // if image exists, show it
+        avatarContainer.style.display = 'block';
+        modalImage.style.display = 'block';
+        modalImage.src = decodeURIComponent(childImage);
+        modalImage.alt = `${childName}'s Image`;
+        
+        modalImage.onerror = function() {
+            console.error('Failed to load image:', childImage);
+            // load default avatar if image fails
+            modalImage.src = 'img/user.jpg';
+            modalImage.alt = `Default avatar for ${childName}`;
+        };
+    } else {
+        // if no image, show default avatar
+        avatarContainer.style.display = 'block';
+        modalImage.style.display = 'block';
+        modalImage.src = 'img/user.jpg';
+        modalImage.alt = `Default avatar for ${childName}`;
+    }
+
     modal.show();
 }
-
 
 // CommentModal
 function openCommentModal(childId, classId, childName) {
@@ -675,71 +730,90 @@ function submitComment() {
 
 
 
-function viewParentInfo(parentId,childName) {
-  fetch("teacher_parentinfo.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "parent_id=" + encodeURIComponent(parentId), 
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      alert(data.error);
-    } else {
-      let content = `
-  <table class="table table-bordered">
-    <tbody>
-      <tr>
-        <th>Name</th>
-        <td>${data.parent_name}</td>
-      </tr>
-      <tr>
-        <th>Gender</th>
-        <td>${data.parent_gender}</td>
-      </tr>
-       <tr>
-        <th>Relationship</th>
-        <td>${data.parent_relationship}</td>
-      </tr>
-      <tr>
-        <th>IC Number</th>
-        <td>${data.ic_number}</td>
-      </tr>
-      <tr>
-        <th>Email</th>
-        <td>${data.parent_email}</td>
-      </tr>
-      <tr>
-        <th>Phone 1</th>
-        <td>${data.phone_number}</td>
-      </tr>
-      <tr>
-        <th>Phone 2</th>
-        <td>${data.phone_number2}</td>
-      </tr>
-      <tr>
-        <th>Address</th>
-        <td>${data.parent_address}</td>
-      </tr>
-      <tr>
-        <th>Parent 2</th>
-        <td>${data.parent_name2} (${data.parent_relationship2}) - ${data.parent_num2}</td>
-      </tr>
-    </tbody>
-  </table>
-`;
+function viewParentInfo(parentId, childName) {
+    fetch("teacher_parentinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "parent_id=" + encodeURIComponent(parentId),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            const modalTitle = document.getElementById("parentInfoModalLabel");
+            const parentImage = document.getElementById("parentImage");
+            
+            modalTitle.innerText = `Parent Information for ${childName}`;
 
-      document.getElementById("parentInfoModalLabel").innerText = `Parent Information for ${childName}`;
+            // process parent image
+            if (data.parent_image && data.parent_image !== "null" && data.parent_image !== "") {
+                parentImage.src = decodeURIComponent(data.parent_image);
+                parentImage.alt = `${data.parent_name}'s Image`;
+                
+                parentImage.onerror = function() {
+                    console.error('Failed to load parent image:', data.parent_image);
+                    parentImage.src = 'img/user.jpg';
+                    parentImage.alt = `Default avatar for ${data.parent_name}`;
+                };
+            } else {
+                parentImage.src = 'img/user.jpg';
+                parentImage.alt = `Default avatar for ${data.parent_name}`;
+            }
 
-      document.getElementById("parent-info-body").innerHTML = content;
-      const modal = new bootstrap.Modal(document.getElementById("parentInfoModal"));
-      modal.show();
-    }
-  })
-  .catch(err => {
-    console.error("Error fetching parent info:", err);
-    alert("Error loading parent information.");
-  });
+            // parent info table
+            let content = `
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <td>${data.parent_name}</td>
+                        </tr>
+                        <tr>
+                            <th>Gender</th>
+                            <td>${data.parent_gender}</td>
+                        </tr>
+                        <tr>
+                            <th>Relationship</th>
+                            <td>${data.parent_relationship}</td>
+                        </tr>
+                        <tr>
+                            <th>IC Number</th>
+                            <td>${data.ic_number}</td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td>${data.parent_email}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone 1</th>
+                            <td>${data.phone_number}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone 2</th>
+                            <td>${data.phone_number2}</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td>${data.parent_address}</td>
+                        </tr>
+                        <tr>
+                            <th>Parent 2</th>
+                            <td>${data.parent_name2} (${data.parent_relationship2}) - ${data.parent_num2}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById("parent-info-body").innerHTML = content;
+            const modal = new bootstrap.Modal(document.getElementById("parentInfoModal"));
+            modal.show();
+        }
+    })
+    .catch(err => {
+        console.error("Error fetching parent info:", err);
+        alert("Error loading parent information.");
+    });
 }
 
 function exportStudentTableToExcel() {
