@@ -46,12 +46,14 @@ $notification_sql = "
             WHEN n.sender_id IN (SELECT admin_id FROM admin) THEN a.admin_name
             ELSE t.teacher_name
         END AS sender_name,
-            COALESCE(s.subject_name, 'General Announcement') as subject_name                 
+            COALESCE(s.subject_name, 'General Announcement') as subject_name, 
+            s.year AS year                
             FROM notification_receiver nr
             JOIN notification n ON nr.notification_id = n.notification_id
             LEFT JOIN teacher t ON n.sender_id = t.teacher_id  
             LEFT JOIN admin a ON n.sender_id = a.admin_id
-            LEFT JOIN subject s ON n.subject_id = s.subject_id  
+            LEFT JOIN class c ON n.class_id = c.class_id
+            LEFT JOIN subject s ON c.subject_id = s.subject_id
             WHERE nr.parent_id = ?  
             ORDER BY n.notification_created_at DESC
 ";

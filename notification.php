@@ -294,7 +294,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 notificationItem.innerHTML = `
                     <div class="notification-header">
-                        <div class="sender">${notif.sender_name} - ${notif.subject_name}</div>  
+                        <div class="sender">${notif.sender_name} - ${notif.subject_name === 'General Announcement' ? 
+                            notif.subject_name : // if subject name is General Announcement,not show year
+                            `${notif.year} ${notif.subject_name}`// else show year and subject name
+                        }</div>   
                         <div class="date">${formattedDate}</div>
                     </div>
                     <div class="title">${notif.notification_title} ${statusLabel}</div>
