@@ -253,6 +253,20 @@
   </div>
 </div>
 
+<!-- Child Image Modal -->
+<div class="modal fade" id="childImageModal" tabindex="-1" aria-labelledby="childImageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="childImageModalLabel">Child Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="childImageModalBody">
+        <!-- Image content loaded via JS -->
+      </div>
+    </div>
+  </div>
+</div>
 
 
 <!-- Comment Modal -->
@@ -475,7 +489,11 @@ function viewStudents(classId) {
                 tbody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
-                        <td>${row.child_name}</td>
+                        <td>
+                        <a href="#" onclick="showChildImageModal('${row.child_id}', '${row.child_name}', '${row.child_image}')">
+                            ${row.child_name}
+                        </a>
+                        </td>
                         <td>${row.child_gender}</td>
                         <td>${row.child_kidnumber}</td>
                         <td><a href="#" onclick="viewParentInfo('${row.parent_id}', '${row.child_name}')">${row.parent_name}</a></td>
@@ -511,6 +529,18 @@ function viewStudents(classId) {
         viewButton.disabled = false;
     });
 }
+
+// Function to show child image in a modal
+function showChildImageModal(childId, childName, childImage) {
+    const imageUrl = childImage ? `${childImage}` : 'placeholder.jpg';
+    document.getElementById("childImageModalBody").innerHTML = `
+        <p><strong>${childName}</strong></p>
+        <img src="${imageUrl}" alt="${childName}" class="img-fluid rounded">
+    `;
+    const modal = new bootstrap.Modal(document.getElementById("childImageModal"));
+    modal.show();
+}
+
 
 // CommentModal
 function openCommentModal(childId, classId, childName) {
