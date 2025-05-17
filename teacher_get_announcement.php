@@ -42,7 +42,6 @@ while ($row = $result->fetch_assoc()) {
         'notification_id' => $row['notification_id'],
         'sender_name' => $teacher_name, 
         'sender_id' => $row['sender_id'],
-        'subject_id' => $row['subject_id'],
         'class_id' => $row['class_id'],
         'notification_title' => $row['notification_title'],
         'notification_content' => $row['notification_content'],

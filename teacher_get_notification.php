@@ -15,7 +15,7 @@ if ($conn->connect_error) {
     die(json_encode(["error" => "Database connection failed: " . $conn->connect_error]));
 }
 
-// 处理单个通知标记为已读
+// process to mark a single notification as read
 if (isset($_GET['mark_single_read']) && isset($_GET['notification_id'])) {
     $notification_id = $_GET['notification_id'];
     $updateSql = "
@@ -31,7 +31,7 @@ if (isset($_GET['mark_single_read']) && isset($_GET['notification_id'])) {
     exit;
 }
 
-// 如果只是查询未读数量
+// count the unread notifications
 if (isset($_GET['check_unread']) && $_GET['check_unread'] === 'true') {
     $sql = "
         SELECT COUNT(*) as unread_count
