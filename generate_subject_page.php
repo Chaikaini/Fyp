@@ -451,6 +451,22 @@ unset($_SESSION['message']);
             background-color: #f8d7da;
             border-radius: 5px;
         }
+
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+        }
+        .notification-icon {
+            position: relative;
+        }
+        
     </style>
 </head>
 <body>
@@ -476,7 +492,7 @@ unset($_SESSION['message']);
 
     <!-- Icon Bar -->
     <div class="icon-bar">
-        <a href="notification.html"><i class="fas fa-bell"></i></a>
+        <a href="notification.php"><i class="fas fa-bell"></i></a>
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
     </div>
@@ -652,302 +668,374 @@ unset($_SESSION['message']);
 
     <!-- Template JavaScript -->
     <script src="js/main.js"></script>
-    <script>
-        let selectedClassInfo = null;
+   <script>
+let selectedClassInfo = null;
 
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch('get_classes.php')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Received data:', data);
-                    if (!data.success) {
-                        console.error('Server error:', data.error);
-                        return;
-                    }
-
-                    const currentSubjectId = "<?= $subject_id ?>"; // Ensure string
-                    const partA = (data.data.partA || []).find(c => c.subject_id == currentSubjectId);
-                    const partB = (data.data.partB || []).find(c => c.subject_id == currentSubjectId);
-
-                    console.log('Filtered Part A:', partA);
-                    console.log('Filtered Part B:', partB);
-
-                    function setupTimeSlot(element, course) {
-                        if (!element || !course) {
-                            console.warn('Invalid element or course:', { element, course });
-                            return;
-                        }
-                        
-                        element.classList.remove('green', 'gray');
-                        const isAvailable = course.class_status.toLowerCase() === 'available';
-                        
-                        if (isAvailable) {
-                            element.classList.add('green');
-                            element.addEventListener('click', function() {
-                                console.log('Time slot clicked:', course);
-                                selectedClassInfo = {
-                                    class_id: course.class_id,
-                                    capacity: course.class_capacity,
-                                    enrolled: course.class_enrolled,
-                                    teacher_id: course.teacher_id
-                                };
-                                updatePopup(course);
-                            });
-                        } else {
-                            element.classList.add('gray');
-                            element.style.pointerEvents = 'none';
-                        }
-                    }
-
-                    const partAElement = document.getElementById('partA');
-                    const partBElement = document.getElementById('partB');
-                    console.log('Part A element:', partAElement);
-                    console.log('Part B element:', partBElement);
-
-                    setupTimeSlot(partAElement, partA);
-                    setupTimeSlot(partBElement, partB);
-
-                    function updatePopup(course) {
-                        if (!course) {
-                            console.warn('No course provided');
-                            return;
-                        }
-                        
-                        console.log('Updating popup with course:', course);
-                        const monthText = course.part_id == 1 ? "January - June" : "July - December";
-                        document.getElementById('popupMonth').textContent = monthText;
-                        document.getElementById('popupTime').textContent = course.class_time || 'Not set';
-                        const enrolled = course.class_enrolled || 0;
-                        const capacity = course.class_capacity || 0;
-                        document.getElementById('popupchildren').textContent = `${enrolled} / ${capacity}`;
-                        const popup = document.getElementById('popup');
-                        popup.style.display = 'flex';
-                        console.log('Popup display set to:', popup.style.display);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to load class data, please refresh the page and try again');
-                });
-
-            document.getElementById('closePopup').addEventListener('click', function() {
-                console.log('Closing popup');
-                document.getElementById('popup').style.display = 'none';
-            });
-        });
-
-        let addToCartButton = document.getElementById("addToCart");
-        addToCartButton.disabled = true;
-
-        let select = document.getElementById("childrenSelect");
-        select.addEventListener("change", function() {
-            if (select.value) {
-                addToCartButton.disabled = false;
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch notifications
+    fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notifications data:', data);
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.style.display = 'block';
+                }
             } else {
-                addToCartButton.disabled = true;
+                console.log('No unread notifications');
             }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
         });
 
-        // Add to cart function
-        document.getElementById("addToCart").addEventListener("click", async function() {
-            try {
-                // Prepare data
-                const cartItem = {
-                    subject_id: <?= json_encode($subject_id) ?>,
-                    subject_name: document.getElementById("subjectName").innerText.trim(),
-                    price: parseFloat(document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim()),
-                    child_name: document.getElementById("childrenSelect").value.trim(),
-                    class_id: selectedClassInfo?.class_id || null,
-                    teacher_id: selectedClassInfo?.teacher_id || null
-                };
-
-                console.log("Sending:", cartItem); // Debug log
-
-                // Validation
-                if (!cartItem.child_name || cartItem.child_name === "Choose") {
-                    throw new Error("Please select a child");
-                }
-                if (isNaN(cartItem.price)) {
-                    throw new Error("Invalid price");
-                }
-                if (!cartItem.class_id || !cartItem.teacher_id) {
-                    throw new Error("No valid class selected");
-                }
-
-                // Send request
-                const response = await fetch('save_cart.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(cartItem)
-                });
-
-                console.log("Response status:", response.status); // Debug log
-
-                if (!response.ok) {
-                    const err = await response.json().catch(() => null);
-                    throw new Error(err?.message || `HTTP error ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log("Response data:", data); // Debug log
-
-                if (data.status !== 'success') {
-                    throw new Error(data.message || "Operation failed");
-                }
-
-                showToast(data.message || "Added to cart successfully!");
-
-            } catch (error) {
-                console.error("Add to cart error:", error);
-                showToast(error.message || "An error occurred", true);
+    // Fetch class data
+    fetch('get_classes.php?subject_id=<?= $subject_id ?>')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received class data:', data);
+            if (!data.success) {
+                console.error('Server error:', data.error);
+                showToast('Failed to load class data: ' + data.error, true);
+                return;
+            }
 
-        // Toast notification
-        function showToast(message, isError = false) {
-            let toast = document.getElementById("successToast");
-            toast.innerText = message;
-            toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-            toast.style.display = "block";
-            toast.style.opacity = "1";
-            setTimeout(() => {
-                toast.style.opacity = "0";
-                setTimeout(() => { toast.style.display = "none"; }, 500);
-            }, 3000);
-        }
+            const currentSubjectId = "<?= $subject_id ?>";
+            const partA = (data.data.partA || []).find(c => c.subject_id == currentSubjectId);
+            const partB = (data.data.partB || []).find(c => c.subject_id == currentSubjectId);
 
-        // Set rating stars
-        const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
-        setRating(avgRating);
+            console.log('Filtered Part A:', partA);
+            console.log('Filtered Part B:', partB);
 
-        // Fetch children data
-        fetch('get_child.php')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Children data:', data); // Debug log
-                let select = document.getElementById("childrenSelect");
-                select.innerHTML = '<option value="">Choose</option>';
-                if (Array.isArray(data) && data.length > 0) {
-                    const subjectYear = <?= intval(str_replace('Year ', '', $subject['year'])) ?>;
-                    data.forEach(child => {
-                        if (child.child_year === subjectYear) {
-                            let option = document.createElement("option");
-                            option.value = child.child_name;
-                            option.textContent = child.child_name;
-                            select.appendChild(option);
-                        }
+            function setupTimeSlot(element, course, partName) {
+                if (!element) {
+                    console.warn(`No element found for ${partName}`);
+                    return;
+                }
+                if (!course) {
+                    console.warn(`No course data for ${partName}`);
+                    element.classList.add('gray');
+                    element.style.pointerEvents = 'none';
+                    showToast(`No class data for ${partName}`, true);
+                    return;
+                }
+
+                // Validate class_id (string, non-empty)
+                const classId = course.class_id ? course.class_id.toString().trim() : null;
+                if (!classId) {
+                    console.error(`Invalid class_id for ${partName}:`, course.class_id);
+                    element.classList.add('gray');
+                    element.style.pointerEvents = 'none';
+                    showToast(`Invalid class data for ${partName}`, true);
+                    return;
+                }
+
+                // Validate teacher_id (integer)
+                const teacherId = parseInt(course.teacher_id);
+                if (isNaN(teacherId) || teacherId <= 0) {
+                    console.error(`Invalid teacher_id for ${partName}:`, course.teacher_id);
+                    element.classList.add('gray');
+                    element.style.pointerEvents = 'none';
+                    showToast(`Invalid teacher data for ${partName}`, true);
+                    return;
+                }
+
+                element.classList.remove('green', 'gray');
+                const isAvailable = course.class_status.toLowerCase() === 'available';
+
+                if (isAvailable) {
+                    element.classList.add('green');
+                    element.addEventListener('click', function() {
+                        console.log(`${partName} clicked:`, course);
+                        selectedClassInfo = {
+                            class_id: classId,
+                            capacity: parseInt(course.class_capacity) || 0,
+                            enrolled: parseInt(course.class_enrolled) || 0,
+                            teacher_id: teacherId
+                        };
+                        console.log('Set selectedClassInfo:', selectedClassInfo);
+                        updatePopup(course);
                     });
-                    if (select.options.length === 1) {
-                        let option = document.createElement("option");
-                        option.textContent = "No matching children found";
-                        option.disabled = true;
-                        select.appendChild(option);
-                        showToast("No children match the subject year. Please add a child in your profile.", true);
-                    }
                 } else {
-                    let option = document.createElement("option");
-                    option.textContent = "No children found";
+                    element.classList.add('gray');
+                    element.style.pointerEvents = 'none';
+                }
+            }
+
+            const partAElement = document.getElementById('partA');
+            const partBElement = document.getElementById('partB');
+            console.log('Part A element:', partAElement);
+            console.log('Part B element:', partBElement);
+
+            setupTimeSlot(partAElement, partA, 'Part A');
+            setupTimeSlot(partBElement, partB, 'Part B');
+
+            function updatePopup(course) {
+                if (!course) {
+                    console.warn('No course provided for popup');
+                    return;
+                }
+
+                console.log('Updating popup with course:', course);
+                const monthText = course.part_id == 1 ? "January - June" : "July - December";
+                document.getElementById('popupMonth').textContent = monthText;
+                document.getElementById('popupTime').textContent = course.class_time || 'Not set';
+                const enrolled = parseInt(course.class_enrolled) || 0;
+                const capacity = parseInt(course.class_capacity) || 0;
+                document.getElementById('popupchildren').textContent = `${enrolled} / ${capacity}`;
+                const popup = document.getElementById('popup');
+                popup.style.display = 'flex';
+                console.log('Popup display set to:', popup.style.display);
+
+                // Reset child selection
+                const select = document.getElementById('childrenSelect');
+                select.value = '';
+                document.getElementById('addToCart').disabled = true;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching classes:', error);
+            showToast('Failed to load class data, please refresh the page and try again', true);
+        });
+
+    // Fetch children data
+    fetch('get_child.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Children data:', data);
+            let select = document.getElementById('childrenSelect');
+            select.innerHTML = '<option value="">Choose</option>';
+            if (Array.isArray(data) && data.length > 0) {
+                const subjectYear = <?= intval(str_replace('Year ', '', $subject['year'])) ?>;
+                data.forEach(child => {
+                    if (child.child_year === subjectYear) {
+                        let option = document.createElement('option');
+                        option.value = child.child_name;
+                        option.textContent = child.child_name;
+                        select.appendChild(option);
+                    }
+                });
+                if (select.options.length === 1) {
+                    let option = document.createElement('option');
+                    option.textContent = 'No matching children found';
                     option.disabled = true;
                     select.appendChild(option);
-                    showToast("No children found. Please add a child in your profile.", true);
+                    showToast('No children match the subject year. Please add a child in your profile.', true);
                 }
+            } else {
+                let option = document.createElement('option');
+                option.textContent = 'No children found';
+                option.disabled = true;
+                select.appendChild(option);
+                showToast('No children found. Please add a child in your profile.', true);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching children:', error);
+            showToast('Failed to load children data', true);
+        });
+
+    // Control "Add to Cart" button state
+    const addToCartButton = document.getElementById('addToCart');
+    const select = document.getElementById('childrenSelect');
+    select.addEventListener('change', function() {
+        addToCartButton.disabled = !select.value || !selectedClassInfo || !selectedClassInfo.class_id || isNaN(selectedClassInfo.teacher_id) || selectedClassInfo.teacher_id <= 0;
+    });
+
+    // Close popup
+    document.getElementById('closePopup').addEventListener('click', function() {
+        console.log('Closing popup');
+        document.getElementById('popup').style.display = 'none';
+        selectedClassInfo = null;
+        addToCartButton.disabled = true;
+        select.value = '';
+    });
+
+    // Add to cart
+    addToCartButton.addEventListener('click', async function() {
+        try {
+            if (!selectedClassInfo) {
+                throw new Error('Please select a class (Part A or Part B)');
+            }
+
+            // Prepare data
+            const cartItem = {
+                subject_id: <?= json_encode($subject_id) ?>,
+                subject_name: document.getElementById('subjectName').innerText.trim(),
+                price: parseFloat(document.getElementById('subjectPrice').innerText.replace('Price: RM', '').trim()),
+                child_name: document.getElementById('childrenSelect').value.trim(),
+                class_id: selectedClassInfo.class_id,
+                teacher_id: selectedClassInfo.teacher_id
+            };
+
+            console.log('Sending cartItem:', cartItem);
+
+            // Validation
+            if (!cartItem.child_name || cartItem.child_name === 'Choose') {
+                throw new Error('Please select a child');
+            }
+            if (isNaN(cartItem.price) || cartItem.price <= 0) {
+                throw new Error('Invalid price');
+            }
+            if (!cartItem.class_id || typeof cartItem.class_id !== 'string' || cartItem.class_id.trim() === '') {
+                throw new Error('Invalid class_id');
+            }
+            if (isNaN(cartItem.teacher_id) || cartItem.teacher_id <= 0) {
+                throw new Error('Invalid teacher_id');
+            }
+
+            // Send request
+            const response = await fetch('save_cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cartItem)
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => null);
+                throw new Error(err?.message || `HTTP error ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Operation failed');
+            }
+
+            showToast(data.message || 'Added to cart successfully!');
+            document.getElementById('popup').style.display = 'none';
+            selectedClassInfo = null;
+            select.value = '';
+            addToCartButton.disabled = true;
+
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            showToast(error.message || 'An error occurred', true);
+        }
+    });
+
+    // Toast notification
+    function showToast(message, isError = false) {
+        let toast = document.getElementById('successToast');
+        toast.innerText = message;
+        toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+        toast.style.display = 'block';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 500);
+        }, 3000);
+    }
+
+    // Set rating stars
+    const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
+    setRating(avgRating);
+
+    function setRating(rating) {
+        const stars = document.querySelectorAll('.stars-container .star');
+        const fullStars = Math.floor(rating);
+        const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
+        stars.forEach(star => {
+            star.classList.remove('yellow', 'half');
+        });
+        for (let i = 0; i < fullStars; i++) {
+            stars[i].classList.add('yellow');
+        }
+        if (halfStar) {
+            stars[fullStars].classList.add('half');
+        }
+        const ratingNumber = document.querySelector('.rating-number');
+        if (ratingNumber) {
+            ratingNumber.textContent = rating.toFixed(1);
+        }
+    }
+
+    // Fetch reviews
+    function fetchReviews() {
+        const subject_id = <?= $subject_id ?>;
+        const url = `get_comments.php?subject_id=${subject_id}`;
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayReviews(data.data || []);
             })
             .catch(error => {
-                console.error('Error fetching children:', error);
-                showToast("Failed to load children data", true);
+                console.error('Fetch error:', error);
+                showError('Error loading reviews: ' + error.message);
             });
+    }
 
-        function setRating(rating) {
-            const stars = document.querySelectorAll('.stars-container .star');
-            const fullStars = Math.floor(rating);
-            const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
-            stars.forEach(star => {
-                star.classList.remove('yellow', 'half');
+    function displayReviews(comments) {
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '<div class="review-items-container"></div>';
+        const container = reviewList.querySelector('.review-items-container');
+
+        if (comments.length > 0) {
+            comments.forEach(comment => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                const commentDate = new Date(comment.comment_created_at);
+                reviewItem.setAttribute('data-year', commentDate.getFullYear());
+
+                const reviewText = document.createElement('div');
+                reviewText.className = 'review-text';
+
+                const nameDate = document.createElement('p');
+                nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
+
+                const starsContainer = document.createElement('div');
+                starsContainer.className = 'stars-container';
+                const rating = parseFloat(comment.rating) || 0;
+                starsContainer.innerHTML = `
+                    ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
+                    ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
+                    ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
+                    <span class="rating-number">${rating.toFixed(1)}</span>`;
+
+                const commentText = document.createElement('p');
+                commentText.textContent = comment.comment;
+
+                reviewText.appendChild(nameDate);
+                reviewText.appendChild(starsContainer);
+                reviewText.appendChild(commentText);
+                reviewItem.appendChild(reviewText);
+                container.appendChild(reviewItem);
             });
-            for (let i = 0; i < fullStars; i++) {
-                stars[i].classList.add('yellow');
-            }
-            if (halfStar) {
-                stars[fullStars].classList.add('half');
-            }
-            const ratingNumber = document.querySelector('.rating-number');
-            if (ratingNumber) {
-                ratingNumber.textContent = rating.toFixed(1);
-            }
+        } else {
+            reviewList.innerHTML += '<p>No reviews yet</p>';
         }
+    }
 
-        // Fetch reviews
-        function fetchReviews() {
-            const subject_id = <?= $subject_id ?>;
-            const url = `get_comments.php?subject_id=${subject_id}`;
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    displayReviews(data.data || []);
-                })
-                .catch(error => {
-                    console.error('Fetch error:', error);
-                    showError('Error loading reviews: ' + error.message);
-                });
-        }
+    function showError(message) {
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = `<p class="error">${message}</p>`;
+    }
 
-        function displayReviews(comments) {
-            const reviewList = document.getElementById('review-list');
-            reviewList.innerHTML = '<div class="review-items-container"></div>';
-            const container = reviewList.querySelector('.review-items-container');
-
-            if (comments.length > 0) {
-                comments.forEach(comment => {
-                    const reviewItem = document.createElement('div');
-                    reviewItem.className = 'review-item';
-                    const commentDate = new Date(comment.comment_created_at);
-                    reviewItem.setAttribute('data-year', commentDate.getFullYear());
-
-                    const reviewText = document.createElement('div');
-                    reviewText.className = 'review-text';
-
-                    const nameDate = document.createElement('p');
-                    nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
-
-                    const starsContainer = document.createElement('div');
-                    starsContainer.className = 'stars-container';
-                    const rating = parseFloat(comment.rating) || 0;
-                    starsContainer.innerHTML = `
-                        ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
-                        ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
-                        ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
-                        <span class="rating-number">${rating.toFixed(1)}</span>`;
-
-                    const commentText = document.createElement('p');
-                    commentText.textContent = comment.comment;
-
-                    reviewText.appendChild(nameDate);
-                    reviewText.appendChild(starsContainer);
-                    reviewText.appendChild(commentText);
-                    reviewItem.appendChild(reviewText);
-                    container.appendChild(reviewItem);
-                });
-            } else {
-                reviewList.innerHTML += '<p>No reviews yet</p>';
-            }
-        }
-
-        function showError(message) {
-            const reviewList = document.getElementById('review-list');
-            reviewList.innerHTML = `<p class="error">${message}</p>`;
-        }
-
-        document.addEventListener("DOMContentLoaded", fetchReviews);
-    </script>
+    fetchReviews();
+});
+</script>
 </body>
 </html>
