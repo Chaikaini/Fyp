@@ -187,7 +187,14 @@
     border-radius: 50%;
     display: none; 
 }
-
+    .new-badge {
+    background-color: rgb(0, 255, 132);
+    color: black;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin-left: 8px;
+}
 
     </style>
 </head>
@@ -273,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 let statusLabel = '';
                 if (notif.read_status === 'unread') {
-                    statusLabel = '<span class="new-label">(New)</span>';
+                    statusLabel = '<span class="new-badge">New</span>';
                 }
 
                 const createdAt = new Date(notif.notification_created_at);

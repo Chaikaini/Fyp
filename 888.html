@@ -244,17 +244,7 @@
             color: #73cf67;
         }
 
-        .notification-badge {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            width: 10px;
-            height: 10px;
-            background-color: red;
-            border-radius: 50%;
-            display: none;
-            z-index: 1000;
-        }
+        
 
         .notification-icon {
             position: relative;
@@ -341,7 +331,7 @@
     <div class="icon-bar">
         <a href="notification.php" class="notification-icon">
             <i class="fas fa-bell"></i>
-            <span class="notification-badge" style="display: none;"></span>
+            
         </a>
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
@@ -601,50 +591,7 @@
             }
         }
 
-        // Load notifications (only for logged-in users)
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('check_login.php')
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to fetch login status');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.isLoggedIn) {
-                        fetch('get_notification.php')
-                            .then(response => {
-                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log('Notifications data:', data);
-                                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                                    console.log('Unread notifications found!');
-                                    const badge = document.querySelector('.notification-badge');
-                                    if (badge) {
-                                        badge.style.display = 'block';
-                                    }
-                                    const modal = document.getElementById('inboxModal');
-                                    if (modal) {
-                                        modal.style.display = 'block';
-                                        setTimeout(() => {
-                                            modal.style.display = 'none';
-                                        }, 8000);
-                                    } else {
-                                        console.error('Modal element with id "inboxModal" not found.');
-                                    }
-                                } else {
-                                    console.log('No unread notifications');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Fetch error:', error);
-                            });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking login status for notifications:', error);
-                });
-        });
+        
 
         // Load subjects and navigation on page load
         document.addEventListener('DOMContentLoaded', () => {

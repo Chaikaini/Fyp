@@ -332,6 +332,28 @@
     transition: opacity 0.5s ease-in-out;
     
 }
+    .btn-secondary-custom {  /* button second contact*/
+        background-color: #6c757d !important;  
+        color: white !important;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-secondary-custom:hover {
+        background-color: #5a6268 !important;
+    }
+
+   
+    .form-group button.btn-secondary-custom {
+        background-color: #6c757d !important;
+    }
+
+    .form-group button.btn-secondary-custom:hover {
+        background-color: #5a6268 !important;
+    }
+
 
 .modal-d {
     display: none;
@@ -450,7 +472,39 @@
 .odd-row {
     background-color: #ffffff;
 }
+.info-reminder {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    color: #495057;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    font-size: 14px;
+    width: 85%;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.info-reminder:before {
+    content: "\f05a";  /* Font Awesome info icon */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 10px;
+    color: #6c757d;
+}
+
+.info-reminder:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
 
 
   .progress-bar.weak { background-color: #dc3545; }
@@ -539,6 +593,9 @@
                     </div>
                     <input type="file" id="parent-avatar-upload" name="parent_image" accept="image/*" style="display: none;">
                 </div>
+                <div class="info-reminder" style="display: none;">
+                    Please complete your personal information.
+                </div>
             </div>
 
             
@@ -592,13 +649,13 @@
         <textarea id="address" name="parent_address"></textarea>
     </div>
 
-    <!-- Add Another Contact Button -->
+<!-- Add Another Contact Button -->
 <div class="form-group">
-    <button type="button" id="add-contact-btn">Second Contact</button>
+    <button type="button" id="add-contact-btn" class="btn-secondary-custom">Second Contact</button>
 </div>
 
-<!-- Additional Contact Section (Initially Hidden) -->
-<div id="additional-contact" style="display: none; margin-top: 15px;">
+<!-- Additional Contact Section -->
+<div id="additional-contact" style="display: none;">
     <div class="form-group">
         <label for="contact-name">Contact Name</label>
         <input type="text" id="contact-name" name="additional_contact_name">
@@ -728,8 +785,8 @@
             <thead>
                 <tr>
                 <th>Child Name</th>
+                <th>Subject Part</th>
                 <th>Subject Name</th>
-                <th>Part</th>
                 <th>Payment Method</th>
                 <th>Total Amount</th>
                 <th>Payment Date</th>
@@ -766,6 +823,9 @@
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="child_name">
+                <small class="text-muted" style="font-size: 0.8em; color: #6c757d; display: block; margin-top: 5px;">
+                * Please fill out the name as shown in MyKid
+                </small>
             </div>
             <div class="form-group">
                 <label for="gender">Gender</label>
@@ -959,6 +1019,57 @@
         document.getElementById("addChildModal").style.display = "none";
         
         };
+
+
+// myinformation reminder
+function checkRequiredFields() {
+    const requiredFields = {
+        'username': {value: document.getElementById('username').value, label: 'Name'},
+        'gender': {value: document.getElementById('gender').value, label: 'Gender'},
+        'ic-num': {value: document.getElementById('ic-num').value, label: 'IC Number'},
+        'phone-num-1': {value: document.getElementById('phone-num-1').value, label: 'Phone Number'},
+        'relationship': {value: document.getElementById('relationship').value, label: 'Relationship'},
+        'address': {value: document.getElementById('address').value, label: 'Address'}
+    };
+    
+    const infoReminder = document.querySelector('.info-reminder');
+    const missingFields = [];
+    
+    // Check each field and collect missing ones
+    Object.entries(requiredFields).forEach(([id, field]) => {
+        const element = document.getElementById(id);
+        if (element && (!field.value || field.value.trim() === '' || 
+            field.value === 'Select your gender' || 
+            field.value === 'Select Relationship With Children')) {
+            missingFields.push(field.label);
+        }
+    });
+    
+    // Show specific message if fields are missing
+    if (missingFields.length > 0) {
+        const message = `Please fill out your ${missingFields.join(', ')}`;
+        infoReminder.textContent = message;
+        infoReminder.style.display = 'flex';
+    } else {
+        infoReminder.style.display = 'none';
+    }
+}
+
+// Update event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const fields = ['username', 'gender', 'ic-num', 'phone-num-1', 'relationship', 'address'];
+    
+    fields.forEach(fieldId => {
+        const element = document.getElementById(fieldId);
+        if (element) {
+            element.addEventListener('input', checkRequiredFields);
+            element.addEventListener('change', checkRequiredFields);
+        }
+    });
+
+    // check when page loads
+    setTimeout(checkRequiredFields, 1000);
+});
 
 
 // add another contact
@@ -1775,8 +1886,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     row.innerHTML = `
                         <td>${childNames}</td>
-                        <td>${subjectNames}</td>
                         <td>${partNames}</td>
+                        <td>${subjectNames}</td>
                         <td>${group.payment_method}</td>
                         <td>RM${parseFloat(group.payment_total_amount).toFixed(2)}</td>
                         <td>${new Date(group.payment_time).toLocaleString('en-GB', {
