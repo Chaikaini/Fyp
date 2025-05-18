@@ -1799,28 +1799,126 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// Validate kid number and auto-fill birthday(2018-2025)
+function addKidNumberValidation(inputId, birthdayId) {
+    const input = document.getElementById(inputId);
+    const birthdayInput = document.getElementById(birthdayId);
+    
+    // Add error message element after input
+    let errorDiv = input.nextElementSibling;
+    if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.style.fontSize = '0.8em';
+        errorDiv.style.marginTop = '5px';
+        input.parentNode.insertBefore(errorDiv, input.nextSibling);
+    }
 
+    input.addEventListener("input", function(e) { //format: 000000-00-0000
+        // Remove non-digits and format with hyphens
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 12) value = value.substr(0, 12);
+        
+        // Add hyphens automatically
+        if (value.length >= 6) {
+            value = value.substr(0, 6) + '-' + value.substr(6);
+        }
+        if (value.length >= 9) {
+            value = value.substr(0, 9) + '-' + value.substr(9);
+        }
+        this.value = value;
+        
+        // Remove hyphens for validation
+        let kidNumber = value.replace(/-/g, '');
+        
+        if (kidNumber.length >= 6) {
+            let currentYear = new Date().getFullYear();
+            let currentYearLastTwo = currentYear % 100; //get last two digits of current year 2025=25
+            let yearInput = parseInt(kidNumber.substring(0, 2));
+            let month = kidNumber.substring(2, 4);
+            let day = kidNumber.substring(4, 6);
+            
+            // Calculate valid year range
+            let validEndYear = (currentYearLastTwo - 7);// 2025-7 years ago = 2018（endyear）
+            let validStartYear = validEndYear - 5;// 2018-5 = 2013（startyear）
 
-document.getElementById("kidNumber").addEventListener("input", function () {
-            let kidNumber = this.value.trim();
-            let birthdayInput = document.getElementById("birthday");
-
-            if (kidNumber.length >= 6) { // atleast 6 num
-                let yearPrefix = kidNumber.substring(0, 2) >= "50" ? "19" : "20"; 
-                let year = yearPrefix + kidNumber.substring(0, 2);
-                let month = kidNumber.substring(2, 4);
-                let day = kidNumber.substring(4, 6);
-
-                
-                if (month >= "01" && month <= "12" && day >= "01" && day <= "31") {
-                    birthdayInput.value = `${year}-${month}-${day}`;
-                } else {
-                    birthdayInput.value = ""; 
-                }
-            } else {
-                birthdayInput.value = ""; 
+            if (validStartYear < 0) {
+                validStartYear += 100;
             }
-        });
+            if (validEndYear < 0) {
+                validEndYear += 100;
+            }
+
+            // Validate year range
+            let yearPrefix = "20";
+            let isValidYear = false;
+            
+            if (validStartYear < validEndYear) {
+                isValidYear = yearInput >= validStartYear && yearInput <= validEndYear;
+            } else {
+                isValidYear = (yearInput >= validStartYear && yearInput <= 99) || 
+                             (yearInput >= 0 && yearInput <= validEndYear);
+            }
+
+            // Show error messages
+            if (!isValidYear) {
+                errorDiv.textContent = `Invalid year. Must be between 20${validStartYear} and 20${validEndYear}`;
+                birthdayInput.value = "";
+                return;
+            }
+
+            // Validate month and day
+            if (month < "01" || month > "12") {
+                errorDiv.textContent = "Invalid month. Must be between 01 and 12";
+                birthdayInput.value = "";
+                return;
+            }
+
+            if (day < "01" || day > "31") {
+                errorDiv.textContent = "Invalid day. Must be between 01 and 31";
+                birthdayInput.value = "";
+                return;
+            }
+
+            // Final date validation
+            let fullYear = yearPrefix + yearInput;
+            let date = new Date(fullYear + "-" + month + "-" + day);
+            if (!(date instanceof Date) || isNaN(date)) {
+                errorDiv.textContent = "Invalid date";
+                birthdayInput.value = "";
+                return;
+            }
+
+            if (kidNumber.length === 12) {
+                // All validations pass
+                errorDiv.textContent = "";
+                birthdayInput.value = `${fullYear}-${month}-${day}`;
+            } else {
+                errorDiv.textContent = "MyKid number must be exactly 12 digits (000000-00-0000)";
+                birthdayInput.value = "";
+            }
+        } else {
+            if (kidNumber.length > 0) {
+                errorDiv.textContent = "";
+            } else {
+                errorDiv.textContent = "";
+            }
+            birthdayInput.value = "";
+        }
+    });
+}
+
+// Apply kidnumber validation to both forms
+document.addEventListener("DOMContentLoaded", function() {
+    // For add child form
+    addKidNumberValidation("kidNumber", "birthday");
+    
+    // For edit child form
+    addKidNumberValidation("editkidNumber", "childBirthday");
+});
+
+
 
     document.addEventListener('DOMContentLoaded', function() {
     fetch('get_notification.php')
