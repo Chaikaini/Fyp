@@ -1,15 +1,18 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once('db_connect.php');
 
 try {
+    $pdo = new PDO("mysql:host=localhost;dbname=the seeds", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    file_put_contents('debug.log', "get_cart.php: Connected to DB\n", FILE_APPEND);
+
     if (!isset($_SESSION['parent_id'])) {
         throw new Exception("Unauthorized", 401);
     }
 
-    // Query cart data with necessary joins
-    $stmt = $conn->prepare("
+    $stmt = $pdo->prepare("
         SELECT 
             c.cart_id,
             c.parent_id,
@@ -35,20 +38,16 @@ try {
         LEFT JOIN teacher t ON cl.teacher_id = t.teacher_id
         WHERE c.parent_id = ? AND c.deleted = 0
     ");
+    $stmt->execute([$_SESSION['parent_id']]);
+    $cartItems = $stmt->fetchAll();
+    file_put_contents('debug.log', "get_cart.php: Fetched cart items: " . print_r($cartItems, true) . "\n", FILE_APPEND);
 
-    $stmt->bind_param("i", $_SESSION['parent_id']);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $cartItems = $result->fetch_all(MYSQLI_ASSOC);
-
-    // Clean up the response
     $cleanedCartItems = array_map(function($item) {
         return [
             'cart_id' => $item['cart_id'],
             'subject_id' => $item['subject_id'],
             'subject_name' => $item['subject_name'],
-            'subject_image' => $item['subject_image'],
+            'subject_image' => $item['subject_image'] ?? 'img/default-subject.jpg',
             'child_id' => $item['child_id'],
             'child_name' => $item['child_name'],
             'price' => $item['price'],
@@ -69,12 +68,11 @@ try {
     ]);
 
 } catch (Exception $e) {
+    file_put_contents('debug.log', "get_cart.php: Error: " . $e->getMessage() . "\n", FILE_APPEND);
     http_response_code($e->getCode() ?: 500);
     echo json_encode([
         'status' => 'error',
         'message' => $e->getMessage()
     ]);
 }
-
-$conn->close();
 ?>

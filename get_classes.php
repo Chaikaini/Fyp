@@ -17,8 +17,16 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 查询课程，只取 Part A 和 B（part_id = 1 或 2）
-$sql = "SELECT * FROM class WHERE part_id IN (1, 2)";
+// 使用 JOIN 查询 teacher_name，同时仍然只取 part_id = 1 或 2
+$sql = "
+    SELECT 
+        c.*,
+        t.teacher_name
+    FROM class c
+    LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
+    WHERE c.part_id IN (1, 2)
+";
+
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -31,11 +39,9 @@ if (!$result) {
 
 $allClasses = $result->fetch_all(MYSQLI_ASSOC);
 
-// 初始化 Part A 和 Part B 数组
 $partA = [];
 $partB = [];
 
-// 将所有 Part A 和 Part B 的数据分别存入数组
 foreach ($allClasses as $class) {
     if ($class['part_id'] == 1) {
         $partA[] = $class;
@@ -44,7 +50,6 @@ foreach ($allClasses as $class) {
     }
 }
 
-// 返回所有 Part A 和 Part B 数据
 $response = [
     "success" => true,
     "data" => [

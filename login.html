@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <title>Login</title>
@@ -20,25 +19,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* Your existing CSS styles remain unchanged */
         body {
             margin: 0;
             font-family: 'Heebo', sans-serif;
             height: 100vh;
             overflow: hidden;
         }
-
         .container {
             display: flex;
             width: 100%;
             min-height: 100vh;
             box-sizing: border-box;
         }
-
         .left-half {
             flex: 0 0 60%;
             overflow: hidden;
         }
-
         .left-half img {
             width: 100%;
             height: 100%;
@@ -46,7 +43,6 @@
             object-position: left;
             display: block;
         }
-
         .right-half {
             flex: 0 0 40%;
             background-color: #f4f4f4;
@@ -55,29 +51,24 @@
             align-items: center;
             box-sizing: border-box;
         }
-
         .logo {
             width: 250px;
             margin-bottom: 10px;
         }
-
         .login-form {
             width: 80%;
             max-width: 400px;
             text-align: center;
         }
-
         .login-form h2 {
             font-size: 24px;
             margin-bottom: 15px;
         }
-
         .login-form p {
             margin-bottom: 20px;
             font-size: 14px;
             color: #777;
         }
-
         .login-form input {
             width: 100%;
             padding: 10px;
@@ -87,7 +78,6 @@
             font-size: 14px;
             box-sizing: border-box;
         }
-
         .login-form button {
             width: 100%;
             padding: 10px;
@@ -98,43 +88,34 @@
             font-size: 16px;
             cursor: pointer;
         }
-
         .login-form button:hover {
             background-color: #138496;
         }
-
         .login-form .options {
             text-align: right;
             margin-bottom: 15px;
         }
-
         .login-form .options a {
             font-size: 14px;
             color: #17a2b8;
             text-decoration: none;
         }
-
         .login-form .options a:hover {
             text-decoration: underline;
         }
-
         .login-form p a {
             color: #17a2b8;
             text-decoration: none;
         }
-
         .login-form p a:hover {
             text-decoration: underline;
         }
-
         .password-container {
             position: relative;
         }
-
         .password-container input {
             padding-right: 40px;
         }
-
         .toggle-password {
             position: absolute;
             right: 10px;
@@ -145,31 +126,25 @@
             font-size: 16px;
             transition: color 0.3s ease, transform 0.2s ease;
         }
-
         .toggle-password:hover {
             transform: translateY(-50%) scale(1.1);
         }
-
         .toggle-password.fa-eye-slash {
             color: #ff4d4d; /* Red when password is hidden */
         }
-
         .toggle-password.fa-eye {
             color: #17a2b8; /* Blue when password is visible */
         }
-
         .password-container input[type="text"] {
             background-color: #e8f4f8;
             border: 1px solid #17a2b8;
         }
-
         .error-message {
             color: red;
             font-size: 12px;
             margin-bottom: 15px;
             text-align: left;
         }
-
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -188,7 +163,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="left-half">
@@ -239,15 +213,21 @@
 
             fetch("login.php", {
                 method: "POST",
-                body: formData
+                body: formData,
+                credentials: 'same-origin' // Ensure session cookies are sent
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     localStorage.setItem("parent_id", data.parent_id);
                     localStorage.setItem("parent_name", data.parent_name);
                     localStorage.setItem("parent_email", data.parent_email);
-                    window.location.href = "member.html";
+                    window.location.href = "member.php"; // Changed to .php for consistency
                 } else {
                     errorMessage.innerText = data.error;
                     errorMessage.style.display = "block";
@@ -270,5 +250,4 @@
         });
     </script>
 </body>
-
 </html>
