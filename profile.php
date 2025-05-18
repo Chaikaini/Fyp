@@ -1799,6 +1799,101 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// Format phone number input
+function addPhoneNumberValidation(inputId) {
+    const input = document.getElementById(inputId);
+    
+    // Add error message element after input
+    let errorDiv = input.nextElementSibling;
+    if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.style.fontSize = '0.8em';
+        errorDiv.style.marginTop = '5px';
+        input.parentNode.insertBefore(errorDiv, input.nextSibling);
+    }
+
+    input.addEventListener("input", function(e) {
+        // Remove non-digits
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 10) value = value.substr(0, 10);
+        
+        // Add hyphen automatically
+        if (value.length >= 3) {
+            value = value.substr(0, 3) + '-' + value.substr(3);
+        }
+        this.value = value;
+        
+        // Validate format
+        let phoneNumber = value.replace(/-/g, '');
+        if (phoneNumber.length > 0 && phoneNumber.length < 10) {
+            errorDiv.textContent = "Phone number must be exactly 10 digits (000-0000000)";
+        } else if (phoneNumber.length === 10) {
+            errorDiv.textContent = "";
+        } else {
+            errorDiv.textContent = "";
+        }
+    });
+}
+
+// Apply phone number validation
+document.addEventListener("DOMContentLoaded", function() {
+    // For primary phone number
+    addPhoneNumberValidation("phone-num-1");
+    // For secondary phone number
+    addPhoneNumberValidation("phone-num-2");
+    // For additional contact phone
+    addPhoneNumberValidation("contact-phone");
+});
+// parent's IC number validation
+function addICNumberValidation(inputId) {
+    const input = document.getElementById(inputId);
+    
+    // Add error message element after input
+    let errorDiv = input.nextElementSibling;
+    if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.style.fontSize = '0.8em';
+        errorDiv.style.marginTop = '5px';
+        input.parentNode.insertBefore(errorDiv, input.nextSibling);
+    }
+
+    input.addEventListener("input", function(e) {
+        // Remove non-digits and format with hyphens
+        let value = this.value.replace(/\D/g, '');
+        if (value.length > 12) value = value.substr(0, 12);
+        
+        // Add hyphens automatically
+        if (value.length >= 6) {
+            value = value.substr(0, 6) + '-' + value.substr(6);
+        }
+        if (value.length >= 9) {
+            value = value.substr(0, 9) + '-' + value.substr(9);
+        }
+        this.value = value;
+        
+        // Validate format
+        let icNumber = value.replace(/-/g, '');
+        if (icNumber.length > 0 && icNumber.length < 12) {
+            errorDiv.textContent = "IC number must be exactly 12 digits (000000-00-0000)";
+        } else if (icNumber.length === 12) {
+            errorDiv.textContent = "";
+        } else {
+            errorDiv.textContent = "";
+        }
+    });
+}
+
+// Apply IC number validation to parent's IC input
+document.addEventListener("DOMContentLoaded", function() {
+    addICNumberValidation("ic-num");
+});
+
+
+
 // Validate kid number and auto-fill birthday(2018-2025)
 function addKidNumberValidation(inputId, birthdayId) {
     const input = document.getElementById(inputId);
