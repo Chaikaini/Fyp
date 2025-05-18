@@ -327,30 +327,38 @@ unset($_SESSION['message']);
             font-size: 16px;
         }
         .toast-message {
-            position: fixed;
-            top: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #28a745;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 5px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 16px;
-            font-weight: bold;
-            z-index: 1000;
-            text-align: center;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .toast-message.error {
-            background-color: #dc3545;
-        }
+        position: fixed;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #28a745;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+        font-weight: bold;
+        z-index: 10000;
+        text-align: center;
+        transition: opacity 0.5s ease-in-out;
+        opacity: 1;
+        min-width: 300px;
+        border: 2px solid #fff;
+    }
+
+    .toast-message.error {
+        background-color: #dc3545;
+        border-color: #fff;
+    }
         .error {
-            color: #dc3545;
-            padding: 10px;
-            background-color: #f8d7da;
-            border-radius: 5px;
-        }
+    color: #dc3545;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: none; /* Start hidden */
+    border: 1px solid #f5c6cb;
+}
         .notification-badge {
             position: absolute;
             top: 5px;
@@ -377,11 +385,11 @@ unset($_SESSION['message']);
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.php" class="nav-item nav-link">Home</a>
-                <a href="subject.php" class="nav-item nav-link">Subject</a>
-                <a href="about.php" class="nav-item nav-link">About us</a>
-                <a href="contact.php" class="nav-item nav-link">Contact us</a>
-                <a href="comment.php" class="nav-item nav-link">Comment</a>
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
             </div>
             <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -397,16 +405,16 @@ unset($_SESSION['message']);
     <div class="breadcrumb-container">
         <h2><?= htmlspecialchars($subject['subject_name']) ?></h2>
         <ul class="breadcrumb">
-            <li><a href="member.php">Home</a></li>
+            <li><a href="member.html">Home</a></li>
             <li>></li>
-            <li><a href="subject.php">Subject</a></li>
+            <li><a href="subject.html">Subject</a></li>
             <li>></li>
             <li><?= htmlspecialchars($subject['subject_name']) ?></li>
         </ul>
     </div>
     <div class="container my-5">
         <?php if ($message): ?>
-            <div class="error"><?= htmlspecialchars($message) ?></div>
+           <div class="error"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
         <div class="class-details-container">
             <div class="subject-image">
@@ -536,274 +544,300 @@ unset($_SESSION['message']);
     <script src="lib/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
     <script>
-        let selectedClassInfo = null;
+         let selectedClassInfo = null;
 
-        function showToast(message, isError = false) {
-            let toast = document.createElement('div');
-            toast.className = `toast-message ${isError ? 'error' : ''}`;
-            toast.innerText = message;
-            document.body.appendChild(toast);
+    function showToast(message, isError = false) {
+        console.log('showToast called with message:', message);
+        let toast = document.createElement('div');
+        toast.className = `toast-message ${isError ? 'error' : ''}`;
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        console.log('Toast element created and appended:', toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
             setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 3000);
-        }
+                toast.remove();
+                console.log('Toast removed from DOM');
+            }, 500);
+        }, 5000);
+    }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('get_notification.php')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                        document.querySelector('.notification-badge').style.display = 'block';
-                    }
-                })
-                .catch(error => console.error('Fetch error:', error));
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('get_notification.php')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                }
+            })
+            .catch(error => console.error('Fetch error:', error));
 
-            fetch('get_classes.php?subject_id=<?= htmlspecialchars($subject_id) ?>')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Received class data:', data);
-                    if (!data.success) {
-                        showToast('Failed to load class data: ' + data.error, true);
+        fetch('get_classes.php?subject_id=<?= htmlspecialchars($subject_id) ?>')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received class data:', data);
+                if (!data.success) {
+                    showToast('Failed to load class data: ' + data.error, true);
+                    return;
+                }
+
+                const currentSubjectId = "<?= htmlspecialchars($subject_id) ?>";
+                const partA = (data.data.partA || []).find(c => c.subject_id == currentSubjectId);
+                const partB = (data.data.partB || []).find(c => c.subject_id == currentSubjectId);
+
+                function setupTimeSlot(element, course, partName) {
+                    if (!element) return;
+                    if (!course) {
+                        element.classList.add('gray');
+                        element.style.pointerEvents = 'none';
+                        showToast(`No class data for ${partName}`, true);
                         return;
                     }
 
-                    const currentSubjectId = "<?= htmlspecialchars($subject_id) ?>";
-                    const partA = (data.data.partA || []).find(c => c.subject_id == currentSubjectId);
-                    const partB = (data.data.partB || []).find(c => c.subject_id == currentSubjectId);
-
-                    function setupTimeSlot(element, course, partName) {
-                        if (!element) return;
-                        if (!course) {
-                            element.classList.add('gray');
-                            element.style.pointerEvents = 'none';
-                            showToast(`No class data for ${partName}`, true);
-                            return;
-                        }
-
-                        const classId = course.class_id?.toString().trim();
-                        const teacherId = parseInt(course.teacher_id);
-                        if (!classId || isNaN(teacherId) || teacherId <= 0) {
-                            element.classList.add('gray');
-                            element.style.pointerEvents = 'none';
-                            showToast(`Invalid class data for ${partName}`, true);
-                            return;
-                        }
-
-                        element.classList.remove('green', 'gray');
-                        const isAvailable = course.class_status.toLowerCase() === 'available';
-                        if (isAvailable) {
-                            element.classList.add('green');
-                            element.addEventListener('click', function() {
-                                selectedClassInfo = {
-                                    class_id: classId,
-                                    capacity: parseInt(course.class_capacity) || 0,
-                                    enrolled: parseInt(course.class_enrolled) || 0,
-                                    teacher_id: teacherId
-                                };
-                                updatePopup(course);
-                            });
-                        } else {
-                            element.classList.add('gray');
-                            element.style.pointerEvents = 'none';
-                        }
+                    const classId = course.class_id?.toString().trim();
+                    const teacherId = parseInt(course.teacher_id);
+                    if (!classId || isNaN(teacherId) || teacherId <= 0) {
+                        element.classList.add('gray');
+                        element.style.pointerEvents = 'none';
+                        showToast(`Invalid class data for ${partName}`, true);
+                        return;
                     }
 
-                    setupTimeSlot(document.getElementById('partA'), partA, 'Part A');
-                    setupTimeSlot(document.getElementById('partB'), partB, 'Part B');
-
-                    function updatePopup(course) {
-                        if (!course) return;
-                        const monthText = course.part_id == 1 ? "January - June" : "July - December";
-                        document.getElementById('popupMonth').textContent = monthText;
-                        document.getElementById('popupTeacher').textContent = course.teacher_name || 'Unknown';
-                        document.getElementById('popupVenue').textContent = course.class_venue || 'Unknown';
-                        document.getElementById('popupTime').textContent = course.class_time || 'Not set';
-                        document.getElementById('popupchildren').textContent = `${course.class_enrolled || 0} / ${course.class_capacity || 0}`;
-                        document.getElementById('popup').style.display = 'flex';
-                        document.getElementById('childrenSelect').value = '';
-                        document.getElementById('addToCart').disabled = true;
+                    element.classList.remove('green', 'gray');
+                    const isAvailable = course.class_status.toLowerCase() === 'available';
+                    if (isAvailable) {
+                        element.classList.add('green');
+                        element.addEventListener('click', function() {
+                            selectedClassInfo = {
+                                class_id: classId,
+                                capacity: parseInt(course.class_capacity) || 0,
+                                enrolled: parseInt(course.class_enrolled) || 0,
+                                teacher_id: teacherId
+                            };
+                            updatePopup(course);
+                        });
+                    } else {
+                        element.classList.add('gray');
+                        element.style.pointerEvents = 'none';
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching classes:', error);
-                    showToast('Failed to load class data', true);
-                });
+                }
 
-            fetch('get_child.php')
+                setupTimeSlot(document.getElementById('partA'), partA, 'Part A');
+                setupTimeSlot(document.getElementById('partB'), partB, 'Part B');
+
+                function updatePopup(course) {
+                    if (!course) return;
+                    const monthText = course.part_id == 1 ? "January - June" : "July - December";
+                    document.getElementById('popupMonth').textContent = monthText;
+                    document.getElementById('popupTeacher').textContent = course.teacher_name || 'Unknown';
+                    document.getElementById('popupVenue').textContent = course.class_venue || 'Unknown';
+                    document.getElementById('popupTime').textContent = course.class_time || 'Not set';
+                    document.getElementById('popupchildren').textContent = `${course.class_enrolled || 0} / ${course.class_capacity || 0}`;
+                    document.getElementById('popup').style.display = 'flex';
+                    document.getElementById('childrenSelect').value = '';
+                    document.getElementById('addToCart').disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching classes:', error);
+                showToast('Failed to load class data', true);
+            });
+
+        fetch('get_child.php')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                let select = document.getElementById('childrenSelect');
+                select.innerHTML = '<option value="">Choose</option>';
+                if (Array.isArray(data) && data.length > 0) {
+                    const subjectYear = <?= json_encode(str_replace('Year ', '', $subject['year'])) ?>;
+                    data.forEach(child => {
+                        if (child.child_year == subjectYear) {
+                            let option = document.createElement('option');
+                            option.value = child.child_name;
+                            option.textContent = child.child_name;
+                            select.appendChild(option);
+                        }
+                    });
+                    if (select.options.length === 1) {
+                        select.innerHTML += '<option disabled>No matching children found</option>';
+                        showToast('No children match the subject year.', true);
+                    }
+                } else {
+                    select.innerHTML += '<option disabled>No children found</option>';
+                    showToast('No children found.', true);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching children:', error);
+                showToast('Failed to load children data', true);
+            });
+
+        const addToCartButton = document.getElementById('addToCart');
+        const select = document.getElementById('childrenSelect');
+        select.addEventListener('change', function() {
+            addToCartButton.disabled = !select.value || !selectedClassInfo || !selectedClassInfo.class_id || isNaN(selectedClassInfo.teacher_id) || selectedClassInfo.teacher_id <= 0;
+        });
+
+        document.getElementById('closePopup').addEventListener('click', function() {
+            document.getElementById('popup').style.display = 'none';
+            selectedClassInfo = null;
+            addToCartButton.disabled = true;
+            select.value = '';
+        });
+
+        // Add this function to show errors in the red box
+function showErrorBox(message) {
+    const errorBox = document.getElementById('errorBox');
+    if (errorBox) {
+        errorBox.textContent = message;
+        errorBox.style.display = 'block';
+        // Hide after 5 seconds
+        setTimeout(() => {
+            errorBox.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Modify your addToCart event listener to use both error displays
+document.getElementById("addToCart").addEventListener("click", async function() {
+    try {
+        // Clear previous errors
+        showErrorBox('');
+        
+        // Prepare data
+        const cartItem = {
+            subject_id: <?= json_encode($subject_id) ?>,
+            subject_name: document.getElementById("subjectName").innerText.trim(),
+            price: parseFloat(document.getElementById("subjectPrice").innerText.replace('Price: RM', '').trim()),
+            child_name: document.getElementById("childrenSelect").value.trim(),
+            class_id: selectedClassInfo?.class_id || null,
+            teacher_id: selectedClassInfo?.teacher_id || null
+        };
+
+        console.log("Sending:", cartItem);
+
+        // Validation
+        if (!cartItem.child_name || cartItem.child_name === "Choose") {
+            throw new Error("Please select a child");
+        }
+        if (isNaN(cartItem.price)) {
+            throw new Error("Invalid price");
+        }
+        if (!cartItem.class_id || !cartItem.teacher_id) {
+            throw new Error("No valid class selected");
+        }
+
+        // Send request
+        const response = await fetch('save_cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cartItem)
+        });
+
+        const data = await response.json().catch(() => null);
+        
+        if (!response.ok || !data || data.status !== 'success') {
+            const errorMsg = data?.message || `HTTP error ${response.status}`;
+            showErrorBox(errorMsg); // Show in red box
+            showToast(errorMsg, true); // Also show as toast
+            return;
+        }
+
+        // Success case
+        showToast(data.message || "Added to cart successfully!");
+        document.getElementById('popup').style.display = 'none';
+
+    } catch (error) {
+        console.error("Add to cart error:", error);
+        showErrorBox(error.message); // Show in red box
+        showToast(error.message || "An error occurred", true); // Also show as toast
+    }
+});
+        const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
+        setRating(avgRating);
+
+        function setRating(rating) {
+            const stars = document.querySelectorAll('.stars-container .star');
+            const fullStars = Math.floor(rating);
+            const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
+            stars.forEach(star => star.classList.remove('yellow', 'half'));
+            for (let i = 0; i < fullStars; i++) {
+                stars[i].classList.add('yellow');
+            }
+            if (halfStar) {
+                stars[fullStars].classList.add('half');
+            }
+            document.querySelector('.rating-number').textContent = rating.toFixed(1);
+        }
+
+        function fetchReviews() {
+            const subject_id = "<?= htmlspecialchars($subject_id) ?>";
+            fetch(`get_comments.php?subject_id=${subject_id}`)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    let select = document.getElementById('childrenSelect');
-                    select.innerHTML = '<option value="">Choose</option>';
-                    if (Array.isArray(data) && data.length > 0) {
-                        const subjectYear = <?= json_encode(str_replace('Year ', '', $subject['year'])) ?>;
-                        data.forEach(child => {
-                            if (child.child_year == subjectYear) {
-                                let option = document.createElement('option');
-                                option.value = child.child_name;
-                                option.textContent = child.child_name;
-                                select.appendChild(option);
-                            }
-                        });
-                        if (select.options.length === 1) {
-                            select.innerHTML += '<option disabled>No matching children found</option>';
-                            showToast('No children match the subject year.', true);
-                        }
-                    } else {
-                        select.innerHTML += '<option disabled>No children found</option>';
-                        showToast('No children found.', true);
-                    }
+                    displayReviews(data.data || []);
                 })
                 .catch(error => {
-                    console.error('Error fetching children:', error);
-                    showToast('Failed to load children data', true);
+                    console.error('Fetch error:', error);
+                    document.getElementById('review-list').innerHTML = `<p class="error">Error loading reviews: ${error.message}</p>`;
                 });
+        }
 
-            const addToCartButton = document.getElementById('addToCart');
-            const select = document.getElementById('childrenSelect');
-            select.addEventListener('change', function() {
-                addToCartButton.disabled = !select.value || !selectedClassInfo || !selectedClassInfo.class_id || isNaN(selectedClassInfo.teacher_id) || selectedClassInfo.teacher_id <= 0;
-            });
+        function displayReviews(comments) {
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '<div class="review-items-container"></div>';
+            const container = reviewList.querySelector('.review-items-container');
 
-            document.getElementById('closePopup').addEventListener('click', function() {
-                document.getElementById('popup').style.display = 'none';
-                selectedClassInfo = null;
-                addToCartButton.disabled = true;
-                select.value = '';
-            });
+            if (comments.length > 0) {
+                comments.forEach(comment => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item';
+                    const commentDate = new Date(comment.comment_created_at);
+                    reviewItem.setAttribute('data-year', commentDate.getFullYear());
 
-            addToCartButton.addEventListener('click', async function() {
-                try {
-                    if (!selectedClassInfo) {
-                        throw new Error('Please select a class (Part A or Part B)');
-                    }
+                    const reviewText = document.createElement('div');
+                    reviewText.className = 'review-text';
 
-                    const cartItem = {
-                        subject_id: "<?= htmlspecialchars($subject_id) ?>",
-                        subject_name: document.getElementById('subjectName').innerText.trim(),
-                        price: parseFloat(document.getElementById('subjectPrice').innerText.replace('Price: RM', '').trim()),
-                        child_name: document.getElementById('childrenSelect').value.trim(),
-                        class_id: selectedClassInfo.class_id,
-                        teacher_id: selectedClassInfo.teacher_id
-                    };
+                    const nameDate = document.createElement('p');
+                    nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
 
-                    console.log('Sending cartItem:', cartItem);
+                    const starsContainer = document.createElement('div');
+                    starsContainer.className = 'stars-container';
+                    const rating = parseFloat(comment.rating) || 0;
+                    starsContainer.innerHTML = `
+                        ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
+                        ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
+                        ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
+                        <span class="rating-number">${rating.toFixed(1)}</span>`;
 
-                    const response = await fetch('save_cart.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(cartItem)
-                    });
+                    const commentText = document.createElement('p');
+                    commentText.textContent = comment.comment;
 
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    console.log('Response data:', data);
-
-                    if (data.status !== 'success') {
-                        throw new Error(data.message || 'Operation failed');
-                    }
-
-                    showToast(data.message || 'Added to cart successfully!');
-                    document.getElementById('popup').style.display = 'none';
-                    selectedClassInfo = null;
-                    select.value = '';
-                    addToCartButton.disabled = true;
-
-                } catch (error) {
-                    console.error('Add to cart error:', error);
-                    showToast(`Failed to add to cart: ${error.message}`, true);
-                }
-            });
-
-            const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
-            setRating(avgRating);
-
-            function setRating(rating) {
-                const stars = document.querySelectorAll('.stars-container .star');
-                const fullStars = Math.floor(rating);
-                const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
-                stars.forEach(star => star.classList.remove('yellow', 'half'));
-                for (let i = 0; i < fullStars; i++) {
-                    stars[i].classList.add('yellow');
-                }
-                if (halfStar) {
-                    stars[fullStars].classList.add('half');
-                }
-                document.querySelector('.rating-number').textContent = rating.toFixed(1);
+                    reviewText.appendChild(nameDate);
+                    reviewText.appendChild(starsContainer);
+                    reviewText.appendChild(commentText);
+                    reviewItem.appendChild(reviewText);
+                    container.appendChild(reviewItem);
+                });
+            } else {
+                reviewList.innerHTML += '<p>No reviews yet</p>';
             }
+        }
 
-            function fetchReviews() {
-                const subject_id = "<?= htmlspecialchars($subject_id) ?>";
-                fetch(`get_comments.php?subject_id=${subject_id}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        return response.json();
-                    })
-                    .then(data => {
-                        displayReviews(data.data || []);
-                    })
-                    .catch(error => {
-                        console.error('Fetch error:', error);
-                        document.getElementById('review-list').innerHTML = `<p class="error">Error loading reviews: ${error.message}</p>`;
-                    });
-            }
-
-            function displayReviews(comments) {
-                const reviewList = document.getElementById('review-list');
-                reviewList.innerHTML = '<div class="review-items-container"></div>';
-                const container = reviewList.querySelector('.review-items-container');
-
-                if (comments.length > 0) {
-                    comments.forEach(comment => {
-                        const reviewItem = document.createElement('div');
-                        reviewItem.className = 'review-item';
-                        const commentDate = new Date(comment.comment_created_at);
-                        reviewItem.setAttribute('data-year', commentDate.getFullYear());
-
-                        const reviewText = document.createElement('div');
-                        reviewText.className = 'review-text';
-
-                        const nameDate = document.createElement('p');
-                        nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
-
-                        const starsContainer = document.createElement('div');
-                        starsContainer.className = 'stars-container';
-                        const rating = parseFloat(comment.rating) || 0;
-                        starsContainer.innerHTML = `
-                            ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
-                            ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
-                            ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
-                            <span class="rating-number">${rating.toFixed(1)}</span>`;
-
-                        const commentText = document.createElement('p');
-                        commentText.textContent = comment.comment;
-
-                        reviewText.appendChild(nameDate);
-                        reviewText.appendChild(starsContainer);
-                        reviewText.appendChild(commentText);
-                        reviewItem.appendChild(reviewText);
-                        container.appendChild(reviewItem);
-                    });
-                } else {
-                    reviewList.innerHTML += '<p>No reviews yet</p>';
-                }
-            }
-
-            fetchReviews();
-        });
+        fetchReviews();
+    });
     </script>
 </body>
 </html>

@@ -1,49 +1,59 @@
 <?php
 session_start();
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json');
-require_once('db_connect.php');
 
 try {
+    file_put_contents('debug.log', "remove_cart.php: Starting\n", FILE_APPEND);
+    $pdo = new PDO("mysql:host=localhost;dbname=the seeds", "root", "");
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    file_put_contents('debug.log', "remove_cart.php: Connected to DB\n", FILE_APPEND);
+
     if (!isset($_SESSION['parent_id'])) {
         throw new Exception("Unauthorized", 401);
     }
 
     $json = file_get_contents('php://input');
     $data = json_decode($json, true);
-
     if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("Invalid JSON", 400);
+        throw new Exception("Invalid JSON: " . json_last_error_msg(), 400);
     }
 
-    $required = ['subject_id', 'child_name'];
-    foreach ($required as $field) {
-        if (!isset($data[$field]) || empty($data[$field])) {
-            throw new Exception("Missing field: " . $field, 400);
-        }
+    if (!isset($data['subject_id']) || !isset($data['child_name'])) {
+        throw new Exception("Missing subject_id or child_name", 400);
     }
 
-    $child_name = $data['child_name'];
+    $subject_id = trim($data['subject_id']);
+    $child_name = trim($data['child_name']);
 
-    // 找到记录并软删除
-    $stmt = $conn->prepare("UPDATE cart SET deleted = 1 WHERE parent_id = ? AND child_name = ? AND subject_id = ? AND deleted = 0");
-    $stmt->bind_param("isi", $_SESSION['parent_id'], $child_name, $data['subject_id']);
-    
-    if (!$stmt->execute() || $stmt->affected_rows === 0) {
-        throw new Exception("Cart item not found or already deleted", 404);
-    }    
+    // Fetch child_id
+    $stmt = $pdo->prepare("SELECT child_id FROM child WHERE child_name = ? AND parent_id = ?");
+    $stmt->execute([$child_name, $_SESSION['parent_id']]);
+    $child = $stmt->fetch();
+    if (!$child) {
+        throw new Exception("Child not found", 404);
+    }
+    $child_id = $child['child_id'];
+    file_put_contents('debug.log', "remove_cart.php: Child verified: child_name=$child_name, child_id=$child_id\n", FILE_APPEND);
 
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Removed from cart successfully'
-    ]);
+    // Soft delete cart item
+    $stmt = $pdo->prepare("UPDATE cart SET deleted = 1 WHERE parent_id = ? AND child_id = ? AND subject_id = ?");
+    $stmt->execute([$_SESSION['parent_id'], $child_id, $subject_id]);
+    if ($stmt->rowCount() === 0) {
+        throw new Exception("Cart item not found", 404);
+    }
 
+    file_put_contents('debug.log', "remove_cart.php: Cart item deleted: subject_id=$subject_id, child_id=$child_id\n", FILE_APPEND);
+    echo json_encode(['status' => 'success', 'message' => 'Item removed from cart']);
 } catch (Exception $e) {
-    http_response_code($e->getCode() ?: 500);
-    echo json_encode([
-        'status' => 'error',
-        'message' => $e->getMessage()
-    ]);
+    file_put_contents('debug.log', "remove_cart.php: Error: " . $e->getMessage() . "\n", FILE_APPEND);
+    $code = is_numeric($e->getCode()) ? (int)$e->getCode() : 500;
+    http_response_code($code);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
-
-$conn->close();
 ?>

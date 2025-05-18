@@ -17,7 +17,7 @@ $subject_year = isset($_GET['subject_year']) ? (int)$_GET['subject_year'] : null
 include 'db.php';
 
 // 基础SQL查询
-$sql = "SELECT child_name, child_year FROM child WHERE parent_id = ?";
+$sql = "SELECT child_id,child_name, child_year FROM child WHERE parent_id = ?";
 
 // 如果有年级参数，添加年级筛选条件
 if ($subject_year !== null) {

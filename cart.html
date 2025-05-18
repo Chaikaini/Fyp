@@ -200,11 +200,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.php" class="nav-item nav-link">Home</a>
-                <a href="subject.php" class="nav-item nav-link">Subject</a>
-                <a href="about.php" class="nav-item nav-link">About us</a>
-                <a href="contact.php" class="nav-item nav-link">Contact us</a>
-                <a href="comment.php" class="nav-item nav-link">Comment</a>
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
             </div>
             <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -214,13 +214,13 @@
             <i class="fas fa-bell"></i>
             <span class="notification-badge" style="display: none;"></span>
         </a>
-        <a href="cart.php"><i class="fas fa-shopping-cart"></i></a>
+        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
     </div>
     <div class="breadcrumb-container">
         <h1>Shopping Cart</h1>
         <ul class="breadcrumb">
-            <li><a href="member.php">Home</a></li>
+            <li><a href="member.html">Home</a></li>
             <li>></li>
             <li>Shopping Cart</li>
         </ul>
@@ -341,6 +341,7 @@
             const childrenSelect = document.getElementById('childrenSelect');
             if (!year || isNaN(year)) {
                 childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
+                showToast('Invalid year for loading children.', true);
                 return;
             }
 
@@ -354,6 +355,7 @@
                 childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
                 if (availableChildren.length === 0) {
                     childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
+                    showToast('No children available for this year.', true);
                     return;
                 }
 
@@ -366,7 +368,7 @@
             } catch (error) {
                 console.error('Error loading children:', error);
                 childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
-                showToast('Failed to load children', true);
+                showToast('Failed to load children.', true);
             }
         }
 
@@ -411,7 +413,7 @@
                         cartItem.classList.add('cart-item');
                         cartItem.innerHTML = `
                             <img src="${item.subject_image}" alt="${item.subject_name || 'Unknown Subject'} Image" class="cart-item-image">
-                            <div class="cart-item-details">
+                            <div class="cart-item-details" data-child-id="${childId}">
                                 <h5>${item.subject_name || 'Unknown Subject'}</h5>
                                 <p>Child: ${childName}</p>
                                 <p>Capacity: ${capacityDisplay}</p>
@@ -420,7 +422,7 @@
                             </div>
                             <div class="cart-item-actions">
                                 <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year})"></i>
-                                <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, '${item.subject_id}', '${childName}')"></i>
+                                <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, '${item.subject_id}', '${childId}')"></i>
                             </div>
                         `;
                         cartContainer.appendChild(cartItem);
@@ -444,41 +446,57 @@
             document.getElementById('popupTime').textContent = classTime;
             document.getElementById('popupCapacity').textContent = capacity;
             await loadChildren(year);
-            document.getElementById('childrenSelect').value = childId;
+            document.getElementById('childrenSelect').value = childId || '';
             document.querySelector('.popup-info').style.display = 'block';
         }
 
         async function saveChanges() {
-            const newChildId = document.getElementById('childrenSelect').value;
-            if (!newChildId) {
-                showToast('Please select a child.', true);
+    const newChildId = document.getElementById('childrenSelect').value;
+    if (!newChildId) {
+        showToast('Please select a child.', true);
+        return;
+    }
+
+    const selectedChild = availableChildren.find(child => child.child_id == newChildId);
+    if (!selectedChild) {
+        showToast('Selected child is invalid.', true);
+        return;
+    }
+
+    try {
+        const response = await fetch('update_cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cart_id: currentCartId,
+                action: 'update_child',
+                child_id: newChildId // Send child_id instead of child_name
+            })
+        });
+        const data = await response.json();
+        if (data.status !== 'success') {
+            throw new Error(data.message || 'Failed to update cart');
+        }
+        showToast('Cart updated successfully!');
+        loadCartData();
+        document.querySelector('.popup-info').style.display = 'none';
+    } catch (error) {
+        console.error('Error updating cart:', error);
+        showToast(`Error: ${error.message}`, true);
+    }
+}
+
+        function removeFromCart(cartId, subjectId, childId) {
+            console.log('Removing from cart:', { cartId, subjectId, childId });
+            if (!childId) {
+                showToast('Error: Child ID not found.', true);
                 return;
             }
 
-            try {
-                const response = await fetch('update_cart.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cart_id: currentCartId, child_id: newChildId })
-                });
-                const data = await response.json();
-                if (data.status !== 'success') {
-                    throw new Error(data.message || 'Failed to update cart');
-                }
-                showToast('Cart updated successfully!');
-                loadCartData();
-                document.querySelector('.popup-info').style.display = 'none';
-            } catch (error) {
-                showToast(`Error: ${error.message}`, true);
-            }
-        }
-
-        function removeFromCart(cartId, subjectId, childName) {
-            console.log('Removing from cart:', { cartId, subjectId, childName });
             fetch('remove_cart.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject_id: subjectId, child_name: childName })
+                body: JSON.stringify({ subject_id: subjectId, child_id: childId })
             })
                 .then(response => response.json())
                 .then(data => {
