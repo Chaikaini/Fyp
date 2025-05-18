@@ -314,27 +314,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // when click, mark as read
                 notificationItem.addEventListener('click', function () {
-                    const notificationId = this.dataset.notificationId;
-                    fetch('mark_as_read.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `notification_id=${notificationId}`
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            const titleDiv = this.querySelector('.title');
-                            const newLabel = titleDiv.querySelector('.new-label');
-                            if (newLabel) newLabel.remove();
-
-                            titleDiv.style.fontWeight = 'normal';
-                            titleDiv.style.color = 'black';
+                const notificationId = this.dataset.notificationId;
+                fetch('mark_as_read.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `notification_id=${notificationId}`
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Find and remove the new-badge span
+                        const titleDiv = this.querySelector('.title');
+                        const newBadge = titleDiv.querySelector('.new-badge');
+                        if (newBadge) {
+                        newBadge.remove();
                         }
-                    })
-                    .catch(error => console.error('Error marking as read:', error));
-                });
+                    }
+                })
+                .catch(error => console.error('Error marking as read:', error));
+            });
 
                 container.appendChild(notificationItem); 
             });
