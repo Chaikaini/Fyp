@@ -103,8 +103,8 @@ try {
     }
     file_put_contents('debug.log', "save_cart.php: Registration checked\n", FILE_APPEND);
 
-    $stmt = $pdo->prepare("SELECT cart_id, deleted FROM cart WHERE parent_id = ? AND child_id = ? AND class_id = ? AND subject_id = ?");
-    $stmt->execute([$_SESSION['parent_id'], $child_id, $class_id, $subject_id]);
+    $stmt = $pdo->prepare("SELECT cart_id, deleted FROM cart WHERE parent_id = ? AND child_id = ? AND class_id = ?");
+    $stmt->execute([$_SESSION['parent_id'], $child_id, $class_id]);
     $cartItem = $stmt->fetch();
     file_put_contents('debug.log', "save_cart.php: Cart checked: " . print_r($cartItem, true) . "\n", FILE_APPEND);
 
@@ -119,8 +119,8 @@ try {
         }
     }
 
-    $stmt = $pdo->prepare("INSERT INTO cart (parent_id, child_id, class_id, subject_id, deleted) VALUES (?, ?, ?, ?, 0)");
-    $stmt->execute([$_SESSION['parent_id'], $child_id, $class_id, $subject_id]);
+    $stmt = $pdo->prepare("INSERT INTO cart (parent_id, child_id, class_id, deleted) VALUES (?, ?, ?, 0)");
+    $stmt->execute([$_SESSION['parent_id'], $child_id, $class_id]);
     file_put_contents('debug.log', "save_cart.php: Inserted into cart\n", FILE_APPEND);
 
     echo json_encode(['status' => 'success', 'message' => 'Added to cart successfully']);
