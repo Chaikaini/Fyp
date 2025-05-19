@@ -68,19 +68,16 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 
 <head>
     <meta charset="utf-8">
-    <title>Checkout</title>
+    <title>Check Out</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="The Seeds Learning Centre, checkout" name="keywords">
-    <meta content="The Seeds Learning Centre | Checkout" name="description">
-
-    <link href="img/the_seeds.jpg" rel="icon" type="image/png">
+    <meta content="The Seeds Learning Centre, Shopping Cart" name="keywords">
+    <meta content="The Seeds Learning Centre | Shopping Cart" name="description">
+    <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="lib/animate.min.css" rel="stylesheet">
-    <link href="lib/owl.carousel.min.css" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <style>
@@ -91,23 +88,15 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             background-color: #f8f9fa;
             border-bottom: 1px solid #caccce;
         }
-
         .icon-bar a {
             margin: 0 15px;
             color: #000000;
             font-size: 24px;
             transition: color 0.3s ease;
         }
-
         .icon-bar a:hover {
             color: #73cf67;
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
         .breadcrumb-container {
             padding: 20px;
             background-color: #f8f9fa;
@@ -116,26 +105,21 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             flex-direction: column;
             align-items: flex-start;
         }
-
         .breadcrumb-container h2 {
             margin-bottom: 10px;
         }
-
         .breadcrumb-container .breadcrumb {
             display: flex;
             gap: 5px;
             font-size: 14px;
         }
-
         .breadcrumb-container .breadcrumb li {
             color: #555;
         }
-
         .breadcrumb-container .breadcrumb li a {
             color: #007bff;
             text-decoration: none;
         }
-
         .breadcrumb-container .breadcrumb li a:hover {
             text-decoration: underline;
         }
@@ -395,6 +379,10 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
             content: url('img/payment_s.png');
         }
 
+        .toast.warning .toast-image {
+            content: url('img/warning.png');
+        }
+
         .toast-image {
             width: 80px;
             height: 80px;
@@ -437,7 +425,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     </div>
 
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="member.php" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -608,12 +596,20 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 })
                 .then(data => {
                     console.log("Cart Data:", data);
+                    const cartItems = data.cart || data;
                     const container = document.getElementById("cart-container");
+                    if (cartItems.length === 0) {
+                        container.innerHTML = "<p>Your cart is empty. Please add items to proceed.</p>";
+                        document.getElementById("subject-fee").innerText = "RM0";
+                        document.getElementById("total-amount").innerText = "RM0";
+                        document.querySelector('.payment button').disabled = true;
+                        return;
+                    }
                     let totalAmount = 0;
                     const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
                     let enrollmentFee = hasPreviousEnrollment ? 0 : 100;
                     container.innerHTML = "";
-                    data.forEach(item => {
+                    cartItems.forEach(item => {
                         totalAmount += parseFloat(item.price);
                         const courseItem = `
                             <div class="course-item" 
@@ -635,28 +631,26 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         `;
                         container.innerHTML += courseItem;
                     });
-
                     document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
-
-                    console.log("Has Previous Enrollment:", hasPreviousEnrollment);
-                    console.log("Enrollment Fee:", enrollmentFee);
-
                     const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
                     if (hasPreviousEnrollment) {
                         enrollmentFeeRow.classList.add('hidden-row');
                     } else {
                         enrollmentFeeRow.classList.remove('hidden-row');
                     }
-
                     document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
                 })
-                .catch(error => console.error("Error fetching cart data:", error));
+                .catch(error => {
+                    console.error("Error fetching cart data:", error);
+                    const container = document.getElementById("cart-container");
+                    container.innerHTML = "<p>Error loading cart data. Please try again later.</p>";
+                });
         });
 
         async function validateForm() {
             console.log("validateForm called");
             const paymentButton = document.querySelector('.payment button');
-            paymentButton.disabled = true; // Prevent multiple submissions
+            paymentButton.disabled = true;
 
             const creditCardRadio = document.getElementById('creditcard');
             if (!creditCardRadio) {
@@ -708,7 +702,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 }
             }
 
-            const cartItems = Array.from(document.querySelectorAll(".course-item")).map(item => ({
+            let cartItems = Array.from(document.querySelectorAll(".course-item")).map(item => ({
                 cart_id: item.getAttribute("data-cart-id"),
                 class_id: item.getAttribute("data-class-id"),
                 child_id: item.getAttribute("data-child-id"),
@@ -716,32 +710,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 teacher_id: item.getAttribute("data-teacher-id")
             }));
             const cartIds = cartItems.map(item => item.cart_id).join(",");
-
-            let subjectTotal = 0;
-            for (const item of cartItems) {
-                try {
-                    const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
-                    if (!priceResponse.ok) throw new Error(`HTTP error! Status: ${priceResponse.status}`);
-                    const priceData = await priceResponse.json();
-                    if (!priceData.price) throw new Error(`Invalid price for subject_id ${item.subject_id}`);
-                    subjectTotal += parseFloat(priceData.price);
-                } catch (error) {
-                    console.error("Failed to fetch subject price:", error);
-                    showToast("Unable to fetch subject price: " + error.message, "error");
-                    paymentButton.disabled = false;
-                    return;
-                }
-            }
-
-            const isFirstEnrollment = <?php echo $hasPreviousEnrollment ? 'false' : 'true'; ?>;
-            const enrollmentFee = isFirstEnrollment ? 100 : 0;
-            const totalAmount = subjectTotal + enrollmentFee;
-
-            if (cartItems.length === 0) {
-                showToast("No items in the cart.", "error");
-                paymentButton.disabled = false;
-                return;
-            }
 
             try {
                 const response = await fetch("check_registration.php", {
@@ -758,6 +726,43 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     paymentButton.disabled = false;
                     return;
                 }
+
+                if (result.conflicts && result.conflicts.length > 0) {
+                    const conflictMessage = result.conflicts.map(conflict => conflict.message).join("\n");
+                    showToast(conflictMessage, "warning");
+
+                    // 移除已注册的项
+                    result.conflicts.forEach(conflict => {
+                        const itemToRemove = document.querySelector(
+                            `.course-item[data-child-id="${conflict.child_id}"][data-subject-id="${conflict.subject_id}"]`
+                        );
+                        if (itemToRemove) {
+                            itemToRemove.remove();
+                            const hr = itemToRemove.nextElementSibling;
+                            if (hr && hr.tagName === 'HR') hr.remove();
+                        }
+                    });
+
+                    // 更新费用显示
+                    let newTotal = 0;
+                    const remainingItems = Array.from(document.querySelectorAll(".course-item"));
+                    remainingItems.forEach(item => {
+                        const priceElement = item.querySelector('p:nth-child(3)').textContent;
+                        const price = parseFloat(priceElement.replace('Price: RM', ''));
+                        newTotal += price;
+                    });
+                    document.getElementById("subject-fee").innerText = `RM${newTotal.toFixed(2)}`;
+                    const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
+                    const enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+                    document.getElementById("total-amount").innerText = `RM${(newTotal + enrollmentFee).toFixed(2)}`;
+                }
+
+                cartItems = result.valid_items || cartItems;
+                if (cartItems.length === 0) {
+                    showToast("No valid items to process after checking registrations.", "error");
+                    paymentButton.disabled = false;
+                    return;
+                }
             } catch (error) {
                 console.error("Failed to check registration status:", error);
                 showToast("Unable to check registration status: " + error.message, "error");
@@ -765,16 +770,36 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 return;
             }
 
-            const orderData = {
-                cart_items: cartItems,
-                subject_total: subjectTotal,
-                enrollment_fee: enrollmentFee,
-                total_amount: totalAmount,
-                payment_method: paymentMethod,
-                phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
-                cart_ids: cartIds,
-                card_details: cardDetails
-            };
+            let subjectTotal = 0;
+for (const item of cartItems) {
+    try {
+        const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
+        if (!priceResponse.ok) throw new Error(`HTTP error! Status: ${priceResponse.status}`);
+        const priceData = await priceResponse.json();
+        if (!priceData.price) throw new Error(`Invalid price for subject_id ${item.subject_id}`);
+        subjectTotal += parseFloat(priceData.price);
+    } catch (error) {
+        console.error("Failed to fetch subject price:", error);
+        showToast("Unable to fetch subject price: " + error.message, "error");
+        paymentButton.disabled = false;
+        return;
+    }
+}
+
+const enrollmentFee = 100; // Always include RM100 enrollment fee
+const totalAmount = subjectTotal + enrollmentFee;
+
+// ... later in the orderData object
+const orderData = {
+    cart_items: cartItems,
+    subject_total: subjectTotal,
+    enrollment_fee: enrollmentFee, // This is informational for process_payment.php but not stored separately
+    total_amount: totalAmount,    // This includes the enrollment fee
+    payment_method: paymentMethod,
+    phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
+    cart_ids: cartIds,
+    card_details: cardDetails
+};
 
             console.log("Order data:", orderData);
 
@@ -783,15 +808,15 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(orderData),
-                    signal: AbortSignal.timeout(10000) // 10-second timeout
+                    signal: AbortSignal.timeout(10000)
                 });
                 console.log("Payment response status:", response.status);
                 console.log("Payment response headers:", response.headers.get("Content-Type"));
-                const responseText = await response.text(); // Get raw response text
+                const responseText = await response.text();
                 console.log("Payment response text:", responseText);
                 let data;
                 try {
-                    data = JSON.parse(responseText); // Attempt JSON parsing
+                    data = JSON.parse(responseText);
                 } catch (parseError) {
                     console.error("JSON parsing failed:", parseError);
                     throw new Error("Invalid JSON response: " + parseError.message);
@@ -809,7 +834,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 showPaymentModal(false);
                 showToast("Payment processing failed: " + error.message, "error");
             } finally {
-                paymentButton.disabled = false; // Re-enable button
+                paymentButton.disabled = false;
             }
         }
 
@@ -830,11 +855,13 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 toast.querySelector('.toast-image').src = 'img/payment_ns.png';
             } else if (type === 'success') {
                 toast.querySelector('.toast-image').src = 'img/payment_s.png';
+            } else if (type === 'warning') {
+                toast.querySelector('.toast-image').src = 'img/warning.png';
             }
             toast.classList.add('show');
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 5000);
         }
 
         function showPaymentModal(isSuccess, paymentId = '') {
@@ -918,7 +945,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <script src="lib/wow.min.js"></script>
     <script src="lib/easing.min.js"></script>
     <script src="lib/waypoints.min.js"></script>
-    <script src="lib/owl.carousel.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

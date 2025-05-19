@@ -23,7 +23,7 @@ if (!isset($_SESSION['parent_id'])) {
 $parent_id = $_SESSION['parent_id'];
 
 $stmt = $conn->prepare("
-    SELECT c.cart_id, c.class_id, c.subject_id, c.price, c.teacher_id, c.child_id,
+    SELECT c.cart_id, c.class_id, c.subject_id, COALESCE(s.subject_price, 0.00) AS price, cl.teacher_id, c.child_id,
            s.subject_name, s.subject_image,
            t.teacher_name,
            ch.child_name,
@@ -31,11 +31,17 @@ $stmt = $conn->prepare("
            cl.class_id AS class_id
     FROM cart c
     LEFT JOIN subject s ON c.subject_id = s.subject_id
-    LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
-    LEFT JOIN child ch ON c.child_id = ch.child_id
     LEFT JOIN class cl ON c.class_id = cl.class_id
+    LEFT JOIN teacher t ON cl.teacher_id = t.teacher_id
+    LEFT JOIN child ch ON c.child_id = ch.child_id
     WHERE c.parent_id = ? AND c.deleted = 0
 ");
+if (!$stmt) {
+    error_log("Prepare failed: " . $conn->error);
+    http_response_code(500);
+    echo json_encode(['status' => 'error', 'message' => 'Query preparation failed']);
+    exit();
+}
 $stmt->bind_param("i", $parent_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -45,6 +51,9 @@ while ($row = $result->fetch_assoc()) {
     $cartItems[] = $row;
 }
 
-echo json_encode($cartItems);
+echo json_encode([
+    'status' => 'success',
+    'cart' => $cartItems
+]);
 $conn->close();
 ?>

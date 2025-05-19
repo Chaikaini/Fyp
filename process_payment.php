@@ -23,37 +23,42 @@ if (!$parent_id) {
     exit;
 }
 
-// Check if user has previous registrations
-$hasPreviousEnrollment = false;
-$registrationCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM registration_class WHERE parent_id = ?");
-$registrationCheckStmt->bind_param("i", $parent_id);
-$registrationCheckStmt->execute();
-$result = $registrationCheckStmt->get_result();
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $hasPreviousEnrollment = $row['count'] > 0;
-}
-$registrationCheckStmt->close();
-error_log("hasPreviousEnrollment in process_payment.php: " . ($hasPreviousEnrollment ? 'true' : 'false'));
-
 // Get data from the request
 $cart_items = $data["cart_items"] ?? [];
+$cart_ids = isset($data["cart_ids"]) ? explode(',', $data["cart_ids"]) : [];
 $subjectTotal = 0;
 
-// Calculate subject total
+// Validate cart_items against cart_ids
+$cart_item_ids = array_map(function($item) { return $item['cart_id']; }, $cart_items);
+if (array_diff($cart_ids, $cart_item_ids) || array_diff($cart_item_ids, $cart_ids)) {
+    error_log("Cart items do not match cart_ids: cart_ids=" . implode(',', $cart_ids) . ", cart_item_ids=" . implode(',', $cart_item_ids));
+    echo json_encode(["success" => false, "message" => "Cart items do not match."]);
+    exit;
+}
+
+// Calculate subject total and validate items
 foreach ($cart_items as $item) {
+    if (!isset($item['subject_id'], $item['class_id'], $item['child_id'])) {
+        error_log("Invalid cart item: missing required fields");
+        echo json_encode(["success" => false, "message" => "Invalid cart item data."]);
+        exit;
+    }
     $priceStmt = $conn->prepare("SELECT subject_price FROM subject WHERE subject_id = ?");
     $priceStmt->bind_param("i", $item["subject_id"]);
     $priceStmt->execute();
     $priceResult = $priceStmt->get_result();
     if ($priceResult->num_rows > 0) {
         $subjectTotal += $priceResult->fetch_assoc()['subject_price'];
+    } else {
+        error_log("Subject price not found for subject_id=" . $item["subject_id"]);
+        echo json_encode(["success" => false, "message" => "Invalid subject ID: " . $item["subject_id"]]);
+        exit;
     }
     $priceStmt->close();
 }
 
-// Dynamic total amount
-$enrollmentFee = $hasPreviousEnrollment ? 0 : 100;
+// Include the enrollment fee in the total amount
+$enrollmentFee = 100.00; // Always RM100 enrollment fee
 $total_amount = $subjectTotal + $enrollmentFee;
 
 $payment_method = $conn->real_escape_string($data["payment_method"] ?? "");
@@ -62,7 +67,7 @@ $card_details = isset($data["card_details"]) ? $data["card_details"] : null;
 
 // Validate data
 if (empty($cart_items) || $total_amount <= 0 || empty($payment_method)) {
-    error_log("Invalid data: cart_items, total_amount, or payment_method missing");
+    error_log("Invalid data: cart_items=" . count($cart_items) . ", total_amount=$total_amount, payment_method=$payment_method");
     echo json_encode(["success" => false, "message" => "Invalid payment data."]);
     exit;
 }
@@ -75,7 +80,7 @@ try {
     $credit_card_id = null;
 
     // Save credit card if provided and save_card is true
-    if ($card_details && $card_details['save_card'] && $payment_method === "Credit Card") {
+    if ($card_details && isset($card_details['save_card']) && $card_details['save_card'] && $payment_method === "Credit Card") {
         $card_number = password_hash($card_details['card_number'], PASSWORD_DEFAULT);
         $expiry_date = $conn->real_escape_string($card_details['expiry_date']);
         $last_four = substr($card_details['card_number'], -4);
@@ -83,7 +88,9 @@ try {
         // Delete existing card for this parent
         $stmt = $conn->prepare("DELETE FROM credit_cards WHERE parent_id = ?");
         $stmt->bind_param("i", $parent_id);
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            throw new Exception("Failed to delete existing credit card: " . $stmt->error);
+        }
 
         // Insert new card
         $stmt = $conn->prepare("INSERT INTO credit_cards (parent_id, card_number, expiry_date, last_four) VALUES (?, ?, ?, ?)");
@@ -91,7 +98,6 @@ try {
         if (!$stmt->execute()) {
             throw new Exception("Failed to save credit card: " . $stmt->error);
         }
-        // Get the inserted credit card ID
         $credit_card_id = $conn->insert_id;
     } elseif ($payment_method === "Credit Card") {
         // Check if a saved card exists for this parent
@@ -102,16 +108,18 @@ try {
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
             $credit_card_id = $row['id'];
+        } else {
+            error_log("No saved credit card found for parent_id=$parent_id");
+            throw new Exception("No saved credit card found.");
         }
     }
 
-    // Insert payment record
-    $payment_status = "Completed";
+    // Insert payment record (only includes parent_id, payment_total_amount, payment_method, credit_card_id, payment_time)
     $stmt = $conn->prepare("
-        INSERT INTO payment (parent_id, payment_total_amount, payment_method, payment_status, enrollment_fee, credit_card_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO payment (payment_id, payment_total_amount, payment_method, credit_card_id, payment_time)
+        VALUES (?, ?, ?, ?, NOW())
     ");
-    $stmt->bind_param("idssii", $parent_id, $total_amount, $payment_method, $payment_status, $enrollmentFee, $credit_card_id);
+    $stmt->bind_param("idsi", $payment_id, $total_amount, $payment_method, $credit_card_id);
     if (!$stmt->execute()) {
         throw new Exception("Failed to insert payment: " . $stmt->error);
     }
@@ -132,22 +140,18 @@ try {
     foreach ($cart_items as $item) {
         $class_id = $conn->real_escape_string($item["class_id"]);
         $child_id = (int)$item["child_id"];
-        $subject_id = (int)$item["subject_id"];
-        $teacher_id = (int)$item["teacher_id"];
-
         $stmt = $conn->prepare("
-            INSERT INTO registration_class (parent_id, class_id, child_id, subject_id, teacher_id, payment_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO registration_class (parent_id, class_id, child_id, payment_id)
+            VALUES (?, ?, ?, ?)
         ");
-        $stmt->bind_param("isiiii", $parent_id, $class_id, $child_id, $subject_id, $teacher_id, $payment_id);
+        $stmt->bind_param("isii", $parent_id, $class_id, $child_id, $payment_id);
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert registration_class: " . $stmt->error);
         }
     }
 
     // Mark cart items as deleted
-    if (!empty($data['cart_ids'])) {
-        $cart_ids = explode(',', $data['cart_ids']);
+    if (!empty($cart_ids)) {
         $placeholders = implode(',', array_fill(0, count($cart_ids), '?'));
         $stmt = $conn->prepare("UPDATE cart SET deleted = 1 WHERE cart_id IN ($placeholders)");
         $stmt->bind_param(str_repeat('i', count($cart_ids)), ...$cart_ids);
@@ -158,12 +162,13 @@ try {
 
     // Commit transaction
     $conn->commit();
+    error_log("Payment successful: payment_id=$payment_id, parent_id=$parent_id, total_amount=$total_amount");
     echo json_encode(["success" => true, "payment_id" => "PAY" . str_pad($payment_id, 4, "0", STR_PAD_LEFT)]);
 } catch (Exception $e) {
     $conn->rollback();
     error_log("Payment processing error: " . $e->getMessage());
     echo json_encode(["success" => false, "message" => "Payment processing failed: " . $e->getMessage()]);
+} finally {
+    $conn->close();
 }
-
-$conn->close();
 ?>

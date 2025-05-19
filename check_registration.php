@@ -20,25 +20,41 @@ try {
     }
 
     $cartItems = $data['cart_items'];
+    $conflicts = [];
+    $validItems = [];
 
-    // 检查每个 (child_id, subject_id) 是否已经注册
+    // Check each (child_id, subject_id) for existing registration
     foreach ($cartItems as $item) {
         $child_id = $item['child_id'];
         $subject_id = $item['subject_id'];
 
-        $stmt = $conn->prepare("SELECT registration_id FROM registration_class WHERE child_id = ? AND subject_id = ?");
+        $stmt = $conn->prepare("
+            SELECT rc.registration_id 
+            FROM registration_class rc 
+            JOIN class c ON rc.class_id = c.class_id 
+            WHERE rc.child_id = ? AND c.subject_id = ?
+        ");
         $stmt->bind_param("ii", $child_id, $subject_id);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
-            throw new Exception("Child with ID $child_id has already registered for subject with ID $subject_id", 400);
+            $conflicts[] = [
+                'child_id' => $child_id,
+                'subject_id' => $subject_id,
+                'message' => "Child with ID $child_id has already registered for subject with ID $subject_id"
+            ];
+        } else {
+            $validItems[] = $item;
         }
+        $stmt->close();
     }
 
     echo json_encode([
         'success' => true,
-        'message' => 'All items are valid for registration'
+        'message' => empty($conflicts) ? 'All items are valid for registration' : 'Some items are already registered, proceeding with remaining items',
+        'conflicts' => $conflicts,
+        'valid_items' => $validItems
     ]);
 
 } catch (Exception $e) {
