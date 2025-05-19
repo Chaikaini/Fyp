@@ -101,13 +101,13 @@ try {
         $credit_card_id = $conn->insert_id;
     } elseif ($payment_method === "Credit Card") {
         // Check if a saved card exists for this parent
-        $stmt = $conn->prepare("SELECT id FROM credit_cards WHERE parent_id = ? ORDER BY created_at DESC LIMIT 1");
+        $stmt = $conn->prepare("SELECT credit_card_id FROM credit_cards WHERE parent_id = ? ORDER BY created_at DESC LIMIT 1");
         $stmt->bind_param("i", $parent_id);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            $credit_card_id = $row['id'];
+            $credit_card_id = $row['credit_card_id'];
         } else {
             error_log("No saved credit card found for parent_id=$parent_id");
             throw new Exception("No saved credit card found.");

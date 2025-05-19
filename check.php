@@ -540,351 +540,450 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 
     <div id="toast" class="toast"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const creditCardRadio = document.getElementById("creditcard");
-            const creditCardField = document.getElementById("credit-card-field");
-            const newCardInput = document.getElementById("new-card-input");
-            const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
-            const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
-            const paymentButton = document.querySelector('.payment button');
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const creditCardRadio = document.getElementById("creditcard");
+    const creditCardField = document.getElementById("credit-card-field");
+    const newCardInput = document.getElementById("new-card-input");
+    const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
+    const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
+    const paymentButton = document.querySelector('.payment button');
 
-            creditCardField.style.display = "none";
+    creditCardField.style.display = "none";
 
-            creditCardRadio.addEventListener("change", function() {
-                creditCardField.style.display = creditCardRadio.checked ? "block" : "none";
+    creditCardRadio.addEventListener("change", function() {
+        creditCardField.style.display = creditCardRadio.checked ? "block" : "none";
+    });
+
+    if (newCardOption) {
+        newCardOption.addEventListener("change", function() {
+            newCardInput.style.display = newCardOption.checked ? "block" : "none";
+        });
+        savedCardOption.addEventListener("change", function() {
+            newCardInput.style.display = savedCardOption.checked ? "none" : "block";
+        });
+    }
+
+    if (paymentButton) {
+        paymentButton.addEventListener('click', validateForm);
+    }
+
+    // Card number formatting and validation
+    const cardNumberInput = document.getElementById('card-number');
+    cardNumberInput.addEventListener('input', function(e) {
+        console.log('Card number input event triggered. Raw value:', e.target.value);
+        
+        // Remove all non-digits and limit to 16 digits
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 16) value = value.slice(0, 16);
+        console.log('Cleaned digits:', value);
+
+        // Format into groups of 4 digits with spaces
+        let formattedValue = '';
+        for (let i = 0; i < value.length; i++) {
+            if (i > 0 && i % 4 === 0) formattedValue += ' ';
+            formattedValue += value[i];
+            console.log(`Iteration ${i}: Adding ${value[i]}, Formatted so far: ${formattedValue}`);
+        }
+
+        // Update the input value
+        e.target.value = formattedValue;
+        console.log('Formatted card number:', formattedValue);
+
+        // Reset validity while typing
+        e.target.setCustomValidity('');
+    });
+
+    cardNumberInput.addEventListener('blur', function() {
+        console.log('Card number blur event triggered. Value:', this.value);
+        const digits = this.value.replace(/\D/g, ''); // Extract digits
+        if (digits.length > 0 && digits.length < 16) {
+            showPaymentModal(false, "Please enter a valid 16-digit card number.");
+            this.value = ''; // Clear the input if invalid
+            this.setCustomValidity('Invalid card number');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Expiry date validation
+    const expiryDateInput = document.getElementById('expiry-date');
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // Months are 0-based, so add 1
+    const currentYear = currentDate.getFullYear() % 100; // Get last two digits of year
+
+    let inputTimeout = null;
+
+    expiryDateInput.addEventListener('input', function(e) {
+        console.log('Input event triggered. Raw value:', e.target.value);
+        clearTimeout(inputTimeout); // Clear any existing timeout
+
+        inputTimeout = setTimeout(() => {
+            let value = e.target.value.replace(/[^\d\/]/g, ''); // Allow digits and /
+            if (value.length > 5) value = value.slice(0, 5); // Limit to 5 characters
+            const digits = value.replace(/\D/g, ''); // Extract digits for validation
+            console.log('Processed digits:', digits);
+
+            const expectedDigits = e.target.value.replace(/\D/g, '');
+            if (digits.length > expectedDigits.length) {
+                console.log('Unexpected digit detected, reverting to:', expectedDigits);
+                value = expectedDigits;
+            }
+
+            let formattedValue = '';
+            if (digits.length === 0) {
+                formattedValue = '';
+            } else if (digits.length <= 2) {
+                formattedValue = digits;
+            } else {
+                const month = digits.slice(0, 2);
+                const year = digits.slice(2);
+                formattedValue = month + (year ? '/' + year : '');
+            }
+            console.log('Formatted value:', formattedValue, 'Raw digits:', digits);
+            e.target.value = formattedValue;
+
+            e.target.setCustomValidity('');
+
+            if (formattedValue.length === 5 && formattedValue.match(/^\d{2}\/\d{2}$/) && digits.length === 4) {
+                const [inputMonth, inputYear] = formattedValue.split('/').map(num => parseInt(num));
+                console.log('Validating:', { inputMonth, inputYear });
+                if (isNaN(inputMonth) || isNaN(inputYear)) {
+                    e.target.setCustomValidity('Invalid date format (MM/YY).');
+                    showPaymentModal(false, 'Invalid date format (MM/YY).');
+                    e.target.value = '';
+                    return;
+                }
+                const isValid = validateExpiryDate(inputMonth, inputYear);
+                if (!isValid) {
+                    e.target.setCustomValidity('Please enter a future date (MM/YY).');
+                    showPaymentModal(false, 'Expiry date must be in the future (MM/YY).');
+                    e.target.value = '';
+                } else {
+                    e.target.setCustomValidity('');
+                }
+            }
+        }, 100);
+    });
+
+    expiryDateInput.addEventListener('blur', function() {
+        console.log('Blur event triggered. Value:', this.value);
+        const value = this.value;
+        if (value.length === 5 && value.match(/^\d{2}\/\d{2}$/)) {
+            const [inputMonth, inputYear] = value.split('/').map(num => parseInt(num));
+            if (isNaN(inputMonth) || isNaN(inputYear)) {
+                this.setCustomValidity('Invalid date format (MM/YY).');
+                showPaymentModal(false, 'Invalid date format (MM/YY).');
+                this.value = '';
+                return;
+            }
+            const isValid = validateExpiryDate(inputMonth, inputYear);
+            if (!isValid) {
+                this.setCustomValidity('Please enter a future date (MM/YY).');
+                showPaymentModal(false, 'Expiry date must be in the future (MM/YY).');
+                this.value = '';
+            } else {
+                this.setCustomValidity('');
+            }
+        } else if (value.length > 0) {
+            showPaymentModal(false, 'Please enter a complete date in MM/YY format.');
+            this.value = '';
+            this.setCustomValidity('');
+        }
+    });
+
+    function validateExpiryDate(month, year) {
+        console.log('validateExpiryDate:', { month, year, currentMonth, currentYear });
+        if (month < 1 || month > 12) return false;
+        const minYear = currentYear;
+        const maxYear = currentYear + 10;
+        if (year < minYear || year > maxYear) return false;
+        const inputDate = new Date(`20${year}-${month}-01`);
+        const isFuture = inputDate > currentDate;
+        console.log('Date comparison:', { inputDate, currentDate, isFuture });
+        return isFuture;
+    }
+
+    fetch('get_notification.php')
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Notification data:', data);
+            if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                console.log('Unread notifications found!');
+                const badge = document.querySelector('.notification-badge');
+                if (badge) badge.style.display = 'block';
+            } else console.log('No unread notifications');
+        })
+        .catch(error => console.error('Fetch notification error:', error));
+
+    fetch("checkout.php")
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log("Cart Data:", data);
+            const cartItems = data.cart || data;
+            const container = document.getElementById("cart-container");
+            if (cartItems.length === 0) {
+                container.innerHTML = "<p>Your cart is empty. Please add items to proceed.</p>";
+                document.getElementById("subject-fee").innerText = "RM0";
+                document.getElementById("total-amount").innerText = "RM0";
+                document.querySelector('.payment button').disabled = true;
+                return;
+            }
+            let totalAmount = 0;
+            const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
+            let enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+            container.innerHTML = "";
+            cartItems.forEach(item => {
+                totalAmount += parseFloat(item.price);
+                const courseItem = `
+                    <div class="course-item" 
+                         data-cart-id="${item.cart_id}" 
+                         data-class-id="${item.class_id}" 
+                         data-child-id="${item.child_id}" 
+                         data-subject-id="${item.subject_id}" 
+                         data-teacher-id="${item.teacher_id}">
+                        <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name}">
+                        <div>
+                            <p><b>${item.subject_name}</b></p>
+                            <p><b>Teacher:</b> ${item.teacher_name}</p>
+                            <p><b>Price:</b> RM${item.price}</p>
+                            <p><b>Time:</b> ${item.class_time}</p>
+                            <p><b>Student:</b> ${item.child_name}</p>
+                        </div>
+                    </div>
+                    <hr>
+                `;
+                container.innerHTML += courseItem;
             });
-
-            if (newCardOption) {
-                newCardOption.addEventListener("change", function() {
-                    newCardInput.style.display = newCardOption.checked ? "block" : "none";
-                });
-                savedCardOption.addEventListener("change", function() {
-                    newCardInput.style.display = savedCardOption.checked ? "none" : "block";
-                });
-            }
-
-            if (paymentButton) {
-                paymentButton.addEventListener('click', validateForm);
-            }
-
-            fetch('get_notification.php')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Notification data:', data);
-                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                        console.log('Unread notifications found!');
-                        const badge = document.querySelector('.notification-badge');
-                        if (badge) {
-                            badge.style.display = 'block';
-                        }
-                    } else {
-                        console.log('No unread notifications');
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch notification error:', error);
-                });
-
-            fetch("checkout.php")
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Cart Data:", data);
-                    const cartItems = data.cart || data;
-                    const container = document.getElementById("cart-container");
-                    if (cartItems.length === 0) {
-                        container.innerHTML = "<p>Your cart is empty. Please add items to proceed.</p>";
-                        document.getElementById("subject-fee").innerText = "RM0";
-                        document.getElementById("total-amount").innerText = "RM0";
-                        document.querySelector('.payment button').disabled = true;
-                        return;
-                    }
-                    let totalAmount = 0;
-                    const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
-                    let enrollmentFee = hasPreviousEnrollment ? 0 : 100;
-                    container.innerHTML = "";
-                    cartItems.forEach(item => {
-                        totalAmount += parseFloat(item.price);
-                        const courseItem = `
-                            <div class="course-item" 
-                                 data-cart-id="${item.cart_id}" 
-                                 data-class-id="${item.class_id}" 
-                                 data-child-id="${item.child_id}" 
-                                 data-subject-id="${item.subject_id}" 
-                                 data-teacher-id="${item.teacher_id}">
-                                <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name}">
-                                <div>
-                                    <p><b>${item.subject_name}</b></p>
-                                    <p><b>Teacher:</b> ${item.teacher_name}</p>
-                                    <p><b>Price:</b> RM${item.price}</p>
-                                    <p><b>Time:</b> ${item.class_time}</p>
-                                    <p><b>Student:</b> ${item.child_name}</p>
-                                </div>
-                            </div>
-                            <hr>
-                        `;
-                        container.innerHTML += courseItem;
-                    });
-                    document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
-                    const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
-                    if (hasPreviousEnrollment) {
-                        enrollmentFeeRow.classList.add('hidden-row');
-                    } else {
-                        enrollmentFeeRow.classList.remove('hidden-row');
-                    }
-                    document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
-                })
-                .catch(error => {
-                    console.error("Error fetching cart data:", error);
-                    const container = document.getElementById("cart-container");
-                    container.innerHTML = "<p>Error loading cart data. Please try again later.</p>";
-                });
+            document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
+            const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
+            if (hasPreviousEnrollment) enrollmentFeeRow.classList.add('hidden-row');
+            else enrollmentFeeRow.classList.remove('hidden-row');
+            document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
+        })
+        .catch(error => {
+            console.error("Error fetching cart data:", error);
+            const container = document.getElementById("cart-container");
+            container.innerHTML = "<p>Error loading cart data. Please try again later.</p>";
         });
 
-        async function validateForm() {
-            console.log("validateForm called");
-            const paymentButton = document.querySelector('.payment button');
-            paymentButton.disabled = true;
+    async function validateForm() {
+        console.log("validateForm called");
+        const paymentButton = document.querySelector('.payment button');
+        paymentButton.disabled = true;
 
-            const creditCardRadio = document.getElementById('creditcard');
-            if (!creditCardRadio) {
-                showToast("Payment option unavailable. Please try again later.", "error");
-                paymentButton.disabled = false;
-                return;
-            }
-            const creditCardSelected = creditCardRadio.checked;
-            const paymentMethod = creditCardSelected ? "Credit Card" : "";
-            
-            console.log("creditCardSelected:", creditCardSelected);
-            console.log("Payment Method:", paymentMethod);
+        const creditCardRadio = document.getElementById('creditcard');
+        if (!creditCardRadio) {
+            showPaymentModal(false, "Payment option unavailable. Please try again later.");
+            paymentButton.disabled = false;
+            return;
+        }
+        const creditCardSelected = creditCardRadio.checked;
+        const paymentMethod = creditCardSelected ? "Credit Card" : "";
 
-            if (!paymentMethod) {
-                console.log("No payment method selected");
-                showToast("Please select a payment method.", "error");
-                paymentButton.disabled = false;
-                return;
-            }
+        console.log("creditCardSelected:", creditCardSelected);
+        console.log("Payment Method:", paymentMethod);
 
-            let cardDetails = null;
-            if (creditCardSelected) {
-                const useSavedCard = document.querySelector('input[name="card-option"][value="saved"]')?.checked;
-                if (!useSavedCard) {
-                    const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
-                    const expiryDate = document.getElementById('expiry-date').value;
-                    const cvv = document.getElementById('cvv').value;
-                    if (!cardNumber || !/^\d{16}$/.test(cardNumber)) {
-                        showToast("Please enter a valid 16-digit card number.", "error");
-                        paymentButton.disabled = false;
-                        return;
-                    }
-                    if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
-                        showToast("Please enter a valid expiry date (MM/YY).", "error");
-                        paymentButton.disabled = false;
-                        return;
-                    }
-                    if (!cvv || !/^\d{3}$/.test(cvv)) {
-                        showToast("Please enter a valid 3-digit CVV code.", "error");
-                        paymentButton.disabled = false;
-                        return;
-                    }
-                    cardDetails = {
-                        card_number: cardNumber,
-                        expiry_date: expiryDate,
-                        cvv: cvv,
-                        save_card: document.getElementById('save-card').checked
-                    };
+        if (!paymentMethod) {
+            showPaymentModal(false, "Please select a payment method.");
+            paymentButton.disabled = false;
+            return;
+        }
+
+        let cardDetails = null;
+        if (creditCardSelected) {
+            const useSavedCard = document.querySelector('input[name="card-option"][value="saved"]')?.checked;
+            if (!useSavedCard) {
+                const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+                const expiryDate = document.getElementById('expiry-date').value;
+                const cvv = document.getElementById('cvv').value;
+
+                if (!cardNumber) {
+                    showPaymentModal(false, "Please enter a card number.");
+                    paymentButton.disabled = false;
+                    return;
                 }
+                if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
+                    showPaymentModal(false, "Please enter a valid expiry date (MM/YY).");
+                    paymentButton.disabled = false;
+                    return;
+                }
+                if (!cvv || !/^\d{3}$/.test(cvv)) {
+                    showPaymentModal(false, "Please enter a valid 3-digit CVV code.");
+                    paymentButton.disabled = false;
+                    return;
+                }
+                cardDetails = {
+                    card_number: cardNumber,
+                    expiry_date: expiryDate,
+                    cvv: cvv,
+                    save_card: document.getElementById('save-card').checked
+                };
+            }
+        }
+
+        let cartItems = Array.from(document.querySelectorAll(".course-item")).map(item => ({
+            cart_id: item.getAttribute("data-cart-id"),
+            class_id: item.getAttribute("data-class-id"),
+            child_id: item.getAttribute("data-child-id"),
+            subject_id: item.getAttribute("data-subject-id"),
+            teacher_id: item.getAttribute("data-teacher-id")
+        }));
+        const cartIds = cartItems.map(item => item.cart_id).join(",");
+
+        try {
+            const response = await fetch("check_registration.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ cart_items: cartItems })
+            });
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const result = await response.json();
+            console.log("Registration check response:", result);
+
+            if (!result.success) {
+                showPaymentModal(false, result.message || "Some subjects are already registered for the selected child.");
+                paymentButton.disabled = false;
+                return;
             }
 
-            let cartItems = Array.from(document.querySelectorAll(".course-item")).map(item => ({
-                cart_id: item.getAttribute("data-cart-id"),
-                class_id: item.getAttribute("data-class-id"),
-                child_id: item.getAttribute("data-child-id"),
-                subject_id: item.getAttribute("data-subject-id"),
-                teacher_id: item.getAttribute("data-teacher-id")
-            }));
-            const cartIds = cartItems.map(item => item.cart_id).join(",");
+            if (result.conflicts && result.conflicts.length > 0) {
+                const conflictMessage = result.conflicts.map(conflict => conflict.message).join("\n");
+                showPaymentModal(false, conflictMessage);
 
-            try {
-                const response = await fetch("check_registration.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ cart_items: cartItems })
+                result.conflicts.forEach(conflict => {
+                    const itemToRemove = document.querySelector(
+                        `.course-item[data-child-id="${conflict.child_id}"][data-subject-id="${conflict.subject_id}"]`
+                    );
+                    if (itemToRemove) {
+                        itemToRemove.remove();
+                        const hr = itemToRemove.nextElementSibling;
+                        if (hr && hr.tagName === 'HR') hr.remove();
+                    }
                 });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const result = await response.json();
-                console.log("Registration check response:", result);
 
-                if (!result.success) {
-                    showToast(result.message || "Some subjects are already registered for the selected child.", "error");
-                    paymentButton.disabled = false;
-                    return;
-                }
+                let newTotal = 0;
+                const remainingItems = Array.from(document.querySelectorAll(".course-item"));
+                remainingItems.forEach(item => {
+                    const priceElement = item.querySelector('p:nth-child(3)').textContent;
+                    const price = parseFloat(priceElement.replace('Price: RM', ''));
+                    newTotal += price;
+                });
+                document.getElementById("subject-fee").innerText = `RM${newTotal.toFixed(2)}`;
+                const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
+                const enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+                document.getElementById("total-amount").innerText = `RM${(newTotal + enrollmentFee).toFixed(2)}`;
+            }
 
-                if (result.conflicts && result.conflicts.length > 0) {
-                    const conflictMessage = result.conflicts.map(conflict => conflict.message).join("\n");
-                    showToast(conflictMessage, "warning");
-
-                    // 移除已注册的项
-                    result.conflicts.forEach(conflict => {
-                        const itemToRemove = document.querySelector(
-                            `.course-item[data-child-id="${conflict.child_id}"][data-subject-id="${conflict.subject_id}"]`
-                        );
-                        if (itemToRemove) {
-                            itemToRemove.remove();
-                            const hr = itemToRemove.nextElementSibling;
-                            if (hr && hr.tagName === 'HR') hr.remove();
-                        }
-                    });
-
-                    // 更新费用显示
-                    let newTotal = 0;
-                    const remainingItems = Array.from(document.querySelectorAll(".course-item"));
-                    remainingItems.forEach(item => {
-                        const priceElement = item.querySelector('p:nth-child(3)').textContent;
-                        const price = parseFloat(priceElement.replace('Price: RM', ''));
-                        newTotal += price;
-                    });
-                    document.getElementById("subject-fee").innerText = `RM${newTotal.toFixed(2)}`;
-                    const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
-                    const enrollmentFee = hasPreviousEnrollment ? 0 : 100;
-                    document.getElementById("total-amount").innerText = `RM${(newTotal + enrollmentFee).toFixed(2)}`;
-                }
-
-                cartItems = result.valid_items || cartItems;
-                if (cartItems.length === 0) {
-                    showToast("No valid items to process after checking registrations.", "error");
-                    paymentButton.disabled = false;
-                    return;
-                }
-            } catch (error) {
-                console.error("Failed to check registration status:", error);
-                showToast("Unable to check registration status: " + error.message, "error");
+            cartItems = result.valid_items || cartItems;
+            if (cartItems.length === 0) {
+                showPaymentModal(false, "No valid items to process after checking registrations.");
                 paymentButton.disabled = false;
                 return;
             }
+        } catch (error) {
+            showPaymentModal(false, "Unable to check registration status: " + error.message);
+            paymentButton.disabled = false;
+            return;
+        }
 
-            let subjectTotal = 0;
-for (const item of cartItems) {
-    try {
-        const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
-        if (!priceResponse.ok) throw new Error(`HTTP error! Status: ${priceResponse.status}`);
-        const priceData = await priceResponse.json();
-        if (!priceData.price) throw new Error(`Invalid price for subject_id ${item.subject_id}`);
-        subjectTotal += parseFloat(priceData.price);
-    } catch (error) {
-        console.error("Failed to fetch subject price:", error);
-        showToast("Unable to fetch subject price: " + error.message, "error");
-        paymentButton.disabled = false;
+        let subjectTotal = 0;
+        for (const item of cartItems) {
+            try {
+                const priceResponse = await fetch(`get_subject_price.php?subject_id=${item.subject_id}`);
+                if (!priceResponse.ok) throw new Error(`HTTP error! Status: ${priceResponse.status}`);
+                const priceData = await priceResponse.json();
+                if (!priceData.price) throw new Error(`Invalid price for subject_id ${item.subject_id}`);
+                subjectTotal += parseFloat(priceData.price);
+            } catch (error) {
+                showPaymentModal(false, "Unable to fetch subject price: " + error.message);
+                paymentButton.disabled = false;
+                return;
+            }
+        }
+
+        const enrollmentFee = 100;
+        const totalAmount = subjectTotal + enrollmentFee;
+
+        const orderData = {
+            cart_items: cartItems,
+            subject_total: subjectTotal,
+            enrollment_fee: enrollmentFee,
+            total_amount: totalAmount,
+            payment_method: paymentMethod,
+            phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
+            cart_ids: cartIds,
+            card_details: cardDetails
+        };
+
+        console.log("Order data:", orderData);
+
+        try {
+            const response = await fetch("process_payment.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(orderData),
+                signal: AbortSignal.timeout(10000)
+            });
+            console.log("Payment response status:", response.status);
+            console.log("Payment response headers:", response.headers.get("Content-Type"));
+            const responseText = await response.text();
+            console.log("Payment response text:", responseText);
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error("JSON parsing failed:", parseError);
+                throw new Error("Invalid JSON response: " + parseError.message);
+            }
+
+            if (data.success) {
+                showPaymentModal(true, data.payment_id);
+                setTimeout(() => { window.location.href = "subject.html"; }, 4000);
+            } else {
+                showPaymentModal(false, data.message || "Payment failed.");
+            }
+        } catch (error) {
+            console.error("Payment processing failed:", error);
+            showPaymentModal(false, "Payment processing failed: " + error.message);
+        } finally {
+            paymentButton.disabled = false;
+        }
+    }
+
+    function showToast(message, type) {
+        // 禁用 Toast，仅保留 Modal
         return;
     }
-}
 
-const enrollmentFee = 100; // Always include RM100 enrollment fee
-const totalAmount = subjectTotal + enrollmentFee;
-
-// ... later in the orderData object
-const orderData = {
-    cart_items: cartItems,
-    subject_total: subjectTotal,
-    enrollment_fee: enrollmentFee, // This is informational for process_payment.php but not stored separately
-    total_amount: totalAmount,    // This includes the enrollment fee
-    payment_method: paymentMethod,
-    phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
-    cart_ids: cartIds,
-    card_details: cardDetails
-};
-
-            console.log("Order data:", orderData);
-
-            try {
-                const response = await fetch("process_payment.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(orderData),
-                    signal: AbortSignal.timeout(10000)
-                });
-                console.log("Payment response status:", response.status);
-                console.log("Payment response headers:", response.headers.get("Content-Type"));
-                const responseText = await response.text();
-                console.log("Payment response text:", responseText);
-                let data;
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error("JSON parsing failed:", parseError);
-                    throw new Error("Invalid JSON response: " + parseError.message);
-                }
-
-                if (data.success) {
-                    showPaymentModal(true, data.payment_id);
-                    setTimeout(() => { window.location.href = "subject.html"; }, 4000);
-                } else {
-                    showPaymentModal(false);
-                    showToast(data.message || "Payment failed.", "error");
-                }
-            } catch (error) {
-                console.error("Payment processing failed:", error);
-                showPaymentModal(false);
-                showToast("Payment processing failed: " + error.message, "error");
-            } finally {
-                paymentButton.disabled = false;
-            }
+    function showPaymentModal(isSuccess, message = '') {
+        const modal = document.getElementById("paymentModal");
+        const paymentIcon = document.getElementById("payment_picture");
+        const paymentTitle = document.getElementById("paymentTitle");
+        const paymentMessage = document.getElementById("paymentMessage");
+        if (isSuccess) {
+            paymentIcon.src = "img/payment_s.png";
+            paymentTitle.innerText = "Payment Successful";
+            paymentMessage.innerText = `Payment ID: ${message || 'Unknown'}. You can view your payment history on the profile page.`;
+        } else {
+            paymentIcon.src = "img/payment_ns.png";
+            paymentTitle.innerText = "Payment Failed";
+            paymentMessage.innerText = message || "There was an issue processing your payment.";
         }
+        modal.style.display = "flex";
+    }
 
-        function showToast(message, type) {
-            console.log("Showing toast:", message, type);
-            if (!document.body) {
-                console.error("Document body not available.");
-                return;
-            }
-            const toast = document.getElementById('toast');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <img src="" alt="Toast image" class="toast-image">
-                <div class="toast-message">${message}</div>
-                <button class="toast-close" onclick="this.parentElement.classList.remove('show')">OK</button>
-            `;
-            if (type === 'error') {
-                toast.querySelector('.toast-image').src = 'img/payment_ns.png';
-            } else if (type === 'success') {
-                toast.querySelector('.toast-image').src = 'img/payment_s.png';
-            } else if (type === 'warning') {
-                toast.querySelector('.toast-image').src = 'img/warning.png';
-            }
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 5000);
-        }
-
-        function showPaymentModal(isSuccess, paymentId = '') {
-            const modal = document.getElementById("paymentModal");
-            const paymentIcon = document.getElementById("payment_picture");
-            const paymentTitle = document.getElementById("paymentTitle");
-            const paymentMessage = document.getElementById("paymentMessage");
-            if (isSuccess) {
-                paymentIcon.src = "img/payment_s.png";
-                paymentTitle.innerText = "Payment Successful";
-                paymentMessage.innerText = `Payment ID: ${paymentId || 'Unknown'}. You can view your payment history on the profile page.`;
-            } else {
-                paymentIcon.src = "img/payment_ns.png";
-                paymentTitle.innerText = "Payment Failed";
-                paymentMessage.innerText = "There was an issue processing your payment.";
-            }
-            modal.style.display = "flex";
-        }
-
-        function closeModal() {
-            document.getElementById("paymentModal").style.display = "none";
-        }
-    </script>
+    function closeModal() {
+        document.getElementById("paymentModal").style.display = "none";
+    }
+});
+</script>
 
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
