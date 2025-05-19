@@ -40,8 +40,13 @@ try {
     $action = trim($data['action']);
     file_put_contents('debug.log', "update_cart.php: Action: $action, cart_id: $cart_id\n", FILE_APPEND);
 
-    // Verify cart item belongs to the parent
-    $stmt = $pdo->prepare("SELECT cart_id, child_id, class_id, subject_id FROM cart WHERE cart_id = ? AND parent_id = ? AND deleted = 0");
+    // Verify cart item belongs to the parent and join with class to get subject_id
+    $stmt = $pdo->prepare("
+        SELECT c.cart_id, c.child_id, c.class_id, cl.subject_id 
+        FROM cart c
+        JOIN class cl ON c.class_id = cl.class_id
+        WHERE c.cart_id = ? AND c.parent_id = ? AND c.deleted = 0
+    ");
     $stmt->execute([$cart_id, $_SESSION['parent_id']]);
     $cartItem = $stmt->fetch();
     if (!$cartItem) {
@@ -50,21 +55,20 @@ try {
     file_put_contents('debug.log', "update_cart.php: Cart item verified: " . print_r($cartItem, true) . "\n", FILE_APPEND);
 
     if ($action === 'update_child') {
-        if (!isset($data['child_name']) || empty(trim($data['child_name']))) {
-            throw new Exception("Missing child_name", 400);
+        if (!isset($data['child_id']) || empty(trim($data['child_id']))) {
+            throw new Exception("Missing child_id", 400);
         }
 
-        $child_name = trim($data['child_name']);
+        $child_id = trim($data['child_id']);
 
-        // Fetch child_id based on child_name and parent_id
-        $stmt = $pdo->prepare("SELECT child_id FROM child WHERE child_name = ? AND parent_id = ?");
-        $stmt->execute([$child_name, $_SESSION['parent_id']]);
+        // Verify child belongs to the parent
+        $stmt = $pdo->prepare("SELECT child_id FROM child WHERE child_id = ? AND parent_id = ?");
+        $stmt->execute([$child_id, $_SESSION['parent_id']]);
         $child = $stmt->fetch();
         if (!$child) {
             throw new Exception("Child not found", 404);
         }
-        $child_id = $child['child_id'];
-        file_put_contents('debug.log', "update_cart.php: Child verified: child_name=$child_name, child_id=$child_id\n", FILE_APPEND);
+        file_put_contents('debug.log', "update_cart.php: Child verified: child_id=$child_id\n", FILE_APPEND);
 
         // Check if child is already registered for this subject
         $stmt = $pdo->prepare("

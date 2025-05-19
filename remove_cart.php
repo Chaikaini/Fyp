@@ -31,15 +31,20 @@ try {
     $subject_id = trim($data['subject_id']);
     $child_id = trim($data['child_id']);
 
-    // Verify child belongs to the parent (optional security check)
+    // Verify child belongs to the parent
     $stmt = $pdo->prepare("SELECT child_id FROM child WHERE child_id = ? AND parent_id = ?");
     $stmt->execute([$child_id, $_SESSION['parent_id']]);
     if (!$stmt->fetch()) {
         throw new Exception("Child not found or unauthorized", 404);
     }
 
-    // Soft delete cart item
-    $stmt = $pdo->prepare("UPDATE cart SET deleted = 1 WHERE parent_id = ? AND child_id = ? AND subject_id = ?");
+    // Soft delete cart item by joining with class table to filter by subject_id
+    $stmt = $pdo->prepare("
+        UPDATE cart c
+        JOIN class cl ON c.class_id = cl.class_id
+        SET c.deleted = 1
+        WHERE c.parent_id = ? AND c.child_id = ? AND cl.subject_id = ?
+    ");
     $stmt->execute([$_SESSION['parent_id'], $child_id, $subject_id]);
     if ($stmt->rowCount() === 0) {
         throw new Exception("Cart item not found", 404);
