@@ -36,7 +36,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'test') {
 }
 
 // Check authentication
-if (!isset($_SESSION['role']) || !isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'Admin') {
+if (!isset($_SESSION['role']) || !isset($_SESSION['admin_id']) || !in_array($_SESSION['role'], ['Admin', 'Super Admin'])) {
     error_log("Unauthorized access attempt by " . ($_SESSION['admin_id'] ?? 'unknown'));
     echo json_encode(["success" => false, "error" => "Unauthorized access"]);
     $conn->close();
@@ -101,7 +101,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
                 WHEN n.sender_id IN (SELECT teacher_id FROM teacher) THEN 'Teacher'
                 ELSE 'Unknown'
             END AS sender_type,
-            CASE 
+            CASE  
                 WHEN n.sender_id IN (SELECT admin_id FROM admin) THEN (SELECT admin_name FROM admin WHERE admin_id = n.sender_id)
                 WHEN n.sender_id IN (SELECT teacher_id FROM teacher) THEN (SELECT teacher_name FROM teacher WHERE teacher_id = n.sender_id)
                 ELSE 'Unknown Sender'
@@ -153,12 +153,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
                 ];
             }
         }
-        $sender_name = $row['sender_type'] === 'Admin' ? 'kaini' : $row['sender_name'];
         $notifications[] = [
             'notification_id' => $row['notification_id'],
             'sender_id' => $row['sender_id'],
             'sender_type' => $row['sender_type'],
-            'sender_name' => $sender_name,
+            'sender_name' => $row['sender_name'], // Use the sender_name from the query
             'recipient_type' => $row['recipient_type'],
             'subject_id' => $row['subject_id'],
             'subject_name' => $row['subject_name'],
@@ -169,7 +168,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'notification_created_at' => $row['notification_created_at'],
             'recipients' => $recipients
         ];
-        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}, subject_id={$row['subject_id']}, class_id={$row['class_id']}");
+        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$row['sender_name']}, recipient_type={$row['recipient_type']}, subject_id={$row['subject_id']}, class_id={$row['class_id']}");
     }
     echo json_encode($notifications);
     $stmt->close();
@@ -246,6 +245,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Handle file upload
         if (isset($_FILES['notification_document']) && $_FILES['notification_document']['error'] == UPLOAD_ERR_OK) {
             $uploadDir = 'Uploads/';
+            $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+            $file_type = $_FILES['notification_document']['type'];
+            if (!in_array($file_type, $allowed_types)) {
+                throw new Exception("Invalid file type. Only JPEG, PNG, and GIF are allowed.");
+            }
             if (!file_exists($uploadDir)) {
                 if (!mkdir($uploadDir, 0777, true)) {
                     throw new Exception("Failed to create upload directory: $uploadDir");
