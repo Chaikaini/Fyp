@@ -128,14 +128,17 @@
         padding: 10px 0;
         background-color: #f8f9fa;
         border-bottom: 1px solid #caccce;
+        position: relative; 
     }
 
     .icon-bar a {
+        position: relative;
         margin: 0 15px;
         color: #000000;
         font-size: 24px;
         transition: color 0.3s ease;
-    }
+        display: inline-block;
+}
 
     .icon-bar a:hover {
         color: #73cf67;
@@ -177,15 +180,16 @@
         text-decoration: underline;
     }
 
-    .notification-dot {
+   .notification-badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 5px;
+    right: 10px;
     width: 10px;
     height: 10px;
     background-color: red;
     border-radius: 50%;
-    display: none; 
+    display: none;
+    z-index: 1000;
 }
     .new-badge {
     background-color: rgb(0, 255, 132);
@@ -223,9 +227,9 @@
 
    
     <div class="icon-bar">
-        <a href="notification.php">
+        <a href="notification.php" onclick="event.preventDefault(); return false;">
             <i class="fas fa-bell"></i>
-            <span id="notificationDot" class="notification-dot"></span>  <!-- red point -->
+            <span id="notificationDot" class="notification-badge"></span>
         </a>
         <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
         <a href="profile.php"><i class="fas fa-user"></i></a>
@@ -241,10 +245,15 @@
         </ul>
     </div>
 
-    <!-- Notification Page -->
-    <div class="notification-page">
-        <div id="welcomeMessage" >
-            <!-- welcome message will display here -->
+    <!-- Notification Content Section -->
+    <div class="container">
+
+        <div class="card">
+            <div class="card-body">
+                <div id="notification-list" class="notification-container">
+                    <div class="text-muted text-center">Loading notifications...</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -253,15 +262,19 @@
 
 <!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('get_notification.php')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            const container = document.getElementById('welcomeMessage');
 
+    document.addEventListener('DOMContentLoaded', function() {
+    loadNotifications();
+    checkUnreadNotifications();
+    setInterval(checkUnreadNotifications, 30000);
+});
+
+ function loadNotifications() {
+    fetch('get_notification.php')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('notification-list');
+            
             if (data.error) {
                 container.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                 return;
@@ -269,107 +282,127 @@ document.addEventListener('DOMContentLoaded', function () {
 
             container.innerHTML = '';
 
-            // Sort notifications by date (newest first)
+            // Sort and display notifications
             data.notifications.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
 
-            // show notifications
+            // Display regular notifications
             data.notifications.forEach(notif => {
-                const notificationItem = document.createElement('div');
-                notificationItem.className = 'notification-item';
-                notificationItem.dataset.notificationId = notif.notification_id;
-
-                let statusLabel = '';
-                if (notif.read_status === 'unread') {
-                    statusLabel = '<span class="new-badge">New</span>';
-                }
-
+                const block = document.createElement('div');
+                block.className = 'card mb-3 shadow-sm';
+                
                 const createdAt = new Date(notif.notification_created_at);
-
-                const datePart = createdAt.toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-
-                const timePart = createdAt.toLocaleTimeString('en-US', {
+                const formattedDate = createdAt.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit',
                     hour12: true
                 });
 
-                const formattedDate = `${datePart} | ${timePart}`;
-
-                notificationItem.innerHTML = `
-                    <div class="notification-header">
-                        <div class="sender">${notif.sender_name} - ${notif.subject_name === 'General Announcement' ? 
-                            notif.subject_name : // if subject name is General Announcement,not show year
-                            `${notif.year} ${notif.subject_name}`// else show year and subject name
-                        }</div>   
-                        <div class="date">${formattedDate}</div>
-                    </div>
-                    <div class="title">${notif.notification_title} ${statusLabel}</div>
-                    <div class="content">${notif.notification_content}</div>
-                    ${notif.notification_document ? `<div><a href="${notif.notification_document}" target="_blank">View Document</a></div>` : ''}
-                `;
-
-                // when click, mark as read
-                notificationItem.addEventListener('click', function () {
-                const notificationId = this.dataset.notificationId;
-                fetch('mark_as_read.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `notification_id=${notificationId}`
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        // Find and remove the new-badge span
-                        const titleDiv = this.querySelector('.title');
-                        const newBadge = titleDiv.querySelector('.new-badge');
-                        if (newBadge) {
-                        newBadge.remove();
-                        }
+                block.onclick = function() {
+                    if (notif.read_status === 'unread') {
+                        markNotificationAsRead(notif.notification_id, block);
                     }
-                })
-                .catch(error => console.error('Error marking as read:', error));
-            });
+                };
 
-                container.appendChild(notificationItem); 
-            });
-
-            // Welcome message down here
-            if (data.first_login) {
-                const welcomeMsg = `
-                    <div class="notification-item">
-                        <div class="title">Welcome to The Seeds</div>
-                        <div class="content">Hello ${data.user_name}! Thank you for joining us.</div>
-                        <div class="date">This is your first login!</div>
+                block.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong>${notif.sender_name} - ${notif.subject_name === 'General Announcement' ? 
+                                    notif.subject_name : 
+                                    `${notif.year} ${notif.subject_name}`}
+                                </strong>
+                                ${notif.read_status === 'unread' ? '<span class="new-badge">New</span>' : ''}
+                            </div>
+                            <small class="text-muted">${formattedDate}</small>
+                        </div>
+                        <p class="card-text mb-1"><strong>${notif.notification_title}</strong></p>
+                        <p class="card-text">${notif.notification_content}</p>
+                        ${notif.notification_document ? `
+                            <a href="${notif.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
+                                <i class="fas fa-paperclip me-1"></i>View Attachment
+                            </a>
+                        ` : ''}
                     </div>
                 `;
-                container.insertAdjacentHTML('beforeend', welcomeMsg); 
-            }
 
-            // unread notification red point
-            const notificationDot = document.getElementById('notificationDot');
-            const hasUnread = data.notifications && data.notifications.some(notif => notif.read_status === 'unread');
-            notificationDot.style.display = hasUnread ? 'block' : 'none';
-
-            // when click the bell icon, hide the red point
-            document.querySelector('.fa-bell').addEventListener('click', function () {
-                notificationDot.style.display = 'none';
+                container.appendChild(block);
             });
+
+            // Add welcome message as a notification if it's first login
+            if (data.first_login) {
+                const welcomeBlock = document.createElement('div');
+                welcomeBlock.className = 'card mb-3 shadow-sm';
+                welcomeBlock.innerHTML = `
+                    <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong>Welcome to The Seeds</strong>
+                        </div>
+                        <small class="text-muted">${new Date().toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })}</small>
+                    </div>
+                    
+                    <p class="card-text">Hello ${data.user_name}! Thank you for joining us.</p>
+                </div>
+                `;
+                container.appendChild(welcomeBlock);
+            }
         })
         .catch(error => {
-            console.error('Fetch error:', error);
-            document.getElementById('welcomeMessage').innerHTML = `
+            console.error('Error:', error);
+            document.getElementById('notification-list').innerHTML = `
                 <div class="alert alert-danger">
                     Failed to load notifications. Please try again later.
                 </div>
             `;
         });
-});
+}
+
+    function markNotificationAsRead(notificationId, element) {
+        fetch('get_notification.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `mark_single_read=true&notification_id=${notificationId}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            const newBadge = element.querySelector('.new-badge');
+            if (newBadge) {
+                newBadge.remove();
+            }
+            checkUnreadNotifications();
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
+    }
+
+  function checkUnreadNotifications() {
+    fetch('get_notification.php?check_unread=true')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.getElementById('notificationDot');
+            if (data.unread_count && data.unread_count > 0) {
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking notifications:', error);
+        });
+}
 </script>
 
 
