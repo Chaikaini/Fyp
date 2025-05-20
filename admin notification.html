@@ -127,12 +127,12 @@
         <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>
+      </li> 
     </ul>
-  </nav>
+    </nav>
 
   <div id="main-content">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
@@ -192,11 +192,19 @@
                 </div>
               </div>
               <div class="row mb-3">
-                <div class="col-md-8">
+                <div class="col-md-6">
+                  <label for="class_id" class="form-label">Class</label>
+                  <select class="form-select form-select-sm" name="class_id" id="class_id" required>
+                    <option value="">-- Select Class --</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
                   <label for="notification_title" class="form-label">Title</label>
                   <input type="text" class="form-control form-control-sm" name="notification_title" id="notification_title" placeholder="Enter the title" required>
                 </div>
-                <div class="col-md-4">
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-12">
                   <label for="notification_document" class="form-label">Attachment</label>
                   <input type="file" class="form-control form-control-sm" name="notification_document" id="notification_document" accept="image/*">
                 </div>
@@ -220,8 +228,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // Sidebar toggle
+      const sidebar = document.getElementById('sidebar');
       document.getElementById('toggleSidebar').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('collapsed');
+        sidebar.classList.toggle('collapsed');
       });
 
       // Report menu toggle
@@ -261,6 +270,29 @@
           toast.style.opacity = '0';
           setTimeout(() => { toast.style.display = 'none'; }, 500);
         }, 3000);
+      }
+
+      // Load classes
+      function loadClasses() {
+        const classSelect = document.getElementById('class_id');
+        classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+        fetch('manage_notification.php?action=classes')
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to load classes');
+            return res.json();
+          })
+          .then(classes => {
+            classes.forEach(cls => {
+              const option = document.createElement('option');
+              option.value = cls.id;
+              option.textContent = `${cls.id} - ${cls.name}`;
+              classSelect.appendChild(option);
+            });
+          })
+          .catch(err => {
+            console.error('Error loading classes:', err);
+            showError('Error loading classes');
+          });
       }
 
       // Load recipients based on type
@@ -305,7 +337,7 @@
             if (!res.ok) {
               return res.json().then(err => {
                 if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html'; // Redirect to login
+                  window.location.href = 'admin login.html';
                 }
                 throw new Error(err.error || 'Failed to load notifications');
               });
@@ -321,16 +353,11 @@
               data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
               data.forEach(n => {
                 const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
-                let recipientInfo = '';
-                if (n.recipient_type === 'Class') {
-                  recipientInfo = `<p class="card-text mb-1"><strong>To Class:</strong> ${n.class_id}</p>`;
-                } else {
-                  const recipientNames = n.recipients.length === 0 ? 'All' : n.recipients.map(r => `${r.recipient_name} (${r.recipient_id})`).join(', ');
-                  recipientInfo = `
-                    <p class="card-text mb-1"><strong>Recipient Type:</strong> ${n.recipient_type}</p>
-                    <p class="card-text mb-1"><strong>Recipients:</strong> ${recipientNames}</p>
-                  `;
-                }
+                const recipientNames = n.recipients.length === 0 ? 'All' : n.recipients.map(r => `${r.recipient_name} (${r.recipient_id})`).join(', ');
+                const classSubjectInfo = n.sender_type !== 'Admin' ? `
+                  <p class="card-text mb-1"><strong>Class:</strong> ${n.class_id || 'N/A'}</p>
+                  <p class="card-text mb-1"><strong>Subject:</strong> ${n.subject_name || 'N/A'} (${n.subject_id || 'N/A'})</p>
+                ` : '';
                 const block = document.createElement('div');
                 block.className = 'card mb-3 shadow-sm';
                 block.innerHTML = `
@@ -343,7 +370,9 @@
                       <small class="text-muted">${time}</small>
                     </div>
                     <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
-                    ${recipientInfo}
+                    <p class="card-text mb-1"><strong>Recipient Type:</strong> ${n.recipient_type}</p>
+                    <p class="card-text mb-1"><strong>Recipients:</strong> ${recipientNames}</p>
+                    ${classSubjectInfo}
                     <p class="card-text">${n.notification_content}</p>
                     ${n.notification_document ? `
                       <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
@@ -399,7 +428,7 @@
             if (!res.ok) {
               return res.json().then(err => {
                 if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html'; // Redirect to login
+                  window.location.href = 'admin login.html';
                 }
                 throw new Error(err.error || 'Failed to send announcement');
               });
@@ -428,9 +457,11 @@
         clearError();
         document.getElementById('notificationForm').reset();
         document.getElementById('recipient_id').innerHTML = '<option value="">-- Select Recipient --</option>';
+        document.getElementById('class_id').innerHTML = '<option value="">-- Select Class --</option>';
       });
 
       // Initial load
+      loadClasses();
       loadNotifications();
     });
   </script>
