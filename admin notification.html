@@ -132,7 +132,7 @@
         </div>
       </li> 
     </ul>
-    </nav>
+  </nav>
 
   <div id="main-content">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
@@ -192,13 +192,7 @@
                 </div>
               </div>
               <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="class_id" class="form-label">Class</label>
-                  <select class="form-select form-select-sm" name="class_id" id="class_id" required>
-                    <option value="">-- Select Class --</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
+                <div class="col-md-12">
                   <label for="notification_title" class="form-label">Title</label>
                   <input type="text" class="form-control form-control-sm" name="notification_title" id="notification_title" placeholder="Enter the title" required>
                 </div>
@@ -272,29 +266,6 @@
         }, 3000);
       }
 
-      // Load classes
-      function loadClasses() {
-        const classSelect = document.getElementById('class_id');
-        classSelect.innerHTML = '<option value="">-- Select Class --</option>';
-        fetch('manage_notification.php?action=classes')
-          .then(res => {
-            if (!res.ok) throw new Error('Failed to load classes');
-            return res.json();
-          })
-          .then(classes => {
-            classes.forEach(cls => {
-              const option = document.createElement('option');
-              option.value = cls.id;
-              option.textContent = `${cls.id} - ${cls.name}`;
-              classSelect.appendChild(option);
-            });
-          })
-          .catch(err => {
-            console.error('Error loading classes:', err);
-            showError('Error loading classes');
-          });
-      }
-
       // Load recipients based on type
       function loadRecipients(recipientType) {
         const recipientSelect = document.getElementById('recipient_id');
@@ -302,7 +273,12 @@
         if (recipientType) {
           fetch(`manage_notification.php?action=recipients&recipient_type=${recipientType}`)
             .then(res => {
-              if (!res.ok) throw new Error('Failed to load recipients');
+              if (!res.ok) {
+                return res.text().then(text => {
+                  console.error('Recipient fetch error response:', text);
+                  throw new Error('Failed to load recipients');
+                });
+              }
               return res.json();
             })
             .then(recipients => {
@@ -335,11 +311,9 @@
         fetch('manage_notification.php?action=getNotifications')
           .then(res => {
             if (!res.ok) {
-              return res.json().then(err => {
-                if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html';
-                }
-                throw new Error(err.error || 'Failed to load notifications');
+              return res.text().then(text => {
+                console.error('Notification fetch error response:', text);
+                throw new Error('Failed to load notifications');
               });
             }
             return res.json();
@@ -387,7 +361,7 @@
           })
           .catch(err => {
             console.error('Error loading notifications:', err);
-            showError(err.message);
+            showError('Error loading notifications');
           });
       }
 
@@ -426,11 +400,9 @@
         })
           .then(res => {
             if (!res.ok) {
-              return res.json().then(err => {
-                if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html';
-                }
-                throw new Error(err.error || 'Failed to send announcement');
+              return res.text().then(text => {
+                console.error('Form submission error response:', text);
+                throw new Error('Failed to send announcement');
               });
             }
             return res.json();
@@ -448,7 +420,7 @@
           })
           .catch(error => {
             console.error('Fetch Error:', error);
-            showError(error.message);
+            showError('Failed to send announcement. Check console for details.');
           });
       });
 
@@ -457,11 +429,9 @@
         clearError();
         document.getElementById('notificationForm').reset();
         document.getElementById('recipient_id').innerHTML = '<option value="">-- Select Recipient --</option>';
-        document.getElementById('class_id').innerHTML = '<option value="">-- Select Class --</option>';
       });
 
       // Initial load
-      loadClasses();
       loadNotifications();
     });
   </script>

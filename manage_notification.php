@@ -1,14 +1,19 @@
 <?php
 ob_start();
 session_start();
-ini_set('display_errors', 1);
+
+// Disable error display and enable logging
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', 'path/to/your/error.log'); // Replace with your server's error log path
 error_reporting(E_ALL);
+
 header("Content-Type: application/json");
 
 $conn = new mysqli("127.0.0.1", "root", "", "the seeds");
 if ($conn->connect_error) {
     error_log("Database connection failed: " . $conn->connect_error);
-    echo json_encode(["success" => false, "error" => "Database connection failed: " . $conn->connect_error]);
+    echo json_encode(["success" => false, "error" => "Database connection failed"]);
     ob_end_flush();
     exit;
 }
@@ -25,30 +30,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'test') {
         "db_connection" => $conn->connect_error ? "Failed: " . $conn->connect_error : "Success"
     ];
     echo json_encode($response);
-    $conn->close();
-    ob_end_flush();
-    exit;
-}
-
-// Handle get classes request
-if (isset($_GET['action']) && $_GET['action'] === 'classes') {
-    error_log("Fetching all classes");
-    $stmt = $conn->prepare("SELECT class_id AS id, class_name AS name FROM class");
-    if (!$stmt) {
-        error_log("Prepare failed: " . $conn->error);
-        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
-        $conn->close();
-        ob_end_flush();
-        exit;
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $classes = [];
-    while ($row = $result->fetch_assoc()) {
-        $classes[] = $row;
-    }
-    echo json_encode($classes);
-    $stmt->close();
     $conn->close();
     ob_end_flush();
     exit;
@@ -84,7 +65,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
     }
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
-        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        echo json_encode(["success" => false, "error" => "Failed to prepare statement"]);
         $conn->close();
         ob_end_flush();
         exit;
@@ -145,7 +126,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
     ");
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
-        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        echo json_encode(["success" => false, "error" => "Failed to prepare statement"]);
         $conn->close();
         ob_end_flush();
         exit;
@@ -205,12 +186,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recipient_id = $_POST['recipient_id'] ?? '';
     $notification_title = $_POST['notification_title'] ?? '';
     $notification_content = $_POST['notification_content'] ?? '';
-    $class_id = $_POST['class_id'] ?? null;
     $documentPath = null;
 
     // Validate inputs
-    if (empty($recipient_type) || empty($recipient_id) || empty($notification_title) || empty($notification_content) || empty($class_id)) {
-        error_log("Missing required fields: recipient_type=$recipient_type, recipient_id=$recipient_id, title=$notification_title, content=$notification_content, class_id=$class_id");
+    if (empty($recipient_type) || empty($recipient_id) || empty($notification_title) || empty($notification_content)) {
+        error_log("Missing required fields: recipient_type=$recipient_type, recipient_id=$recipient_id, title=$notification_title, content=$notification_content");
         echo json_encode(['success' => false, 'error' => 'All required fields must be filled']);
         $conn->close();
         ob_end_flush();
@@ -227,18 +207,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn->begin_transaction();
     try {
-        // Validate class_id
-        $stmt = $conn->prepare("SELECT 1 FROM class WHERE class_id = ?");
-        if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
-        }
-        $stmt->bind_param("i", $class_id);
-        $stmt->execute();
-        if ($stmt->get_result()->num_rows === 0) {
-            throw new Exception("Invalid class ID: $class_id");
-        }
-        $stmt->close();
-
         $recipient_ids = [];
         if ($recipient_id === 'all') {
             if ($recipient_type === 'Parent') {
@@ -295,12 +263,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert into notification table
-        error_log("Inserting notification with recipient_type: $recipient_type, class_id: $class_id");
-        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document, class_id) VALUES (?, ?, ?, ?, ?, ?)");
+        error_log("Inserting notification with recipient_type: $recipient_type");
+        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document) VALUES (?, ?, ?, ?, ?)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
-        $stmt->bind_param("issssi", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath, $class_id);
+        $stmt->bind_param("issss", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath);
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert notification: " . $stmt->error);
         }
@@ -308,11 +276,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($notification_id == 0) {
             throw new Exception("AUTO_INCREMENT failed, notification_id is 0");
         }
-        error_log("Inserted notification: notification_id=$notification_id, sender_id=$sender_id, recipient_type=$recipient_type, class_id=$class_id");
+        error_log("Inserted notification: notification_id=$notification_id, sender_id=$sender_id, recipient_type=$recipient_type");
         $stmt->close();
 
-        // Verify inserted recipient_type and class_id
-        $stmt = $conn->prepare("SELECT recipient_type, class_id FROM notification WHERE notification_id = ?");
+        // Verify inserted recipient_type
+        $stmt = $conn->prepare("SELECT recipient_type FROM notification WHERE notification_id = ?");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
@@ -320,7 +288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        error_log("Verified notification: recipient_type=" . ($row['recipient_type'] ?? 'NULL') . ", class_id=" . ($row['class_id'] ?? 'NULL'));
+        error_log("Verified notification: recipient_type=" . ($row['recipient_type'] ?? 'NULL'));
         $stmt->close();
 
         // Insert into notification_receiver table
@@ -367,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Handle invalid requests
 error_log("Invalid request received: method={$_SERVER['REQUEST_METHOD']}, action=" . ($_GET['action'] ?? 'none'));
-echo json_encode(["success" => false, "error" => "Invalid request. Please specify a valid action (e.g., ?action=getNotifications)"]);
+echo json_encode(["success" => false, "error" => "Invalid request"]);
 $conn->close();
 ob_end_flush();
 exit;
