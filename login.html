@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* Your existing CSS styles remain unchanged */
         body {
             margin: 0;
             font-family: 'Heebo', sans-serif;
@@ -91,16 +90,17 @@
         .login-form button:hover {
             background-color: #138496;
         }
-        .login-form .options {
+        .forgot-password {
             text-align: right;
+            margin-top: 10px;
             margin-bottom: 15px;
         }
-        .login-form .options a {
+        .forgot-password a {
             font-size: 14px;
             color: #17a2b8;
             text-decoration: none;
         }
-        .login-form .options a:hover {
+        .forgot-password a:hover {
             text-decoration: underline;
         }
         .login-form p a {
@@ -130,10 +130,10 @@
             transform: translateY(-50%) scale(1.1);
         }
         .toggle-password.fa-eye-slash {
-            color: #ff4d4d; /* Red when password is hidden */
+            color: #ff4d4d;
         }
         .toggle-password.fa-eye {
-            color: #17a2b8; /* Blue when password is visible */
+            color: #17a2b8;
         }
         .password-container input[type="text"] {
             background-color: #e8f4f8;
@@ -181,10 +181,10 @@
                         <i class="fa fa-eye-slash toggle-password" id="togglePassword" title="Toggle password visibility" aria-label="Hide password" role="button"></i>
                     </div>
                     <div class="error-message" id="errorMessage" style="display: none;"></div>
-                    <div class="options">
+                    <button type="submit">Login</button>
+                    <div class="forgot-password">
                         <a href="forgot.html">Forgot password?</a>
                     </div>
-                    <button type="submit">Login</button>
                     <p>Don’t have an account? <a href="registration.html">Sign up for free</a></p>
                 </form>
             </div>
@@ -214,7 +214,7 @@
             fetch("login.php", {
                 method: "POST",
                 body: formData,
-                credentials: 'same-origin' // Ensure session cookies are sent
+                credentials: 'same-origin'
             })
             .then(response => {
                 if (!response.ok) {
@@ -227,7 +227,7 @@
                     localStorage.setItem("parent_id", data.parent_id);
                     localStorage.setItem("parent_name", data.parent_name);
                     localStorage.setItem("parent_email", data.parent_email);
-                    window.location.href = "member.html"; 
+                    window.location.href = "member.html";
                 } else {
                     errorMessage.innerText = data.error;
                     errorMessage.style.display = "block";

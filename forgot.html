@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <title>Forgot Password</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="The Seeds Learning Centre,forgot password">
+    <meta name="keywords" content="The Seeds Learning Centre, forgot password">
     <meta name="description" content="The Seeds Learning Centre | Forgot Password">
 
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
@@ -51,6 +51,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            box-sizing: border-box;
         }
 
         .forgot-password-form button {
@@ -68,7 +69,21 @@
             background-color: #138496;
         }
 
-        /* 弹窗样式 */
+        .forgot-password-form a {
+            color: #17a2b8;
+            text-decoration: none;
+        }
+
+        .forgot-password-form a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
         .popup {
             display: none;
             position: fixed;
@@ -85,6 +100,18 @@
 
         .popup button {
             margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            background-color: #17a2b8;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .popup button:hover {
+            background-color: #138496;
         }
 
         .overlay {
@@ -96,83 +123,225 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
         }
+
+        .loading {
+            display: none;
+            font-size: 14px;
+            color: #17a2b8;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="forgot-password-form">
             <h2>Forgot Password</h2>
-            <p>Enter your email to receive a password reset link.</p>
-            <form id="forgotPasswordForm">
+            <p>Enter your email to receive a reset OTP.</p>
+            <form id="forgotPasswordForm" method="post">
                 <input type="email" id="email" name="email" placeholder="Enter your email" required>
-                <button type="submit">Send Reset Link</button>
-            </form>            
-            <p>Remember your password? <a href="login.html">Login here</a></p>
+                <div class="loading" id="loadingMessage">Sending OTP...</div>
+                <div class="error" id="errorMessage" style="display: none;"></div>
+                <button type="submit" name="send_otp">Send OTP</button>
+                <p>Remember your password? <a href="login.html">Login here</a></p>
+            </form>
         </div>
     </div>
 
     <div class="overlay" id="overlay"></div>
     <div class="popup" id="popup">
-        <p id="popupMessage"></p>
-        <button onclick="closePopup()">OK</button>
+        <p id="popupMessage">OTP sent to your email.</p>
+        <form id="otpForm" method="post">
+            <h2>Verify OTP</h2>
+            <input type="text" id="input_otp" name="input_otp" placeholder="Enter OTP" required>
+            <div class="error" id="otpErrorMessage" style="display: none;"></div>
+            <button type="submit" name="verify_otp">Verify OTP</button>
+        </form>
     </div>
 
     <div class="overlay" id="resetOverlay"></div>
     <div class="popup" id="resetPopup">
         <h2>Reset Password</h2>
-        <form id="resetPasswordForm">
-            <input type="password" id="newPassword" name="password" placeholder="Enter new password" required>
-            <button type="submit">Reset Password</button>
+        <form id="resetPasswordForm" method="post">
+            <input type="password" id="newPassword" name="new_password" placeholder="New Password" required>
+            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
+            <div class="error" id="resetErrorMessage" style="display: none;"></div>
+            <button type="submit" name="reset_password">Reset Password</button>
         </form>
     </div>
 
     <script>
+        // Email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Handle Forgot Password Form Submission
         document.getElementById("forgotPasswordForm").addEventListener("submit", function(event) {
             event.preventDefault();
             let email = document.getElementById("email").value;
+            let errorMessage = document.getElementById("errorMessage");
+            let loadingMessage = document.getElementById("loadingMessage");
+            let sendOtpButton = document.querySelector('button[name="send_otp"]');
+
+            errorMessage.style.display = "none";
+            errorMessage.innerText = "";
+            loadingMessage.style.display = "block";
+            sendOtpButton.disabled = true;
+
+            // Client-side email validation
+            if (!emailRegex.test(email)) {
+                errorMessage.innerText = "Please enter a valid email address.";
+                errorMessage.style.display = "block";
+                loadingMessage.style.display = "none";
+                sendOtpButton.disabled = false;
+                return;
+            }
 
             let formData = new FormData();
             formData.append("email", email);
+            formData.append("send_otp", "true");
 
-            fetch("send-reset-link.php", {
+            fetch("reset-password.php", {
                 method: "POST",
                 body: formData
             })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("popupMessage").innerHTML = data;
-                document.getElementById("overlay").style.display = "block";
-                document.getElementById("popup").style.display = "block";
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error, status = ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Expected JSON, received " + contentType);
+                }
+                return response.json();
             })
-            .catch(error => console.error("Error:", error));
+            .then(data => {
+                loadingMessage.style.display = "none";
+                sendOtpButton.disabled = false;
+                if (data.success) {
+                    document.getElementById("overlay").style.display = "block";
+                    document.getElementById("popup").style.display = "block";
+                    // For testing only: display OTP if returned by server
+                    if (data.otp) {
+                        console.log(`OTP for testing: ${data.otp}`);
+                    }
+                } else {
+                    errorMessage.innerText = data.error || "An error occurred.";
+                    errorMessage.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                loadingMessage.style.display = "none";
+                sendOtpButton.disabled = false;
+                errorMessage.innerText = "Network or server error: " + error.message;
+                errorMessage.style.display = "block";
+            });
         });
 
-        function closePopup() {
-            document.getElementById("overlay").style.display = "none";
-            document.getElementById("popup").style.display = "none";
+        // Handle OTP Verification Form Submission
+        document.getElementById("otpForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let inputOtp = document.getElementById("input_otp").value;
+            let errorMessage = document.getElementById("otpErrorMessage");
+
+            errorMessage.style.display = "none";
+            errorMessage.innerText = "";
+
+            let formData = new FormData();
+            formData.append("input_otp", inputOtp);
+            formData.append("verify_otp", "true");
+
+            fetch("reset-password.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error, status = ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Expected JSON, received " + contentType);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("overlay").style.display = "none";
+                    document.getElementById("popup").style.display = "none";
+                    document.getElementById("resetOverlay").style.display = "block";
+                    document.getElementById("resetPopup").style.display = "block";
+                } else {
+                    errorMessage.innerText = data.error || "Invalid OTP.";
+                    errorMessage.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                errorMessage.innerText = "Network or server error: " + error.message;
+                errorMessage.style.display = "block";
+            });
+        });
+
+        // Handle Reset Password Form Submission
+        // Handle Reset Password Form Submission
+document.getElementById("resetPasswordForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    let newPassword = document.getElementById("newPassword").value;
+    let confirmPassword = document.getElementById("confirmPassword").value;
+    let errorMessage = document.getElementById("resetErrorMessage");
+
+    errorMessage.style.display = "none";
+    errorMessage.innerText = "";
+
+    // Client-side password validation
+    if (newPassword.length < 8) {
+        errorMessage.innerText = "Password must be at least 8 characters long.";
+        errorMessage.style.display = "block";
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        errorMessage.innerText = "Passwords do not match.";
+        errorMessage.style.display = "block";
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("new_password", newPassword);
+    formData.append("confirm_password", confirmPassword);
+    formData.append("reset_password", "true");
+
+    fetch("reset-password.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error, status = ${response.status}`);
         }
-
-        let params = new URLSearchParams(window.location.search);
-        if (params.has("token")) {
-            document.getElementById("resetOverlay").style.display = "block";
-            document.getElementById("resetPopup").style.display = "block";
-
-            document.getElementById("resetPasswordForm").addEventListener("submit", function(event) {
-                event.preventDefault();
-                let password = document.getElementById("newPassword").value;
-
-                fetch(`reset-password.php?token=${params.get("token")}`, {
-                    method: "POST",
-                    body: new URLSearchParams({ password })
-                })
-                .then(response => response.text())
-                .then(data => {
-                    alert(data);
-                    window.location.href = "login.html";
-                })
-                .catch(error => console.error("Error:", error));
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            return response.text().then(text => {
+                throw new Error("Expected JSON, received: " + text);
             });
         }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            alert("Password reset successfully!");
+            window.location.href = "login.html";
+        } else {
+            errorMessage.innerText = data.error || "An error occurred.";
+            errorMessage.style.display = "block";
+        }
+    })
+    .catch(error => {
+        console.error("Fetch error:", error);
+        errorMessage.innerText = "An error occurred: " + error.message;
+        errorMessage.style.display = "block";
+    });
+});
     </script>
 </body>
 </html>
