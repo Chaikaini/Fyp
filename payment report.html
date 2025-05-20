@@ -166,7 +166,6 @@
               <th>Payment ID</th>
               <th>Parent Name</th>
               <th>Payment Method</th>
-              <th>Payment Status</th>
               <th>Payment Time</th>
               <th>Total Amount</th>
             </tr>
@@ -229,7 +228,6 @@
               <td>${payment.payment_id}</td>
               <td>${payment.parent_name}</td>
               <td>${payment.payment_method}</td>
-              <td>${payment.payment_status}</td>
               <td>${payment.payment_time}</td>
               <td>RM${payment.payment_total_amount}</td>
           </tr>`;
@@ -260,7 +258,6 @@
           'Payment ID': payment.payment_id,
           'Parent Name': payment.parent,
           'Payment Method': payment.payment_method,
-          'Payment Status': payment.payment_status,
           'Payment Time': payment.payment_time,
           'Total Amount': `RM${payment.payment_total_amount}`
         }));
