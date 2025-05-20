@@ -11,6 +11,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for eye, info, and toast icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body {
@@ -25,7 +27,7 @@
 
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
@@ -46,11 +48,11 @@
 
         .forgot-password-form input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
+            font-size: 16px;
             box-sizing: border-box;
         }
 
@@ -94,8 +96,18 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 350px;
+            width: 400px;
             text-align: center;
+        }
+
+        .popup input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
         }
 
         .popup button {
@@ -130,6 +142,198 @@
             color: #17a2b8;
             margin-bottom: 15px;
         }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-container input {
+            padding-right: 70px; /* Space for eye and info icons */
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #777;
+            font-size: 16px;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .toggle-password.fa-eye-slash {
+            color: #ff4d4d;
+        }
+
+        .toggle-password.fa-eye {
+            color: #17a2b8;
+        }
+
+        .password-container input[type="text"] {
+            background-color: #e8f4f8;
+            border: 1px solid #17a2b8;
+        }
+
+        .password-requirements-toggle {
+            position: absolute;
+            top: 50%;
+            right: 40px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            background-color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .password-requirements-toggle:hover {
+            background-color: #f0f0f0;
+        }
+
+        .password-requirements-toggle i {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .password-strength {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .strength-bar {
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+            width: 0%;
+            background-color: transparent;
+        }
+
+        .weak {
+            width: 33%;
+            background-color: #ff4d4d;
+        }
+
+        .medium {
+            width: 66%;
+            background-color: #ffd700;
+        }
+
+        .strong {
+            width: 100%;
+            background-color: #4caf50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 300px;
+            width: 80%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .modal-content ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .modal-content .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #777;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-content .close-btn:hover {
+            color: #ff4d4d;
+        }
+
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 300px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-100%) translateX(-50%);
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+        }
+
+        .toast.success {
+            background-color: rgba(23, 162, 184, 0.95); /* #17a2b8 with slight transparency */
+        }
+
+        .toast.error {
+            background-color: rgba(255, 77, 77, 0.95); /* #ff4d4d with slight transparency */
+        }
+
+        .toast-icon {
+            font-size: 18px;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -162,16 +366,69 @@
     <div class="popup" id="resetPopup">
         <h2>Reset Password</h2>
         <form id="resetPasswordForm" method="post">
-            <input type="password" id="newPassword" name="new_password" placeholder="New Password" required>
-            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
+            <div class="password-container">
+                <input type="password" id="newPassword" name="new_password" placeholder="New Password" required>
+                <i class="fa fa-eye-slash toggle-password" id="toggleNewPassword" title="Toggle password visibility" aria-label="Hide password" role="button"></i>
+                <div class="password-requirements-toggle" title="Show password requirements" role="button">
+                    <i class="fas fa-info"></i>
+                </div>
+            </div>
+            <div class="password-strength" id="strengthText">Password Strength: None</div>
+            <div class="strength-bar" id="strengthBar" aria-live="polite" aria-label="Password strength: none"></div>
+            <div class="password-container">
+                <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
+                <i class="fa fa-eye-slash toggle-password" id="toggleConfirmPassword" title="Toggle password visibility" aria-label="Hide confirm password" role="button"></i>
+            </div>
             <div class="error" id="resetErrorMessage" style="display: none;"></div>
             <button type="submit" name="reset_password">Reset Password</button>
         </form>
     </div>
 
+    <!-- Password Requirements Modal -->
+    <div class="modal" id="passwordRequirementsModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">×</span>
+            <h3>Password Requirements</h3>
+            <ul>
+                <li>At least 8 characters long</li>
+                <li>Contains at least one uppercase letter (A-Z)</li>
+                <li>Contains at least one lowercase letter (a-z)</li>
+                <li>Contains at least one special character (!@#$%^&*)</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon"></span>
+        <span class="toast-message"></span>
+    </div>
+
     <script>
         // Email validation regex
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // Function to show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = toast.querySelector('.toast-icon');
+            const toastMessage = toast.querySelector('.toast-message');
+
+            // Set message and icon
+            toastMessage.textContent = message;
+            toastIcon.className = 'toast-icon fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle');
+
+            // Show toast
+            toast.className = `toast ${type} show`;
+
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.className = `toast ${type}`;
+                setTimeout(() => {
+                    window.location.href = "login.html"; // Redirect after toast hides
+                }, 400); // Match transition duration
+            }, 3000);
+        }
 
         // Handle Forgot Password Form Submission
         document.getElementById("forgotPasswordForm").addEventListener("submit", function(event) {
@@ -209,7 +466,9 @@
                 }
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Expected JSON, received " + contentType);
+                    return response.text().then(text => {
+                        throw new Error("Expected JSON, received: " + text);
+                    });
                 }
                 return response.json();
             })
@@ -260,7 +519,9 @@
                 }
                 const contentType = response.headers.get("content-type");
                 if (!contentType || !contentType.includes("application/json")) {
-                    throw new Error("Expected JSON, received " + contentType);
+                    return response.text().then(text => {
+                        throw new Error("Expected JSON, received: " + text);
+                    });
                 }
                 return response.json();
             })
@@ -283,65 +544,159 @@
         });
 
         // Handle Reset Password Form Submission
-        // Handle Reset Password Form Submission
-document.getElementById("resetPasswordForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let newPassword = document.getElementById("newPassword").value;
-    let confirmPassword = document.getElementById("confirmPassword").value;
-    let errorMessage = document.getElementById("resetErrorMessage");
+        document.getElementById("resetPasswordForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let newPassword = document.getElementById("newPassword").value;
+            let confirmPassword = document.getElementById("confirmPassword").value;
+            let errorMessage = document.getElementById("resetErrorMessage");
 
-    errorMessage.style.display = "none";
-    errorMessage.innerText = "";
+            errorMessage.style.display = "none";
+            errorMessage.innerText = "";
 
-    // Client-side password validation
-    if (newPassword.length < 8) {
-        errorMessage.innerText = "Password must be at least 8 characters long.";
-        errorMessage.style.display = "block";
-        return;
-    }
+            // Client-side password validation
+            let missingRequirements = [];
+            if (newPassword.length < 8) {
+                missingRequirements.push("be at least 8 characters long");
+            }
+            if (!/[A-Z]/.test(newPassword)) {
+                missingRequirements.push("contain at least one uppercase letter");
+            }
+            if (!/[a-z]/.test(newPassword)) {
+                missingRequirements.push("contain at least one lowercase letter");
+            }
+            if (!/[!@#$%^&*]/.test(newPassword)) {
+                missingRequirements.push("contain at least one special character (!@#$%^&*)");
+            }
 
-    if (newPassword !== confirmPassword) {
-        errorMessage.innerText = "Passwords do not match.";
-        errorMessage.style.display = "block";
-        return;
-    }
+            if (missingRequirements.length > 0) {
+                let errorText = "Password must ";
+                if (missingRequirements.length === 1) {
+                    errorText += missingRequirements[0] + ".";
+                } else if (missingRequirements.length === 2) {
+                    errorText += missingRequirements.join(" and ") + ".";
+                } else {
+                    errorText += missingRequirements.slice(0, -1).join(", ") + ", and " + missingRequirements.slice(-1) + ".";
+                }
+                errorMessage.innerText = errorText;
+                errorMessage.style.display = "block";
+                return;
+            }
 
-    let formData = new FormData();
-    formData.append("new_password", newPassword);
-    formData.append("confirm_password", confirmPassword);
-    formData.append("reset_password", "true");
+            if (newPassword !== confirmPassword) {
+                errorMessage.innerText = "Passwords do not match.";
+                errorMessage.style.display = "block";
+                return;
+            }
 
-    fetch("reset-password.php", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error, status = ${response.status}`);
-        }
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            return response.text().then(text => {
-                throw new Error("Expected JSON, received: " + text);
+            let formData = new FormData();
+            formData.append("new_password", newPassword);
+            formData.append("confirm_password", confirmPassword);
+            formData.append("reset_password", "true");
+
+            fetch("reset-password.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error, status = ${response.status}`);
+                }
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    return response.text().then(text => {
+                        throw new Error("Expected JSON, received: " + text);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast("Password reset successfully!", "success");
+                } else {
+                    errorMessage.innerText = data.error || "An error occurred.";
+                    errorMessage.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                errorMessage.innerText = "An error occurred: " + error.message;
+                errorMessage.style.display = "block";
             });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert("Password reset successfully!");
-            window.location.href = "login.html";
-        } else {
-            errorMessage.innerText = data.error || "An error occurred.";
-            errorMessage.style.display = "block";
-        }
-    })
-    .catch(error => {
-        console.error("Fetch error:", error);
-        errorMessage.innerText = "An error occurred: " + error.message;
-        errorMessage.style.display = "block";
-    });
-});
+        });
+
+        // Toggle Password Visibility for New Password
+        document.getElementById("toggleNewPassword").addEventListener("click", function() {
+            const passwordInput = document.getElementById("newPassword");
+            const isHidden = passwordInput.getAttribute("type") === "password";
+            passwordInput.setAttribute("type", isHidden ? "text" : "password");
+            this.classList.toggle("fa-eye", isHidden);
+            this.classList.toggle("fa-eye-slash", !isHidden);
+            this.setAttribute("aria-label", isHidden ? "Show password" : "Hide password");
+        });
+
+        // Toggle Password Visibility for Confirm Password
+        document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+            const confirmPasswordInput = document.getElementById("confirmPassword");
+            const isHidden = confirmPasswordInput.getAttribute("type") === "password";
+            confirmPasswordInput.setAttribute("type", isHidden ? "text" : "password");
+            this.classList.toggle("fa-eye", isHidden);
+            this.classList.toggle("fa-eye-slash", !isHidden);
+            this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
+        });
+
+        // Password Strength Indicator
+        document.getElementById("newPassword").addEventListener("input", function() {
+            const password = this.value;
+            const strengthText = document.getElementById("strengthText");
+            const strengthBar = document.getElementById("strengthBar");
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[!@#$%^&*]/.test(password)) strength++;
+
+            strengthBar.className = "strength-bar";
+            strengthBar.style.width = "";
+            strengthBar.style.backgroundColor = "";
+
+            if (password.length === 0) {
+                strengthText.innerText = "Password Strength: None";
+                strengthBar.classList.add("strength-bar");
+                strengthBar.setAttribute("aria-label", "Password strength: none");
+            } else if (strength <= 2) {
+                strengthText.innerText = "Password Strength: Weak";
+                strengthBar.classList.add("weak");
+                strengthBar.setAttribute("aria-label", "Password strength: weak, 33%");
+            } else if (strength === 3) {
+                strengthText.innerText = "Password Strength: Medium";
+                strengthBar.classList.add("medium");
+                strengthBar.setAttribute("aria-label", "Password strength: medium, 66%");
+            } else {
+                strengthText.innerText = "Password Strength: Strong";
+                strengthBar.classList.add("strong");
+                strengthBar.setAttribute("aria-label", "Password strength: strong, 100%");
+            }
+        });
+
+        // Password Requirements Modal Control
+        const toggleButton = document.querySelector('.password-requirements-toggle');
+        const modal = document.getElementById('passwordRequirementsModal');
+        const closeModal = document.getElementById('closeModal');
+
+        toggleButton.addEventListener('click', function() {
+            modal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

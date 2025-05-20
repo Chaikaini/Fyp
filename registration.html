@@ -380,124 +380,146 @@
     </div>
 
     <script>
-        document.getElementById("registerForm").addEventListener("submit", function(event) {
-            event.preventDefault();
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+        event.preventDefault();
 
-            let form = this;
-            let formData = new FormData(form);
-            let parent_password = document.getElementById("password").value;
-            let confirm_password = document.getElementById("confirm_password").value;
-            let errorMessage = document.getElementById("errorMessage");
+        let form = this;
+        let formData = new FormData(form);
+        let parent_password = document.getElementById("password").value;
+        let confirm_password = document.getElementById("confirm_password").value;
+        let errorMessage = document.getElementById("errorMessage");
 
-            errorMessage.style.display = "none";
-            errorMessage.innerText = "";
+        errorMessage.style.display = "none";
+        errorMessage.innerText = "";
 
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-            if (!passwordRegex.test(parent_password)) {
-                errorMessage.innerText = "Password must be at least 8 characters long and contain uppercase, lowercase, and special characters!";
-                errorMessage.style.display = "block";
-                return;
-            }
+        // Client-side password validation
+        let missingRequirements = [];
+        if (parent_password.length < 8) {
+            missingRequirements.push("be at least 8 characters long");
+        }
+        if (!/[A-Z]/.test(parent_password)) {
+            missingRequirements.push("contain at least one uppercase letter");
+        }
+        if (!/[a-z]/.test(parent_password)) {
+            missingRequirements.push("contain at least one lowercase letter");
+        }
+        if (!/[!@#$%^&*]/.test(parent_password)) {
+            missingRequirements.push("contain at least one special character (!@#$%^&*)");
+        }
 
-            if (parent_password !== confirm_password) {
-                errorMessage.innerText = "Passwords do not match!";
-                errorMessage.style.display = "block";
-                return;
-            }
-
-            fetch("register.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.href = "login.html";
-                } else {
-                    errorMessage.innerText = data.message;
-                    errorMessage.style.display = "block";
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                errorMessage.innerText = "An error occurred. Please try again.";
-                errorMessage.style.display = "block";
-            });
-        });
-
-        document.getElementById("password").addEventListener("input", function() {
-            const password = this.value;
-            const strengthText = document.getElementById("strengthText");
-            const strengthBar = document.getElementById("strengthBar");
-
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[a-z]/.test(password)) strength++;
-            if (/[!@#$%^&*]/.test(password)) strength++;
-
-            strengthBar.className = "strength-bar";
-            strengthBar.style.width = "";
-            strengthBar.style.backgroundColor = "";
-
-            if (password.length === 0) {
-                strengthText.innerText = "Password Strength: None";
-                strengthBar.classList.add("strength-bar");
-                strengthBar.setAttribute("aria-label", "Password strength: none");
-            } else if (strength <= 2) {
-                strengthText.innerText = "Password Strength: Weak";
-                strengthBar.classList.add("weak");
-                strengthBar.setAttribute("aria-label", "Password strength: weak, 33%");
-            } else if (strength === 3) {
-                strengthText.innerText = "Password Strength: Medium";
-                strengthBar.classList.add("medium");
-                strengthBar.setAttribute("aria-label", "Password strength: medium, 66%");
+        if (missingRequirements.length > 0) {
+            let errorText = "Password must ";
+            if (missingRequirements.length === 1) {
+                errorText += missingRequirements[0] + ".";
+            } else if (missingRequirements.length === 2) {
+                errorText += missingRequirements.join(" and ") + ".";
             } else {
-                strengthText.innerText = "Password Strength: Strong";
-                strengthBar.classList.add("strong");
-                strengthBar.setAttribute("aria-label", "Password strength: strong, 100%");
+                errorText += missingRequirements.slice(0, -1).join(", ") + ", and " + missingRequirements.slice(-1) + ".";
             }
+            errorMessage.innerText = errorText;
+            errorMessage.style.display = "block";
+            return;
+        }
+
+        if (parent_password !== confirm_password) {
+            errorMessage.innerText = "Passwords do not match!";
+            errorMessage.style.display = "block";
+            return;
+        }
+
+        fetch("register.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "login.html";
+            } else {
+                errorMessage.innerText = data.message || "An error occurred. Please try again.";
+                errorMessage.style.display = "block";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            errorMessage.innerText = "An error occurred. Please try again.";
+            errorMessage.style.display = "block";
         });
+    });
 
-        document.getElementById("togglePassword").addEventListener("click", function() {
-            const passwordInput = document.getElementById("password");
-            const isHidden = passwordInput.getAttribute("type") === "password";
-            passwordInput.setAttribute("type", isHidden ? "text" : "password");
-            this.classList.toggle("fa-eye", isHidden);
-            this.classList.toggle("fa-eye-slash", !isHidden);
-            this.setAttribute("aria-label", isHidden ? "Show password" : "Hide password");
-        });
+    document.getElementById("password").addEventListener("input", function() {
+        const password = this.value;
+        const strengthText = document.getElementById("strengthText");
+        const strengthBar = document.getElementById("strengthBar");
 
-        document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
-            const confirmPasswordInput = document.getElementById("confirm_password");
-            const isHidden = confirmPasswordInput.getAttribute("type") === "password";
-            confirmPasswordInput.setAttribute("type", isHidden ? "text" : "password");
-            this.classList.toggle("fa-eye", isHidden);
-            this.classList.toggle("fa-eye-slash", !isHidden);
-            this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
-        });
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[!@#$%^&*]/.test(password)) strength++;
 
-        // 对话框控制
-        const toggleButton = document.querySelector('.password-requirements-toggle');
-        const modal = document.getElementById('passwordRequirementsModal');
-        const closeModal = document.getElementById('closeModal');
+        strengthBar.className = "strength-bar";
+        strengthBar.style.width = "";
+        strengthBar.style.backgroundColor = "";
 
-        // 点击“i”图标显示对话框
-        toggleButton.addEventListener('click', function() {
-            modal.style.display = 'flex';
-        });
+        if (password.length === 0) {
+            strengthText.innerText = "Password Strength: None";
+            strengthBar.classList.add("strength-bar");
+            strengthBar.setAttribute("aria-label", "Password strength: none");
+        } else if (strength <= 2) {
+            strengthText.innerText = "Password Strength: Weak";
+            strengthBar.classList.add("weak");
+            strengthBar.setAttribute("aria-label", "Password strength: weak, 33%");
+        } else if (strength === 3) {
+            strengthText.innerText = "Password Strength: Medium";
+            strengthBar.classList.add("medium");
+            strengthBar.setAttribute("aria-label", "Password strength: medium, 66%");
+        } else {
+            strengthText.innerText = "Password Strength: Strong";
+            strengthBar.classList.add("strong");
+            strengthBar.setAttribute("aria-label", "Password strength: strong, 100%");
+        }
+    });
 
-        // 点击关闭按钮关闭对话框
-        closeModal.addEventListener('click', function() {
+    document.getElementById("togglePassword").addEventListener("click", function() {
+        const passwordInput = document.getElementById("password");
+        const isHidden = passwordInput.getAttribute("type") === "password";
+        passwordInput.setAttribute("type", isHidden ? "text" : "password");
+        this.classList.toggle("fa-eye", isHidden);
+        this.classList.toggle("fa-eye-slash", !isHidden);
+        this.setAttribute("aria-label", isHidden ? "Show password" : "Hide password");
+    });
+
+    document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+        const confirmPasswordInput = document.getElementById("confirm_password");
+        const isHidden = confirmPasswordInput.getAttribute("type") === "password";
+        confirmPasswordInput.setAttribute("type", isHidden ? "text" : "password");
+        this.classList.toggle("fa-eye", isHidden);
+        this.classList.toggle("fa-eye-slash", !isHidden);
+        this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
+    });
+
+    // 对话框控制
+    const toggleButton = document.querySelector('.password-requirements-toggle');
+    const modal = document.getElementById('passwordRequirementsModal');
+    const closeModal = document.getElementById('closeModal');
+
+    // 点击“i”图标显示对话框
+    toggleButton.addEventListener('click', function() {
+        modal.style.display = 'flex';
+    });
+
+    // 点击关闭按钮关闭对话框
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+    });
+
+    // 点击遮罩层关闭对话框
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
             modal.style.display = 'none';
-        });
-
-        // 点击遮罩层关闭对话框
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
+        }
+    });
     </script>
 </body>
 

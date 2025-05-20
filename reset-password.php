@@ -143,8 +143,31 @@ try {
             throw new Exception("Passwords do not match.");
         }
         
+        // Validate password requirements
+        $missingRequirements = [];
         if (strlen($newPassword) < 8) {
-            throw new Exception("Password must be at least 8 characters long.");
+            $missingRequirements[] = "be at least 8 characters long";
+        }
+        if (!preg_match('/[A-Z]/', $newPassword)) {
+            $missingRequirements[] = "contain at least one uppercase letter";
+        }
+        if (!preg_match('/[a-z]/', $newPassword)) {
+            $missingRequirements[] = "contain at least one lowercase letter";
+        }
+        if (!preg_match('/[!@#$%^&*]/', $newPassword)) {
+            $missingRequirements[] = "contain at least one special character (!@#$%^&*)";
+        }
+
+        if (!empty($missingRequirements)) {
+            $errorText = "Password must ";
+            if (count($missingRequirements) === 1) {
+                $errorText .= $missingRequirements[0] . ".";
+            } elseif (count($missingRequirements) === 2) {
+                $errorText .= $missingRequirements[0] . " and " . $missingRequirements[1] . ".";
+            } else {
+                $errorText .= implode(", ", array_slice($missingRequirements, 0, -1)) . ", and " . $missingRequirements[count($missingRequirements) - 1] . ".";
+            }
+            throw new Exception($errorText);
         }
 
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
