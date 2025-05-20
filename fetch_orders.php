@@ -47,24 +47,28 @@ switch ($action) {
             LEFT JOIN parent p ON r.parent_id = p.parent_id
             LEFT JOIN class c ON r.class_id = c.class_id
             LEFT JOIN child ch ON r.child_id = ch.child_id
-            LEFT JOIN subject s ON r.subject_id = s.subject_id
-            LEFT JOIN teacher t ON r.teacher_id = t.teacher_id
+            LEFT JOIN subject s ON c.subject_id = s.subject_id
+            LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
             LEFT JOIN payment pmt ON r.payment_id = pmt.payment_id
             WHERE 
-                p.parent_name LIKE '$search_term' OR
-                r.registration_id LIKE '$search_term' OR
-                c.class_id LIKE '$search_term' OR
-                ch.child_name LIKE '$search_term' OR
-                s.subject_name LIKE '$search_term' OR
-                t.teacher_name LIKE '$search_term'
+                p.parent_name LIKE ? OR
+                r.registration_id LIKE ? OR
+                c.class_id LIKE ? OR
+                ch.child_name LIKE ? OR
+                s.subject_name LIKE ? OR
+                t.teacher_name LIKE ?
             ORDER BY r.registration_id ASC
         ";
-        $result = $conn->query($sql);
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssssss", $search_term, $search_term, $search_term, $search_term, $search_term, $search_term);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $registrations = [];
         while ($row = $result->fetch_assoc()) {
             $registrations[] = $row;
         }
         echo json_encode($registrations);
+        $stmt->close();
         break;
 
     case 'getSubjects':
@@ -112,10 +116,10 @@ switch ($action) {
                 LEFT JOIN parent p ON r.parent_id = p.parent_id
                 LEFT JOIN class c ON r.class_id = c.class_id
                 LEFT JOIN child ch ON r.child_id = ch.child_id
-                LEFT JOIN subject s ON r.subject_id = s.subject_id
-                LEFT JOIN teacher t ON r.teacher_id = t.teacher_id
+                LEFT JOIN subject s ON c.subject_id = s.subject_id
+                LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
                 LEFT JOIN payment pmt ON r.payment_id = pmt.payment_id
-                WHERE r.subject_id = ? AND r.class_id = ?
+                WHERE c.subject_id = ? AND r.class_id = ?
                 ORDER BY r.registration_id ASC
             ");
             $stmt->bind_param("ss", $subject_id, $class_id);
@@ -147,8 +151,8 @@ switch ($action) {
             LEFT JOIN parent p ON r.parent_id = p.parent_id
             LEFT JOIN class c ON r.class_id = c.class_id
             LEFT JOIN child ch ON r.child_id = ch.child_id
-            LEFT JOIN subject s ON r.subject_id = s.subject_id
-            LEFT JOIN teacher t ON r.teacher_id = t.teacher_id
+            LEFT JOIN subject s ON c.subject_id = s.subject_id
+            LEFT JOIN teacher t ON c.teacher_id = t.teacher_id
             LEFT JOIN payment pmt ON r.payment_id = pmt.payment_id
             ORDER BY r.registration_id ASC
         ";
@@ -159,7 +163,7 @@ switch ($action) {
         }
         echo json_encode($registrations);
         break;
-} 
+}
 
-$conn->close(); 
+$conn->close();
 ?>
