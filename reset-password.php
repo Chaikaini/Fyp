@@ -1,6 +1,38 @@
 <?php
-ob_start(); // Start output buffering at the very beginning
-header('Content-Type: application/json'); // Set this at the very beginning
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+ob_start(); // Start output buffering
+header('Content-Type: application/json'); // Set JSON content type
+
+// Include PHPMailer manually
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+// Verify PHPMailer files
+$phpmailer_path = 'PHPMailer.php';
+$smtp_path = 'SMTP.php';
+$exception_path = 'Exception.php';
+
+if (!file_exists($phpmailer_path) || !file_exists($smtp_path) || !file_exists($exception_path)) {
+    throw new Exception("PHPMailer files not found. Check paths.");
+}
+
+require $phpmailer_path;
+require $smtp_path;
+require $exception_path;
+
+// Verify config.php
+if (!file_exists('config.php')) {
+    throw new Exception("Configuration file (config.php) not found.");
+}
+require 'config.php';
+
+// Verify SMTP credentials
+if (!defined('SMTP_USERNAME') || !defined('SMTP_PASSWORD')) {
+    throw new Exception("SMTP_USERNAME or SMTP_PASSWORD not defined in config.php.");
+}
 
 session_start();
 
@@ -13,6 +45,11 @@ $dbname = "the seeds";
 $response = ["success" => false, "error" => ""];
 
 try {
+    // Check OpenSSL extension
+    if (!extension_loaded('openssl')) {
+        throw new Exception("OpenSSL extension not enabled.");
+    }
+
     $conn = new mysqli($servername, $username, $password, $dbname);
     
     if ($conn->connect_error) {
@@ -20,7 +57,7 @@ try {
     }
 
     if (isset($_POST['send_otp'])) {
-        $email = $_POST['email'];
+        $email = $_POST['email'] ?? '';
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception("Invalid email format.");
         }
@@ -32,7 +69,7 @@ try {
         
         $stmt->bind_param("s", $email);
         if (!$stmt->execute()) {
-            throw new Exception("Execute failed: " . $conn->error);
+            throw new Exception("Execute failed: " . $stmt->error);
         }
         
         $result = $stmt->get_result();
@@ -42,22 +79,47 @@ try {
             $_SESSION['otp'] = $otp;
             $_SESSION['email'] = $email;
             $_SESSION['otp_time'] = time(); // Store OTP generation time
-            
-            // TODO: Implement actual email sending here
-            // mail($email, "Password Reset OTP", "Your OTP is: $otp");
-            
-            $response["success"] = true;
-            $response["otp"] = $otp; // For testing only
+
+            // Send OTP via email using PHPMailer
+            $mail = new PHPMailer(true);
+            try {
+                // Enable debug output (for testing)
+                $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Remove in production
+                // Server settings
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com'; // Gmail SMTP server
+                $mail->SMTPAuth = true;
+                $mail->Username = SMTP_USERNAME;
+                $mail->Password = SMTP_PASSWORD;
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port = 465;
+
+                // Recipients
+                $mail->setFrom(SMTP_USERNAME, 'The Seeds Learning Centre');
+                $mail->addAddress($email); // Recipient's email
+
+                // Content
+                $mail->isHTML(true);
+                $mail->Subject = 'Password Reset OTP';
+                $mail->Body = "Dear User,<br><br>Your OTP for password reset is: <b>$otp</b><br>This OTP is valid for 10 minutes.<br><br>Best regards,<br>The Seeds Learning Centre";
+                $mail->AltBody = "Your OTP for password reset is: $otp\nThis OTP is valid for 10 minutes.\n\nBest regards,\nThe Seeds Learning Centre";
+
+                $mail->send();
+                $response["success"] = true;
+                // Remove in production: $response["otp"] = $otp; // For testing only
+            } catch (Exception $e) {
+                throw new Exception("Failed to send OTP email: " . $mail->ErrorInfo);
+            }
         } else {
             throw new Exception("Email not found.");
         }
         $stmt->close();
         
     } elseif (isset($_POST['verify_otp'])) {
-        $inputOtp = $_POST['input_otp'];
+        $inputOtp = $_POST['input_otp'] ?? '';
         $storedOtp = $_SESSION['otp'] ?? '';
         
-        // Check if OTP is expired (e.g., 10 minutes)
+        // Check if OTP is expired (10 minutes)
         if (!isset($_SESSION['otp_time']) || (time() - $_SESSION['otp_time']) > 600) {
             throw new Exception("OTP has expired.");
         }
@@ -69,8 +131,8 @@ try {
         }
         
     } elseif (isset($_POST['reset_password'])) {
-        $newPassword = $_POST['new_password'];
-        $confirmPassword = $_POST['confirm_password'];
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
         $email = $_SESSION['email'] ?? '';
 
         if (empty($email)) {
@@ -108,11 +170,8 @@ try {
         $conn->close();
     }
     
-    ob_end_clean(); // Clean any output
+    ob_end_clean(); // Clean output buffer
     echo json_encode($response);
     exit;
 }
-
-$conn->close();
-ob_end_flush(); // Send output
 ?>
