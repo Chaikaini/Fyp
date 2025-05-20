@@ -136,3 +136,129 @@ Stack trace:
 [12-May-2025 11:14:05 Europe/Berlin] Invalid request method: GET
 [12-May-2025 11:14:07 Europe/Berlin] Invalid request method: GET
 [12-May-2025 11:14:07 Europe/Berlin] Invalid request method: GET
+[20-May-2025 15:24:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:24 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:24 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:24 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:24 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:37 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:24:39 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:25:09 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:25:09 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:25:38 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:25:38 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:02 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:02 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[20-May-2025 15:26:03 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'the_seeds' in C:\xampp\htdocs\Fyp\admin_manage.php:19
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(19): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'the_seeds')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 19
+[2025-05-20 15:27:49] Add admin failed: Email already exists: chaikaini@gmail.com
+[2025-05-20 15:27:49] Add admin failed: Email already exists: chaikaini@gmail.com
+[2025-05-20 15:27:50] Add admin failed: Email already exists: chaikaini@gmail.com
+[2025-05-20 15:27:52] Add admin failed: Email already exists: chaikaini@gmail.com
+[2025-05-20 15:28:45] Successfully added admin: jiaxin@gmail.com
+[2025-05-20 15:30:44] Successfully added admin: 12123@gmail.com
+[2025-05-20 15:31:10] Successfully added admin: 123@gmail.com
+[2025-05-20 15:31:23] Delete request received for admin_id: 11114
+[2025-05-20 15:31:23] Successfully deleted admin_id: 11114
+[2025-05-20 15:31:25] Delete request received for admin_id: 11115
+[2025-05-20 15:31:25] Successfully deleted admin_id: 11115
+[2025-05-20 15:31:39] Successfully added admin: 123@gmail.com
+[2025-05-20 15:31:43] Delete request received for admin_id: 11116
+[2025-05-20 15:31:43] Successfully deleted admin_id: 11116
+[2025-05-20 15:35:30] Successfully updated admin_id: 11112
+[2025-05-20 15:35:36] Successfully updated admin_id: 11112

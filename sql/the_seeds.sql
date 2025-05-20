@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 17, 2025 at 02:37 PM
+-- Generation Time: May 20, 2025 at 03:36 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -34,15 +34,17 @@ CREATE TABLE `admin` (
   `admin_email` varchar(100) NOT NULL,
   `admin_address` varchar(255) DEFAULT NULL,
   `admin_phone_number` varchar(20) DEFAULT NULL,
-  `admin_password` varchar(255) NOT NULL
+  `admin_password` varchar(255) NOT NULL,
+  `role` enum('Admin','Super Admin') NOT NULL DEFAULT 'Admin'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `admin`
 --
 
-INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_address`, `admin_phone_number`, `admin_password`) VALUES
-(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$lQlGrowkkRVMDwrfxWOTveKgHOLxPIdZgaz/qrMs6lJkCIvPEaM/e');
+INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_address`, `admin_phone_number`, `admin_password`, `role`) VALUES
+(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$lQlGrowkkRVMDwrfxWOTveKgHOLxPIdZgaz/qrMs6lJkCIvPEaM/e', 'Super Admin'),
+(11112, 'jiaxin', 'Female', 'jiaxin@gmail.com', 'Jalan Putra 1', '0127818656', '$2y$10$TJwacQClqzn00.t5QwJpoOUo/RjVZQAYUdtK22DKoAcKuqdTc2.ja', 'Admin');
 
 -- --------------------------------------------------------
 
@@ -162,9 +164,7 @@ INSERT INTO `credit_cards` (`credit_card_id`, `parent_id`, `card_number`, `expir
 (1, 1, '4111111111111111', '12/25', '1122', '2025-04-17 07:25:04'),
 (2, 2, '5111111111111111', '12/25', '9988', '2025-04-17 11:56:09');
 
-
 -- --------------------------------------------------------
-
 
 --
 -- Table structure for table `exam_result`
@@ -423,7 +423,6 @@ ALTER TABLE `cart`
   ADD KEY `class_id` (`class_id`),
   ADD KEY `child_id` (`child_id`);
 
-
 --
 -- Indexes for table `child`
 --
@@ -454,7 +453,6 @@ ALTER TABLE `comments`
 ALTER TABLE `credit_cards`
   ADD PRIMARY KEY (`credit_card_id`),
   ADD KEY `parent_id` (`parent_id`);
-
 
 --
 -- Indexes for table `exam_result`
@@ -535,6 +533,12 @@ ALTER TABLE `teacher_comment`
 --
 
 --
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11113;
+
+--
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
@@ -557,6 +561,7 @@ ALTER TABLE `comments`
 --
 ALTER TABLE `credit_cards`
   MODIFY `credit_card_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
 --
 -- AUTO_INCREMENT for table `exam_result`
 --
@@ -567,13 +572,13 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `parent`
@@ -622,7 +627,6 @@ ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
   ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`);
-
 
 --
 -- Constraints for table `child`
