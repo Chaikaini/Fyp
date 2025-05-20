@@ -30,6 +30,30 @@ if (isset($_GET['action']) && $_GET['action'] === 'test') {
     exit;
 }
 
+// Handle get classes request
+if (isset($_GET['action']) && $_GET['action'] === 'classes') {
+    error_log("Fetching all classes");
+    $stmt = $conn->prepare("SELECT class_id AS id, class_name AS name FROM class");
+    if (!$stmt) {
+        error_log("Prepare failed: " . $conn->error);
+        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        $conn->close();
+        ob_end_flush();
+        exit;
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $classes = [];
+    while ($row = $result->fetch_assoc()) {
+        $classes[] = $row;
+    }
+    echo json_encode($classes);
+    $stmt->close();
+    $conn->close();
+    ob_end_flush();
+    exit;
+}
+
 // Check authentication
 if (!isset($_SESSION['role']) || !isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'Admin') {
     error_log("Unauthorized access attempt by " . ($_SESSION['admin_id'] ?? 'unknown'));
@@ -86,7 +110,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             n.notification_id, 
             n.sender_id, 
             n.recipient_type, 
-            n.subject_id, 
             n.class_id, 
             n.notification_title, 
             n.notification_content, 
@@ -108,12 +131,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             GROUP_CONCAT(CASE 
                 WHEN nr.recipient_type = 'Teacher' THEN t.teacher_name 
                 WHEN nr.recipient_type = 'Parent' THEN p.parent_name 
-                WHEN nr.recipient_type = 'Class' THEN NULL
-            END) AS recipient_names
+                ELSE NULL
+            END) AS recipient_names,
+            c.subject_id,
+            s.subject_name
         FROM notification n
         LEFT JOIN notification_receiver nr ON n.notification_id = nr.notification_id
         LEFT JOIN teacher t ON nr.teacher_id = t.teacher_id AND nr.recipient_type = 'Teacher'
         LEFT JOIN parent p ON nr.parent_id = p.parent_id AND nr.recipient_type = 'Parent'
+        LEFT JOIN class c ON n.class_id = c.class_id
+        LEFT JOIN subject s ON c.subject_id = s.subject_id
         GROUP BY n.notification_id
     ");
     if (!$stmt) {
@@ -127,29 +154,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
     $result = $stmt->get_result();
     $notifications = [];
     while ($row = $result->fetch_assoc()) {
+        $recipient_ids = [];
+        if ($row['recipient_type'] === 'Teacher' && $row['teacher_ids']) {
+            $recipient_ids = explode(',', $row['teacher_ids']);
+        } elseif ($row['recipient_type'] === 'Parent' && $row['parent_ids']) {
+            $recipient_ids = explode(',', $row['parent_ids']);
+        }
+        $recipient_names = $row['recipient_names'] ? explode(',', $row['recipient_names']) : [];
+        $recipient_types = $row['recipient_types'] ? explode(',', $row['recipient_types']) : [];
         $recipients = [];
-        if ($row['recipient_type'] === 'Class') {
-            $recipients = [];
-        } else {
-            $recipient_ids = [];
-            if ($row['recipient_type'] === 'Teacher' && $row['teacher_ids']) {
-                $recipient_ids = explode(',', $row['teacher_ids']);
-            } elseif ($row['recipient_type'] === 'Parent' && $row['parent_ids']) {
-                $recipient_ids = explode(',', $row['parent_ids']);
-            }
-            $recipient_names = $row['recipient_names'] ? explode(',', $row['recipient_names']) : [];
-            $recipient_types = $row['recipient_types'] ? explode(',', $row['recipient_types']) : [];
-            for ($i = 0; $i < count($recipient_ids); $i++) {
-                if ($recipient_ids[$i] && isset($recipient_names[$i])) {
-                    $recipients[] = [
-                        'recipient_id' => $recipient_ids[$i],
-                        'recipient_name' => $recipient_names[$i],
-                        'recipient_type' => $recipient_types[$i]
-                    ];
-                }
+        for ($i = 0; $i < count($recipient_ids); $i++) {
+            if ($recipient_ids[$i] && isset($recipient_names[$i])) {
+                $recipients[] = [
+                    'recipient_id' => $recipient_ids[$i],
+                    'recipient_name' => $recipient_names[$i],
+                    'recipient_type' => $recipient_types[$i]
+                ];
             }
         }
-        // Override sender_name for admin to "kaini"
         $sender_name = $row['sender_type'] === 'Admin' ? 'kaini' : $row['sender_name'];
         $notifications[] = [
             'notification_id' => $row['notification_id'],
@@ -158,6 +180,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'sender_name' => $sender_name,
             'recipient_type' => $row['recipient_type'],
             'subject_id' => $row['subject_id'],
+            'subject_name' => $row['subject_name'],
             'class_id' => $row['class_id'],
             'notification_title' => $row['notification_title'],
             'notification_content' => $row['notification_content'],
@@ -165,7 +188,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'notification_created_at' => $row['notification_created_at'],
             'recipients' => $recipients
         ];
-        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}");
+        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}, subject_id={$row['subject_id']}, class_id={$row['class_id']}");
     }
     echo json_encode($notifications);
     $stmt->close();
@@ -182,11 +205,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recipient_id = $_POST['recipient_id'] ?? '';
     $notification_title = $_POST['notification_title'] ?? '';
     $notification_content = $_POST['notification_content'] ?? '';
+    $class_id = $_POST['class_id'] ?? null;
     $documentPath = null;
 
     // Validate inputs
-    if (empty($recipient_type) || empty($recipient_id) || empty($notification_title) || empty($notification_content)) {
-        error_log("Missing required fields: recipient_type=$recipient_type, recipient_id=$recipient_id, title=$notification_title, content=$notification_content");
+    if (empty($recipient_type) || empty($recipient_id) || empty($notification_title) || empty($notification_content) || empty($class_id)) {
+        error_log("Missing required fields: recipient_type=$recipient_type, recipient_id=$recipient_id, title=$notification_title, content=$notification_content, class_id=$class_id");
         echo json_encode(['success' => false, 'error' => 'All required fields must be filled']);
         $conn->close();
         ob_end_flush();
@@ -203,6 +227,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $conn->begin_transaction();
     try {
+        // Validate class_id
+        $stmt = $conn->prepare("SELECT 1 FROM class WHERE class_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        $stmt->bind_param("i", $class_id);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows === 0) {
+            throw new Exception("Invalid class ID: $class_id");
+        }
+        $stmt->close();
+
         $recipient_ids = [];
         if ($recipient_id === 'all') {
             if ($recipient_type === 'Parent') {
@@ -259,12 +295,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Insert into notification table
-        error_log("Inserting notification with recipient_type: $recipient_type");
-        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document, subject_id, class_id) VALUES (?, ?, ?, ?, ?, NULL, NULL)");
+        error_log("Inserting notification with recipient_type: $recipient_type, class_id: $class_id");
+        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document, class_id) VALUES (?, ?, ?, ?, ?, ?)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
-        $stmt->bind_param("issss", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath);
+        $stmt->bind_param("issssi", $sender_id, $recipient_type, $notification_title, $notification_content, $documentPath, $class_id);
         if (!$stmt->execute()) {
             throw new Exception("Failed to insert notification: " . $stmt->error);
         }
@@ -272,16 +308,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($notification_id == 0) {
             throw new Exception("AUTO_INCREMENT failed, notification_id is 0");
         }
-        error_log("Inserted notification: notification_id=$notification_id, sender_id=$sender_id, recipient_type=$recipient_type");
+        error_log("Inserted notification: notification_id=$notification_id, sender_id=$sender_id, recipient_type=$recipient_type, class_id=$class_id");
         $stmt->close();
 
-        // Verify inserted recipient_type
-        $stmt = $conn->prepare("SELECT recipient_type FROM notification WHERE notification_id = ?");
+        // Verify inserted recipient_type and class_id
+        $stmt = $conn->prepare("SELECT recipient_type, class_id FROM notification WHERE notification_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         $stmt->bind_param("i", $notification_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        error_log("Verified recipient_type in notification: " . ($row['recipient_type'] ?? 'NULL'));
+        error_log("Verified notification: recipient_type=" . ($row['recipient_type'] ?? 'NULL') . ", class_id=" . ($row['class_id'] ?? 'NULL'));
         $stmt->close();
 
         // Insert into notification_receiver table
@@ -303,6 +342,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verify inserted recipient_type in notification_receiver
         $stmt = $conn->prepare("SELECT recipient_type FROM notification_receiver WHERE notification_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         $stmt->bind_param("i", $notification_id);
         $stmt->execute();
         $result = $stmt->get_result();

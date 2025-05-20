@@ -159,7 +159,7 @@ switch ($action) {
         }
         echo json_encode($registrations);
         break;
-}
+} 
 
 $conn->close(); 
 ?>
