@@ -127,10 +127,10 @@
         <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
-      </li>
+      </li> 
     </ul>
   </nav>
 
@@ -192,11 +192,13 @@
                 </div>
               </div>
               <div class="row mb-3">
-                <div class="col-md-8">
+                <div class="col-md-12">
                   <label for="notification_title" class="form-label">Title</label>
                   <input type="text" class="form-control form-control-sm" name="notification_title" id="notification_title" placeholder="Enter the title" required>
                 </div>
-                <div class="col-md-4">
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-12">
                   <label for="notification_document" class="form-label">Attachment</label>
                   <input type="file" class="form-control form-control-sm" name="notification_document" id="notification_document" accept="image/*">
                 </div>
@@ -220,8 +222,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // Sidebar toggle
+      const sidebar = document.getElementById('sidebar');
       document.getElementById('toggleSidebar').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('collapsed');
+        sidebar.classList.toggle('collapsed');
       });
 
       // Report menu toggle
@@ -270,7 +273,12 @@
         if (recipientType) {
           fetch(`manage_notification.php?action=recipients&recipient_type=${recipientType}`)
             .then(res => {
-              if (!res.ok) throw new Error('Failed to load recipients');
+              if (!res.ok) {
+                return res.text().then(text => {
+                  console.error('Recipient fetch error response:', text);
+                  throw new Error('Failed to load recipients');
+                });
+              }
               return res.json();
             })
             .then(recipients => {
@@ -303,11 +311,9 @@
         fetch('manage_notification.php?action=getNotifications')
           .then(res => {
             if (!res.ok) {
-              return res.json().then(err => {
-                if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html'; // Redirect to login
-                }
-                throw new Error(err.error || 'Failed to load notifications');
+              return res.text().then(text => {
+                console.error('Notification fetch error response:', text);
+                throw new Error('Failed to load notifications');
               });
             }
             return res.json();
@@ -321,16 +327,11 @@
               data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
               data.forEach(n => {
                 const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
-                let recipientInfo = '';
-                if (n.recipient_type === 'Class') {
-                  recipientInfo = `<p class="card-text mb-1"><strong>To Class:</strong> ${n.class_id}</p>`;
-                } else {
-                  const recipientNames = n.recipients.length === 0 ? 'All' : n.recipients.map(r => `${r.recipient_name} (${r.recipient_id})`).join(', ');
-                  recipientInfo = `
-                    <p class="card-text mb-1"><strong>Recipient Type:</strong> ${n.recipient_type}</p>
-                    <p class="card-text mb-1"><strong>Recipients:</strong> ${recipientNames}</p>
-                  `;
-                }
+                const recipientNames = n.recipients.length === 0 ? 'All' : n.recipients.map(r => `${r.recipient_name} (${r.recipient_id})`).join(', ');
+                const classSubjectInfo = n.sender_type !== 'Admin' ? `
+                  <p class="card-text mb-1"><strong>Class:</strong> ${n.class_id || 'N/A'}</p>
+                  <p class="card-text mb-1"><strong>Subject:</strong> ${n.subject_name || 'N/A'} (${n.subject_id || 'N/A'})</p>
+                ` : '';
                 const block = document.createElement('div');
                 block.className = 'card mb-3 shadow-sm';
                 block.innerHTML = `
@@ -343,7 +344,9 @@
                       <small class="text-muted">${time}</small>
                     </div>
                     <p class="card-text mb-1"><strong>Title:</strong> ${n.notification_title}</p>
-                    ${recipientInfo}
+                    <p class="card-text mb-1"><strong>Recipient Type:</strong> ${n.recipient_type}</p>
+                    <p class="card-text mb-1"><strong>Recipients:</strong> ${recipientNames}</p>
+                    ${classSubjectInfo}
                     <p class="card-text">${n.notification_content}</p>
                     ${n.notification_document ? `
                       <a href="${n.notification_document}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
@@ -358,7 +361,7 @@
           })
           .catch(err => {
             console.error('Error loading notifications:', err);
-            showError(err.message);
+            showError('Error loading notifications');
           });
       }
 
@@ -397,11 +400,9 @@
         })
           .then(res => {
             if (!res.ok) {
-              return res.json().then(err => {
-                if (err.error === 'Unauthorized access') {
-                  window.location.href = 'admin login.html'; // Redirect to login
-                }
-                throw new Error(err.error || 'Failed to send announcement');
+              return res.text().then(text => {
+                console.error('Form submission error response:', text);
+                throw new Error('Failed to send announcement');
               });
             }
             return res.json();
@@ -419,7 +420,7 @@
           })
           .catch(error => {
             console.error('Fetch Error:', error);
-            showError(error.message);
+            showError('Failed to send announcement. Check console for details.');
           });
       });
 

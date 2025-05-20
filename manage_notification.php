@@ -1,14 +1,19 @@
 <?php
 ob_start();
 session_start();
-ini_set('display_errors', 1);
+
+// Disable error display and enable logging
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', 'path/to/your/error.log'); // Replace with your server's error log path
 error_reporting(E_ALL);
+
 header("Content-Type: application/json");
 
 $conn = new mysqli("127.0.0.1", "root", "", "the seeds");
 if ($conn->connect_error) {
     error_log("Database connection failed: " . $conn->connect_error);
-    echo json_encode(["success" => false, "error" => "Database connection failed: " . $conn->connect_error]);
+    echo json_encode(["success" => false, "error" => "Database connection failed"]);
     ob_end_flush();
     exit;
 }
@@ -60,7 +65,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['r
     }
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
-        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        echo json_encode(["success" => false, "error" => "Failed to prepare statement"]);
         $conn->close();
         ob_end_flush();
         exit;
@@ -86,7 +91,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             n.notification_id, 
             n.sender_id, 
             n.recipient_type, 
-            n.subject_id, 
             n.class_id, 
             n.notification_title, 
             n.notification_content, 
@@ -108,17 +112,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             GROUP_CONCAT(CASE 
                 WHEN nr.recipient_type = 'Teacher' THEN t.teacher_name 
                 WHEN nr.recipient_type = 'Parent' THEN p.parent_name 
-                WHEN nr.recipient_type = 'Class' THEN NULL
-            END) AS recipient_names
+                ELSE NULL
+            END) AS recipient_names,
+            c.subject_id,
+            s.subject_name
         FROM notification n
         LEFT JOIN notification_receiver nr ON n.notification_id = nr.notification_id
         LEFT JOIN teacher t ON nr.teacher_id = t.teacher_id AND nr.recipient_type = 'Teacher'
         LEFT JOIN parent p ON nr.parent_id = p.parent_id AND nr.recipient_type = 'Parent'
+        LEFT JOIN class c ON n.class_id = c.class_id
+        LEFT JOIN subject s ON c.subject_id = s.subject_id
         GROUP BY n.notification_id
     ");
     if (!$stmt) {
         error_log("Prepare failed: " . $conn->error);
-        echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+        echo json_encode(["success" => false, "error" => "Failed to prepare statement"]);
         $conn->close();
         ob_end_flush();
         exit;
@@ -127,29 +135,24 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
     $result = $stmt->get_result();
     $notifications = [];
     while ($row = $result->fetch_assoc()) {
+        $recipient_ids = [];
+        if ($row['recipient_type'] === 'Teacher' && $row['teacher_ids']) {
+            $recipient_ids = explode(',', $row['teacher_ids']);
+        } elseif ($row['recipient_type'] === 'Parent' && $row['parent_ids']) {
+            $recipient_ids = explode(',', $row['parent_ids']);
+        }
+        $recipient_names = $row['recipient_names'] ? explode(',', $row['recipient_names']) : [];
+        $recipient_types = $row['recipient_types'] ? explode(',', $row['recipient_types']) : [];
         $recipients = [];
-        if ($row['recipient_type'] === 'Class') {
-            $recipients = [];
-        } else {
-            $recipient_ids = [];
-            if ($row['recipient_type'] === 'Teacher' && $row['teacher_ids']) {
-                $recipient_ids = explode(',', $row['teacher_ids']);
-            } elseif ($row['recipient_type'] === 'Parent' && $row['parent_ids']) {
-                $recipient_ids = explode(',', $row['parent_ids']);
-            }
-            $recipient_names = $row['recipient_names'] ? explode(',', $row['recipient_names']) : [];
-            $recipient_types = $row['recipient_types'] ? explode(',', $row['recipient_types']) : [];
-            for ($i = 0; $i < count($recipient_ids); $i++) {
-                if ($recipient_ids[$i] && isset($recipient_names[$i])) {
-                    $recipients[] = [
-                        'recipient_id' => $recipient_ids[$i],
-                        'recipient_name' => $recipient_names[$i],
-                        'recipient_type' => $recipient_types[$i]
-                    ];
-                }
+        for ($i = 0; $i < count($recipient_ids); $i++) {
+            if ($recipient_ids[$i] && isset($recipient_names[$i])) {
+                $recipients[] = [
+                    'recipient_id' => $recipient_ids[$i],
+                    'recipient_name' => $recipient_names[$i],
+                    'recipient_type' => $recipient_types[$i]
+                ];
             }
         }
-        // Override sender_name for admin to "kaini"
         $sender_name = $row['sender_type'] === 'Admin' ? 'kaini' : $row['sender_name'];
         $notifications[] = [
             'notification_id' => $row['notification_id'],
@@ -158,6 +161,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'sender_name' => $sender_name,
             'recipient_type' => $row['recipient_type'],
             'subject_id' => $row['subject_id'],
+            'subject_name' => $row['subject_name'],
             'class_id' => $row['class_id'],
             'notification_title' => $row['notification_title'],
             'notification_content' => $row['notification_content'],
@@ -165,7 +169,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'notification_created_at' => $row['notification_created_at'],
             'recipients' => $recipients
         ];
-        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}");
+        error_log("Notification fetched: notification_id={$row['notification_id']}, sender_id={$row['sender_id']}, sender_type={$row['sender_type']}, sender_name={$sender_name}, recipient_type={$row['recipient_type']}, subject_id={$row['subject_id']}, class_id={$row['class_id']}");
     }
     echo json_encode($notifications);
     $stmt->close();
@@ -260,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Insert into notification table
         error_log("Inserting notification with recipient_type: $recipient_type");
-        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document, subject_id, class_id) VALUES (?, ?, ?, ?, ?, NULL, NULL)");
+        $stmt = $conn->prepare("INSERT INTO notification (sender_id, recipient_type, notification_title, notification_content, notification_document) VALUES (?, ?, ?, ?, ?)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
@@ -277,11 +281,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verify inserted recipient_type
         $stmt = $conn->prepare("SELECT recipient_type FROM notification WHERE notification_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         $stmt->bind_param("i", $notification_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        error_log("Verified recipient_type in notification: " . ($row['recipient_type'] ?? 'NULL'));
+        error_log("Verified notification: recipient_type=" . ($row['recipient_type'] ?? 'NULL'));
         $stmt->close();
 
         // Insert into notification_receiver table
@@ -303,6 +310,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verify inserted recipient_type in notification_receiver
         $stmt = $conn->prepare("SELECT recipient_type FROM notification_receiver WHERE notification_id = ?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         $stmt->bind_param("i", $notification_id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -325,7 +335,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Handle invalid requests
 error_log("Invalid request received: method={$_SERVER['REQUEST_METHOD']}, action=" . ($_GET['action'] ?? 'none'));
-echo json_encode(["success" => false, "error" => "Invalid request. Please specify a valid action (e.g., ?action=getNotifications)"]);
+echo json_encode(["success" => false, "error" => "Invalid request"]);
 $conn->close();
 ob_end_flush();
 exit;
