@@ -93,6 +93,19 @@
     .notification.error {
       background-color: #dc3545;
     }
+    .card-header form {
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      align-items: center;
+    }
+    .card-header .form-select {
+      width: 200px;
+      margin-right: 10px;
+    }
+    .card-header button {
+      padding: 8px 15px;
+    }
   </style>
 </head>
 <body>
@@ -156,7 +169,12 @@
     
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5>Payment Report</h5>
+        <form class="d-flex align-items-center">
+          <select id="monthSelect" class="form-select">
+            <option value="" disabled selected>Select Month</option>
+          </select>
+          <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
+        </form>
         <button class="btn btn-success" id="exportExcel"><i class="fas fa-file-excel"></i> Export to Excel</button>
       </div>
       <div class="card-body">
@@ -198,15 +216,32 @@
         }, 5000);
       }
 
-      fetchReportData(); // Load the default report data (current month)
+      // Populate month select options (last 12 months)
+      function populateMonthSelect() {
+        const monthSelect = document.getElementById('monthSelect');
+        const today = new Date();
+        monthSelect.innerHTML = '<option value="" disabled selected>Select Month</option>';
+        for (let i = 0; i < 12; i++) {
+          const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          const monthIndex = date.getMonth(); // 0-11
+          const year = date.getFullYear();
+          // Adjust month to 1-12 for correct yearMonth format
+          const yearMonth = `${year}-${String(monthIndex + 1).padStart(2, '0')}`; // e.g., "2025-04" for April
+          const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+          monthSelect.innerHTML += `<option value="${yearMonth}">${monthName}</option>`;
+        }
+      }
 
-      function fetchReportData() {
-        fetch('fetch_report.php')
+      // Fetch report data
+      function fetchReportData(month = null) {
+        console.log("Fetching data for month:", month); // Debug log
+        const url = month ? `fetch_report.php?month=${month}` : 'fetch_report.php';
+        fetch(url)
           .then(response => response.json())
           .then(data => {
             paymentData = data; // Store data for export
             updateTable(data);
-            updateDateRange(); // Update the date range for the current month
+            updateDateRange(month); // Update the date range display
           })
           .catch(error => {
             console.error("Error fetching report data:", error);
@@ -219,7 +254,7 @@
         tableBody.innerHTML = "";
 
         if (data.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No records found</td></tr>`;
+          tableBody.innerHTML = `<tr><td colspan="5" class="text-center">No records found</td></tr>`;
           return;
         }
 
@@ -235,10 +270,16 @@
         });
       }
 
-      function updateDateRange() {
-        let startDate = new Date();
-        startDate.setDate(1); // First day of the current month
-        let endDate = new Date();
+      function updateDateRange(month = null) {
+        let startDate, endDate;
+        if (month) {
+          startDate = new Date(`${month}-01`);
+          endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0); // Last day of the month
+        } else {
+          startDate = new Date();
+          startDate.setDate(1); // First day of the current month
+          endDate = new Date();
+        }
         let formattedStart = startDate.toISOString().split('T')[0];
         let formattedEnd = endDate.toISOString().split('T')[0];
 
@@ -256,7 +297,7 @@
         // Prepare data for Excel
         const excelData = paymentData.map(payment => ({
           'Payment ID': payment.payment_id,
-          'Parent Name': payment.parent,
+          'Parent Name': payment.parent_name,
           'Payment Method': payment.payment_method,
           'Payment Time': payment.payment_time,
           'Total Amount': `RM${payment.payment_total_amount}`
@@ -270,8 +311,23 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment Report');
 
         // Generate Excel file and trigger download
-        XLSX.writeFile(workbook, `Payment_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+        const selectedMonth = document.getElementById('monthSelect').value || new Date().toISOString().slice(0, 7);
+        XLSX.writeFile(workbook, `Payment_Report_${selectedMonth}.xlsx`);
       });
+
+      // Search button event listener
+      document.getElementById('search-btn').addEventListener('click', () => {
+        const selectedMonth = document.getElementById('monthSelect').value;
+        if (selectedMonth) {
+          fetchReportData(selectedMonth);
+        } else {
+          showNotification("Please select a month", "error");
+        }
+      });
+
+      // Initialize page
+      populateMonthSelect();
+      // Do not fetch data initially; wait for user to select a month
     });
   </script>
 </body>

@@ -1,6 +1,6 @@
 <?php
 // Database configuration (use environment variables or config for production)
-$servername = getenv('DB_HOST') ?: 'localhost'; // Fallback to localhost if not set
+$servername = getenv('DB_HOST') ?: 'localhost';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASS') ?: '';
 $dbname = getenv('DB_NAME') ?: 'the seeds';
@@ -13,11 +13,15 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Set date range for the current month
-$start_date = date("Y-m-01 00:00:00"); // First day of current month
-$end_date = date("Y-m-d 23:59:59"); // Current date
+// Get month from query parameter or default to current month
+$month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
+$start_date = date("Y-m-01 00:00:00", strtotime($month));
+$end_date = date("Y-m-t 23:59:59", strtotime($month));
 
-// Updated SQL query: removed payment_status and fixed table name to credit_cards
+// Debug: Log the date range
+error_log("Fetching payments for month: $month, Start: $start_date, End: $end_date");
+
+// SQL query to fetch payment data
 $sql = "SELECT p.payment_id, pr.parent_name, p.payment_method, p.payment_time, p.payment_total_amount 
         FROM payment p
         JOIN credit_cards cc ON p.credit_card_id = cc.credit_card_id
@@ -40,6 +44,9 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
     $data[] = $row;
 }
+
+// Debug: Log the number of records fetched
+error_log("Records fetched: " . count($data));
 
 // Set JSON header and output data
 header('Content-Type: application/json');
