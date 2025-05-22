@@ -39,20 +39,21 @@
         }
 
         .custom-video {
-            display: block;
             width: 100%;
-            height: 100vh; /* 填满视口高度 */
-            object-fit: cover;
-            border-radius: 0; /* 移除圆角以填满 */
+            height: 100%; /* Fill the container height */
+            object-fit: cover; /* Ensure the video covers the area without distortion */
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         .video-container {
             width: 100%;
-            height: 100vh; /* 强制容器填满视口高度 */
-            padding: 0; /* 移除内边距 */
+            height: 100vh; /* Full viewport height */
+            padding: 0;
             margin: 0;
-            text-align: center;
-            position: relative; /* 确保子元素定位正确 */
+            overflow: hidden; /* Prevent overflow */
+            position: relative;
         }
 
         .grid-container {
@@ -351,15 +352,15 @@
     <!-- Icon Bar End -->
 
     <!-- Header Start -->
-    <div class="container-fluid">
+    <div class="container-fluid p-0">
         <div class="video-container">
-            <video class="custom-video" controls autoplay>
+            <video class="custom-video" autoplay muted loop>
                 <source src="videos/announcement_video.mp4" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
 
-        <div class="container py-5"> <!-- 仅在介绍部分保留 py-5 -->
+        <div class="container py-5">
             <!-- Introduction Start -->
             <div class="text-center wow fadeInUp">
                 <h3 class="section-title bg-white text-center text-primary px-3">The Seeds Learning Centre</h3>
