@@ -79,10 +79,6 @@ $stmt->bind_param("s", $class_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-$imagePath = 'img/the seeds.jpg';
-$imageData = base64_encode(file_get_contents($imagePath));
-$src = 'data:image/jpeg;base64,'.$imageData;
-
 
 if ($result->num_rows > 0) {
     $values = [];
