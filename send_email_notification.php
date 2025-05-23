@@ -13,13 +13,13 @@ function sendEmailToParent($toEmail, $toName, $subject, $bodyContent) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'shilinghappy@gmail.com';
-        $mail->Password = 'vhcx fqmv cnsp bbzn'; 
+        $mail->Username = 'enxi6387@gmail.com';
+        $mail->Password = 'lroa ywhk lldq fwzt'; 
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
         // sender
-        $mail->setFrom('shilinghappy@gmail.com', 'The Seeds Learning Tuition Centre');
+        $mail->setFrom('enxi6387@gmail.com', 'The Seeds Learning Tuition Centre');
 
         // receiver
         $mail->addAddress($toEmail, $toName);
