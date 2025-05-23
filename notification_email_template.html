@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Notification</title>
+    <style>
+
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 20px;
+    }
+
+    .email-container {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .email-header {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #4CAF50;
+    }
+
+    .email-content {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .email-footer {
+        margin-top: 30px;
+        font-size: 14px;
+        color: #777;
+    }
+   
+
+    .notification-content {
+        margin: 15px 0;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+    }
+    
+
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            
+            <div>Hello {{parent_name}},</div>
+        </div>
+
+        <div class="email-content">
+            <p>You have received a new notification:</p>
+            <div class="notification-details">
+                <p><strong>From:</strong> {{sender_name}}</p>
+                <p><strong>Class:</strong> {{class_name}}</p>
+                <p><strong>Title:</strong> {{notification_title}}</p>
+                    <a href='http://localhost/Fyp/login.html'>
+                       Click here to login and view the content of the notification.
+                    </a>
+             
+            </div>
+        </div>
+
+        <div class="email-footer">
+            <p>Best regards,<br>The Seeds Learning Tuition Centre</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+

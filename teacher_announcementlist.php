@@ -1,5 +1,8 @@
 <?php
+header('Content-Type: application/json');
+
 session_start();
+require 'send_email_notification.php';
 
 $conn = new mysqli("localhost", "root", "", "the seeds");
 if ($conn->connect_error) {
@@ -13,12 +16,37 @@ if (!$sender_id) {
 }
 
 // Get form data
-$class_id = $_POST['subject_id'] ?? ''; 
-$class_id = $_POST['class_id'] ?? ''; 
+$class_id = $_POST['class_id'] ?? ($_POST['subject_id'] ?? ''); 
 $notification_title = $_POST['notification_title'] ?? '';
 $notification_content = $_POST['notification_content'] ?? ''; 
 $documentPath = null;
 $recipient_type = 'Class'; 
+
+// Get form data
+$class_id = $_POST['class_id'] ?? ($_POST['subject_id'] ?? ''); 
+$notification_title = $_POST['notification_title'] ?? '';
+$notification_content = $_POST['notification_content'] ?? ''; 
+$documentPath = null;
+$recipient_type = 'Class'; 
+
+// Get sender (teacher) information
+$teacherQuery = $conn->prepare("SELECT teacher_name FROM teacher WHERE teacher_id = ?");
+$teacherQuery->bind_param("s", $sender_id);
+$teacherQuery->execute();
+$teacherData = $teacherQuery->get_result()->fetch_assoc();
+$sender_name = $teacherData['teacher_name'];
+
+// Get class information
+$classQuery = $conn->prepare("
+    SELECT c.class_id, s.subject_name, s.year
+    FROM class c 
+    JOIN subject s ON c.subject_id = s.subject_id 
+    WHERE c.class_id = ?
+");
+$classQuery->bind_param("s", $class_id);
+$classQuery->execute();
+$classData = $classQuery->get_result()->fetch_assoc();
+$class_info = " {$classData['year']} - {$classData['subject_name']}";
 
 // Upload the document if it exists
 if (isset($_FILES['notification_document']) && $_FILES['notification_document']['error'] == UPLOAD_ERR_OK) {
@@ -51,12 +79,60 @@ $stmt->bind_param("s", $class_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
+$imagePath = 'img/the seeds.jpg';
+$imageData = base64_encode(file_get_contents($imagePath));
+$src = 'data:image/jpeg;base64,'.$imageData;
+
+
 if ($result->num_rows > 0) {
     $values = [];
     while ($row = $result->fetch_assoc()) {
         $parent_id = $row['parent_id'];
         $values[] = "($notification_id, '$parent_id', NULL, 'Class', 'unread')";
+
+        // Get parent email and name
+        $parentQuery = $conn->prepare("SELECT parent_email, parent_name FROM parent WHERE parent_id = ?");
+        $parentQuery->bind_param("s", $parent_id);
+        $parentQuery->execute();
+        $parentData = $parentQuery->get_result()->fetch_assoc();
+        
+        if ($parentData) {
+            $toEmail = $parentData['parent_email'];
+            $toName = $parentData['parent_name'];
+            $emailSubject = "The Seeds Learning Tuition Centre";
+
+            // Load HTML template
+            $template = file_get_contents('http://localhost/Fyp/notification_email_template.html');
+            $notificationLink = "http://localhost/Fyp/login.html";
+
+            
+            $emailBody = str_replace(
+                [
+                   
+                    '{{parent_name}}',
+                    '{{sender_name}}',
+                    '{{class_name}}',
+                    '{{notification_title}}',
+                    '{{notification_link}}'
+                ],
+                [
+                    
+                    $toName,
+                    $sender_name,
+                    $class_info,
+                    $notification_title,
+                    $notificationLink
+                ],
+                $template
+            );
+
+            // send email
+            sendEmailToParent($toEmail, $toName, $emailSubject, $emailBody);
+        }
+        $parentQuery->close();
     }
+
+
 
     $insert_sql = "INSERT INTO notification_receiver 
         (notification_id, parent_id, teacher_id, recipient_type, read_status) 

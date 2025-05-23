@@ -277,18 +277,22 @@
       loadNotifications();
     });
 
-    function loadSubjects() {
+function loadSubjects() {
   fetch("teacher_announcement_data.php?action=subject")
     .then(res => res.json())
-    .then(subjects => {
-      const subjectSelect = document.getElementById("subject_id");
-      subjectSelect.innerHTML = "<option value=''>-- Select Subject --</option>";
-      subjects.forEach(subject => {
-        const option = document.createElement("option");
-        option.value = subject.subject_id;
-        option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
-        subjectSelect.appendChild(option);
-      });
+    .then(response => {
+      if (Array.isArray(response)) {
+        const subjectSelect = document.getElementById("subject_id");
+        subjectSelect.innerHTML = "<option value=''>-- Select Subject --</option>";
+        response.forEach(subject => {
+          const option = document.createElement("option");
+          option.value = subject.subject_id;
+          option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
+          subjectSelect.appendChild(option);
+        });
+      } else {
+        console.error('Invalid response format:', response);
+      }
     })
     .catch(err => console.error('Error loading subjects:', err));
 }
