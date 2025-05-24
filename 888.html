@@ -260,26 +260,73 @@
         }
 
         /* Modal Styling */
-        #teacherDetails .row {
+        #teacherModal {
+            z-index: 1055;
+        }
+
+        #teacherDetails .year-section {
+            margin-bottom: 30px;
+        }
+
+        #teacherDetails .year-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
             margin-bottom: 20px;
         }
-        #teacherDetails h6 {
-            font-size: 1.2em;
-            margin-top: 20px;
-            color: #2c3e50;
+
+        #teacherDetails .teacher-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            text-align: center;
         }
-        #teacherDetails p {
-            margin: 5px 0;
-            font-size: 0.9em;
+
+        #teacherDetails .teacher-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        #teacherDetails img {
+
+        #teacherDetails .teacher-image {
+            width: 120px;
+            height: 150px;
+            object-fit: cover;
             border-radius: 5px;
-            max-width: 100%;
-            height: auto;
+            margin: 0 auto 10px;
+            display: block;
         }
-        #teacherDetails .text-danger {
-            font-weight: bold;
-            font-size: 1em;
+
+        #teacherDetails .teacher-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        #teacherDetails .teacher-info {
+            font-size: 0.9em;
+            margin: 5px 0;
+            color: #555;
+        }
+
+        #teacherDetails .teacher-info i {
+            color: #28a745;
+        }
+
+        /* Horizontal layout */
+        #teacherDetails .year-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        #teacherDetails .year-column {
+            flex: 1;
+            min-width: 0;
         }
     </style>
 </head>
@@ -390,9 +437,7 @@
                 <div class="modal-body" id="teacherDetails">
                     <div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+                <!-- 移除 "Close" 按钮 -->
             </div>
         </div>
     </div>
@@ -472,183 +517,239 @@
     <script src="js/main.js"></script>
 
     <!-- Custom JavaScript -->
-   <!-- Custom JavaScript -->
-<script>
-    // Load subjects dynamically
-    async function loadSubjects() {
-        try {
-            const response = await fetch('get_subjects.php');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const subjects = await response.json();
-            
-            console.log('Subjects from get_subjects.php:', subjects); // Debug: Log subjects
-
-            const container = document.getElementById('subjectContainer');
-            container.innerHTML = '';
-            
-            // Group subjects by subject_name
-            const groupedSubjects = subjects.reduce((acc, subject) => {
-                const subjectName = subject.subject_name.toLowerCase();
-                if (!acc[subjectName]) {
-                    acc[subjectName] = [];
+    <script>
+        // Load subjects dynamically
+        async function loadSubjects() {
+            try {
+                const response = await fetch('get_subjects.php');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch subjects: ${response.status} ${response.statusText}`);
                 }
-                acc[subjectName].push(subject);
-                return acc;
-            }, {});
+                const subjects = await response.json();
+                
+                console.log('Subjects from get_subjects.php:', subjects);
 
-            // Limit to 3 unique subject names
-            const subjectNames = Object.keys(groupedSubjects).slice(0, 3);
+                const container = document.getElementById('subjectContainer');
+                if (!container) {
+                    console.error('Subject container not found');
+                    return;
+                }
+                container.innerHTML = '';
 
-            subjectNames.forEach(subjectName => {
-                const subjectGroup = groupedSubjects[subjectName];
-                const card = document.createElement('div');
-                card.className = `subject-card ${subjectName}-card`;
+                // Group subjects by subject_name
+                const groupedSubjects = subjects.reduce((acc, subject) => {
+                    const subjectName = subject.subject_name.toLowerCase();
+                    if (!acc[subjectName]) {
+                        acc[subjectName] = [];
+                    }
+                    acc[subjectName].push(subject);
+                    return acc;
+                }, {});
 
-                // Collect all years and subject ID for this subject
-                const years = subjectGroup.map(subject => subject.year).sort();
-                const subjectId = subjectGroup
-                    .filter(subject => subject.subject_id && !isNaN(subject.subject_id))
-                    .map(subject => subject.subject_id)
-                    .join(',');
+                // Limit to 3 unique subject names
+                const subjectNames = Object.keys(groupedSubjects).slice(0, 3);
 
-                // Skip if no valid subject ID
-                if (!subjectId) {
-                    console.error(`No valid subject ID for ${subjectName}`);
+                subjectNames.forEach(subjectName => {
+                    const subjectGroup = groupedSubjects[subjectName];
+                    const years = subjectGroup.map(subject => subject.year).sort();
+                    const subjectIds = subjectGroup
+                        .filter(subject => subject.subject_id && !isNaN(subject.subject_id))
+                        .map(subject => subject.subject_id);
+
+                    if (subjectIds.length === 0) {
+                        console.error(`No valid subject IDs for ${subjectName}`);
+                        return;
+                    }
+
+                    console.log(`Processing subject: ${subjectName}, subjectIds: ${subjectIds}, years: ${years}`);
+
+                    const card = document.createElement('div');
+                    card.className = `subject-card ${subjectName}-card`;
+
+                    card.innerHTML = `
+                        <div class="subject-header">
+                            <img src="${subjectGroup[0].subject_image}" alt="${subjectGroup[0].subject_name}" class="subject-image">
+                            <div class="subject-badge">RM ${subjectGroup[0].subject_price}/term</div>
+                        </div>
+                        <div class="subject-content">
+                            <div class="subject-title">
+                                ${subjectGroup[0].subject_name}
+                                ${years.map(year => `<span class="subject-year">${year}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    // Add click event to fetch teacher details
+                    card.addEventListener('click', async () => {
+                        console.log(`Card clicked for subject: ${subjectName}, IDs: ${subjectIds}`);
+                        try {
+                            const teacherDetails = document.getElementById('teacherDetails');
+                            if (!teacherDetails) {
+                                console.error('Teacher details container not found');
+                                return;
+                            }
+                            teacherDetails.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>';
+
+                            const response = await fetch(`get_teachers_by_subject.php?subject_id=${encodeURIComponent(subjectIds.join(','))}`);
+                            console.log('Fetch response status:', response.status);
+                            if (!response.ok) {
+                                throw new Error(`Failed to fetch teachers: ${response.status} ${response.statusText}`);
+                            }
+                            const teachersByYear = await response.json();
+                            console.log('Teachers data:', teachersByYear);
+
+                            if (teachersByYear.error) {
+                                console.error('Server returned error:', teachersByYear.error);
+                                teacherDetails.innerHTML = `<p class="text-danger">${teachersByYear.error}</p>`;
+                            } else {
+                                let html = '<div class="year-container">';
+                                const years = Object.keys(teachersByYear);
+                                years.forEach((year, index) => {
+                                    html += `
+                                        <div class="year-column">
+                                            <h6 class="year-title">${year}</h6>
+                                            <div class="row">
+                                    `;
+                                    const teachers = teachersByYear[year];
+                                    if (teachers.length === 0) {
+                                        html += `<div class="col-12"><p>No available teachers for this year.</p></div>`;
+                                    } else {
+                                        teachers.forEach(teacher => {
+                                            html += `
+                                                <div class="col-12 mb-4">
+                                                    <div class="teacher-card">
+                                                        <img src="${teacher.teacher_image}" alt="${teacher.teacher_name}" class="teacher-image img-fluid rounded mb-2" onerror="this.src='img/default_teacher.jpg'">
+                                                        <h6 class="teacher-name">${teacher.teacher_name}</h6>
+                                                        <p class="teacher-info"><i class="fas fa-clock me-2"></i><strong>Time:</strong> ${teacher.class_time}</p>
+                                                        <p class="teacher-info"><i class="fas fa-map-marker-alt me-2"></i><strong>Venue:</strong> ${teacher.class_venue}</p>
+                                                    </div>
+                                                </div>
+                                            `;
+                                        });
+                                    }
+                                    html += '</div>';
+                                    if (index < years.length - 1) {
+                                        html += '</div><div class="year-column">';
+                                    }
+                                });
+                                html += '</div>';
+                                teacherDetails.innerHTML = html;
+                            }
+
+                            // Update modal title
+                            const modalLabel = document.getElementById('teacherModalLabel');
+                            if (modalLabel) {
+                                modalLabel.textContent = `Tutor Details for ${subjectGroup[0].subject_name}`;
+                            }
+
+                            // Show the modal
+                            const modalElement = document.getElementById('teacherModal');
+                            if (modalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                const modal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
+                                modal.show();
+                                console.log('Modal shown successfully');
+                            } else {
+                                console.error('Modal element not found or Bootstrap Modal not available');
+                                teacherDetails.innerHTML = '<p class="text-danger">Failed to open modal. Please check if Bootstrap is loaded correctly.</p>';
+                            }
+                        } catch (error) {
+                            console.error('Error fetching teacher details:', error);
+                            const teacherDetails = document.getElementById('teacherDetails');
+                            if (teacherDetails) {
+                                teacherDetails.innerHTML = '<p class="text-danger">Failed to load teacher details. Please try again.</p>';
+                            }
+                            const modalElement = document.getElementById('teacherModal');
+                            if (modalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                const modal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
+                                modal.show();
+                            }
+                        }
+                    });
+
+                    container.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                const container = document.getElementById('subjectContainer');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-book book-open fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Our Programs</h4>
+                            <p>We are currently updating our program offerings</p>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch login status: ${response.status} ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                const iconBar = document.querySelector('.icon-bar');
+
+                if (!navLinks || !authButton || !iconBar) {
+                    console.error('Navigation elements not found');
                     return;
                 }
 
-                card.innerHTML = `
-                    <div class="subject-header">
-                        <img src="${subjectGroup[0].subject_image}" alt="${subjectGroup[0].subject_name}" class="subject-image">
-                        <div class="subject-badge">RM ${subjectGroup[0].subject_price}/term</div>
-                    </div>
-                    <div class="subject-content">
-                        <div class="subject-title">
-                            ${subjectGroup[0].subject_name}
-                            ${years.map(year => `<span class="subject-year">${year}</span>`).join('')}
-                        </div>
-                    </div>
-                `;
-                
-                // Add click event to fetch teacher details
-                card.addEventListener('click', async () => {
-                    console.log(`Fetching teachers for subject ID: ${subjectId}`);
-                    console.log(`Request URL: get_teachers_by_subject.php?subject_id=${subjectId}`);
-                    try {
-                        document.getElementById('teacherDetails').innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>';
-                        const response = await fetch(`get_teachers_by_subject.php?subject_id=${encodeURIComponent(subjectId)}`);
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        const teachersByYear = await response.json();
-
-                        if (teachersByYear.error) {
-                            document.getElementById('teacherDetails').innerHTML = `<p class="text-danger">${teachersByYear.error}</p>`;
-                        } else {
-                            let html = '';
-                            for (const [year, teachers] of Object.entries(teachersByYear)) {
-                                html += `<h6>${year}</h6>`;
-                                if (teachers.length === 0) {
-                                    html += `<p>No available teachers for this year.</p>`;
-                                } else {
-                                    html += '<div class="row">';
-                                    teachers.forEach(teacher => {
-                                        html += `
-                                            <div class="col-md-4 text-center">
-                                                <img src="${teacher.teacher_image}" alt="${teacher.teacher_name}" class="img-fluid rounded mb-2" style="max-height: 150px;">
-                                                <p><strong>${teacher.teacher_name}</strong></p>
-                                                <p>${teacher.teacher_gender}</p>
-                                                <p>${teacher.teacher_email}</p>
-                                                <p>${teacher.teacher_phone_number}</p>
-                                                <p>Time: ${teacher.class_time}</p>
-                                                <p>Venue: ${teacher.class_venue}</p>
-                                            </div>
-                                        `;
-                                    });
-                                    html += '</div>';
-                                }
-                            }
-                            document.getElementById('teacherDetails').innerHTML = html;
-                        }
-
-                        // Update modal title with subject name
-                        document.getElementById('teacherModalLabel').textContent = `Teacher Details for ${subjectGroup[0].subject_name}`;
-                        // Show the modal
-                        const modal = new bootstrap.Modal(document.getElementById('teacherModal'));
-                        modal.show();
-                    } catch (error) {
-                        console.error('Error fetching teacher details:', error);
-                        document.getElementById('teacherDetails').innerHTML = '<p class="text-danger">Failed to load teacher details. Please try again.</p>';
-                        const modal = new bootstrap.Modal(document.getElementById('teacherModal'));
-                        modal.show();
-                    }
-                });
-                
-                container.appendChild(card);
-            });
-            
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-            document.getElementById('subjectContainer').innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
-                    <h4 class="text-muted">Our Programs</h4>
-                    <p>We are currently updating our program offerings</p>
-                </div>
-            `;
-        }
-    }
-
-    // Load navigation dynamically
-    async function loadNavigation() {
-        try {
-            const response = await fetch('check_login.php');
-            if (!response.ok) throw new Error('Failed to fetch login status');
-            const data = await response.json();
-            
-            const navLinks = document.getElementById('navLinks');
-            const authButton = document.getElementById('authButton');
-
-            if (data.isLoggedIn) {
-                navLinks.innerHTML = `
-                    <a href="member.html" class="nav-item nav-link">Home</a>
-                    <a href="subject.html" class="nav-item nav-link">Subject</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                    <a href="comment.html" class="nav-item nav-link">Comment</a>
-                `;
-                authButton.textContent = 'Log out';
-                authButton.href = 'logout.php';
-                document.querySelector('.icon-bar').style.display = 'flex';
-            } else {
-                navLinks.innerHTML = `
-                    <a href="888.html" class="nav-item nav-link">Home</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                `;
-                authButton.textContent = 'Log in';
-                authButton.href = 'login.html';
-                document.querySelector('.icon-bar').style.display = 'none';
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                    iconBar.style.display = 'flex';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    iconBar.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                const iconBar = document.querySelector('.icon-bar');
+                if (navLinks && authButton && iconBar) {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                    iconBar.style.display = 'none';
+                }
             }
-        } catch (error) {
-            console.error('Error fetching login status:', error);
-            const navLinks = document.getElementById('navLinks');
-            navLinks.innerHTML = `
-                <a href="888.html" class="nav-item nav-link">Home</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-            `;
-            const authButton = document.getElementById('authButton');
-            authButton.textContent = 'Log in';
-            authButton.href = 'login.html';
-            document.querySelector('.icon-bar').style.display = 'none';
         }
-    }
 
-    // Load subjects and navigation on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        loadSubjects();
-        loadNavigation();
-    });
-</script>
+        // Load subjects and navigation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+                console.error('Bootstrap Modal is not available. Ensure Bootstrap JS is loaded correctly.');
+            }
+            loadSubjects();
+            loadNavigation();
+        });
+    </script>
 </body>
 
 </html>
