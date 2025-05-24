@@ -23,6 +23,8 @@
         body {
             margin: 0;
             font-family: 'Heebo', sans-serif;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
@@ -50,10 +52,8 @@
             background-color: #f4f4f4;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
+            align-items: center;
             box-sizing: border-box;
-            overflow-y: auto;
         }
 
         .registration-form {
@@ -73,8 +73,7 @@
             color: #777;
         }
 
-        .registration-form input,
-        .registration-form select {
+        .registration-form input {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -84,13 +83,23 @@
             box-sizing: border-box;
         }
 
+        .registration-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
         .registration-form select:invalid {
             color: #808080;
+            font-size: 3.8mm;
             text-align: left;
             padding-left: 5px;
         }
 
         .registration-form select:valid {
+            font-size: 3.8mm;
             text-align: left;
             padding-left: 5px;
         }
@@ -179,14 +188,15 @@
             color: #777;
         }
 
+        /* 对话框样式 */
         .modal {
-            display: none;
+            display: none; /* 默认隐藏 */
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -206,12 +216,6 @@
             margin: 0 0 10px;
             font-size: 16px;
             color: #333;
-        }
-
-        .modal-content p {
-            font-size: 14px;
-            color: #666;
-            margin: 0 0 15px;
         }
 
         .modal-content ul {
@@ -234,33 +238,6 @@
 
         .modal-content .close-btn:hover {
             color: #ff4d4d;
-        }
-
-        .modal-content button {
-            width: 45%;
-            padding: 10px;
-            margin: 10px 2.5%;
-            border: none;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .modal-content .confirm-btn {
-            background-color: #17a2b8;
-        }
-
-        .modal-content .confirm-btn:hover {
-            background-color: #138496;
-        }
-
-        .modal-content .cancel-btn {
-            background-color: #ff4d4d;
-        }
-
-        .modal-content .cancel-btn:hover {
-            background-color: #cc0000;
         }
 
         .password-container input {
@@ -316,7 +293,6 @@
             .right-half {
                 height: auto;
                 padding: 20px;
-                align-items: flex-start;
             }
             .password-strength {
                 font-size: 12px;
@@ -351,16 +327,12 @@
             <div class="registration-form">
                 <h2>Create Your Account</h2>
                 <p>Fill in the details below to create your account.</p>
-                <p style="color: #ff4d4d; font-weight: bold;">Note: This service is only available for users in Kulai, Johor, Malaysia.</p>
+
                 <form id="registerForm">
                     <input type="text" name="username" placeholder="Username" required>
                     <input type="email" name="email" placeholder="Email" required>
-                    <input type="text" id="address" name="address" placeholder="Address (e.g., Jalan Anggerik 1, No. 12, 81000 Kulai, Johor)" required>
-                    <p style="font-size: 12px; color: #777; text-align: left; margin-top: -10px; margin-bottom: 15px;">
-                        Example: Jalan Anggerik 1, No. 12, 81000 Kulai, Johor. 
-                        <a href="https://www.pos.com.my/postcode-finder" target="_blank">Find your postcode</a>
-                    </p>
-                    <input type="tel" id="phone_number" name="phone_number" placeholder="Phone Number (e.g., 012-234 1234)" required>
+                    <input type="text" name="address" placeholder="Address" required>
+                    <input type="tel" name="phone_number" placeholder="Phone Number" required>
                     <select name="gender" required>
                         <option value="" disabled selected hidden>Gender</option>
                         <option value="Male">Male</option>
@@ -393,9 +365,10 @@
         </div>
     </div>
 
+    <!-- 对话框 HTML -->
     <div class="modal" id="passwordRequirementsModal">
         <div class="modal-content">
-            <span class="close-btn" id="closeModal">×</span>
+            <span class="close-btn" id="closeModal">&times;</span>
             <h3>Password Requirements</h3>
             <ul>
                 <li>At least 8 characters long</li>
@@ -403,16 +376,6 @@
                 <li>Contains at least one lowercase letter (a-z)</li>
                 <li>Contains at least one special character (!@#$%^&*)</li>
             </ul>
-        </div>
-    </div>
-
-    <div class="modal" id="confirmRegisterModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeConfirmModal">×</span>
-            <h3>Confirm Registration</h3>
-            <p>The Seeds Learning Tuition Centre is located in Kulai. Are you sure you want to register?</p>
-            <button class="confirm-btn" id="confirmRegister">Confirm</button>
-            <button class="cancel-btn" id="cancelRegister">Cancel</button>
         </div>
     </div>
 
@@ -424,21 +387,12 @@
         let formData = new FormData(form);
         let parent_password = document.getElementById("password").value;
         let confirm_password = document.getElementById("confirm_password").value;
-        let phone_number = document.getElementById("phone_number").value;
         let errorMessage = document.getElementById("errorMessage");
 
         errorMessage.style.display = "none";
         errorMessage.innerText = "";
 
-        // Client-side validation
-        let errors = [];
-
-        // Phone number validation
-        if (!phone_number.match(/^\d{3}-\d{3} \d{4}$/)) {
-            errors.push("Invalid phone number format. Use XXX-XXX XXXX (e.g., 012-234 1234).");
-        }
-
-        // Password validation
+        // Client-side password validation
         let missingRequirements = [];
         if (parent_password.length < 8) {
             missingRequirements.push("be at least 8 characters long");
@@ -462,54 +416,17 @@
             } else {
                 errorText += missingRequirements.slice(0, -1).join(", ") + ", and " + missingRequirements.slice(-1) + ".";
             }
-            errors.push(errorText);
-        }
-
-        if (parent_password !== confirm_password) {
-            errors.push("Passwords do not match!");
-        }
-
-        if (errors.length > 0) {
-            errorMessage.innerText = errors.join(" ");
+            errorMessage.innerText = errorText;
             errorMessage.style.display = "block";
             return;
         }
 
-        // Show confirmation modal
-        document.getElementById("confirmRegisterModal").style.display = "flex";
-    });
-
-    // Handle confirmation modal
-    document.getElementById("confirmRegister").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        let formData = new FormData(document.getElementById("registerForm"));
-        submitForm(formData);
-    });
-
-    document.getElementById("cancelRegister").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        document.getElementById("address").value = "";
-        document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-        document.getElementById("errorMessage").style.display = "block";
-    });
-
-    document.getElementById("closeConfirmModal").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        document.getElementById("address").value = "";
-        document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-        document.getElementById("errorMessage").style.display = "block";
-    });
-
-    document.getElementById("confirmRegisterModal").addEventListener("click", function(event) {
-        if (event.target === this) {
-            this.style.display = "none";
-            document.getElementById("address").value = "";
-            document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-            document.getElementById("errorMessage").style.display = "block";
+        if (parent_password !== confirm_password) {
+            errorMessage.innerText = "Passwords do not match!";
+            errorMessage.style.display = "block";
+            return;
         }
-    });
 
-    function submitForm(formData) {
         fetch("register.php", {
             method: "POST",
             body: formData
@@ -519,16 +436,16 @@
             if (data.success) {
                 window.location.href = "login.html";
             } else {
-                document.getElementById("errorMessage").innerText = data.message || "An error occurred. Please try again.";
-                document.getElementById("errorMessage").style.display = "block";
+                errorMessage.innerText = data.message || "An error occurred. Please try again.";
+                errorMessage.style.display = "block";
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            document.getElementById("errorMessage").innerText = "An error occurred. Please try again.";
-            document.getElementById("errorMessage").style.display = "block";
+            errorMessage.innerText = "An error occurred. Please try again.";
+            errorMessage.style.display = "block";
         });
-    }
+    });
 
     document.getElementById("password").addEventListener("input", function() {
         const password = this.value;
@@ -542,8 +459,12 @@
         if (/[!@#$%^&*]/.test(password)) strength++;
 
         strengthBar.className = "strength-bar";
+        strengthBar.style.width = "";
+        strengthBar.style.backgroundColor = "";
+
         if (password.length === 0) {
             strengthText.innerText = "Password Strength: None";
+            strengthBar.classList.add("strength-bar");
             strengthBar.setAttribute("aria-label", "Password strength: none");
         } else if (strength <= 2) {
             strengthText.innerText = "Password Strength: Weak";
@@ -578,18 +499,22 @@
         this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
     });
 
+    // 对话框控制
     const toggleButton = document.querySelector('.password-requirements-toggle');
     const modal = document.getElementById('passwordRequirementsModal');
     const closeModal = document.getElementById('closeModal');
 
+    // 点击“i”图标显示对话框
     toggleButton.addEventListener('click', function() {
         modal.style.display = 'flex';
     });
 
+    // 点击关闭按钮关闭对话框
     closeModal.addEventListener('click', function() {
         modal.style.display = 'none';
     });
 
+    // 点击遮罩层关闭对话框
     modal.addEventListener('click', function(event) {
         if (event.target === modal) {
             modal.style.display = 'none';
