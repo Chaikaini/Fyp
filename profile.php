@@ -928,15 +928,7 @@
     </div>
 </div>
 
-    <!-- Child Delete Modal -->
-<div id="deleteConfirmModal" class="modal-d">
-    <div class="modal-dcontent">
-        <h4>Confirm Deletion</h4>
-        <p>Are you sure you want to delete this child?</p>
-        <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
-        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
-    </div>
-</div>
+ 
 
    
 <!-- Custom Modal -->
@@ -1399,51 +1391,6 @@ document.getElementById('edit-child-avatar-upload').addEventListener('change', f
 });
 
 
-// delete modal
-document.addEventListener("DOMContentLoaded", function () {
-    let selectedChildId = null; // save the select child_id
-
-    // when click delete button，get child_id and display delete modal
-    document.querySelector("#children-info-content").addEventListener("click", function (event) {
-        if (event.target.classList.contains("delete-btn")) {
-            selectedChildId = event.target.getAttribute("data-child-id");
-            document.getElementById("deleteConfirmModal").style.display = "flex";
-        }
-    });
-
-    // cancel delete
-    document.getElementById("cancelDeleteBtn").addEventListener("click", function () {
-        document.getElementById("deleteConfirmModal").style.display = "none";
-        selectedChildId = null; 
-    });
-
-    // make sure delete
-    document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
-        if (selectedChildId) {
-            fetch("profile_deletechild.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "child_id=" + encodeURIComponent(selectedChildId)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("deleteConfirmModal").style.display = "none";
-                selectedChildId = null;
-
-                if (data.success) {
-                    showToast("Children information deleted successfully!");
-                    setTimeout(() => { location.reload(); }, 2000);
-                } else {
-                    showToast("Error: " + data.error, true);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showToast("Unexpected error occurred.", true);
-            });
-        }
-    });
-});
 
 
 // Toast Notification Function
@@ -1827,8 +1774,7 @@ function fetchChildrenInfo() {
                                '${child.child_kidNumber}','${child.child_birthday}', 
                                '${child.child_school}', '${child.child_year}', 
                                '${child.child_id}', '${imagePath}')"></i>
-                            <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" 
-                               data-child-id="${child.child_id}"></i>
+                            
                         </td>
                     `;
                     tbody.appendChild(row);

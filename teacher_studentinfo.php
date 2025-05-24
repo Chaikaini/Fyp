@@ -22,8 +22,8 @@ $sql = "SELECT
             s.subject_name, 
             ch.child_id,
             ch.child_name, 
-            ch.child_gender, 
-            ch.child_kidnumber, 
+            ch.child_gender,  
+            ch.child_school,
             ch.child_image,
             p.parent_name, 
             p.phone_number,
@@ -56,7 +56,7 @@ while ($row = $result->fetch_assoc()) {
 
    
    $child_image = $row['child_image'] 
-        ? 'uploads/child_images/' . basename($row['child_image'])  // 只使用文件名部分
+        ? 'uploads/child_images/' . basename($row['child_image'])  
         : null;
 
    
@@ -64,7 +64,7 @@ while ($row = $result->fetch_assoc()) {
         'child_id' => $row['child_id'],
         'child_name' => $row['child_name'],
         'child_gender' => $row['child_gender'],
-        'child_kidnumber' => $row['child_kidnumber'],
+        'child_school' => $row['child_school'],
         'child_image' => $child_image,
         'parent_name' => $row['parent_name'],
         'phone_number' => $row['phone_number'],

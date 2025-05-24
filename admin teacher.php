@@ -285,51 +285,63 @@ function renderSchedule(data) {
 
   if (data.error) {
     tbody.innerHTML = `<tr><td colspan='7'>${data.error}</td></tr>`;
-  } else if (data.length === 0) {
+    return;
+  }
+
+  if (data.length === 0) {
     tbody.innerHTML = "<tr><td colspan='7'>No classes found.</td></tr>";
-  } else {
-    const currentMonth = new Date().getMonth();
-    const monthMap = {
-      "January": 0, "February": 1, "March": 2, "April": 3,
-      "May": 4, "June": 5, "July": 6, "August": 7,
-      "September": 8, "October": 9, "November": 10, "December": 11
-    };
+    return;
+  }
 
-    data.forEach((row) => {
-      let status = "Ongoing";
-      let statusClass = "text-success";
+  const monthMap = {
+    "January": 0, "February": 1, "March": 2, "April": 3,
+    "May": 4, "June": 5, "July": 6, "August": 7,
+    "September": 8, "October": 9, "November": 10, "December": 11
+  };
 
-      if (row.part_duration) {
-        const [start, end] = row.part_duration.split(" - ").map(s => s.trim());
-        const startMonth = monthMap[start];
-        const endMonth = monthMap[end];
+  const currentDate = new Date();
 
-        if (startMonth !== undefined && endMonth !== undefined) {
-          if (currentMonth < startMonth) {
-            status = "Not Started";
-            statusClass = "text-secondary";
-          } else if (currentMonth > endMonth) {
-            status = "Complete";
-            statusClass = "text-danger";
-          }
+  data.forEach((row) => {
+    let status = "Ongoing";
+    let statusClass = "text-success";
+
+    if (row.part_duration && row.class_term) {
+      const [start, end] = row.part_duration.split(" - ").map(s =>
+        s.trim().charAt(0).toUpperCase() + s.trim().slice(1).toLowerCase()
+      );
+      const startMonth = monthMap[start];
+      const endMonth = monthMap[end];
+      const classYear = parseInt(row.class_term);
+
+      if (startMonth !== undefined && endMonth !== undefined && !isNaN(classYear)) {
+        const startDate = new Date(classYear, startMonth, 1);
+        const endDate = new Date(classYear, endMonth + 1, 0);
+
+        if (currentDate < startDate) {
+          status = "Not Started";
+          statusClass = "text-secondary";
+        } else if (currentDate > endDate) {
+          status = "Complete";
+          statusClass = "text-danger";
         }
       }
+    }
 
-      tbody.innerHTML += `
-        <tr>
-          <td>${row.subject_id}</td>
-          <td>${row.subject_name}</td>
-          <td>${row.class_term}</td>
-          <td>${row.class_id}</td>
-          <td>${row.year}</td>
-          <td>${row.class_venue}</td>
-          <td>${row.time}</td>
-          <td class="${statusClass}">${status}</td>
-        </tr>
-      `;
-    });
-  }
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.subject_id}</td>
+        <td>${row.subject_name}</td>
+        <td>${row.class_term}</td>
+        <td>${row.class_id}</td>
+        <td>${row.year}</td>
+        <td>${row.class_venue}</td>
+        <td>${row.time}</td>
+        <td class="${statusClass}">${status}</td>
+      </tr>
+    `;
+  });
 }
+
 
 document.getElementById("view-timetable-btn").addEventListener("click", function () {
   const allRows = document.querySelectorAll("#schedule-table-body tr");

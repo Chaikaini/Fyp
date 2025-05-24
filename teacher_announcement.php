@@ -277,18 +277,22 @@
       loadNotifications();
     });
 
-    function loadSubjects() {
+function loadSubjects() {
   fetch("teacher_announcement_data.php?action=subject")
     .then(res => res.json())
-    .then(subjects => {
-      const subjectSelect = document.getElementById("subject_id");
-      subjectSelect.innerHTML = "<option value=''>-- Select Subject --</option>";
-      subjects.forEach(subject => {
-        const option = document.createElement("option");
-        option.value = subject.subject_id;
-        option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
-        subjectSelect.appendChild(option);
-      });
+    .then(response => {
+      if (Array.isArray(response)) {
+        const subjectSelect = document.getElementById("subject_id");
+        subjectSelect.innerHTML = "<option value=''>-- Select Subject --</option>";
+        response.forEach(subject => {
+          const option = document.createElement("option");
+          option.value = subject.subject_id;
+          option.textContent = `${subject.subject_id} - ${subject.subject_name}`;
+          subjectSelect.appendChild(option);
+        });
+      } else {
+        console.error('Invalid response format:', response);
+      }
     })
     .catch(err => console.error('Error loading subjects:', err));
 }
@@ -374,7 +378,6 @@ function showToast(message, isError = false) {
 }
 
 
-
 function loadNotifications() {
   fetch("teacher_get_announcement.php")
     .then(res => res.json())
@@ -389,8 +392,17 @@ function loadNotifications() {
         data.sort((a, b) => new Date(b.notification_created_at) - new Date(a.notification_created_at));
 
         data.forEach(n => {
-          const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString() : '';
-          const block = document.createElement("div");
+          // date & time format
+          const time = n.notification_created_at ? new Date(n.notification_created_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          }) : '';
+
+        const block = document.createElement("div");
           block.className = "card mb-3 shadow-sm";
 
           block.innerHTML = `

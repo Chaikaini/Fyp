@@ -240,7 +240,7 @@
               <th>No.</th>
               <th>Student Name</th>
               <th>Gender</th>
-              <th>Kid Number</th>
+              <th>School</th>
               <th>Parent Name</th>
               <th>Relationship</th>
               <th>Phone Number</th>
@@ -529,7 +529,7 @@ function viewStudents(classId) {
                             </a>
                         </td>
                         <td>${row.child_gender}</td>
-                        <td>${row.child_kidnumber}</td>
+                        <td>${row.child_school}</td>
                         <td><a href="#" onclick="viewParentInfo('${row.parent_id}', '${row.child_name}')">${row.parent_name}</a></td>
                         <td>${row.parent_relationship}</td>
                         <td>${row.phone_number}</td>
