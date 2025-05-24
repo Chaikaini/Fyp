@@ -70,8 +70,13 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <meta charset="utf-8">
     <title>Check Out</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="The Seeds Learning Centre, Shopping Cart" name="keywords">
-    <meta content="The Seeds Learning Centre | Shopping Cart" name="description">
+    <meta content="The Seeds Learning Centre, subject" name="keywords">
+    <meta content="The Seeds Learning Centre | Subject" name="description">
+    <!-- 禁用缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -425,7 +430,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     </div>
 
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="member.php" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="member.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -433,13 +438,9 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subjects</a>
-                <a href="about.html" class="nav-item nav-link">About Us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact Us</a>
-                <a href="comment.html" class="nav-item nav-link">Reviews</a>
+                <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="login.html" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log Out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
 
@@ -541,6 +542,77 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <div id="toast" class="toast"></div>
 
 <script>
+
+
+     // Check login status and load content
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('check_login.php', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                console.log('Login check response:', data);
+
+                if (!data.isLoggedIn) {
+                    window.location.href = 'login.html';
+                } else {
+                    loadNavigation();
+                    loadYears();
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                showToast('Failed to check login status. Please try again.', true);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                `;
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+            }
+        }
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const creditCardRadio = document.getElementById("creditcard");
     const creditCardField = document.getElementById("credit-card-field");
