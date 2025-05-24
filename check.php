@@ -70,8 +70,8 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
     <meta charset="utf-8">
     <title>Check Out</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="The Seeds Learning Centre, subject" name="keywords">
-    <meta content="The Seeds Learning Centre | Subject" name="description">
+    <meta content="The Seeds Learning Centre, Check Out" name="keywords">
+    <meta content="The Seeds Learning Centre | Check Out" name="description">
     <!-- 禁用缓存 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
