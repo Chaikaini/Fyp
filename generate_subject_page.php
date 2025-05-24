@@ -896,6 +896,78 @@ unset($_SESSION['message']);
 
         fetchReviews();
     });
+
+
+
+checkLoginStatus();
+
+     // Check login status and load content
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('check_login.php', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+                console.log('Login check response:', data);
+
+                if (!data.isLoggedIn) {
+                    window.location.href = 'login.html';
+                } else {
+                    loadNavigation();
+                    loadYears();
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                showToast('Failed to check login status. Please try again.', true);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Load navigation dynamically
+        async function loadNavigation() {
+            try {
+                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+                if (!response.ok) throw new Error('Failed to fetch login status');
+                const data = await response.json();
+
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+
+                if (data.isLoggedIn) {
+                    navLinks.innerHTML = `
+                        <a href="member.html" class="nav-item nav-link">Home</a>
+                        <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                        <a href="comment.html" class="nav-item nav-link">Comment</a>
+                    `;
+                    authButton.textContent = 'Log out';
+                    authButton.href = 'logout.php';
+                } else {
+                    navLinks.innerHTML = `
+                        <a href="888.html" class="nav-item nav-link">Home</a>
+                        <a href="about.html" class="nav-item nav-link">About us</a>
+                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    `;
+                    authButton.textContent = 'Log in';
+                    authButton.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('Error fetching login status:', error);
+                const navLinks = document.getElementById('navLinks');
+                const authButton = document.getElementById('authButton');
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                `;
+                authButton.textContent = 'Log in';
+                authButton.href = 'login.html';
+            }
+        }
+
     </script>
 </body>
 </html>
