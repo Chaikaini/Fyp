@@ -355,25 +355,7 @@
     }
 
 
-.modal-d {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-}
-.modal-dcontent {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    width: 300px;
-}
+
 .btn-d {
     padding: 10px 15px;
     margin: 5px;
@@ -1186,8 +1168,12 @@ function displayLearningStatus() {
             `;
 
             data.forEach(course => {
-                let status = "Ongoing"; 
-                const duration = course.part_duration;
+            let status = "Ongoing";
+            const duration = course.part_duration;
+            const classYear = parseInt(course.class_term); 
+            const now = new Date();
+
+            if (duration && !isNaN(classYear)) {
                 const timeRange = duration.split(" - ");
 
                 if (timeRange.length === 2) {
@@ -1197,45 +1183,51 @@ function displayLearningStatus() {
                     const endMonth = monthMap[endMonthStr];
 
                     if (startMonth !== undefined && endMonth !== undefined) {
-                        if (currentMonth < startMonth) {
+                        
+                        const startDate = new Date(classYear, startMonth, 1);
+                        const endDate = new Date(classYear, endMonth + 1, 0); 
+
+                        if (now < startDate) {
                             status = "Not Started";
-                        } else if (currentMonth > endMonth) {
+                        } else if (now > endDate) {
                             status = "Complete";
                         } else {
                             status = "Ongoing";
                         }
                     }
                 }
+            }
 
-                let statusClass = "";
-                if (status === "Ongoing") statusClass = "text-success";
-                else if (status === "Complete") statusClass = "text-danger";
-                else if (status === "Not Started") statusClass = "text-secondary";
+            let statusClass = "";
+            if (status === "Ongoing") statusClass = "text-success";
+            else if (status === "Complete") statusClass = "text-danger";
+            else if (status === "Not Started") statusClass = "text-secondary";
 
-                table += `
-                    <tr>
-                        <td>${course.subject_name}</td>
-                        <td>${course.part_name} (${course.part_duration})</td>
-                        <td>${course.year}</td>
-                        <td>
+            table += `
+                <tr>
+                    <td>${course.subject_name}</td>
+                    <td>${course.part_name} (${course.part_duration})</td>
+                    <td>${course.year}</td>
+                    <td>
                         <a href="#" onclick="viewTeacherInfo('${course.teacher_id}', '${course.teacher_name}')">
                             ${course.teacher_name}
                         </a>
-                        </td>
-                        <td>${course.class_venue}</td>
-                        <td>${course.class_time}</td>
-                        <td>
-                            <button class="icon-button result-btn" 
-                                    data-child-id="${childId}" 
-                                    data-class-id="${course.class_id}" 
-                                    title="View Result">
-                                <i class="fas fa-clipboard"></i>
-                            </button>
-                        </td>
-                        <td class="${statusClass}">${status}</td>
-                    </tr>
-                `;
-            });
+                    </td>
+                    <td>${course.class_venue}</td>
+                    <td>${course.class_time}</td>
+                    <td>
+                        <button class="icon-button result-btn" 
+                                data-child-id="${childId}" 
+                                data-class-id="${course.class_id}" 
+                                title="View Result">
+                            <i class="fas fa-clipboard"></i>
+                        </button>
+                    </td>
+                    <td class="${statusClass}">${status}</td>
+                </tr>
+            `;
+        });
+
 
             table += "</tbody></table>";
             statusContent.innerHTML = table;

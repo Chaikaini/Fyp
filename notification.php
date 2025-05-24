@@ -237,11 +237,11 @@
 
     <!-- Breadcrumb Section -->
     <div class="breadcrumb-container">
-        <h1>Notifications</h1>
+        <h1>Announcement</h1>
         <ul class="breadcrumb">
             <li><a href="member.html">Home</a></li>
             <li>&gt;</li>
-            <li>Notifications</li>
+            <li>Announcement</li>
         </ul>
     </div>
 
@@ -251,7 +251,7 @@
         <div class="card">
             <div class="card-body">
                 <div id="notification-list" class="notification-container">
-                    <div class="text-muted text-center">Loading notifications...</div>
+                    <div class="text-muted text-center">Loading announcement...</div>
                 </div>
             </div>
         </div>
@@ -291,14 +291,16 @@
                 block.className = 'card mb-3 shadow-sm';
                 
                 const createdAt = new Date(notif.notification_created_at);
-                const formattedDate = createdAt.toLocaleString('en-US', {
-                    year: 'numeric',
-                    month: 'numeric',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                });
+                const day = String(createdAt.getDate()).padStart(2, '0');
+                const month = String(createdAt.getMonth() + 1).padStart(2, '0');
+                const year = createdAt.getFullYear();
+                let hours = createdAt.getHours();
+                const minutes = String(createdAt.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                hours = String(hours).padStart(2, '0');
+                const formattedDate = `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+
 
                 block.onclick = function() {
                     if (notif.read_status === 'unread') {
@@ -331,31 +333,21 @@
                 container.appendChild(block);
             });
 
-            // Add welcome message as a notification if it's first login
-            if (data.first_login) {
-                const welcomeBlock = document.createElement('div');
-                welcomeBlock.className = 'card mb-3 shadow-sm';
-                welcomeBlock.innerHTML = `
-                    <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div>
-                            <strong>Welcome to The Seeds</strong>
-                        </div>
-                        <small class="text-muted">${new Date().toLocaleString('en-US', {
-                            year: 'numeric',
-                            month: 'numeric',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                        })}</small>
+            // A welcome message 
+           if (data.first_login) {
+            const welcomeBlock = document.createElement('div');
+            welcomeBlock.className = 'card mb-3 shadow-sm';
+
+            welcomeBlock.innerHTML = `
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Welcome to The Seeds</strong>
                     </div>
-                    
                     <p class="card-text">Hello ${data.user_name}! Thank you for joining us.</p>
                 </div>
-                `;
-                container.appendChild(welcomeBlock);
-            }
+            `;
+            container.appendChild(welcomeBlock);
+        }
         })
         .catch(error => {
             console.error('Error:', error);
