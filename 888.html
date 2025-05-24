@@ -38,22 +38,19 @@
             max-height: 500px;
         }
 
-        .custom-video {
+        .carousel-container {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .video-container {
-            width: 100%;
-            height: 100vh;
+            height: 110vh;
             padding: 0;
             margin: 0;
             overflow: hidden;
             position: relative;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 110vh;
+            object-fit: cover;
         }
 
         .grid-container {
@@ -378,13 +375,29 @@
     <!-- Icon Bar End -->
 
     <!-- Header Start -->
-    <div class="container-fluid p-0">
-        <div class="video-container">
-            <video class="custom-video" autoplay muted loop>
-                <source src="videos/announcement_video.mp4" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
+    <div class="carousel-container">
+    <div id="headerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="img/classroom.jpg" class="d-block w-100" alt="Classroom at The Seeds Learning Centre" onerror="this.src='img/default_carousel.jpg'">
+            </div>
+            <div class="carousel-item">
+                <img src="img/teachers.jpg" class="d-block w-100" alt="Teachers at The Seeds Learning Centre" onerror="this.src='img/default_carousel.jpg'">
+            </div>
+            <div class="carousel-item">
+                <img src="img/teaching.jpg" class="d-block w-100" alt="Teaching session at The Seeds Learning Centre" onerror="this.src='img/default_carousel.jpg'">
+            </div>
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#headerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#headerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
 
         <div class="container py-5">
             <!-- Introduction Start -->
