@@ -95,14 +95,14 @@ try {
                 $mail->Port = 465;
 
                 // Recipients
-                $mail->setFrom(SMTP_USERNAME, 'The Seeds Learning Centre');
+                $mail->setFrom(SMTP_USERNAME, 'The Seeds Learning Tuition Centre');
                 $mail->addAddress($email); // Recipient's email
 
                 // Content
                 $mail->isHTML(true);
                 $mail->Subject = 'Password Reset OTP';
-                $mail->Body = "Dear User,<br><br>Your OTP for password reset is: <b>$otp</b><br>This OTP is valid for 10 minutes.<br><br>Best regards,<br>The Seeds Learning Centre";
-                $mail->AltBody = "Your OTP for password reset is: $otp\nThis OTP is valid for 10 minutes.\n\nBest regards,\nThe Seeds Learning Centre";
+                $mail->Body = "Dear User,<br><br>Your OTP for password reset is: <b>$otp</b><br>This OTP is valid for 10 minutes.<br><br>Best regards,<br>The Seeds Learning Tuition Centre";
+                $mail->AltBody = "Your OTP for password reset is: $otp\nThis OTP is valid for 10 minutes.\n\nBest regards,\nThe Seeds Learning Tuition Centre";
 
                 $mail->send();
                 $response["success"] = true;

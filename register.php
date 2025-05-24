@@ -41,8 +41,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if (empty($phone_number)) {
         $errors[] = "Phone number is required.";
-    } elseif (!preg_match("/^\d{3}-\d{3}-\d{4}$/", $phone_number)) {
-        $errors[] = "Invalid phone number format. Use XXX-XXX-XXXX (e.g., 012-234-1234).";
+    } elseif (!preg_match("/^\d{3}-\d{3} \d{4}$/", $phone_number)) {
+        $errors[] = "Invalid phone number format. Use XXX-XXX XXXX (e.g., 012-234 1234).";
     }
     if (empty($parent_gender) || !in_array($parent_gender, ['Male', 'Female'])) {
         $errors[] = "Valid gender is required.";
