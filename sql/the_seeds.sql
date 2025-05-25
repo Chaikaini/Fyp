@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 20, 2025 at 03:36 PM
+-- Generation Time: May 25, 2025 at 05:32 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,6 +59,13 @@ CREATE TABLE `cart` (
   `child_id` int(11) NOT NULL,
   `deleted` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `deleted`) VALUES
+(1, 1, 'Mat0001', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -116,7 +123,7 @@ INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_t
 ('Eng0002', '11245', 2, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Eng2001', '22534', 1, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
 ('Eng2002', '22534', 2, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
+('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
 ('Mat0002', '11132', 2, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Mat2001', '22134', 1, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
 ('Mat2002', '22134', 2, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
@@ -202,7 +209,8 @@ CREATE TABLE `notification` (
 INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
 (1, 12345, 'Class', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
 (2, 12345, 'Class', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
-(3, 11111, 'Parent', NULL, '123', '123', NULL, '2025-05-08 15:51:06');
+(3, 11111, 'Parent', NULL, '123', '123', NULL, '2025-05-08 15:51:06'),
+(6, 11112, 'Parent', NULL, '1', '123', NULL, '2025-05-20 21:45:37');
 
 -- --------------------------------------------------------
 
@@ -226,7 +234,9 @@ CREATE TABLE `notification_receiver` (
 INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `teacher_id`, `recipient_type`, `read_status`) VALUES
 (1, 1, 1, NULL, 'Parent', 'read'),
 (2, 2, 1, NULL, 'Parent', 'read'),
-(3, 3, 1, NULL, 'Parent', 'read');
+(3, 3, 1, NULL, 'Parent', 'read'),
+(8, 6, 1, NULL, 'Parent', 'unread'),
+(9, 6, 2, NULL, 'Parent', 'unread');
 
 -- --------------------------------------------------------
 
@@ -300,7 +310,9 @@ CREATE TABLE `payment` (
 INSERT INTO `payment` (`payment_id`, `payment_total_amount`, `payment_method`, `credit_card_id`, `payment_time`) VALUES
 (1, 510.00, 'Credit Card', 1, '2025-04-17 07:25:04'),
 (2, 510.00, 'Credit Card', 2, '2025-04-17 11:56:09'),
-(3, 510.00, 'Credit Card', 1, '2025-04-20 08:47:33');
+(3, 510.00, 'Credit Card', 1, '2025-04-20 08:47:33'),
+(4, 610.00, 'Credit Card', 1, '2025-05-25 02:10:56'),
+(5, 610.00, 'Credit Card', 1, '2025-05-25 02:29:43');
 
 -- --------------------------------------------------------
 
@@ -362,6 +374,7 @@ INSERT INTO `subject` (`subject_id`, `admin_id`, `subject_name`, `year`, `subjec
 CREATE TABLE `teacher` (
   `teacher_id` int(11) NOT NULL,
   `teacher_name` varchar(100) NOT NULL,
+  `teacher_ic_number` varchar(20) NOT NULL,
   `teacher_gender` enum('Male','Female') NOT NULL,
   `teacher_email` varchar(100) NOT NULL,
   `teacher_image` varchar(255) DEFAULT NULL,
@@ -376,11 +389,11 @@ CREATE TABLE `teacher` (
 -- Dumping data for table `teacher`
 --
 
-INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
-(12123, 'Mr. David', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
-(12233, 'Mr. John', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
-(12347, 'Ms. Enxi', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
+INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
+(12123, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
+(12233, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
+(12345, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12347, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
 
@@ -518,7 +531,9 @@ ALTER TABLE `subject`
 -- Indexes for table `teacher`
 --
 ALTER TABLE `teacher`
-  ADD PRIMARY KEY (`teacher_id`);
+  ADD PRIMARY KEY (`teacher_id`),
+  ADD UNIQUE KEY `teacher_ic_number` (`teacher_ic_number`),
+  ADD UNIQUE KEY `teacher_ic_number_2` (`teacher_ic_number`);
 
 --
 -- Indexes for table `teacher_comment`
@@ -542,7 +557,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `child`
@@ -572,13 +587,13 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `parent`
@@ -596,19 +611,19 @@ ALTER TABLE `part`
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `teacher`
 --
 ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12350;
+  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12351;
 
 --
 -- AUTO_INCREMENT for table `teacher_comment`
