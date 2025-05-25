@@ -438,7 +438,11 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <!-- Navigation links will be dynamically inserted here -->
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
             </div>
             <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
