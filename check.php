@@ -1055,7 +1055,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     paymentIcon.src = "img/payment_s.png";
                     paymentIcon.onerror = () => { paymentIcon.src = "https://via.placeholder.com/80"; };
                     paymentTitle.innerText = "Payment Successful";
-                    paymentMessage.innerText = `Payment ID: ${message || 'Unknown'}. You can view your payment history on the profile page.`;
+                    paymentMessage.innerText = `You can view your payment history on the profile page.`;
                     okButton.style.display = 'none';
                     setTimeout(() => {
                         modal.style.display = "none";

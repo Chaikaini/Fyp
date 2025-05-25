@@ -4763,3 +4763,65 @@ get_cart.php: Fetched cart items: Array
 
 )
 
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 3
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 11245
+    [subject_name] => English
+    [price] => 510
+    [child_name] => Hansen
+    [class_id] => Eng0001
+    [teacher_id] => 12233
+)
+
+save_cart.php: Validated input: subject_id=11245, class_id=Eng0001, teacher_id=12233
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => English
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Eng0001
+    [subject_id] => 11245
+    [teacher_id] => 12233
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=3
+save_cart.php: Registration checked
+save_cart.php: Cart checked: Array
+(
+    [cart_id] => 1
+    [deleted] => 1
+)
+
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 1
+            [parent_id] => 3
+            [child_id] => 3
+            [class_id] => Eng0001
+            [deleted] => 0
+            [child_name] => Hansen
+            [class_capacity] => 30
+            [class_enrolled] => 2
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11245
+            [teacher_id] => 12233
+            [subject_name] => English
+            [subject_image] => img/english.jpg
+            [price] => 510.00
+            [teacher_name] => Mr. John
+        )
+
+)
+
