@@ -214,6 +214,9 @@
           <p><strong>Email:</strong> <span id="profile-email" class="fw-bold"></span></p>
         </div>
         <div class="mb-3">
+          <p><strong>IC Number:</strong> <span id="profile-ic_number" class="fw-bold"></span></p>
+        </div>
+        <div class="mb-3">
           <p><strong>Phone:</strong> <span id="profile-phone" class="fw-bold"></span></p>
         </div>
         <div class="mb-3">
@@ -254,21 +257,24 @@
 
           <div class="mb-3">
             <label for="edit-name" class="form-label">Name</label>
-            <input type="text" id="edit-name" name="name" class="form-control" required>
+            <input type="text" id="edit-name" name="name" class="form-control readonly-email" readonly title="Name Unchangeable">
           </div>
+
           <div class="mb-3">
             <label for="edit-gender" class="form-label">Gender</label>
-            <select id="edit-gender" name="gender" class="form-select" required>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+            <input type="text" id="edit-gender" name="gender" class="form-control readonly-email" readonly title="Gender Unchangeable">
+          </div>
+
+          <div class="mb-3">
+            <label for="edit-ic_number" class="form-label">IC Number</label>
+            <input type="text" id="edit-ic_number" name="ic_number" class="form-control readonly-email" readonly title="IC Number Unchangeable">
           </div>
           <div class="mb-3">
             <label for="edit-email" class="form-label">Email </label>
             <input type="email" class="form-control readonly-email" id="edit-email" readonly title="Email Unchangeable">
 
           </div>
-          
+        
           <div class="mb-3">
             <label for="edit-phone" class="form-label">Phone</label>
             <input type="text" id="edit-phone" name="phone_number" class="form-control">
@@ -361,17 +367,21 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.status === "success") {
         const profile = data.data;
 
-        // display profile information
-        document.getElementById("profile-name").innerText = profile.name;
-        document.getElementById("profile-gender").innerText = profile.gender;
-        document.getElementById("profile-email").innerText = profile.email;
-        document.getElementById("profile-phone").innerText = profile.phone_number || '';
-        document.getElementById("profile-address").innerText = profile.address || '';
-        document.getElementById("edit-name").value = profile.name;
-        document.getElementById("edit-gender").value = profile.gender;
-        document.getElementById("edit-email").value = profile.email;
-        document.getElementById("edit-phone").value = profile.phone_number || '';
-        document.getElementById("edit-address").value = profile.address || '';
+       // display profile information
+      document.getElementById("profile-name").innerText = profile.name;
+      document.getElementById("profile-gender").innerText = profile.gender;
+      document.getElementById("profile-email").innerText = profile.email;
+      document.getElementById("profile-ic_number").innerText = profile.ic_number || '';
+      document.getElementById("profile-phone").innerText = profile.phone_number || '';
+      document.getElementById("profile-address").innerText = profile.address || '';
+
+      // Set readonly fields
+      document.getElementById("edit-name").value = profile.name;
+      document.getElementById("edit-gender").value = profile.gender;
+      document.getElementById("edit-email").value = profile.email;
+      document.getElementById("edit-ic_number").value = profile.ic_number || '';
+      document.getElementById("edit-phone").value = profile.phone_number || '';
+      document.getElementById("edit-address").value = profile.address || '';
 
         // profile image
         const editImage = document.getElementById("edit-profile-image");
