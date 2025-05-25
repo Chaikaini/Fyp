@@ -6,10 +6,6 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre, Shopping Cart" name="keywords">
     <meta content="The Seeds Learning Centre | Shopping Cart" name="description">
-    <!-- 禁用缓存 -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -315,291 +311,305 @@
     <script src="lib/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
     <script>
-        let currentCartId = null;
-        let availableChildren = [];
+    let currentCartId = null;
+    let availableChildren = [];
 
+    // Check login status and load content
+    async function checkLoginStatus() {
+        try {
+            const response = await fetch('check_login.php', {
+                credentials: 'include',
+                cache: 'no-store'
+            });
+            console.log('check_login.php status:', response.status);
+            if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
+            const data = await response.json();
+            console.log('Login check response:', data);
 
-         // Check login status and load content
-        async function checkLoginStatus() {
-            try {
-                const response = await fetch('check_login.php', {
-                    credentials: 'include',
-                    cache: 'no-store'
-                });
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
-                console.log('Login check response:', data);
-
-                if (!data.isLoggedIn) {
-                    window.location.href = 'login.html';
-                } else {
-                    loadNavigation();
-                    loadYears();
-                }
-            } catch (error) {
-                console.error('Error fetching login status:', error);
-                showToast('Failed to check login status. Please try again.', true);
+            if (!data.isLoggedIn) {
+                console.log('User not logged in, redirecting to login.html');
                 window.location.href = 'login.html';
+            } else {
+                console.log('User logged in, loading navigation and cart data');
+                loadNavigation();
+                loadCartData();
             }
+        } catch (error) {
+            console.error('Error fetching login status:', error);
+            showToast('Failed to check login status. Please try again.', true);
+            window.location.href = 'login.html';
         }
+    }
 
-        // Load navigation dynamically
-        async function loadNavigation() {
-            try {
-                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
-                if (!response.ok) throw new Error('Failed to fetch login status');
-                const data = await response.json();
+    // Load navigation dynamically
+    async function loadNavigation() {
+        try {
+            const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+            if (!response.ok) throw new Error(`Failed to fetch login status: ${response.status}`);
+            const data = await response.json();
+            console.log('Navigation login check response:', data);
 
-                const navLinks = document.getElementById('navLinks');
-                const authButton = document.getElementById('authButton');
+            const navLinks = document.getElementById('navbarCollapse').querySelector('.navbar-nav');
+            const authButton = document.querySelector('.btn-primary');
 
-                if (data.isLoggedIn) {
-                    navLinks.innerHTML = `
-                        <a href="member.html" class="nav-item nav-link">Home</a>
-                        <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                        <a href="about.html" class="nav-item nav-link">About us</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                        <a href="comment.html" class="nav-item nav-link">Comment</a>
-                    `;
-                    authButton.textContent = 'Log out';
-                    authButton.href = 'logout.php';
-                } else {
-                    navLinks.innerHTML = `
-                        <a href="888.html" class="nav-item nav-link">Home</a>
-                        <a href="about.html" class="nav-item nav-link">About us</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                    `;
-                    authButton.textContent = 'Log in';
-                    authButton.href = 'login.html';
-                }
-            } catch (error) {
-                console.error('Error fetching login status:', error);
-                const navLinks = document.getElementById('navLinks');
-                const authButton = document.getElementById('authButton');
+            if (!navLinks || !authButton) {
+                throw new Error('navLinks or authButton element not found');
+            }
+
+            if (data.isLoggedIn) {
+                console.log('Setting navigation for logged-in user');
+                navLinks.innerHTML = `
+                    <a href="member.html" class="nav-item nav-link">Home</a>
+                    <a href="subject.html" class="nav-item nav-link">Subjects</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                    <a href="comment.html" class="nav-item nav-link">Comments</a>
+                `;
+                authButton.textContent = 'Log Out';
+                authButton.href = 'logout.php';
+                console.log('authButton set to Log out, href:', authButton.href);
+            } else {
+                console.log('Setting navigation for logged-out user');
                 navLinks.innerHTML = `
                     <a href="888.html" class="nav-item nav-link">Home</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
                 `;
-                authButton.textContent = 'Log in';
+                authButton.textContent = 'Log In';
+                authButton.href = 'login.html';
+                console.log('authButton set to Log in, href:', authButton.href);
+            }
+        } catch (error) {
+            console.error('Error loading navigation:', error);
+            const navLinks = document.getElementById('navbarCollapse').querySelector('.navbar-nav');
+            const authButton = document.querySelector('.btn-primary');
+            if (navLinks && authButton) {
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                `;
+                authButton.textContent = 'Log In';
                 authButton.href = 'login.html';
             }
+            showToast('Failed to load navigation. Please try again!', true);
+        }
+    }
+
+    // Toast function
+    function showToast(message, isError = false) {
+        let toast = document.createElement('div');
+        toast.className = `toast-message ${isError ? 'error' : ''}`;
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        checkLoginStatus();
+
+        fetch('get_notification.php')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Notifications data:', data);
+                if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                }
+            })
+            .catch(error => console.error('Fetch error:', error));
+    });
+
+    async function loadChildren(year) {
+        console.log('Loading children for year:', year);
+        const childrenSelect = document.getElementById('childrenSelect');
+        if (!year || isNaN(year)) {
+            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
+            showToast('Invalid year for loading children.', true);
+            return;
         }
 
+        try {
+            const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            console.log('Children data received:', data);
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('get_notification.php')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Notifications data:', data);
-                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                        document.querySelector('.notification-badge').style.display = 'block';
-                    }
-                })
-                .catch(error => console.error('Fetch error:', error));
-
-            loadCartData();
-        });
-
-        function showToast(message, isError = false) {
-            let toast = document.createElement('div');
-            toast.className = `toast-message ${isError ? 'error' : ''}`;
-            toast.innerText = message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 3000);
-        }
-
-        async function loadChildren(year) {
-            console.log('Loading children for year:', year);
-            const childrenSelect = document.getElementById('childrenSelect');
-            if (!year || isNaN(year)) {
-                childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
-                showToast('Invalid year for loading children.', true);
+            availableChildren = Array.isArray(data) ? data : [];
+            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
+            if (availableChildren.length === 0) {
+                childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
+                showToast('No children available for this year.', true);
                 return;
             }
 
-            try {
-                const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                console.log('Children data received:', data);
+            availableChildren.forEach(child => {
+                const option = document.createElement('option');
+                option.value = child.child_id;
+                option.textContent = `${child.child_name} (Year ${year})`;
+                childrenSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading children:', error);
+            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
+            showToast('Failed to load children.', true);
+        }
+    }
 
-                availableChildren = Array.isArray(data) ? data : [];
-                childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
-                if (availableChildren.length === 0) {
-                    childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
-                    showToast('No children available for this year.', true);
+    function loadCartData() {
+        fetch('get_cart.php')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Cart data received:', data);
+                if (data.status !== 'success') {
+                    throw new Error(data.message || 'Failed to load cart data');
+                }
+
+                let cart = data.cart || [];
+                let cartContainer = document.querySelector('.cart-items');
+                let totalPriceElement = document.getElementById('total-price');
+
+                if (cart.length === 0) {
+                    cartContainer.innerHTML = "<p>Your cart is empty.</p>";
+                    totalPriceElement.textContent = "0";
                     return;
                 }
 
-                availableChildren.forEach(child => {
-                    const option = document.createElement('option');
-                    option.value = child.child_id;
-                    option.textContent = `${child.child_name} (Year ${year})`;
-                    childrenSelect.appendChild(option);
+                cartContainer.innerHTML = '';
+                let totalPrice = 0;
+
+                cart.forEach(item => {
+                    if (item.deleted) return;
+
+                    let itemPrice = parseFloat(item.price) || 0;
+                    totalPrice += itemPrice;
+                    let capacityDisplay = `${item.class_enrolled || 0}/${item.class_capacity || 0}`;
+                    let classTime = item.class_time || 'Not specified';
+                    let childName = item.child_name || 'Not specified';
+                    let childId = item.child_id || '';
+                    let partId = item.part_id ?? null;
+                    let year = item.year ? parseInt(item.year.replace('Year ', '')) : null;
+
+                    let cartItem = document.createElement('div');
+                    cartItem.classList.add('cart-item');
+                    cartItem.innerHTML = `
+                        <img src="${item.subject_image}" alt="${item.subject_name || 'Unknown Subject'} Image" class="cart-item-image">
+                        <div class="cart-item-details" data-child-id="${childId}">
+                            <h5>${item.subject_name || 'Unknown Subject'}</h5>
+                            <p>Child: ${childName}</p>
+                            <p>Capacity: ${capacityDisplay}</p>
+                            <p>Price: RM ${itemPrice.toFixed(2)}</p>
+                            <p>Year: ${year ?? 'Not specified'}</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year})"></i>
+                            <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, '${item.subject_id}', '${childId}')"></i>
+                        </div>
+                    `;
+                    cartContainer.appendChild(cartItem);
                 });
-            } catch (error) {
-                console.error('Error loading children:', error);
-                childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
-                showToast('Failed to load children.', true);
-            }
-        }
 
-        function loadCartData() {
-            fetch('get_cart.php')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Cart data received:', data);
-                    if (data.status !== 'success') {
-                        throw new Error(data.message || 'Failed to load cart data');
-                    }
-
-                    let cart = data.cart || [];
-                    let cartContainer = document.querySelector('.cart-items');
-                    let totalPriceElement = document.getElementById('total-price');
-
-                    if (cart.length === 0) {
-                        cartContainer.innerHTML = "<p>Your cart is empty.</p>";
-                        totalPriceElement.textContent = "0";
-                        return;
-                    }
-
-                    cartContainer.innerHTML = '';
-                    let totalPrice = 0;
-
-                    cart.forEach(item => {
-                        if (item.deleted) return;
-
-                        let itemPrice = parseFloat(item.price) || 0;
-                        totalPrice += itemPrice;
-                        let capacityDisplay = `${item.class_enrolled || 0}/${item.class_capacity || 0}`;
-                        let classTime = item.class_time || 'Not specified';
-                        let childName = item.child_name || 'Not specified';
-                        let childId = item.child_id || '';
-                        let partId = item.part_id ?? null;
-                        let year = item.year ? parseInt(item.year.replace('Year ', '')) : null;
-
-                        let cartItem = document.createElement('div');
-                        cartItem.classList.add('cart-item');
-                        cartItem.innerHTML = `
-                            <img src="${item.subject_image}" alt="${item.subject_name || 'Unknown Subject'} Image" class="cart-item-image">
-                            <div class="cart-item-details" data-child-id="${childId}">
-                                <h5>${item.subject_name || 'Unknown Subject'}</h5>
-                                <p>Child: ${childName}</p>
-                                <p>Capacity: ${capacityDisplay}</p>
-                                <p>Price: RM ${itemPrice.toFixed(2)}</p>
-                                <p>Year: ${year ?? 'Not specified'}</p>
-                            </div>
-                            <div class="cart-item-actions">
-                                <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year})"></i>
-                                <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, '${item.subject_id}', '${childId}')"></i>
-                            </div>
-                        `;
-                        cartContainer.appendChild(cartItem);
-                    });
-
-                    totalPriceElement.textContent = totalPrice.toFixed(2);
-                })
-                .catch(error => {
-                    console.error('Error loading cart:', error);
-                    document.querySelector('.cart-items').innerHTML = `<p>Error loading cart: ${error.message}</p>`;
-                    showToast(`Error loading cart: ${error.message}`, true);
-                });
-        }
-
-        async function editCartItem(cartId, partId, classTime, capacity, childId, year) {
-            console.log('Editing cart item:', { cartId, partId, classTime, capacity, childId, year });
-            currentCartId = cartId;
-
-            const monthText = partId == 1 ? "January - June" : partId == 2 ? "July - December" : "Not specified";
-            document.getElementById('popupMonth').textContent = monthText;
-            document.getElementById('popupTime').textContent = classTime;
-            document.getElementById('popupCapacity').textContent = capacity;
-            await loadChildren(year);
-            document.getElementById('childrenSelect').value = childId || '';
-            document.querySelector('.popup-info').style.display = 'block';
-        }
-
-        async function saveChanges() {
-    const newChildId = document.getElementById('childrenSelect').value;
-    if (!newChildId) {
-        showToast('Please select a child.', true);
-        return;
-    }
-
-    const selectedChild = availableChildren.find(child => child.child_id == newChildId);
-    if (!selectedChild) {
-        showToast('Selected child is invalid.', true);
-        return;
-    }
-
-    try {
-        const response = await fetch('update_cart.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                cart_id: currentCartId,
-                action: 'update_child',
-                child_id: newChildId // Send child_id instead of child_name
+                totalPriceElement.textContent = totalPrice.toFixed(2);
             })
-        });
-        const data = await response.json();
-        if (data.status !== 'success') {
-            throw new Error(data.message || 'Failed to update cart');
-        }
-        showToast('Cart updated successfully!');
-        loadCartData();
-        document.querySelector('.popup-info').style.display = 'none';
-    } catch (error) {
-        console.error('Error updating cart:', error);
-        showToast(`Error: ${error.message}`, true);
+            .catch(error => {
+                console.error('Error loading cart:', error);
+                document.querySelector('.cart-items').innerHTML = `<p>Error loading cart: ${error.message}</p>`;
+                showToast(`Error loading cart: ${error.message}`, true);
+            });
     }
-}
 
-        function removeFromCart(cartId, subjectId, childId) {
-            console.log('Removing from cart:', { cartId, subjectId, childId });
-            if (!childId) {
-                showToast('Error: Child ID not found.', true);
-                return;
-            }
+    async function editCartItem(cartId, partId, classTime, capacity, childId, year) {
+        console.log('Editing cart item:', { cartId, partId, classTime, capacity, childId, year });
+        currentCartId = cartId;
 
-            fetch('remove_cart.php', {
+        const monthText = partId == 1 ? "January - June" : partId == 2 ? "July - December" : "Not specified";
+        document.getElementById('popupMonth').textContent = monthText;
+        document.getElementById('popupTime').textContent = classTime;
+        document.getElementById('popupCapacity').textContent = capacity;
+        await loadChildren(year);
+        document.getElementById('childrenSelect').value = childId || '';
+        document.querySelector('.popup-info').style.display = 'block';
+    }
+
+    async function saveChanges() {
+        const newChildId = document.getElementById('childrenSelect').value;
+        if (!newChildId) {
+            showToast('Please select a child.', true);
+            return;
+        }
+
+        const selectedChild = availableChildren.find(child => child.child_id == newChildId);
+        if (!selectedChild) {
+            showToast('Selected child is invalid.', true);
+            return;
+        }
+
+        try {
+            const response = await fetch('update_cart.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject_id: subjectId, child_id: childId })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Remove response:', data);
-                    if (data.status === 'success') {
-                        showToast('Item removed from cart!');
-                        loadCartData();
-                    } else {
-                        showToast('Error: ' + data.message, true);
-                    }
+                body: JSON.stringify({
+                    cart_id: currentCartId,
+                    action: 'update_child',
+                    child_id: newChildId
                 })
-                .catch(error => {
-                    console.error('Error removing from cart:', error);
-                    showToast('Error removing from cart.', true);
-                });
+            });
+            const data = await response.json();
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Failed to update cart');
+            }
+            showToast('Cart updated successfully!');
+            loadCartData();
+            document.querySelector('.popup-info').style.display = 'none';
+        } catch (error) {
+            console.error('Error updating cart:', error);
+            showToast(`Error: ${error.message}`, true);
+        }
+    }
+
+    function removeFromCart(cartId, subjectId, childId) {
+        console.log('Removing from cart:', { cartId, subjectId, childId });
+        if (!childId) {
+            showToast('Error: Child ID not found.', true);
+            return;
         }
 
-        document.querySelector('.popup-close').addEventListener('click', function() {
-            document.querySelector('.popup-info').style.display = 'none';
-        });
+        fetch('remove_cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject_id: subjectId, child_id: childId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Remove response:', data);
+                if (data.status === 'success') {
+                    showToast('Item removed from cart!');
+                    loadCartData();
+                } else {
+                    showToast('Error: ' + data.message, true);
+                }
+            })
+            .catch(error => {
+                console.error('Error removing from cart:', error);
+                showToast('Error removing from cart.', true);
+            });
+    }
 
-        document.getElementById("checkoutButton").addEventListener("click", function() {
-            window.location.href = "check.php";
-        });
-    </script>
+    document.querySelector('.popup-close').addEventListener('click', function() {
+        document.querySelector('.popup-info').style.display = 'none';
+    });
+
+    document.getElementById("checkoutButton").addEventListener("click", function() {
+        window.location.href = "check.php";
+    });
+</script>
 </body>
 </html>
