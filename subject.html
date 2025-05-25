@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <title>Subject</title>
@@ -21,7 +20,6 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
 
-
     <style>
         .icon-bar {
             display: flex;
@@ -30,18 +28,15 @@
             background-color: #f8f9fa;
             border-bottom: 1px solid #caccce;
         }
-
         .icon-bar a {
             margin: 0 15px;
             color: #000000;
             font-size: 24px;
             transition: color 0.3s ease;
         }
-
         .icon-bar a:hover {
             color: #73cf67;
         }
-
         .breadcrumb-container {
             padding: 20px;
             background-color: #f8f9fa;
@@ -50,23 +45,11 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        .breadcrumb-container .search-box {
-            display: flex;
-            align-items: center;
-        }
-
-        .breadcrumb-container .search-box input {
-            width: 200px;
-            margin-right: 10px;
-        }
-
         .breadcrumb-container h1 {
             margin: 0;
             font-size: 28px;
             font-weight: bold;
         }
-
         .breadcrumb-container .breadcrumb {
             margin: 0;
             padding: 0;
@@ -76,32 +59,26 @@
             display: flex;
             gap: 5px;
         }
-
         .breadcrumb-container .breadcrumb li {
             color: #555;
         }
-
         .breadcrumb-container .breadcrumb li a {
             color: #007bff;
             text-decoration: none;
         }
-
         .breadcrumb-container .breadcrumb li a:hover {
             text-decoration: underline;
         }
-
         .breadcrumb-container .breadcrumb li:not(:last-child)::after {
             content: '>';
             margin-left: 5px;
             color: #555;
         }
-
         .container-main {
             display: flex;
             padding: 20px;
             gap: 20px;
         }
-
         .left-panel {
             width: 300px;
             display: flex;
@@ -110,12 +87,10 @@
             border-right: 1px solid #ccc;
             padding-right: 15px;
         }
-
         .search-box {
             display: flex;
             align-items: center;
         }
-
         .search-box input {
             width: 200px;
             margin-right: 10px;
@@ -124,13 +99,11 @@
             font-size: 14px;
             height: 38px;
         }
-
         .search-box .btn {
             padding: 10px 20px;
             font-size: 16px;
             height: 38px;
         }
-
         .year-list select {
             width: 280px;
             padding: 8px 10px;
@@ -141,12 +114,10 @@
             transition: background-color 0.3s ease;
             height: 38px;
         }
-
         .year-list select:focus {
             outline: none;
             background-color: #e0f7e4;
         }
-
         .subject-grid, #resultsContainer {
             display: flex;
             flex-wrap: nowrap;
@@ -159,7 +130,6 @@
             overflow-x: auto;
             flex: 1;
         }
-
         .subject-card {
             width: 220px;
             height: 280px;
@@ -169,31 +139,26 @@
             padding: 15px;
             transition: transform 0.3s, background-color 0.3s;
         }
-
         .subject-card:hover {
             transform: scale(1.05);
             background-color: #e0f7e4;
         }
-
         .subject-card img {
             width: 100%;
             height: 180px;
             margin-bottom: 10px;
             border-radius: 8px;
         }
-
         .subject-card h5 {
             font-size: 16px;
             margin: 0;
             color: #333;
         }
-
         .stars-container {
             display: flex;
             justify-content: center;
             margin-top: 10px;
         }
-
         .stars-container .star {
             width: 20px;
             height: 20px;
@@ -202,43 +167,31 @@
             margin-right: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
         .stars-container .yellow {
             background-color: gold;
         }
-
         .stars-container .half {
             background: linear-gradient(to right, gold 50%, #ddd 50%);
         }
-
-        .stars-container .half-4-8 {
-            background: linear-gradient(to right, gold 65%, #ddd 35%);
-        }
-
         .rating-text {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
             text-align: center;
         }
-
         #resultsContainer {
             display: none;
         }
-
         .search-results {
             display: flex !important;
             flex-direction: row !important;
         }
-
         .search-active .subject-grid {
             display: none;
         }
-
         .search-active #resultsContainer {
             display: flex;
         }
-
         .toast-message {
             position: fixed;
             top: 10%;
@@ -255,7 +208,6 @@
             text-align: center;
             transition: opacity 0.5s ease-in-out;
         }
-
         .notification-badge {
             position: absolute;
             top: 5px;
@@ -267,17 +219,21 @@
             display: none;
             z-index: 1000;
         }
-
         .notification-icon {
             position: relative;
         }
-
         .navbar-color {
             color: #28a745;
         }
+        .fa-arrow-right {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .fa-arrow-right {
+            opacity: 1;
+        }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="member.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
@@ -287,10 +243,10 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
                 <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
 
@@ -326,31 +282,26 @@
             </div>
         </div>
         <div class="subject-grid" id="subjectGrid">
-            <p>Loading...</p> <!-- 初始加载提示 -->
+            <p>Loading...</p>
         </div>
         <div id="resultsContainer"></div>
         <div id="successToast" class="toast-message" style="display: none;"></div>
     </div>
 
-     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
-                <!-- 品牌标语 -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">The Seeds Learning Tuition Centre</h4>
                     <p>Every child is a different kind of flower. We nurture their growth.</p>
                 </div>
-                <!-- Quick Link -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">Quick Link</h4>
                     <a class="btn btn-link" href="about.html">About Us</a><br>
                 </div>
-                <!-- Contact -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">Contact</h4>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-                    <!-- 社交媒体（可替换为真实链接） -->
                     <div class="d-flex pt-2">
                         <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/people/The-Seeds-Learning-Centre/100063525220441/#"><i class="fab fa-facebook-f"></i></a>
                         <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/theseeds_kulai?igsh=dGt4YWpiOWJiem44"><i class="fab fa-instagram"></i></a>
@@ -365,330 +316,414 @@
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
                         © <a class="border-bottom" href="#">The Seeds Learning Tuition Centre</a>, All Right Reserved.
                     </div>
-                    <div class="col-md-6 text-center text-md-end">
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Footer End -->
 
-    <!-- Back to Top -->
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 
-    <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="lib/wow.min.js"></script>
     <script src="lib/easing.min.js"></script>
     <script src="lib/waypoints.min.js"></script>
     <script src="lib/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
     <script src="js/main.js"></script>
 
     <script>
-        // Protect page from unauthorized access and handle page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
+      // Force cache busting for the HTML page itself
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded, initializing page...');
+    // Add cache-busting meta refresh as a fallback
+    const meta = document.createElement('meta');
+    meta.httpEquiv = 'refresh';
+    meta.content = '0;url=subject.html?_=' + new Date().getTime();
+    if (!window.location.search.includes('_=')) {
+        document.head.appendChild(meta);
+    }
+    checkLoginStatus();
+    loadNotifications();
+    bindSearchEvents();
+});
 
+// Handle browser back/forward navigation
+window.addEventListener('popstate', function() {
+    console.log('Popstate event triggered, reloading subjects');
+    const urlParams = new URLSearchParams(window.location.search);
+    const year = urlParams.get('year') || '';
+    const yearSelect = document.getElementById('yearSelect');
+    if (yearSelect) {
+        yearSelect.value = year;
+        showSubjects(year);
+    }
+});
 
-            // Bind search and year select events
-            const searchInput = document.getElementById('searchInput');
-            const searchButton = document.getElementById('searchButton');
-            const yearSelect = document.getElementById('yearSelect');
+// Check login status
+async function checkLoginStatus() {
+    try {
+        const response = await fetch('check_login.php?_=' + new Date().getTime(), {
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+        const data = await response.json();
+        console.log('Login check response:', data);
 
-            searchButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                performSearch(searchInput.value.trim());
-            });
+        if (!data.isLoggedIn) {
+            console.log('User not logged in, redirecting to login.html');
+            window.location.href = 'login.html';
+        } else {
+            console.log('User logged in, loading navigation and years');
+            loadNavigation();
+            loadYears();
+        }
+    } catch (error) {
+        console.error('Error fetching login status:', error);
+        showToast('Failed to check login status. Redirecting to login.', true);
+        setTimeout(() => window.location.href = 'login.html', 2000);
+    }
+}
 
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    performSearch(searchInput.value.trim());
-                }
-            });
+// Load navigation
+async function loadNavigation() {
+    console.log('loadNavigation called');
+    try {
+        const navLinks = document.getElementById('navLinks');
+        const authButton = document.getElementById('authButton');
+        if (!navLinks || !authButton) {
+            throw new Error('Navigation elements not found');
+        }
 
-            yearSelect.addEventListener('change', () => {
-                console.log('Year selected:', yearSelect.value);
-                showSubjects(yearSelect.value);
-            });
+        const response = await fetch('check_login.php?_=' + new Date().getTime(), {
+            credentials: 'include',
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        if (!response.ok) throw new Error(`Failed to fetch login status: ${response.status}`);
+        const data = await response.json();
+        console.log('Navigation login check response:', data);
 
-            // Notification badge
-            fetch('get_notification.php', { cache: 'no-store' })
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Notifications data:', data);
-                    if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
-                        const badge = document.querySelector('.notification-badge');
-                        if (badge) badge.style.display = 'block';
-                    }
-                })
-                .catch(error => console.error('Fetch error:', error));
+        if (data.isLoggedIn) {
+            navLinks.innerHTML = `
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                <a href="comment.html" class="nav-item nav-link">Comment</a>
+            `;
+            authButton.textContent = 'Log out';
+            authButton.href = 'logout.php';
+        } else {
+            navLinks.innerHTML = `
+                <a href="888.html" class="nav-item nav-link">Home</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+            `;
+            authButton.textContent = 'Log in';
+            authButton.href = 'login.html';
+        }
+    } catch (error) {
+        console.error('Error loading navigation:', error);
+        showToast('Failed to load navigation. Please try again.', true);
+    }
+}
+
+// Load notifications
+async function loadNotifications() {
+    try {
+        const response = await fetch('get_notification.php?_=' + new Date().getTime(), {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log('Notifications data:', data);
+        if (data.notifications && data.notifications.some(notif => notif.read_status === 'unread')) {
+            const badge = document.querySelector('.notification-badge');
+            if (badge) badge.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Failed to load notifications:', error);
+    }
+}
+
+// Load years
+async function loadYears() {
+    console.log('Loading years...');
+    const yearSelect = document.getElementById('yearSelect');
+    if (!yearSelect) {
+        console.error('Year select element not found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`get_years.php?_=${new Date().getTime()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+        const data = await response.json();
+        console.log('Years data:', data);
+
+        yearSelect.innerHTML = '<option value="">Select Year</option>';
+        if (!data || data.length === 0) {
+            console.warn('No years available');
+            yearSelect.innerHTML += '<option value="">No years available</option>';
+            return;
+        }
+
+        data.forEach(year => {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
         });
 
-        // Check login status and load content
-        async function checkLoginStatus() {
-            try {
-                const response = await fetch('check_login.php', {
-                    credentials: 'include',
-                    cache: 'no-store'
-                });
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
-                console.log('Login check response:', data);
+        // Bind year change event
+        yearSelect.onchange = () => {
+            console.log('Year selected:', yearSelect.value);
+            showSubjects(yearSelect.value);
+        };
 
-                if (!data.isLoggedIn) {
-                    window.location.href = 'login.html';
-                } else {
-                    loadNavigation();
-                    loadYears();
-                }
-            } catch (error) {
-                console.error('Error fetching login status:', error);
-                showToast('Failed to check login status. Please try again.', true);
-                window.location.href = 'login.html';
+        // Load default year from URL or show subjects for no year
+        const urlParams = new URLSearchParams(window.location.search);
+        const defaultYear = urlParams.get('year') || '';
+        console.log('Default year from URL:', defaultYear);
+        yearSelect.value = data.includes(defaultYear) ? defaultYear : '';
+        showSubjects(yearSelect.value);
+    } catch (error) {
+        console.error('Error loading years:', error);
+        yearSelect.innerHTML = '<option value="">Error loading years</option>';
+    }
+}
+
+// Show subjects
+async function showSubjects(year) {
+    console.log('showSubjects called with year:', year);
+    const subjectGrid = document.getElementById('subjectGrid');
+    const resultsContainer = document.getElementById('resultsContainer');
+    if (!subjectGrid || !resultsContainer) {
+        console.error('Subject grid or results container not found');
+        return;
+    }
+
+    // Reset UI
+    resultsContainer.style.display = 'none';
+    resultsContainer.innerHTML = '';
+    subjectGrid.style.display = 'flex';
+    document.body.classList.remove('search-active');
+    subjectGrid.innerHTML = '<p>Loading...</p>';
+
+    // Update URL without reloading
+    history.pushState(null, '', `subject.html?year=${encodeURIComponent(year || '')}&_=${new Date().getTime()}`);
+
+    if (!year) {
+        subjectGrid.innerHTML = '<p>Please select a year to view subjects</p>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`subject.php?year=${encodeURIComponent(year)}&_=${new Date().getTime()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
             }
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        console.log('Fetched subjects data:', data);
+        subjectGrid.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
+            return;
         }
 
-        // Load navigation dynamically
-        async function loadNavigation() {
-            try {
-                const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
-                if (!response.ok) throw new Error('Failed to fetch login status');
-                const data = await response.json();
+        data.forEach(subject => {
+            const card = document.createElement('div');
+            card.className = 'subject-card';
+            const rating = parseFloat(subject.rating) || 0;
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let starsHtml = '';
+            for (let i = 0; i < fullStars; i++) {
+                starsHtml += '<span class="star yellow"></span>';
+            }
+            if (hasHalfStar) {
+                starsHtml += '<span class="star half"></span>';
+            }
+            for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                starsHtml += '<span class="star"></span>';
+            }
 
-                const navLinks = document.getElementById('navLinks');
-                const authButton = document.getElementById('authButton');
+            card.innerHTML = `
+                <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
+                <h5>${subject.name}</h5>
+                <div class="stars-container">${starsHtml}</div>
+                <div class="rating-text">${rating.toFixed(1)}</div>
+            `;
+            card.onclick = () => {
+                clearSearch();
+                window.location.href = `generate_subject_page.php?id=${subject.subject_id}&_=${new Date().getTime()}`;
+            };
+            subjectGrid.appendChild(card);
+        });
+    } catch (error) {
+        console.error('Error fetching subjects:', error);
+        subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
+    }
+}
 
-                if (data.isLoggedIn) {
-                    navLinks.innerHTML = `
-                        <a href="member.html" class="nav-item nav-link">Home</a>
-                        <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                        <a href="about.html" class="nav-item nav-link">About us</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                        <a href="comment.html" class="nav-item nav-link">Comment</a>
-                    `;
-                    authButton.textContent = 'Log out';
-                    authButton.href = 'logout.php';
-                } else {
-                    navLinks.innerHTML = `
-                        <a href="888.html" class="nav-item nav-link">Home</a>
-                        <a href="about.html" class="nav-item nav-link">About us</a>
-                        <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                    `;
-                    authButton.textContent = 'Log in';
-                    authButton.href = 'login.html';
+// Search functionality
+function bindSearchEvents() {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+
+    if (searchButton) {
+        searchButton.onclick = (e) => {
+            e.preventDefault();
+            performSearch(searchInput.value.trim());
+        };
+    }
+
+    if (searchInput) {
+        searchInput.onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch(searchInput.value.trim());
+            }
+        };
+    }
+}
+
+// Perform search
+async function performSearch(query) {
+    if (!query) {
+        showToast('Please enter a search term!', true);
+        return;
+    }
+    if (query.length < 2) {
+        showToast('Please enter at least 2 characters to search.', true);
+        return;
+    }
+
+    const subjectGrid = document.getElementById('subjectGrid');
+    const resultsContainer = document.getElementById('resultsContainer');
+    if (!subjectGrid || !resultsContainer) {
+        console.error('Subject grid or results container not found');
+        return;
+    }
+
+    subjectGrid.style.display = 'none';
+    resultsContainer.style.display = 'flex';
+    document.body.classList.add('search-active');
+    resultsContainer.innerHTML = '<p>Loading...</p>';
+
+    try {
+        const response = await fetch(`search.php?query=${encodeURIComponent(query)}&_=${new Date().getTime()}`, {
+            cache: 'no-store',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
+        if (!response.ok) throw new Error('Network error');
+        const data = await response.json();
+        resultsContainer.innerHTML = '';
+
+        if (!data || data.length === 0) {
+            resultsContainer.innerHTML = `<p>No results found for "${query}"</p>`;
+        } else {
+            const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
+            uniqueData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                const rating = parseFloat(item.rating) || 0;
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating % 1 >= 0.5;
+                let starsHtml = '';
+                for (let i = 0; i < fullStars; i++) {
+                    starsHtml += '<span class="star yellow"></span>';
                 }
-            } catch (error) {
-                console.error('Error fetching login status:', error);
-                const navLinks = document.getElementById('navLinks');
-                const authButton = document.getElementById('authButton');
-                navLinks.innerHTML = `
-                    <a href="888.html" class="nav-item nav-link">Home</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
+                if (hasHalfStar) {
+                    starsHtml += '<span class="star half"></span>';
+                }
+                for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                    starsHtml += '<span class="star"></span>';
+                }
+
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
+                    <h5>${item.name}</h5>
+                    <div class="stars-container">${starsHtml}</div>
+                    <div class="rating-text">${rating.toFixed(1)} (${item.year})</div>
                 `;
-                authButton.textContent = 'Log in';
-                authButton.href = 'login.html';
-            }
+                card.onclick = () => {
+                    clearSearch();
+                    window.location.href = `generate_subject_page.php?id=${item.subject_id}&_=${new Date().getTime()}`;
+                };
+                resultsContainer.appendChild(card);
+            });
         }
+        document.getElementById('searchInput').value = '';
+    } catch (error) {
+        console.error('Error performing search:', error);
+        resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
+        document.getElementById('searchInput').value = '';
+    }
+}
 
-        // Toast function
-        function showToast(message, isError = false) {
-            let toast = document.getElementById("successToast");
-            toast.innerText = message;
-            toast.style.backgroundColor = isError ? "#dc3545" : "#28a745";
-            toast.style.display = "block";
-            toast.style.opacity = "1";
-            setTimeout(() => {
-                toast.style.opacity = "0";
-                setTimeout(() => { toast.style.display = "none"; }, 500);
-            }, 3000);
-        }
+// Clear search
+function clearSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const subjectGrid = document.getElementById('subjectGrid');
+    const yearSelect = document.getElementById('yearSelect');
 
-        // Load years into dropdown
-        function loadYears() {
-            console.log('Loading years...');
-            fetch('get_years.php', { cache: 'no-store' })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok: ' + response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Years data:', data);
-                    const yearSelect = document.getElementById('yearSelect');
-                    yearSelect.innerHTML = '<option value="">Select Year</option>';
+    if (searchInput) searchInput.value = '';
+    if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+    }
+    if (subjectGrid) subjectGrid.style.display = 'flex';
+    document.body.classList.remove('search-active');
+    const selectedYear = yearSelect ? yearSelect.value || '' : '';
+    showSubjects(selectedYear);
+}
 
-                    if (!data || data.length === 0) {
-                        console.warn('No years available');
-                        yearSelect.innerHTML += '<option value="">No years available</option>';
-                        return;
-                    }
+// Toast function
+function showToast(message, isError = false) {
+    const toast = document.getElementById('successToast');
+    if (!toast) {
+        console.error('Toast element not found');
+        return;
+    }
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+    toast.style.display = 'block';
+    toast.style.opacity = '1';
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => { toast.style.display = 'none'; }, 500);
+    }, 3000);
+}
 
-                    data.forEach(year => {
-                        const option = document.createElement('option');
-                        option.value = year;
-                        option.textContent = year;
-                        yearSelect.appendChild(option);
-                    });
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    let defaultYear = urlParams.get('year') || '';
-                    console.log('Default year from URL:', defaultYear);
-                    if (defaultYear && data.includes(defaultYear)) {
-                        yearSelect.value = defaultYear;
-                        showSubjects(defaultYear);
-                    } else {
-                        showSubjects('');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading years:', error);
-                    document.getElementById('yearSelect').innerHTML = '<option value="">Error loading years</option>';
-                });
-        }
-
-        // Load subjects for a year
-        function showSubjects(year) {
-            console.log('showSubjects called with year:', year);
-            history.pushState(null, '', `?year=${encodeURIComponent(year || '')}`);
-            document.getElementById('resultsContainer').style.display = 'none';
-            document.getElementById('subjectGrid').style.display = 'flex';
-            document.body.classList.remove('search-active');
-
-            const subjectGrid = document.getElementById('subjectGrid');
-            subjectGrid.innerHTML = '<p>Loading...</p>';
-
-            if (!year) {
-                subjectGrid.innerHTML = '<p>Please select a year to view subjects</p>';
-                return;
-            }
-
-            fetch(`subject.php?year=${encodeURIComponent(year)}`, { cache: 'no-store' })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Fetched subjects data:', data);
-                    subjectGrid.innerHTML = '';
-                    if (!data || data.length === 0) {
-                        subjectGrid.innerHTML = `<p>No subjects available for ${year}</p>`;
-                        return;
-                    }
-
-                    data.forEach(subject => {
-                        const card = document.createElement('div');
-                        card.className = 'subject-card';
-                        const rating = parseFloat(subject.rating) || 0;
-                        const fullStars = Math.floor(rating);
-                        const hasHalfStar = rating % 1 >= 0.5;
-                        let starsHtml = '';
-                        for (let i = 0; i < fullStars; i++) {
-                            starsHtml += '<span class="star yellow"></span>';
-                        }
-                        if (hasHalfStar) {
-                            starsHtml += '<span class="star half"></span>';
-                        }
-                        for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-                            starsHtml += '<span class="star"></span>';
-                        }
-
-                        card.innerHTML = `
-                            <img src="${subject.image}" alt="${subject.name}" onerror="this.src='img/default-subject.jpg'">
-                            <h5>${subject.name}</h5>
-                            <div class="stars-container">${starsHtml}</div>
-                            <div class="rating-text">${rating.toFixed(1)}</div>
-                        `;
-                        card.onclick = () => window.location.href = `generate_subject_page.php?id=${subject.subject_id}`;
-                        subjectGrid.appendChild(card);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching subjects:', error);
-                    subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
-                });
-        }
-
-        // Search functionality
-        function performSearch(query) {
-            if (!query) {
-                showToast('Please enter a search term!', true);
-                return;
-            }
-            if (query.length < 2) {
-                showToast('Please enter at least 2 characters to search.', true);
-                return;
-            }
-
-            document.body.classList.add('search-active');
-            document.getElementById('subjectGrid').style.display = 'none';
-            const resultsContainer = document.getElementById('resultsContainer');
-            resultsContainer.style.display = 'flex';
-            resultsContainer.innerHTML = '<div class="search-results"><p>Loading...</p></div>';
-
-            fetch(`search.php?query=${encodeURIComponent(query)}`, { cache: 'no-store' })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.json();
-                })
-                .then(data => {
-                    const resultsGrid = document.querySelector('.search-results');
-                    resultsGrid.innerHTML = '';
-
-                    if (!data || data.length === 0) {
-                        resultsGrid.innerHTML = `<p>No results found for "${query}"</p>`;
-                    } else {
-                        const uniqueData = [...new Set(data.map(item => JSON.stringify(item)))].map(str => JSON.parse(str));
-                        uniqueData.forEach(item => {
-                            const card = document.createElement('div');
-                            card.className = 'subject-card';
-                            const rating = parseFloat(item.rating) || 0;
-                            const fullStars = Math.floor(rating);
-                            const hasHalfStar = rating % 1 >= 0.5;
-                            let starsHtml = '';
-                            for (let i = 0; i < fullStars; i++) {
-                                starsHtml += '<span class="star yellow"></span>';
-                            }
-                            if (hasHalfStar) {
-                                starsHtml += '<span class="star half"></span>';
-                            }
-                            for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-                                starsHtml += '<span class="star"></span>';
-                            }
-
-                            card.innerHTML = `
-                                <img src="${item.image}" alt="${item.name}" onerror="this.src='img/default-subject.jpg'">
-                                <h5>${item.name}</h5>
-                                <div class="stars-container">${starsHtml}</div>
-                                <div class="rating-text">${rating.toFixed(1)} (${item.year})</div>
-                            `;
-                            card.onclick = () => window.location.href = `generate_subject_page.php?id=${item.subject_id}`;
-                            resultsGrid.appendChild(card);
-                        });
-                    }
-                    document.getElementById('searchInput').value = '';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
-                    document.getElementById('searchInput').value = '';
-                });
-        }
-
-        // Clear search
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('resultsContainer').style.display = 'none';
-            document.getElementById('subjectGrid').style.display = 'flex';
-            const selectedYear = document.getElementById('yearSelect').value || '';
-            showSubjects(selectedYear);
-        }
+// Handle page visibility changes
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        console.log('Page became visible, re-checking login status and reloading data');
+        checkLoginStatus();
+    }
+});
     </script>
 </body>
 </html>
