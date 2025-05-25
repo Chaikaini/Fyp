@@ -24,9 +24,7 @@ $teacher_id = $_SESSION['teacher_id'];
 
 // process update profile
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name    = $_POST['name'] ?? '';
-    $gender  = $_POST['gender'] ?? '';
-    $email   = $_POST['email'] ?? '';
+    
     $phone   = $_POST['phone_number'] ?? '';
     $address = $_POST['address'] ?? '';
     $status  = 'Active'; 
@@ -46,10 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (move_uploaded_file($imageTmp, $imagePath)) {
             // update with image
             $sql = "UPDATE teacher 
-                    SET teacher_name = ?, teacher_gender = ?,  teacher_phone_number = ?, teacher_address = ?, teacher_status = ?, teacher_image = ?
+                    SET teacher_phone_number = ?, teacher_address = ?, teacher_status = ?, teacher_image = ?
                     WHERE teacher_id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssssssi", $name, $gender, $phone, $address, $status, $imagePath, $teacher_id);
+            $stmt->bind_param("ssssi", $phone, $address, $status, $imagePath, $teacher_id);
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Failed to upload image']);
             exit;
@@ -57,10 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // no update image 
         $sql = "UPDATE teacher 
-                SET teacher_name = ?, teacher_gender = ?,  teacher_phone_number = ?, teacher_address = ?, teacher_status = ?
+                SET teacher_phone_number = ?, teacher_address = ?, teacher_status = ?
                 WHERE teacher_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssssi", $name, $gender, $phone, $address, $status, $teacher_id);
+        $stmt->bind_param("sssi", $phone, $address, $status, $teacher_id);
     }
 
     // run the update query
@@ -80,6 +78,7 @@ $sql = "SELECT
             teacher_name AS name, 
             teacher_gender AS gender, 
             teacher_email AS email, 
+            teacher_ic_number AS ic_number,
             teacher_phone_number AS phone_number,
             teacher_address AS address,
             teacher_image AS image,
