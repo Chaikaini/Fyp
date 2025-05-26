@@ -4900,3 +4900,8 @@ get_cart.php: Fetched cart items: Array
 (
 )
 
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+)
+

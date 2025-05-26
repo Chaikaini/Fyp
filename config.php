@@ -1,4 +1,4 @@
 <?php
-define('SMTP_USERNAME', 'enxi6387@gmail.com');
-define('SMTP_PASSWORD', 'lroa ywhk lldq fwzt'); // New app-specific password
+define('SMTP_USERNAME', 'theseeds11@gmail.com');
+define('SMTP_PASSWORD', 'hqwq cpmp zrhv bbby'); // New app-specific password
 ?>
