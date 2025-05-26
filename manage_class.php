@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 SELECT 
                     c.*, 
                     s.subject_name, 
+                    s.year AS subject_year, 
                     p.part_id, 
                     p.part_name, 
                     t.teacher_id, 
@@ -52,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "teacher_id" => $row["teacher_id"],
                     "teacher_name" => $row["teacher_name"],
                     "class_term" => $row["class_term"],
-                    "year" => $row["year"],
+                    "year" => $row["subject_year"],
                     "time" => $row["class_time"],
                     "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
@@ -123,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 SELECT 
                     c.*, 
                     s.subject_name, 
+                    s.year AS subject_year, 
                     p.part_id, 
                     p.part_name, 
                     t.teacher_id, 
@@ -157,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "teacher_id" => $row["teacher_id"],
                     "teacher_name" => $row["teacher_name"],
                     "class_term" => $row["class_term"],
-                    "year" => $row["year"],
+                    "year" => $row["subject_year"],
                     "time" => $row["class_time"],
                     "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
@@ -183,17 +185,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } catch (Exception $e) {
             echo json_encode(["success" => false, "message" => "Error fetching teachers: " . $e->getMessage()]);
         }
-    } elseif ($action === 'getYears') {
-        try {
-            $stmt = $pdo->query("SELECT DISTINCT year FROM class ORDER BY year");
-            $years = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $years[] = $row["year"];
-            }
-            echo json_encode(["success" => true, "years" => $years]);
-        } catch (Exception $e) {
-            echo json_encode(["success" => false, "message" => "Error fetching years: " . $e->getMessage()]);
-        }
     } elseif ($action === 'getTerms') {
         try {
             $stmt = $pdo->query("SELECT DISTINCT class_term FROM class ORDER BY class_term");
@@ -208,32 +199,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($action === 'getNextClassId') {
         try {
             $subjectId = $_GET['subject_id'] ?? '';
-            $year = $_GET['year'] ?? '';
 
-            if (!$subjectId || !$year) {
-                echo json_encode(["success" => false, "message" => "Subject ID and year are required"]);
+            if (!$subjectId) {
+                echo json_encode(["success" => false, "message" => "Subject ID is required"]);
                 exit;
             }
 
-            // Validate subject_id and year
-            $stmt = $pdo->prepare("SELECT year FROM subject WHERE subject_id = ?");
+            // Get subject_name and year
+            $stmt = $pdo->prepare("SELECT subject_name, year FROM subject WHERE subject_id = ?");
             $stmt->execute([$subjectId]);
-            $subjectYear = $stmt->fetchColumn();
-            if (!$subjectYear) {
+            $subject = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$subject) {
                 echo json_encode(["success" => false, "message" => "Invalid subject ID"]);
                 exit;
             }
-            if ($subjectYear !== $year) {
-                echo json_encode(["success" => false, "message" => "Year does not match subject ID"]);
+            $subjectName = $subject['subject_name'];
+            $year = $subject['year'];
+
+            // Validate year
+            $firstChar = substr($subjectId, 0, 1);
+            if ($firstChar !== '1' && $firstChar !== '2') {
+                echo json_encode(["success" => false, "message" => "Subject ID must start with '1' or '2'"]);
                 exit;
             }
-
-            // Get subject_name and determine abbreviation
-            $stmt = $pdo->prepare("SELECT subject_name FROM subject WHERE subject_id = ?");
-            $stmt->execute([$subjectId]);
-            $subjectName = $stmt->fetchColumn();
-            if (!$subjectName) {
-                echo json_encode(["success" => false, "message" => "Subject name not found"]);
+            if (($firstChar === '1' && $year !== 'Year 1') || ($firstChar === '2' && $year !== 'Year 2')) {
+                echo json_encode(["success" => false, "message" => "Subject ID starting with '$firstChar' must have " . ($firstChar === '1' ? 'Year 1' : 'Year 2')]);
                 exit;
             }
 
@@ -329,12 +319,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($input['action'] === 'addClass') {
         try {
             $subjectId = $input['subject_id'];
-            $year = $input['year'];
             $classId = $input['class_id'];
-            $firstChar = substr($subjectId, 0, 1);
 
+            // Validate subject_id
+            $firstChar = substr($subjectId, 0, 1);
             if ($firstChar !== '1' && $firstChar !== '2') {
                 throw new Exception("Subject ID must start with '1' or '2'");
+            }
+
+            // Get year from subject table
+            $stmt = $pdo->prepare("SELECT year FROM subject WHERE subject_id = ?");
+            $stmt->execute([$subjectId]);
+            $year = $stmt->fetchColumn();
+            if (!$year) {
+                throw new Exception("Invalid subject ID");
             }
             if (($firstChar === '1' && $year !== 'Year 1') || ($firstChar === '2' && $year !== 'Year 2')) {
                 throw new Exception("Subject ID starting with '$firstChar' must have " . ($firstChar === '1' ? 'Year 1' : 'Year 2'));
@@ -349,9 +347,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $pdo->prepare("
                 INSERT INTO class (
-                    class_id, subject_id, part_id, teacher_id, class_term, year, 
+                    class_id, subject_id, part_id, teacher_id, class_term, 
                     class_time, class_venue, class_capacity, class_enrolled, class_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
             ");
             $stmt->execute([
                 $classId,
@@ -359,7 +357,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input['part'],
                 $input['teacher_id'],
                 $input['class_term'],
-                $year,
                 $input['time'],
                 $input['venue'],
                 $input['capacity'],

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 25, 2025 at 05:32 AM
+-- Generation Time: May 26, 2025 at 11:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -106,7 +106,6 @@ CREATE TABLE `class` (
   `part_id` int(11) NOT NULL,
   `teacher_id` varchar(20) NOT NULL,
   `class_term` varchar(20) NOT NULL,
-  `year` varchar(10) NOT NULL,
   `class_time` text NOT NULL,
   `class_venue` varchar(100) NOT NULL DEFAULT '',
   `class_capacity` int(11) NOT NULL,
@@ -118,19 +117,19 @@ CREATE TABLE `class` (
 -- Dumping data for table `class`
 --
 
-INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `year`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', '11245', 1, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
-('Eng0002', '11245', 2, '12233', '2025', 'Year 1', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Eng2001', '22534', 1, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
-('Eng2002', '22534', 2, '12345', '2025', 'Year 2', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat0001', '11132', 1, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
-('Mat0002', '11132', 2, '12123', '2025', 'Year 1', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat2001', '22134', 1, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
-('Mat2002', '22134', 2, '12347', '2025', 'Year 2', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly0001', '11351', 1, '12345', '2025', 'Year 1', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
-('Mly0002', '11351', 2, '12345', '2025', 'Year 1', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly2001', '22345', 1, '12347', '2025', 'Year 2', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
-('Mly2002', '22345', 2, '12347', '2025', 'Year 2', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
+INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
+('Eng0001', '11245', 1, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
+('Eng0002', '11245', 2, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
+('Eng2001', '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
+('Eng2002', '22534', 2, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
+('Mat0001', '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
+('Mat0002', '11132', 2, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
+('Mat2001', '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mat2002', '22134', 2, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly0001', '11351', 1, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
+('Mly0002', '11351', 2, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly2001', '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mly2002', '22345', 2, '12347', '2025', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
 
 -- --------------------------------------------------------
 
@@ -210,7 +209,8 @@ INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `c
 (1, 12345, 'Class', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
 (2, 12345, 'Class', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
 (3, 11111, 'Parent', NULL, '123', '123', NULL, '2025-05-08 15:51:06'),
-(6, 11112, 'Parent', NULL, '1', '123', NULL, '2025-05-20 21:45:37');
+(6, 11112, 'Parent', NULL, '1', '123', NULL, '2025-05-20 21:45:37'),
+(7, 11111, 'Teacher', NULL, '123', '123', NULL, '2025-05-26 16:31:12');
 
 -- --------------------------------------------------------
 
@@ -587,13 +587,13 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `parent`
@@ -623,7 +623,7 @@ ALTER TABLE `registration_class`
 -- AUTO_INCREMENT for table `teacher`
 --
 ALTER TABLE `teacher`
-  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12351;
+  MODIFY `teacher_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12352;
 
 --
 -- AUTO_INCREMENT for table `teacher_comment`

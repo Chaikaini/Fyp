@@ -148,7 +148,7 @@
   <nav id="sidebar" class="d-flex flex-column p-3">
     <div class="sidebar-header"> 
       <h3>Admin Panel</h3>
-    </div>
+    </div> 
     <ul class="nav flex-column">
       <li class="nav-item"><a href="dashboard.html" class="nav-link"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
       <li class="nav-item"><a href="manage_admin.html" class="nav-link"><i class="fas fa-user"></i> <span>Admin List</span></a></li>
@@ -167,7 +167,7 @@
         <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
       </li>
@@ -220,7 +220,6 @@
               <th>Part</th>
               <th>Teacher</th>
               <th>Term</th>
-              <th>Year</th>
               <th>Time</th>
               <th>Venue</th>
               <th>Capacity</th>
@@ -275,13 +274,6 @@
               <input type="text" class="form-control" id="class_term" required>
             </div>
             <div class="mb-3">
-              <label for="yearSelect" class="form-label">Year</label>
-              <select class="form-select disabled-field" id="yearSelect" required disabled>
-                <option value="" disabled selected>Select Year</option>
-                <!-- Year options will be populated dynamically -->
-              </select>
-            </div>
-            <div class="mb-3">
               <label for="time" class="form-label">Time</label>
               <input type="text" class="form-control" id="time" required>
             </div>
@@ -328,10 +320,6 @@
             <div class="mb-3">
               <label for="editClassId" class="form-label">Class ID</label>
               <input type="text" class="form-control fixed-field" id="editClassId" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="editYear" class="form-label">Year</label>
-              <input type="text" class="form-control fixed-field" id="editYear" readonly>
             </div>
             <div class="mb-3">
               <label for="editPathSelect" class="form-label">Part</label>
@@ -491,14 +479,13 @@
                 <td data-part-id="${cls.part_id}">${cls.part}</td>
                 <td>${cls.teacher_name}</td>
                 <td>${cls.class_term}</td>
-                <td>${cls.year}</td>
                 <td>${cls.time}</td>
                 <td>${cls.venue}</td>
                 <td>${cls.enrolled} / ${cls.capacity}</td>
                 <td class="${cls.status === 'Available' ? 'status-available' : 'status-unavailable'}">${cls.status}</td>
                 <td>
                   <i class="pointer-cursor fas fa-eye text-info view-btn" data-id="${cls.class_id}"></i>
-                  <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${cls.class_id}" data-subject="${cls.subject_id} - ${cls.subject_name}" data-year="${cls.year}" data-subject-id="${cls.subject_id}"></i>
+                  <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${cls.class_id}" data-subject="${cls.subject_id} - ${cls.subject_name}" data-subject-id="${cls.subject_id}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${cls.class_id}"></i>
                 </td>
               `;
@@ -512,7 +499,7 @@
             });
           } else {
             const message = data.message || (data.success ? 'No classes found' : 'Invalid response format');
-            table.innerHTML = `<tr><td colspan="11" class="text-center">${message}</td></tr>`;
+            table.innerHTML = `<tr><td colspan="10" class="text-center">${message}</td></tr>`;
             if (!data.success) {
               showNotification(`Failed to load classes: ${message}`, 'error');
             }
@@ -521,7 +508,7 @@
         .catch(error => {
           console.error("Fetch Classes Error:", error);
           showNotification("Error loading classes: " + error.message, "error");
-          document.getElementById("classTable").innerHTML = `<tr><td colspan="11" class="text-center">Error loading classes</td></tr>`;
+          document.getElementById("classTable").innerHTML = `<tr><td colspan="10" class="text-center">Error loading classes</td></tr>`;
         });
     }
 
@@ -559,11 +546,10 @@
 
     function generateClassId() {
       const subjectSelect = document.getElementById('subjectSelect');
-      const yearSelect = document.getElementById('yearSelect');
       const classIdInput = document.getElementById('classId');
 
-      if (subjectSelect.value && yearSelect.value) {
-        fetch(`manage_class.php?action=getNextClassId&subject_id=${encodeURIComponent(subjectSelect.value)}&year=${encodeURIComponent(yearSelect.value)}`)
+      if (subjectSelect.value) {
+        fetch(`manage_class.php?action=getNextClassId&subject_id=${encodeURIComponent(subjectSelect.value)}`)
           .then(response => response.json())
           .then(data => {
             if (data.success) {
@@ -589,7 +575,6 @@
     function populateEditModal(classData, partId) {
       document.getElementById('editSubject').value = classData.subject;
       document.getElementById('editClassId').value = classData.class_id;
-      document.getElementById('editYear').value = classData.year;
       document.getElementById('editPathSelect').value = partId || '';
       document.getElementById('editTeacherSelect').value = classData.teacher_id || '';
       document.getElementById('editTerm').value = classData.class_term || '';
@@ -635,40 +620,6 @@
       });
     }
 
-    function updateYearOptions() {
-      const subjectSelect = document.getElementById('subjectSelect');
-      const yearSelect = document.getElementById('yearSelect');
-      const subjectId = subjectSelect.value;
-
-      // Clear existing options except the default
-      while (yearSelect.options.length > 1) {
-        yearSelect.remove(1);
-      }
-
-      if (subjectId) {
-        const firstChar = subjectId.charAt(0);
-        const yearOption = document.createElement('option');
-        if (firstChar === '1') {
-          yearOption.value = 'Year 1';
-          yearOption.textContent = 'Year 1';
-        } else if (firstChar === '2') {
-          yearOption.value = 'Year 2';
-          yearOption.textContent = 'Year 2';
-        } else {
-          showError('addClassModal', "Subject ID must start with '1' or '2'");
-          showNotification("Subject ID must start with '1' or '2'", 'error');
-          return;
-        }
-        yearSelect.appendChild(yearOption);
-        yearSelect.value = yearOption.value; // Auto-select the valid year
-        yearSelect.disabled = true; // Disable the year select
-        generateClassId(); // Trigger class ID generation after setting year
-      } else {
-        yearSelect.value = '';
-        yearSelect.disabled = false; // Enable if no subject is selected
-      }
-    }
-
     // Fetch terms for the search form
     function fetchTerms() {
       fetch('manage_class.php?action=getTerms')
@@ -702,11 +653,6 @@
         clearError('addClassModal');
         document.getElementById('classForm').reset();
         document.getElementById('classId').value = '';
-        const yearSelect = document.getElementById('yearSelect');
-        while (yearSelect.options.length > 1) {
-          yearSelect.remove(1);
-        }
-        yearSelect.disabled = false; // Re-enable year select
       });
       document.getElementById('editClassModal').addEventListener('hidden.bs.modal', () => clearError('editClassModal'));
       document.getElementById('deleteModal').addEventListener('hidden.bs.modal', () => {
@@ -740,7 +686,6 @@
                   populateEditModal({
                     subject: subject,
                     class_id: cls.class_id,
-                    year: cls.year,
                     teacher_id: cls.teacher_id,
                     class_term: cls.class_term,
                     time: cls.time,
@@ -769,17 +714,11 @@
         clearError('addClassModal');
 
         const subjectId = document.getElementById("subjectSelect").value;
-        const year = document.getElementById("yearSelect").value;
         const firstChar = subjectId.charAt(0);
 
         if (firstChar !== '1' && firstChar !== '2') {
           showError('addClassModal', "Subject ID must start with '1' or '2'");
           showNotification("Subject ID must start with '1' or '2'", 'error');
-          return;
-        }
-        if ((firstChar === '1' && year !== 'Year 1') || (firstChar === '2' && year !== 'Year 2')) {
-          showError('addClassModal', `Subject ID starting with '${firstChar}' must have ${firstChar === '1' ? 'Year 1' : 'Year 2'}`);
-          showNotification(`Subject ID starting with '${firstChar}' must have ${firstChar === '1' ? 'Year 1' : 'Year 2'}`, 'error');
           return;
         }
 
@@ -790,7 +729,6 @@
           part: document.getElementById("pathSelect").value,
           teacher_id: document.getElementById("teacherSelect").value,
           class_term: document.getElementById("class_term").value,
-          year: year,
           time: document.getElementById("time").value,
           venue: document.getElementById("venue").value,
           capacity: document.getElementById("capacity").value,
@@ -811,11 +749,6 @@
               showNotification("Class successfully added!", "success");
               document.getElementById("classForm").reset();
               document.getElementById('classId').value = '';
-              const yearSelect = document.getElementById('yearSelect');
-              while (yearSelect.options.length > 1) {
-                yearSelect.remove(1);
-              }
-              yearSelect.disabled = false;
               let modal = bootstrap.Modal.getInstance(document.getElementById("addClassModal"));
               modal.hide();
             } else {
@@ -951,14 +884,9 @@
           showNotification("Error loading teachers: " + error.message, "error");
         });
 
-      // Initialize year select with placeholder
-      const yearSelect = document.getElementById('yearSelect');
-      yearSelect.innerHTML = '<option value="" disabled selected>Select Year</option>';
-
-      // Update year options and generate class ID when subject changes
+      // Generate class ID when subject changes
       const subjectSelect = document.getElementById('subjectSelect');
-      subjectSelect.addEventListener('change', updateYearOptions);
-      document.getElementById('yearSelect').addEventListener('change', generateClassId);
+      subjectSelect.addEventListener('change', generateClassId);
     });
   </script>
 </body>
