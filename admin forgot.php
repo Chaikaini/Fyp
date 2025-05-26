@@ -46,8 +46,16 @@ function renderForm($content, $error = '') {
                 margin-bottom: 15px;
                 font-size: 14px;
             }
-            form input, form select {
-                width: 99%;
+            form select {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            form input {
+                width: 95%;
                 padding: 10px;
                 margin-bottom: 15px;
                 border: 1px solid #ddd;
