@@ -2,6 +2,9 @@
 ob_start();
 session_start();
 
+// Include email sending functionality
+require 'send_email_notification.php';
+
 // Disable error display and enable logging
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -47,6 +50,14 @@ if (!isset($_SESSION['role']) || !isset($_SESSION['admin_id']) || !in_array($_SE
 $admin_id = $_SESSION['admin_id'];
 $sender_id = $admin_id;
 error_log("Setting sender_id: $sender_id");
+
+// Get sender (admin) information
+$adminQuery = $conn->prepare("SELECT admin_name FROM admin WHERE admin_id = ?");
+$adminQuery->bind_param("i", $sender_id);
+$adminQuery->execute();
+$adminData = $adminQuery->get_result()->fetch_assoc();
+$sender_name = $adminData['admin_name'] ?? 'Unknown Admin';
+$adminQuery->close();
 
 // Handle recipients request
 if (isset($_GET['action']) && $_GET['action'] === 'recipients' && isset($_GET['recipient_type'])) {
@@ -157,7 +168,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getNotifications') {
             'notification_id' => $row['notification_id'],
             'sender_id' => $row['sender_id'],
             'sender_type' => $row['sender_type'],
-            'sender_name' => $row['sender_name'], // Use the sender_name from the query
+            'sender_name' => $row['sender_name'],
             'recipient_type' => $row['recipient_type'],
             'subject_id' => $row['subject_id'],
             'subject_name' => $row['subject_name'],
@@ -209,9 +220,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $recipient_ids = [];
         if ($recipient_id === 'all') {
             if ($recipient_type === 'Parent') {
-                $stmt = $conn->prepare("SELECT parent_id AS id FROM parent");
+                $stmt = $conn->prepare("SELECT parent_id AS id, parent_name AS name, parent_email AS email FROM parent");
             } else {
-                $stmt = $conn->prepare("SELECT teacher_id AS id FROM teacher");
+                $stmt = $conn->prepare("SELECT teacher_id AS id, teacher_name AS name, teacher_email AS email FROM teacher");
             }
             if (!$stmt) {
                 throw new Exception("Prepare failed: " . $conn->error);
@@ -219,20 +230,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $result = $stmt->get_result();
             while ($row = $result->fetch_assoc()) {
-                $recipient_ids[] = $row['id'];
+                $recipient_ids[] = [
+                    'id' => $row['id'],
+                    'name' => $row['name'],
+                    'email' => $row['email']
+                ];
             }
             $stmt->close();
         } else {
-            $recipient_ids = [$recipient_id];
-            $stmt = $conn->prepare("SELECT 1 FROM " . ($recipient_type === 'Parent' ? 'parent' : 'teacher') . " WHERE " . ($recipient_type === 'Parent' ? 'parent_id' : 'teacher_id') . " = ?");
+            $table = $recipient_type === 'Parent' ? 'parent' : 'teacher';
+            $id_field = $recipient_type === 'Parent' ? 'parent_id' : 'teacher_id';
+            $name_field = $recipient_type === 'Parent' ? 'parent_name' : 'teacher_name';
+            $email_field = $recipient_type === 'Parent' ? 'parent_email' : 'teacher_email';
+            $stmt = $conn->prepare("SELECT $id_field AS id, $name_field AS name, $email_field AS email FROM $table WHERE $id_field = ?");
             if (!$stmt) {
                 throw new Exception("Prepare failed: " . $conn->error);
             }
             $stmt->bind_param("i", $recipient_id);
             $stmt->execute();
-            if ($stmt->get_result()->num_rows === 0) {
+            $result = $stmt->get_result();
+            if ($result->num_rows === 0) {
                 throw new Exception("Invalid recipient ID: $recipient_id");
             }
+            $row = $result->fetch_assoc();
+            $recipient_ids[] = [
+                'id' => $row['id'],
+                'name' => $row['name'],
+                'email' => $row['email']
+            ];
             $stmt->close();
         }
 
@@ -240,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("No recipients available for recipient_type: $recipient_type");
         }
 
-        error_log("Recipient IDs for $recipient_type: " . implode(", ", $recipient_ids));
+        error_log("Recipient IDs for $recipient_type: " . implode(", ", array_column($recipient_ids, 'id')));
 
         // Handle file upload
         if (isset($_FILES['notification_document']) && $_FILES['notification_document']['error'] == UPLOAD_ERR_OK) {
@@ -295,12 +320,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         error_log("Verified notification: recipient_type=" . ($row['recipient_type'] ?? 'NULL'));
         $stmt->close();
 
-        // Insert into notification_receiver table
+        // Insert into notification_receiver table and send emails
         $stmt = $conn->prepare("INSERT INTO notification_receiver (notification_id, parent_id, teacher_id, recipient_type, read_status) VALUES (?, ?, ?, ?, ?)");
         if (!$stmt) {
             throw new Exception("Prepare failed: " . $conn->error);
         }
-        foreach ($recipient_ids as $id) {
+
+        // Load email template
+        $template = file_get_contents('admin_notification_template.html');
+        $notificationLink = "http://localhost/Fyp/login.html"; // Adjust to your actual login page URL
+        $emailSubject = "The Seeds Learning Tuition Centre";
+
+        foreach ($recipient_ids as $recipient) {
+            $id = $recipient['id'];
+            $name = $recipient['name'];
+            $email = $recipient['email'];
             $parent_id = ($recipient_type === 'Parent') ? $id : null;
             $teacher_id = ($recipient_type === 'Teacher') ? $id : null;
             $read_status = 'unread';
@@ -308,6 +342,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param("iiiss", $notification_id, $parent_id, $teacher_id, $recipient_type, $read_status);
             if (!$stmt->execute()) {
                 throw new Exception("Failed to insert receiver: " . $stmt->error);
+            }
+
+            // Prepare attachment link
+            $attachmentLink = $documentPath ? "<p><a href='$documentPath'>View Attachment</a></p>" : '';
+
+            // Send email to recipient
+            if ($email) {
+                $emailBody = str_replace(
+                    [
+                        '{{recipient_name}}',
+                        '{{sender_name}}',
+                        '{{notification_title}}',
+                        '{{notification_content}}',
+                        '{{notification_link}}',
+                        '{{attachment_link}}'
+                    ],
+                    [
+                        $name,
+                        $sender_name,
+                        $notification_title,
+                        $notification_content,
+                        $notificationLink,
+                        $attachmentLink
+                    ],
+                    $template
+                );
+                if (!sendEmailToParent($email, $name, $emailSubject, $emailBody)) {
+                    error_log("Failed to send email to $email for notification_id=$notification_id");
+                    // Continue processing to avoid rolling back the transaction
+                } else {
+                    error_log("Email sent to $email for notification_id=$notification_id");
+                }
+            } else {
+                error_log("No email address for recipient ID: $id");
             }
         }
         $stmt->close();
