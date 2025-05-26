@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 26, 2025 at 11:57 AM
+-- Generation Time: May 26, 2025 at 12:45 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -134,22 +134,6 @@ INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_t
 -- --------------------------------------------------------
 
 --
--- Table structure for table `comments`
---
-
-CREATE TABLE `comments` (
-  `comment_id` int(11) NOT NULL,
-  `parent_id` int(11) NOT NULL,
-  `class_id` varchar(10) DEFAULT NULL,
-  `subject_id` varchar(50) DEFAULT NULL,
-  `comment_rating` int(11) DEFAULT NULL,
-  `comment_text` text DEFAULT NULL,
-  `comment_created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `credit_cards`
 --
 
@@ -206,11 +190,7 @@ CREATE TABLE `notification` (
 --
 
 INSERT INTO `notification` (`notification_id`, `sender_id`, `recipient_type`, `class_id`, `notification_title`, `notification_content`, `notification_document`, `notification_created_at`) VALUES
-(1, 12345, 'Class', 'Mly0001', 'Holidays', '1 May is public holidays.', 'Uploads/1745754390_Announcemant 1 (1).png', '2025-04-27 19:46:30'),
-(2, 12345, 'Class', 'Mly0001', 'hello', '111', NULL, '2025-04-30 13:28:07'),
-(3, 11111, 'Parent', NULL, '123', '123', NULL, '2025-05-08 15:51:06'),
-(6, 11112, 'Parent', NULL, '1', '123', NULL, '2025-05-20 21:45:37'),
-(7, 11111, 'Teacher', NULL, '123', '123', NULL, '2025-05-26 16:31:12');
+(1, 12345, 'Class', 'Mly0001', '29/5（Thusrday）Class Cancelled', 'Dear parents and students, the class on 29/5 (Thursday) is cancelled due to my medical leave. A replacement class will be held on 30/5 (Friday) from 2:30 PM to 4:30 PM. Please contact me if that have any issue and problem. Thank you for your understanding.', NULL, '2025-05-26 18:33:30');
 
 -- --------------------------------------------------------
 
@@ -232,11 +212,7 @@ CREATE TABLE `notification_receiver` (
 --
 
 INSERT INTO `notification_receiver` (`receiver_id`, `notification_id`, `parent_id`, `teacher_id`, `recipient_type`, `read_status`) VALUES
-(1, 1, 1, NULL, 'Parent', 'read'),
-(2, 2, 1, NULL, 'Parent', 'read'),
-(3, 3, 1, NULL, 'Parent', 'read'),
-(8, 6, 1, NULL, 'Parent', 'unread'),
-(9, 6, 2, NULL, 'Parent', 'unread');
+(1, 1, 1, NULL, 'Class', 'unread');
 
 -- --------------------------------------------------------
 
@@ -392,7 +368,7 @@ CREATE TABLE `teacher` (
 INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
 (12123, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', 'jalan puteri', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12345, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
 (12347, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
@@ -450,15 +426,6 @@ ALTER TABLE `class`
   ADD PRIMARY KEY (`class_id`),
   ADD KEY `subject_id` (`subject_id`),
   ADD KEY `part_id` (`part_id`);
-
---
--- Indexes for table `comments`
---
-ALTER TABLE `comments`
-  ADD PRIMARY KEY (`comment_id`),
-  ADD KEY `parent_id` (`parent_id`),
-  ADD KEY `class_id` (`class_id`),
-  ADD KEY `subject_id` (`subject_id`);
 
 --
 -- Indexes for table `credit_cards`
@@ -566,12 +533,6 @@ ALTER TABLE `child`
   MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `comments`
---
-ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `credit_cards`
 --
 ALTER TABLE `credit_cards`
@@ -587,13 +548,13 @@ ALTER TABLE `exam_result`
 -- AUTO_INCREMENT for table `notification`
 --
 ALTER TABLE `notification`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `notification_receiver`
 --
 ALTER TABLE `notification_receiver`
-  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `receiver_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `parent`
@@ -655,14 +616,6 @@ ALTER TABLE `child`
 ALTER TABLE `class`
   ADD CONSTRAINT `class_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
   ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`);
-
---
--- Constraints for table `comments`
---
-ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `comments_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`);
 
 --
 -- Constraints for table `credit_cards`

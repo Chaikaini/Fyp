@@ -30,10 +30,10 @@ if (!isset($_SESSION['teacher_id'])) {
 $sql = "SELECT 
             s.subject_id, 
             s.subject_name, 
+            s.year,
             c.teacher_id,
             c.class_term,
             c.class_id,
-            c.year,
             c.class_venue,
             c.class_time,
             p.part_duration

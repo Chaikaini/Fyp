@@ -31,7 +31,7 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                c.year
+                s.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
@@ -48,7 +48,7 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                c.year
+                s.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
@@ -67,7 +67,7 @@ if (!empty($subject_id)) {
                 c.class_enrolled,
                 p.part_name,
                 p.part_duration,
-                c.year
+                s.year
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
