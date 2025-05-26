@@ -220,6 +220,7 @@
               <th>Part</th>
               <th>Teacher</th>
               <th>Term</th>
+              <th>Year</th>
               <th>Time</th>
               <th>Venue</th>
               <th>Capacity</th>
@@ -479,6 +480,7 @@
                 <td data-part-id="${cls.part_id}">${cls.part}</td>
                 <td>${cls.teacher_name}</td>
                 <td>${cls.class_term}</td>
+                <td>${cls.year}</td>
                 <td>${cls.time}</td>
                 <td>${cls.venue}</td>
                 <td>${cls.enrolled} / ${cls.capacity}</td>
@@ -499,7 +501,7 @@
             });
           } else {
             const message = data.message || (data.success ? 'No classes found' : 'Invalid response format');
-            table.innerHTML = `<tr><td colspan="10" class="text-center">${message}</td></tr>`;
+            table.innerHTML = `<tr><td colspan="11" class="text-center">${message}</td></tr>`;
             if (!data.success) {
               showNotification(`Failed to load classes: ${message}`, 'error');
             }
@@ -508,7 +510,7 @@
         .catch(error => {
           console.error("Fetch Classes Error:", error);
           showNotification("Error loading classes: " + error.message, "error");
-          document.getElementById("classTable").innerHTML = `<tr><td colspan="10" class="text-center">Error loading classes</td></tr>`;
+          document.getElementById("classTable").innerHTML = `<tr><td colspan="11" class="text-center">Error loading classes</td></tr>`;
         });
     }
 
