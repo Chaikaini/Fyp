@@ -9,15 +9,9 @@ $dbname = "the seeds";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 require_once 'vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-
-require 'PHPMailer.php';
-require 'SMTP.php';
-require 'Exception.php';
 
 function renderForm($content, $error = '') {
     echo "<!DOCTYPE html>
@@ -92,15 +86,17 @@ if (isset($_POST['send_otp'])) {
     $role = $_POST['role'];
 
     if ($role == 'admin') {
-        $query = mysqli_query($conn, "SELECT * FROM admin WHERE admin_email='$email'");
+        $query = mysqli_query($conn, "SELECT admin_name FROM admin WHERE admin_email='$email'");
     } elseif ($role == 'teacher') {
-        $query = mysqli_query($conn, "SELECT * FROM teacher WHERE teacher_email='$email'");
+        $query = mysqli_query($conn, "SELECT teacher_name FROM teacher WHERE teacher_email='$email'");
     } else {
         renderForm("", "Invalid role selected.");
         exit;
     }
 
     if (mysqli_num_rows($query) > 0) {
+        $row = mysqli_fetch_assoc($query);
+        $recipient_name = ($role == 'admin') ? $row['admin_name'] : $row['teacher_name'];
         $otp = rand(100000, 999999);
         $_SESSION['otp'] = $otp;
         $_SESSION['email'] = $email;
@@ -109,18 +105,26 @@ if (isset($_POST['send_otp'])) {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = 'smtp.sendgrid.net';
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $_ENV['SENDGRID_USERNAME'];
-            $mail->Password   = $_ENV['SENDGRID_PASSWORD'];
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'theseeds11@gmail.com';
+            $mail->Password = 'hqwq cpmp zrhv bbby';
             $mail->SMTPSecure = 'tls';
-            $mail->Port       = 587;
+            $mail->Port = 587;
 
-            $mail->setFrom('chaikaini@gmail.com', 'Forgot Password System');
+            $mail->setFrom('theseeds11@gmail.com', 'The Seeds Learning Tuition Centre');
             $mail->addAddress($email);
             $mail->isHTML(true);
-            $mail->Subject = 'Your OTP Code';
-            $mail->Body    = "Your OTP code is <b>$otp</b>";
+            $mail->Subject = 'Your OTP Code for Password Reset';
+
+            // Load and populate email template
+            $template = file_get_contents('otp_email_template.html');
+            $emailBody = str_replace(
+                ['{{recipient_name}}', '{{otp_code}}'],
+                [$recipient_name, $otp],
+                $template
+            );
+            $mail->Body = $emailBody;
 
             $mail->send();
 

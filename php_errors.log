@@ -267,3 +267,9 @@ Stack trace:
 [2025-05-25 05:30:23] Successfully updated teacher_id: 12345
 [2025-05-25 05:30:39] Successfully updated teacher_id: 12347
 [2025-05-25 05:31:22] Successfully added teacher: 123@gmail.com
+[2025-05-26 11:39:35] Delete request received for teacher_id: 12351
+[26-May-2025 11:39:35 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'teacher_id' in 'where clause' in C:\xampp\htdocs\Fyp\manage_admin.php:232
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\manage_admin.php(232): mysqli->query('SELECT COUNT(*)...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\manage_admin.php on line 232
