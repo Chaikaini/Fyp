@@ -23,6 +23,9 @@
       transition: width 0.3s;
       white-space: nowrap;
       overflow: hidden;
+      height: 160vh;
+      display: flex;
+      flex-direction: column;
     }
     #sidebar a {
       color: white;
@@ -425,7 +428,7 @@ function loadNotifications() {
           container.appendChild(block);
         });
       }
-    });
+    }); 
 }
 
  function checkUnreadNotifications() {
