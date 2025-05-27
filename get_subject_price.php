@@ -7,6 +7,12 @@ if ($conn->connect_error) {
     die(json_encode(["success" => false, "message" => "Database connection failed"]));
 }
 
+// Check if subject_id is provided and is numeric
+if (!isset($_GET['subject_id']) || !is_numeric($_GET['subject_id'])) {
+    echo json_encode(["success" => false, "message" => "Invalid or missing subject_id"]);
+    exit;
+}
+
 $subject_id = (int)$_GET['subject_id'];
 
 $stmt = $conn->prepare("SELECT subject_price FROM subject WHERE subject_id = ?");
@@ -21,5 +27,6 @@ if ($result->num_rows > 0) {
     echo json_encode(["success" => false, "message" => "Subject not found"]);
 }
 
+$stmt->close();
 $conn->close();
 ?>
