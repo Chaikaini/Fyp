@@ -24,7 +24,7 @@ try {
             cl.class_enrolled,
             cl.part_id,
             cl.class_time,
-            cl.year,
+            s.year,
             cl.subject_id,
             cl.teacher_id,
             s.subject_name,
