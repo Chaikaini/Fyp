@@ -16,22 +16,6 @@ header('Content-Type: application/json');
 $action = $_POST['action'] ?? '';
 
 switch ($action) {
-    case 'delete':
-        $registration_id = $_POST['registration_id'] ?? '';
-        if (!empty($registration_id)) {
-            $stmt = $conn->prepare("DELETE FROM registration_class WHERE registration_id = ?");
-            $stmt->bind_param("s", $registration_id);
-            if ($stmt->execute()) {
-                echo json_encode(["success" => true]);
-            } else {
-                echo json_encode(["success" => false, "error" => $stmt->error]);
-            }
-            $stmt->close();
-        } else {
-            echo json_encode(["success" => false, "error" => "Missing registration_id"]);
-        }
-        break;
-
     case 'search':
         $search_term = '%' . ($conn->real_escape_string($_POST['search_term'] ?? '')) . '%';
         $sql = "
