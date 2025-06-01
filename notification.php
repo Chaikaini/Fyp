@@ -306,7 +306,6 @@
                         <a href="subject.html" class="nav-item nav-link active">Subject</a>
                         <a href="about.html" class="nav-item nav-link">About us</a>
                         <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                        <a href="comment.html" class="nav-item nav-link">Comment</a>
                     `;
                     authButton.textContent = 'Log out';
                     authButton.href = 'logout.php';
