@@ -831,7 +831,7 @@ $conn->close();
                                     <p><b>Teacher:</b> ${item.teacher_name || 'Unknown Teacher'}</p>
                                     <p><b>Price:</b> RM${parseFloat(item.price || 0).toFixed(2)}</p>
                                     <p><b>Time:</b> ${item.class_time || 'N/A'}</p>
-                                    <p><b>Student:</b> ${item.child_name || 'Unknown Student'}</p>
+                                    <p><b>Child:</b> ${item.child_name || 'Unknown Student'}</p>
                                 </div>
                             </div>
                             <hr>
