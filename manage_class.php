@@ -1,6 +1,15 @@
 <?php
 header('Content-Type: application/json');
 
+// Start session to access logged-in admin's ID
+session_start();
+
+// Check if admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    echo json_encode(["success" => false, "message" => "Unauthorized: No admin logged in"]);
+    exit;
+}
+
 $host = 'localhost';
 $dbname = 'the seeds';
 $username = 'root';
@@ -9,6 +18,14 @@ $password = '';
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Verify admin_id exists in the admin table
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM admin WHERE admin_id = ?");
+    $stmt->execute([$_SESSION['admin_id']]);
+    if ($stmt->fetchColumn() == 0) {
+        echo json_encode(["success" => false, "message" => "Invalid admin ID in session"]);
+        exit;
+    }
 } catch (PDOException $e) {
     echo json_encode(["success" => false, "message" => "Database connection failed: " . $e->getMessage()]);
     exit;
@@ -28,11 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     p.part_name, 
                     t.teacher_id, 
                     t.teacher_name,
+                    a.admin_name,
                     (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
                 JOIN teacher t ON c.teacher_id = t.teacher_id
+                LEFT JOIN admin a ON c.admin_id = a.admin_id
             ";
             if (isset($_GET['class_id'])) {
                 $sql .= " WHERE c.class_id = ?";
@@ -58,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
                     "enrolled" => $row["enrolled"],
-                    "status" => $row["class_status"]
+                    "status" => $row["class_status"],
+                    "admin_name" => $row["admin_name"] ?? 'Unknown'
                 ];
             }
             echo json_encode(["success" => true, "classes" => $classes]);
@@ -129,11 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     p.part_name, 
                     t.teacher_id, 
                     t.teacher_name,
+                    a.admin_name,
                     (SELECT COUNT(*) FROM registration_class rc WHERE rc.class_id = c.class_id) AS enrolled
                 FROM class c
                 JOIN subject s ON c.subject_id = s.subject_id
                 JOIN part p ON c.part_id = p.part_id
                 JOIN teacher t ON c.teacher_id = t.teacher_id
+                LEFT JOIN admin a ON c.admin_id = a.admin_id
                 WHERE 1=1
             ";
             $params = [];
@@ -164,7 +186,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "venue" => $row["class_venue"],
                     "capacity" => $row["class_capacity"],
                     "enrolled" => $row["enrolled"],
-                    "status" => $row["class_status"]
+                    "status" => $row["class_status"],
+                    "admin_name" => $row["admin_name"] ?? 'Unknown'
                 ];
             }
             echo json_encode(["success" => true, "classes" => $classes]);
@@ -272,12 +295,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $nextNumber = 1;
             if ($lastClassId) {
-                $numberPart = substr($lastClassId, strlen($prefix), 3); // Extract the last 3 digits
+                $numberPart = substr($lastClassId, strlen($prefix), 3);
                 $currentNumber = (int)$numberPart;
                 $nextNumber = $currentNumber + 1;
             }
 
-            $nextClassId = $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT); // e.g., "Sci0001"
+            $nextClassId = $prefix . str_pad((string)$nextNumber, 3, '0', STR_PAD_LEFT);
             echo json_encode(["success" => true, "class_id" => $nextClassId]);
         } catch (Exception $e) {
             echo json_encode(["success" => false, "message" => "Error generating class ID: " . $e->getMessage()]);
@@ -347,12 +370,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt = $pdo->prepare("
                 INSERT INTO class (
-                    class_id, subject_id, part_id, teacher_id, class_term, 
+                    class_id, admin_id, subject_id, part_id, teacher_id, class_term, 
                     class_time, class_venue, class_capacity, class_enrolled, class_status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
             ");
             $stmt->execute([
                 $classId,
+                $_SESSION['admin_id'],
                 $subjectId,
                 $input['part'],
                 $input['teacher_id'],
@@ -379,7 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception("Class ID does not exist");
                 }
 
-                // Check current enrollment dynamically
+                // Check current enrollment
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM registration_class WHERE class_id = ?");
                 $stmt->execute([$classId]);
                 $currentEnrolled = $stmt->fetchColumn();
@@ -427,7 +451,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     class_time = ?, 
                     class_venue = ?, 
                     class_capacity = ?, 
-                    class_status = ? 
+                    class_status = ?, 
+                    admin_id = ?
                 WHERE class_id = ?
             ");
             $stmt->execute([
@@ -438,6 +463,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $input['venue'],
                 $input['capacity'],
                 $input['status'],
+                $_SESSION['admin_id'],
                 $classId
             ]);
             echo json_encode(["success" => true]);
