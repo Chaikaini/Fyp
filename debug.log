@@ -5436,3 +5436,8 @@ save_cart.php: Class verified: Array
 save_cart.php: Teacher verified
 save_cart.php: Child verified: child_id=3
 save_cart.php: Error: Child already registered for this subject
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+)
+
