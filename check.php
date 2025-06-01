@@ -428,7 +428,6 @@ $conn->close();
                 <a href="subject.html" class="nav-item nav-link">Subject</a>
                 <a href="about.html" class="nav-item nav-link">About us</a>
                 <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
             </div>
             <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -568,7 +567,6 @@ $conn->close();
                         <a href="subject.html" class="nav-item nav-link">Subject</a>
                         <a href="about.html" class="nav-item nav-link">About us</a>
                         <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                        <a href="comment.html" class="nav-item nav-link">Comment</a>
                     `;
                     authButton.textContent = 'Log out';
                     authButton.href = 'logout.php';

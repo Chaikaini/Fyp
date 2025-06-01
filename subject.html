@@ -258,7 +258,7 @@
             </div>
         </div>
         <div class="subject-grid" id="subjectGrid">
-            <p>Loading...</p>
+            <p>Please select a year to view subjects</p> <!-- 修改初始内容，移除“Loading...” -->
         </div>
         <div id="resultsContainer"></div>
         <div id="successToast" class="toast-message" style="display: none;"></div>
@@ -352,7 +352,7 @@
                 window.location.href = 'login.html';
             } else {
                 console.log('User logged in, loading navigation and years');
-                loadNavigation();
+                loadNavigation(); // 确保导航加载
                 loadYears();
             }
         } catch (error) {
@@ -383,27 +383,29 @@
             const data = await response.json();
             console.log('Navigation login check response:', data);
 
-            if (data.isLoggedIn) {
-                navLinks.innerHTML = `
-                    <a href="member.html" class="nav-item nav-link">Home</a>
-                    <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                `;
-                authButton.textContent = 'Log out';
-                authButton.href = 'logout.php';
-            } else {
-                navLinks.innerHTML = `
-                    <a href="888.html" class="nav-item nav-link">Home</a>
-                    <a href="about.html" class="nav-item nav-link">About us</a>
-                    <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                `;
-                authButton.textContent = 'Log in';
-                authButton.href = 'login.html';
-            }
+            // 无论响应如何，强制显示完整的导航（第二张图的状态）
+            navLinks.innerHTML = `
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+            `;
+            authButton.textContent = 'Log out';
+            authButton.href = 'logout.php';
         } catch (error) {
             console.error('Error loading navigation:', error);
-            showToast('Failed to load navigation. Please try again.', true);
+            showToast('Failed to load navigation. Displaying default navigation.', true);
+            // 回退到默认导航（第二张图的状态）
+            const navLinks = document.getElementById('navLinks');
+            const authButton = document.getElementById('authButton');
+            navLinks.innerHTML = `
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link active">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
+            `;
+            authButton.textContent = 'Log out';
+            authButton.href = 'logout.php';
         }
     }
 
@@ -471,7 +473,7 @@
             // Always reset to "Select Year" on page load
             yearSelect.value = '';
             history.pushState(null, '', `subject.html?_=${new Date().getTime()}`);
-            showSubjects('');
+            // showSubjects(''); // 不需要再次调用，因为初始内容已设置
         } catch (error) {
             console.error('Error loading years:', error);
             yearSelect.innerHTML = '<option value="">Error loading years</option>';
@@ -492,7 +494,6 @@
         resultsContainer.innerHTML = '';
         subjectGrid.style.display = 'flex';
         document.body.classList.remove('search-active');
-        subjectGrid.innerHTML = '<p>Loading...</p>';
 
         history.pushState(null, '', `subject.html?year=${encodeURIComponent(year || '')}&_=${new Date().getTime()}`);
 
@@ -502,6 +503,7 @@
         }
 
         try {
+            subjectGrid.innerHTML = '<p>Loading subjects...</p>'; // 仅在加载科目时显示
             const response = await fetch(`subject.php?year=${encodeURIComponent(year)}&_=${new Date().getTime()}`, {
                 cache: 'no-store',
                 headers: {
@@ -667,6 +669,6 @@
             checkLoginStatus();
         }
     });
-</script>
+    </script>
 </body>
 </html>
