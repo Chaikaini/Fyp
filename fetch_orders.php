@@ -139,7 +139,7 @@ switch ($action) {
     default:
         // Default: return all registrations
         $sql = "
-            SELECT 
+            SELECT  
                 r.registration_id, 
                 p.parent_name, 
                 c.class_id, 

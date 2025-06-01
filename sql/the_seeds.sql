@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 26, 2025 at 12:45 PM
+-- Generation Time: Jun 01, 2025 at 05:38 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -102,6 +102,7 @@ INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `chi
 
 CREATE TABLE `class` (
   `class_id` varchar(20) NOT NULL,
+  `admin_id` int(11) NOT NULL DEFAULT 1,
   `subject_id` varchar(20) NOT NULL,
   `part_id` int(11) NOT NULL,
   `teacher_id` varchar(20) NOT NULL,
@@ -117,19 +118,19 @@ CREATE TABLE `class` (
 -- Dumping data for table `class`
 --
 
-INSERT INTO `class` (`class_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', '11245', 1, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
-('Eng0002', '11245', 2, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Eng2001', '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
-('Eng2002', '22534', 2, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat0001', '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
-('Mat0002', '11132', 2, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat2001', '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
-('Mat2002', '22134', 2, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly0001', '11351', 1, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
-('Mly0002', '11351', 2, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly2001', '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
-('Mly2002', '22345', 2, '12347', '2025', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
+INSERT INTO `class` (`class_id`, `admin_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
+('Eng0001', 11112, '11245', 1, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 2, 'Available'),
+('Eng0002', 11111, '11245', 2, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
+('Eng2001', 11111, '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Available'),
+('Eng2002', 11111, '22534', 2, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
+('Mat0001', 11111, '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
+('Mat0002', 11111, '11132', 2, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
+('Mat2001', 11111, '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mat2002', 11111, '22134', 2, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly0001', 11111, '11351', 1, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
+('Mly0002', 11111, '11351', 2, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly2001', 11111, '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mly2002', 11111, '22345', 2, '12347', '2025', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
 
 -- --------------------------------------------------------
 
@@ -336,7 +337,7 @@ CREATE TABLE `subject` (
 INSERT INTO `subject` (`subject_id`, `admin_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`) VALUES
 ('11132', 11111, 'Math', 'Year 1', 510.00, '-', 'img/math.jpg'),
 ('11245', 11111, 'English', 'Year 1', 510.00, '-', 'img/english.jpg'),
-('11351', 11111, 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
+('11351', 11112, 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
 ('22134', 11111, 'Math', 'Year 2', 510.00, '-', 'img/math.jpg'),
 ('22345', 11111, 'Melayu', 'Year 2', 510.00, '-', 'img/malay1.jpg'),
 ('22534', 11111, 'English', 'Year 2', 510.00, '-', 'img/english.jpg');
@@ -349,6 +350,7 @@ INSERT INTO `subject` (`subject_id`, `admin_id`, `subject_name`, `year`, `subjec
 
 CREATE TABLE `teacher` (
   `teacher_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
   `teacher_name` varchar(100) NOT NULL,
   `teacher_ic_number` varchar(20) NOT NULL,
   `teacher_gender` enum('Male','Female') NOT NULL,
@@ -365,11 +367,11 @@ CREATE TABLE `teacher` (
 -- Dumping data for table `teacher`
 --
 
-INSERT INTO `teacher` (`teacher_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
-(12123, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
-(12233, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
-(12345, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
-(12347, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
+INSERT INTO `teacher` (`teacher_id`, `admin_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
+(12123, 11111, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', NULL, '0117098524', 'jalan D1', '2025-03-14', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
+(12233, 11111, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', NULL, '0168208964', 'jalan tropika', '2025-01-16', 'Active', '$2y$10$WnsDdMYXC8EJe3A1AYq5qesgQEv8opNhCvE/kP1uWe5hnE3aLDlL.'),
+(12345, 11112, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2025-02-27', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12347, 11111, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', NULL, '0111827834', '123', '2025-04-30', 'Inactive', '$2y$10$XI0j5U9NIrEEw5AI1zTS9O6gtJRpt0b6HaCBYH6KMhoVAgNhAb7di');
 
 -- --------------------------------------------------------
 
@@ -425,7 +427,8 @@ ALTER TABLE `child`
 ALTER TABLE `class`
   ADD PRIMARY KEY (`class_id`),
   ADD KEY `subject_id` (`subject_id`),
-  ADD KEY `part_id` (`part_id`);
+  ADD KEY `part_id` (`part_id`),
+  ADD KEY `fk_class_admin_id` (`admin_id`);
 
 --
 -- Indexes for table `credit_cards`
@@ -500,7 +503,8 @@ ALTER TABLE `subject`
 ALTER TABLE `teacher`
   ADD PRIMARY KEY (`teacher_id`),
   ADD UNIQUE KEY `teacher_ic_number` (`teacher_ic_number`),
-  ADD UNIQUE KEY `teacher_ic_number_2` (`teacher_ic_number`);
+  ADD UNIQUE KEY `teacher_ic_number_2` (`teacher_ic_number`),
+  ADD KEY `fk_teacher_admin_id` (`admin_id`);
 
 --
 -- Indexes for table `teacher_comment`
@@ -615,7 +619,8 @@ ALTER TABLE `child`
 --
 ALTER TABLE `class`
   ADD CONSTRAINT `class_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`);
+  ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`),
+  ADD CONSTRAINT `fk_class_admin_id` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
 
 --
 -- Constraints for table `credit_cards`
@@ -664,6 +669,12 @@ ALTER TABLE `registration_class`
 --
 ALTER TABLE `subject`
   ADD CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `teacher`
+--
+ALTER TABLE `teacher`
+  ADD CONSTRAINT `fk_teacher_admin_id` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
 
 --
 -- Constraints for table `teacher_comment`
