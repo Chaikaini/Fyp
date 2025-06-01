@@ -149,11 +149,11 @@
         <a href="#" class="nav-link" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
           <i class="fas fa-chart-line"></i> <span>Report</span>
           <i class="fas fa-chevron-down ms-2" id="reportIcon"></i>
-        </a>
+        </a> 
         <div class="collapse" id="reportMenu"> 
           <ul class="nav flex-column ms-3">
             <li class="nav-item"><a href="payment report.html" class="nav-link"><i class="fas fa-file-invoice"></i> <span>Payment report</span></a></li>
-            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
+            <li class="nav-item"><a href="new student report.html" class="nav-link"><i class="fas fa-file-alt"></i> <span>New Children report</span></a></li>
           </ul>
         </div>
       </li>
@@ -202,11 +202,12 @@
               <th>Year</th>
               <th>Price</th>
               <th>Image</th>
+              <th>Last Modified By</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="subjectTable">
-            <tr><td colspan="6" class="text-center">Loading subjects...</td></tr>
+            <tr><td colspan="7" class="text-center">Loading subjects...</td></tr>
           </tbody>
         </table>
       </div>
@@ -406,6 +407,7 @@
                 <td>${subject.year || 'N/A'}</td>
                 <td>RM ${subject.subject_price ? Number(subject.subject_price).toFixed(2) : '0.00'}</td>
                 <td><a href="#" class="image-link" data-image="${subject.subject_image || ''}" data-bs-toggle="modal" data-bs-target="#imagePreviewModal">${subject.subject_image ? subject.subject_image.split('/').pop() : 'No Image'}</a></td>
+                <td>${subject.admin_name || 'Unknown'}</td>
                 <td>
                   <i class="pointer-cursor fas fa-edit text-primary edit-btn" data-id="${subject.subject_id}"></i>
                   <i class="pointer-cursor fas fa-trash-alt text-danger delete-btn" data-id="${subject.subject_id}"></i>
@@ -427,7 +429,7 @@
             });
           } else {
             const message = data.message || (data.success ? 'No subjects found' : 'Invalid response format');
-            table.innerHTML = `<tr><td colspan="6" class="text-center">${message}</td></tr>`;
+            table.innerHTML = `<tr><td colspan="7" class="text-center">${message}</td></tr>`;
             if (!data.success) {
               showNotification(`Failed to load subjects: ${message}`, 'error');
             }
@@ -436,7 +438,7 @@
         .catch(error => {
           console.error("Fetch Subjects Error:", error);
           showNotification("Error loading subjects: " + error.message, "error");
-          document.getElementById("subjectTable").innerHTML = `<tr><td colspan="6" class="text-center">Error loading subjects: ${error.message}</td></tr>`;
+          document.getElementById("subjectTable").innerHTML = `<tr><td colspan="7" class="text-center">Error loading subjects: ${error.message}</td></tr>`;
         });
     }
 

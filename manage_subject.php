@@ -1,6 +1,15 @@
 <?php
 header('Content-Type: application/json');
 
+// Start session to access logged-in admin's ID
+session_start();
+
+// Check if admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    echo json_encode(["success" => false, "message" => "Unauthorized: No admin logged in"]);
+    exit;
+}
+
 $host = 'localhost';
 $dbname = 'the seeds';
 $username = 'root';
@@ -30,9 +39,11 @@ $action = $_GET['action'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'getSubjects') {
         try {
-            $sql = "SELECT subject_id, subject_name, year, subject_price, subject_description, subject_image FROM subject";
+            $sql = "SELECT s.subject_id, s.subject_name, s.year, s.subject_price, s.subject_description, s.subject_image, a.admin_name 
+                    FROM subject s 
+                    LEFT JOIN admin a ON s.admin_id = a.admin_id";
             if (isset($_GET['subject_id'])) {
-                $sql .= " WHERE subject_id = ?";
+                $sql .= " WHERE s.subject_id = ?";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$_GET['subject_id']]);
             } else {
@@ -46,7 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "subject_price" => (float)$row["subject_price"],
                     "subject_description" => $row["subject_description"],
-                    "subject_image" => $row["subject_image"]
+                    "subject_image" => $row["subject_image"],
+                    "admin_name" => $row["admin_name"] ?? 'Unknown'
                 ];
             }
             echo json_encode(["success" => true, "subjects" => $subjects]);
@@ -87,9 +99,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($action === 'searchSubjects') {
         $searchQuery = $_GET['query'] ?? '';
         try {
-            $sql = "SELECT subject_id, subject_name, year, subject_price, subject_description, subject_image 
-                    FROM subject 
-                    WHERE subject_name LIKE :search";
+            $sql = "SELECT s.subject_id, s.subject_name, s.year, s.subject_price, s.subject_description, s.subject_image, a.admin_name 
+                    FROM subject s 
+                    LEFT JOIN admin a ON s.admin_id = a.admin_id 
+                    WHERE s.subject_name LIKE :search";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':search' => "%$searchQuery%"]);
             $subjects = [];
@@ -100,7 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     "year" => $row["year"],
                     "subject_price" => (float)$row["subject_price"],
                     "subject_description" => $row["subject_description"],
-                    "subject_image" => $row["subject_image"]
+                    "subject_image" => $row["subject_image"],
+                    "admin_name" => $row["admin_name"] ?? 'Unknown'
                 ];
             }
             echo json_encode(["success" => true, "subjects" => $subjects]);
@@ -166,10 +180,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($hasAdminId) {
                 $sql = "INSERT INTO subject (subject_id, admin_id, subject_name, year, subject_price, subject_description, subject_image) 
-                        VALUES (?, 11111, ?, ?, ?, ?, ?)";
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     $subjectId,
+                    $_SESSION['admin_id'], // Use session admin_id
                     $_POST['subject_name'],
                     $year,
                     $_POST['subject_price'],
@@ -230,6 +245,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_POST['subject_price'],
                 $_POST['subject_description'] ?: null
             ];
+
+            if ($hasAdminId) {
+                $sql .= ", admin_id = ?";
+                $params[] = $_SESSION['admin_id']; // Use session admin_id
+            }
 
             if ($imagePath) {
                 $sql .= ", subject_image = ?";

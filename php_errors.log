@@ -273,3 +273,15 @@ Stack trace:
 #0 C:\xampp\htdocs\Fyp\manage_admin.php(232): mysqli->query('SELECT COUNT(*)...')
 #1 {main}
   thrown in C:\xampp\htdocs\Fyp\manage_admin.php on line 232
+[2025-06-01 05:13:22] Delete request received for admin_id: 11112
+[01-Jun-2025 05:13:22 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`subject`, CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE) in C:\xampp\htdocs\Fyp\admin_manage.php:211
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(211): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 211
+[2025-06-01 05:13:29] Delete request received for admin_id: 11112
+[01-Jun-2025 05:13:29 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot delete or update a parent row: a foreign key constraint fails (`the seeds`.`subject`, CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE) in C:\xampp\htdocs\Fyp\admin_manage.php:211
+Stack trace:
+#0 C:\xampp\htdocs\Fyp\admin_manage.php(211): mysqli_stmt->execute()
+#1 {main}
+  thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 211
