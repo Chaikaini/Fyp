@@ -21,8 +21,7 @@ if (empty($subject_id)) {
 
 try {
     $stmt = $pdo->prepare("
-        SELECT s.*, 
-               (SELECT AVG(comment_rating) FROM comments WHERE subject_id = s.subject_id) as avg_rating
+        SELECT s.*
         FROM subject s 
         WHERE s.subject_id = ?
     ");
@@ -39,7 +38,6 @@ try {
 $subject = array_merge([
     'subject_name' => 'Unknown Subject',
     'subject_price' => '0.00',
-    'avg_rating' => 0,
     'subject_description' => 'No description available',
     'subject_image' => 'img/default-subject.jpg',
     'year' => 'Year 1'
@@ -228,38 +226,6 @@ unset($_SESSION['message']);
         .time-slot-container {
             margin-top: 20px;
         }
-        .rating-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .stars-container {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 30px;
-        }
-        .stars-container .star {
-            width: 25px;
-            height: 25px;
-            background: gray;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            display: inline-block;
-        }
-        .stars-container .yellow {
-            background: gold;
-        }
-        .stars-container .half {
-            background: linear-gradient(to right, gold 50%, gray 50%);
-        }
-        .rating-text {
-            font-size: 18px;
-            color: #333;
-        }
-        .rating-number {
-            font-weight: bold;
-            font-size: 20px;
-        }
         .container {
             display: flex;
             flex-direction: column;
@@ -268,71 +234,20 @@ unset($_SESSION['message']);
             width: 100%;
         }
         .subject-overview {
-            width: 60%;
+            width: 100%;
             font-size: 18px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
         }
         .subject-overview h2 {
             font-size: 32px;
             font-weight: bold;
             margin-bottom: 15px;
         }
-        .subject-overview ul {
-            padding-left: 20px;
-            margin-top: 10px;
-        }
-        .subject-overview li {
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
         .subject-overview p {
             margin-top: 20px;
             font-size: 18px;
-        }
-        .review-section {
-            width: 35%;
-            margin-top: 0;
-        }
-        .review-section h2 {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        .review-item {
-            display: flex;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        .review-text {
-            max-width: 100%;
-        }
-        .subject-overview, .review-section {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-        .stars-container {
-            display: flex;
-            gap: 5px;
-            font-size: 20px;
-        }
-        .star {
-            width: 20px;
-            height: 20px;
-            background: gray;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            display: inline-block;
-        }
-        .star.filled {
-            background: gold;
-        }
-        .review-text p {
-            margin-top: 10px;
-            font-size: 16px;
         }
         .toast-message {
             position: fixed;
@@ -397,15 +312,10 @@ unset($_SESSION['message']);
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0">
+            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
                 <!-- Navigation links will be dynamically inserted here -->
-                 <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
             </div>
-            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
     </nav>
     <div class="icon-bar">
@@ -438,27 +348,6 @@ unset($_SESSION['message']);
             </div>
             <div class="class-details">
                 <h2 id="subjectName"><?= htmlspecialchars($subject['subject_name']) ?></h2>
-                <div class="rating-container">
-                    <div class="stars-container">
-                        <?php
-                        $rating = $subject['avg_rating'] ?? 0;
-                        $fullStars = floor($rating);
-                        $hasHalfStar = ($rating - $fullStars) >= 0.5;
-                        for ($i = 0; $i < $fullStars; $i++) {
-                            echo '<span class="star yellow"></span>';
-                        }
-                        if ($hasHalfStar) {
-                            echo '<span class="star half"></span>';
-                        }
-                        for ($i = $fullStars + ($hasHalfStar ? 1 : 0); $i < 5; $i++) {
-                            echo '<span class="star"></span>';
-                        }
-                        ?>
-                    </div>
-                    <div class="rating-text">
-                        <span class="rating-number"><?= number_format($rating, 1) ?></span>
-                    </div>
-                </div>
                 <div class="class-info">
                     <p id="subjectPrice"><strong>Price: RM</strong> <?= htmlspecialchars($subject['subject_price']) ?></p>
                 </div>
@@ -509,30 +398,21 @@ unset($_SESSION['message']);
             <h2>Subject Overview</h2>
             <p><?= nl2br(htmlspecialchars($subject['subject_description'])) ?></p>
         </div>
-        <div class="review-section">
-            <h2>Parent Reviews</h2>
-            <div id="review-list"></div>
-        </div>
     </div>
-     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
-                <!-- 品牌标语 -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">The Seeds Learning Tuition Centre</h4>
                     <p>Every child is a different kind of flower. We nurture their growth.</p>
                 </div>
-                <!-- Quick Link -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">Quick Link</h4>
                     <a class="btn btn-link" href="about.html">About Us</a><br>
                 </div>
-                <!-- Contact -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">Contact</h4>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-                    <!-- 社交媒体（可替换为真实链接） -->
                     <div class="d-flex pt-2">
                         <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/people/The-Seeds-Learning-Centre/100063525220441/#"><i class="fab fa-facebook-f"></i></a>
                         <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/theseeds_kulai?igsh=dGt4YWpiOWJiem44"><i class="fab fa-instagram"></i></a>
@@ -547,14 +427,10 @@ unset($_SESSION['message']);
                     <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
                         © <a class="border-bottom" href="#">The Seeds Learning Tuition Centre</a>, All Right Reserved.
                     </div>
-                    <div class="col-md-6 text-center text-md-end">
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Footer End -->
-     
     <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -563,10 +439,9 @@ unset($_SESSION['message']);
     <script src="lib/waypoints.min.js"></script>
     <script src="lib/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
-    
     <script>
 let selectedClassInfo = null;
-let hasChildren = false; // Flag to track if children are available
+let hasChildren = false;
 
 function showToast(message, isError = false) {
     console.log('showToast called with message:', message, 'at', new Date().toLocaleString('en-US', { timeZone: 'Asia/Kuala_Lumpur' }));
@@ -575,15 +450,10 @@ function showToast(message, isError = false) {
     toast.className = `toast-message ${isError ? 'error' : ''}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    console.log('Toast element created and appended:', toast);
     toast.style.opacity = '1';
     setTimeout(() => {
-        console.log('Fading out toast:', message);
         toast.style.opacity = '0';
-        setTimeout(() => {
-            console.log('Removing toast from DOM:', message);
-            toast.remove();
-        }, 500);
+        setTimeout(() => toast.remove(), 500);
     }, 3000);
 }
 
@@ -601,12 +471,12 @@ function showErrorBox(message) {
     }
 }
 
-// Check login status and load content
 async function checkLoginStatus() {
     try {
-        const response = await fetch('check_login.php', {
+        const response = await fetch('check_login.php?_=' + new Date().getTime(), {
             credentials: 'include',
-            cache: 'no-store'
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' }
         });
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
@@ -624,10 +494,13 @@ async function checkLoginStatus() {
     }
 }
 
-// Load navigation dynamically
 async function loadNavigation() {
     try {
-        const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+        const response = await fetch('check_login.php?_=' + new Date().getTime(), {
+            credentials: 'include',
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' }
+        });
         if (!response.ok) throw new Error('Failed to fetch login status');
         const data = await response.json();
 
@@ -640,7 +513,6 @@ async function loadNavigation() {
                 <a href="subject.html" class="nav-item nav-link active">Subject</a>
                 <a href="about.html" class="nav-item nav-link">About us</a>
                 <a href="contact.html" class="nav-item nav-link">Contact us</a>
-                <a href="comment.html" class="nav-item nav-link">Comment</a>
             `;
             authButton.textContent = 'Log out';
             authButton.href = 'logout.php';
@@ -655,24 +527,14 @@ async function loadNavigation() {
         }
     } catch (error) {
         console.error('Error fetching login status:', error);
-        const navLinks = document.getElementById('navLinks');
-        const authButton = document.getElementById('authButton');
-        navLinks.innerHTML = `
-            <a href="888.html" class="nav-item nav-link">Home</a>
-            <a href="about.html" class="nav-item nav-link">About us</a>
-            <a href="contact.html" class="nav-item nav-link">Contact us</a>
-        `;
-        authButton.textContent = 'Log in';
-        authButton.href = 'login.html';
+        showToast('Failed to load navigation.', true);
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Check login status
     checkLoginStatus();
 
-    // Existing fetch for notifications
-    fetch('get_notification.php')
+    fetch('get_notification.php?_=' + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
@@ -684,8 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Fetch error:', error));
 
-    // Existing fetch for classes
-    fetch('get_classes.php?subject_id=<?= htmlspecialchars($subject_id) ?>')
+    fetch('get_classes.php?subject_id=<?= htmlspecialchars($subject_id) ?>&_=' + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
@@ -754,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const select = document.getElementById('childrenSelect');
                 const childrenContainer = document.getElementById('childrenContainer');
                 const addToCartButton = document.getElementById('addToCart');
-                addToCartButton.disabled = false; // Ensure button is enabled on popup open
+                addToCartButton.disabled = false;
 
                 if (!hasChildren) {
                     childrenContainer.innerHTML = `
@@ -774,8 +635,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast('Failed to load class data', true);
         });
 
-    // Existing fetch for children
-    fetch('get_child.php')
+    fetch('get_child.php?_=' + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return response.json();
@@ -810,21 +670,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 select.appendChild(option);
             });
             const addToCartButton = document.getElementById('addToCart');
-            addToCartButton.disabled = false; // Ensure button is enabled after children load
+            addToCartButton.disabled = false;
         })
         .catch(error => {
             console.error('Error fetching children:', error);
             hasChildren = false;
             showToast('Failed to load children data. Please go to Profile\'s Children Information to add a child.', true);
             const addToCartButton = document.getElementById('addToCart');
-            addToCartButton.disabled = false; // Ensure button is enabled on error
+            addToCartButton.disabled = false;
         });
 
-    // Existing event listeners
     const addToCartButton = document.getElementById('addToCart');
     const select = document.getElementById('childrenSelect');
     select.addEventListener('change', function() {
-        addToCartButton.disabled = false; // Ensure button is enabled on change
+        addToCartButton.disabled = false;
         console.log('Child selected:', this.value);
     });
 
@@ -832,7 +691,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('popup').style.display = 'none';
         selectedClassInfo = null;
         const addToCartButton = document.getElementById('addToCart');
-        addToCartButton.disabled = false; // Ensure button is enabled on close
+        addToCartButton.disabled = false;
         select.value = '';
         if (hasChildren) {
             document.getElementById('childrenContainer').innerHTML = `
@@ -844,7 +703,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById("addToCart").addEventListener("click", async function() {
-        console.log('Add to Cart clicked, disabled:', this.disabled);
         if (!hasChildren) {
             showToast('No children registered. Please go to Profile\'s Children Information to add a child.', true);
             return;
@@ -869,7 +727,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!cartItem.child_name || cartItem.child_name === "") {
                 showToast("Please select a child", true);
-                return; // Stop execution if no child is selected
+                return;
             }
             if (isNaN(cartItem.price)) {
                 showToast("Invalid price", true);
@@ -900,83 +758,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast(error.message || "An error occurred", true);
         }
     });
-
-    const avgRating = <?= $subject['avg_rating'] ?? 0 ?>;
-    setRating(avgRating);
-
-    function setRating(rating) {
-        const stars = document.querySelectorAll('.stars-container .star');
-        const fullStars = Math.floor(rating);
-        const halfStar = (rating - fullStars) >= 0.5 ? 1 : 0;
-        stars.forEach(star => star.classList.remove('yellow', 'half'));
-        for (let i = 0; i < fullStars; i++) {
-            stars[i].classList.add('yellow');
-        }
-        if (halfStar) {
-            stars[fullStars].classList.add('half');
-        }
-        document.querySelector('.rating-number').textContent = rating.toFixed(1);
-    }
-
-    function fetchReviews() {
-        const subject_id = "<?= htmlspecialchars($subject_id) ?>";
-        fetch(`get_comments.php?subject_id=${subject_id}`)
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                displayReviews(data.data || []);
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                document.getElementById('review-list').innerHTML = `<p class="error">Error loading reviews: ${error.message}</p>`;
-            });
-    }
-
-    function displayReviews(comments) {
-        const reviewList = document.getElementById('review-list');
-        reviewList.innerHTML = '<div class="review-items-container"></div>';
-        const container = reviewList.querySelector('.review-items-container');
-
-        if (comments.length > 0) {
-            comments.forEach(comment => {
-                const reviewItem = document.createElement('div');
-                reviewItem.className = 'review-item';
-                const commentDate = new Date(comment.comment_created_at);
-                reviewItem.setAttribute('data-year', commentDate.getFullYear());
-
-                const reviewText = document.createElement('div');
-                reviewText.className = 'review-text';
-
-                const nameDate = document.createElement('p');
-                nameDate.innerHTML = `<strong>${comment.parent_name}</strong> - ${commentDate.toLocaleDateString()}`;
-
-                const starsContainer = document.createElement('div');
-                starsContainer.className = 'stars-container';
-                const rating = parseFloat(comment.rating) || 0;
-                starsContainer.innerHTML = `
-                    ${'<span class="star yellow"></span>'.repeat(Math.floor(rating))}
-                    ${rating % 1 >= 0.5 ? '<span class="star half"></span>' : ''}
-                    ${'<span class="star"></span>'.repeat(5 - Math.ceil(rating))}
-                    <span class="rating-number">${rating.toFixed(1)}</span>`;
-
-                const commentText = document.createElement('p');
-                commentText.textContent = comment.comment;
-
-                reviewText.appendChild(nameDate);
-                reviewText.appendChild(starsContainer);
-                reviewText.appendChild(commentText);
-                reviewItem.appendChild(reviewText);
-                container.appendChild(reviewItem);
-            });
-        } else {
-            reviewList.innerHTML += '<p>No reviews yet</p>';
-        }
-    }
-
-    fetchReviews();
 });
-</script>
+    </script>
 </body>
 </html>
