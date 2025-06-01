@@ -262,7 +262,7 @@
         </div>
     </div>
 
-     <!-- Footer Start -->
+    <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
@@ -425,8 +425,9 @@
             .catch(error => console.error('Fetch error:', error));
     });
 
-    async function loadChildren(year) {
-        console.log('Loading children for year:', year);
+    // Load children, excluding those already registered for the subject
+    async function loadChildren(year, subjectId) {
+        console.log('Loading children for year:', year, 'subjectId:', subjectId);
         const childrenSelect = document.getElementById('childrenSelect');
         if (!year || isNaN(year)) {
             childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
@@ -435,6 +436,7 @@
         }
 
         try {
+            // 获取所有符合年级的孩子
             const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
@@ -442,6 +444,14 @@
 
             availableChildren = Array.isArray(data) ? data : [];
             childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
+
+            // 获取已经注册该科目的孩子
+            const registeredResponse = await fetch(`check_registration.php?cart_items=[{"child_id":0,"subject_id":"${subjectId}"}]`);
+            if (!registeredResponse.ok) throw new Error(`HTTP error! status: ${registeredResponse.status}`);
+            const registeredData = await registeredResponse.json();
+            console.log('Registered children data:', registeredData);
+            const registeredChildIds = registeredData.conflicts.map(conflict => conflict.child_id) || [];
+
             if (availableChildren.length === 0) {
                 childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
                 showToast('No children available for this year.', true);
@@ -449,6 +459,10 @@
             }
 
             availableChildren.forEach(child => {
+                // 排除已经注册的孩子
+                if (registeredChildIds.includes(child.child_id)) {
+                    return;
+                }
                 const option = document.createElement('option');
                 option.value = child.child_id;
                 option.textContent = `${child.child_name} (Year ${year})`;
@@ -461,7 +475,7 @@
         }
     }
 
-    function loadCartData() {
+    async function loadCartData() {
         fetch('get_cart.php')
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -497,6 +511,7 @@
                     let childId = item.child_id || '';
                     let partId = item.part_id ?? null;
                     let year = item.year ? parseInt(item.year.replace('Year ', '')) : null;
+                    let subjectId = item.subject_id || '';
 
                     let cartItem = document.createElement('div');
                     cartItem.classList.add('cart-item');
@@ -510,7 +525,7 @@
                             <p>Year: ${year ?? 'Not specified'}</p>
                         </div>
                         <div class="cart-item-actions">
-                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year})"></i>
+                            <i class="fas fa-edit" onclick="editCartItem(${item.cart_id}, ${partId}, '${classTime}', '${capacityDisplay}', '${childId}', ${year}, '${subjectId}')"></i>
                             <i class="fas fa-trash" onclick="removeFromCart(${item.cart_id}, '${item.subject_id}', '${childId}')"></i>
                         </div>
                     `;
@@ -526,15 +541,15 @@
             });
     }
 
-    async function editCartItem(cartId, partId, classTime, capacity, childId, year) {
-        console.log('Editing cart item:', { cartId, partId, classTime, capacity, childId, year });
+    async function editCartItem(cartId, partId, classTime, capacity, childId, year, subjectId) {
+        console.log('Editing cart item:', { cartId, partId, classTime, capacity, childId, year, subjectId });
         currentCartId = cartId;
 
         const monthText = partId == 1 ? "January - June" : partId == 2 ? "July - December" : "Not specified";
         document.getElementById('popupMonth').textContent = monthText;
         document.getElementById('popupTime').textContent = classTime;
         document.getElementById('popupCapacity').textContent = capacity;
-        await loadChildren(year);
+        await loadChildren(year, subjectId);
         document.getElementById('childrenSelect').value = childId || '';
         document.querySelector('.popup-info').style.display = 'block';
     }
