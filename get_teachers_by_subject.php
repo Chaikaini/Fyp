@@ -51,12 +51,13 @@ try {
 
     // Prepare and execute the query with class_status filter
     $stmt = $conn->prepare("
-        SELECT c.class_id, c.year, c.class_time, c.class_venue, t.teacher_id, t.teacher_name, t.teacher_gender, 
+        SELECT c.class_id, s.year, c.class_time, c.class_venue, t.teacher_id, t.teacher_name, t.teacher_gender, 
                t.teacher_email, t.teacher_phone_number, t.teacher_image
         FROM class c
+        JOIN subject s ON c.subject_id = s.subject_id
         JOIN teacher t ON c.teacher_id = t.teacher_id
         WHERE c.subject_id IN ($placeholders) AND c.class_status = 'available'
-        ORDER BY c.year
+        ORDER BY s.year
     ");
     $stmt->execute($subject_id);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);

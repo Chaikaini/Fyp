@@ -22,20 +22,8 @@ $userPhoneNumber = "";
 $savedCard = null;
 $parent_id = $_SESSION['parent_id'];
 
-// Check if user has previous registrations
-$hasPreviousEnrollment = false;
-$registrationCheckStmt = $conn->prepare("SELECT COUNT(*) as count FROM registration_class WHERE parent_id = ?");
-$registrationCheckStmt->bind_param("i", $parent_id);
-$registrationCheckStmt->execute();
-$result = $registrationCheckStmt->get_result();
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $hasPreviousEnrollment = $row['count'] > 0;
-    error_log("Registration count for parent_id $parent_id: " . $row['count']);
-} else {
-    error_log("No registration records found for parent_id $parent_id");
-}
-$registrationCheckStmt->close();
+// Debug: Log parent_id
+error_log("Session parent_id: " . $parent_id);
 
 // Get user phone number
 $stmt = $conn->prepare("SELECT phone_number FROM parent WHERE parent_id = ?");
@@ -59,8 +47,6 @@ if ($result->num_rows > 0) {
 $stmt->close();
 
 $conn->close();
-
-error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'));
 ?>
 
 <!DOCTYPE html>
@@ -418,10 +404,6 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
 
         .toast-close:hover {
             background-color: #14a631;
-        }
-
-        .hidden-row {
-            display: none !important;
         }
     </style>
 </head>
@@ -800,16 +782,31 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                 .catch(error => console.error('Fetch notification error:', error));
 
             // Fetch cart data
-            fetch("checkout.php")
+            fetch("checkout.php", {
+                credentials: 'include',
+                cache: 'no-store'
+            })
                 .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Invalid JSON:', text);
+                            throw new Error('Invalid JSON response from checkout.php');
+                        }
+                    });
                 })
                 .then(data => {
                     console.log("Cart Data:", data);
-                    const cartItems = data.cart || data;
+                    if (data.status !== 'success') {
+                        throw new Error(data.message || 'Failed to load cart data');
+                    }
+                    const cartItems = data.cart || [];
                     const container = document.getElementById("cart-container");
-                    if (cartItems.length === 0) {
+                    if (!Array.isArray(cartItems) || cartItems.length === 0) {
                         container.innerHTML = "<p>Your cart is empty. Please add items to proceed.</p>";
                         document.getElementById("subject-fee").innerText = "RM0";
                         document.getElementById("total-amount").innerText = "RM0";
@@ -817,11 +814,12 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         return;
                     }
                     let totalAmount = 0;
-                    const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
-                    let enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+                    const enrollmentFee = 100; // Always include enrollment fee
                     container.innerHTML = "";
                     cartItems.forEach(item => {
-                        totalAmount += parseFloat(item.price);
+                        totalAmount += parseFloat(item.price || 0);
+                        // Normalize subject_image path
+                        const imagePath = (item.subject_image || 'images/default.png').replace(/\\/g, '/');
                         const courseItem = `
                             <div class="course-item" 
                                  data-cart-id="${item.cart_id}" 
@@ -829,13 +827,13 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                                  data-child-id="${item.child_id}" 
                                  data-subject-id="${item.subject_id}" 
                                  data-teacher-id="${item.teacher_id}">
-                                <img src="${item.subject_image || 'images/default.png'}" alt="${item.subject_name}">
+                                <img src="${imagePath}" alt="${item.subject_name || 'Subject'}">
                                 <div>
-                                    <p><b>${item.subject_name}</b></p>
-                                    <p><b>Teacher:</b> ${item.teacher_name}</p>
-                                    <p><b>Price:</b> RM${item.price}</p>
-                                    <p><b>Time:</b> ${item.class_time}</p>
-                                    <p><b>Student:</b> ${item.child_name}</p>
+                                    <p><b>${item.subject_name || 'Unknown Subject'}</b></p>
+                                    <p><b>Teacher:</b> ${item.teacher_name || 'Unknown Teacher'}</p>
+                                    <p><b>Price:</b> RM${parseFloat(item.price || 0).toFixed(2)}</p>
+                                    <p><b>Time:</b> ${item.class_time || 'N/A'}</p>
+                                    <p><b>Student:</b> ${item.child_name || 'Unknown Student'}</p>
                                 </div>
                             </div>
                             <hr>
@@ -843,15 +841,15 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                         container.innerHTML += courseItem;
                     });
                     document.getElementById("subject-fee").innerText = `RM${totalAmount.toFixed(2)}`;
-                    const enrollmentFeeRow = document.getElementById("enrollment-fee-row");
-                    if (hasPreviousEnrollment) enrollmentFeeRow.classList.add('hidden-row');
-                    else enrollmentFeeRow.classList.remove('hidden-row');
+                    document.getElementById("enrollment-fee-row").classList.remove('hidden-row'); // Always show enrollment fee
                     document.getElementById("total-amount").innerText = `RM${(totalAmount + enrollmentFee).toFixed(2)}`;
                 })
                 .catch(error => {
-                    console.error("Error fetching cart data:", error);
+                    console.error("Error fetching cart data:", error.message);
+                    console.error("Full error:", error);
                     const container = document.getElementById("cart-container");
-                    container.innerHTML = "<p>Error loading cart data. Please try again later.</p>";
+                    container.innerHTML = `<p>Error loading cart data: ${error.message}. Please try again later.</p>`;
+                    document.querySelector('.payment button').disabled = true;
                 });
 
             async function validateForm() {
@@ -957,8 +955,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                             newTotal += price;
                         });
                         document.getElementById("subject-fee").innerText = `RM${newTotal.toFixed(2)}`;
-                        const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
-                        const enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+                        const enrollmentFee = 100; // Always include enrollment fee
                         document.getElementById("total-amount").innerText = `RM${(newTotal + enrollmentFee).toFixed(2)}`;
                     }
 
@@ -991,8 +988,7 @@ error_log("hasPreviousEnrollment: " . ($hasPreviousEnrollment ? 'true' : 'false'
                     }
                 }
 
-                const hasPreviousEnrollment = <?php echo $hasPreviousEnrollment ? 'true' : 'false'; ?>;
-                const enrollmentFee = hasPreviousEnrollment ? 0 : 100;
+                const enrollmentFee = 100; // Always include enrollment fee
                 const totalAmount = subjectTotal + enrollmentFee;
 
                 const orderData = {
