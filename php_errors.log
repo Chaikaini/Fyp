@@ -285,3 +285,4 @@ Stack trace:
 #0 C:\xampp\htdocs\Fyp\admin_manage.php(211): mysqli_stmt->execute()
 #1 {main}
   thrown in C:\xampp\htdocs\Fyp\admin_manage.php on line 211
+[2025-06-01 05:35:05] Successfully updated teacher_id: 12345
