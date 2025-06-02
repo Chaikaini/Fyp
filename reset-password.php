@@ -75,6 +75,10 @@ try {
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
+            // Fetch the recipient's name
+            $user = $result->fetch_assoc();
+            $recipient_name = $user['parent_name'] ?? 'User'; // Use 'User' as fallback if name is not available
+
             $otp = mt_rand(100000, 999999);
             $_SESSION['otp'] = $otp;
             $_SESSION['email'] = $email;
@@ -101,8 +105,86 @@ try {
                 // Content
                 $mail->isHTML(true);
                 $mail->Subject = 'Password Reset OTP';
-                $mail->Body = "Dear User,<br><br>Your OTP for password reset is: <b>$otp</b><br>This OTP is valid for 10 minutes.<br><br>Best regards,<br>The Seeds Learning Tuition Centre";
-                $mail->AltBody = "Your OTP for password reset is: $otp\nThis OTP is valid for 10 minutes.\n\nBest regards,\nThe Seeds Learning Tuition Centre";
+
+                // HTML Email Template
+                $emailTemplate = '
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Password Reset OTP</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background-color: #f9f9f9;
+                            color: #333;
+                            padding: 20px;
+                            margin: 0;
+                        }
+                        .email-container {
+                            background-color: #ffffff;
+                            padding: 30px;
+                            border-radius: 8px;
+                            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+                            max-width: 600px;
+                            margin: 0 auto;
+                        }
+                        .email-header {
+                            font-size: 20px;
+                            font-weight: bold;
+                            margin-bottom: 20px;
+                            color: #4CAF50;
+                        }
+                        .email-content {
+                            font-size: 16px;
+                            line-height: 1.6;
+                        }
+                        .email-footer {
+                            margin-top: 30px;
+                            font-size: 14px;
+                            color: #777;
+                        }
+                        .otp-code {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: #4CAF50;
+                            text-align: center;
+                            margin: 20px 0;
+                            padding: 10px;
+                            background-color: #f5f5f5;
+                            border-radius: 4px;
+                        }
+                        a {
+                            color: #4CAF50;
+                            text-decoration: none;
+                            font-weight: bold;
+                        }
+                        a:hover {
+                            text-decoration: underline;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="email-container">
+                        <div class="email-header">
+                            <div>Hello ' . htmlspecialchars($recipient_name) . ',</div>
+                        </div>
+                        <div class="email-content">
+                            <p>You have requested to reset your password. Please use the following OTP code to proceed:</p>
+                            <div class="otp-code">' . htmlspecialchars($otp) . '</div>
+                            <p>If you did not request this, please ignore this email or contact <a href="mailto:support@theseeds.com">support</a>.</p>
+                        </div>
+                        <div class="email-footer">
+                            <p>Best regards,<br>The Seeds Learning Tuition Centre</p>
+                            <p>This is an automated message, please do not reply to this email.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>';
+
+                $mail->Body = $emailTemplate;
+                // Fallback for non-HTML email clients
+                $mail->AltBody = "Hello $recipient_name,\n\nYou have requested to reset your password. Your OTP code is: $otp\nThis OTP is valid for 10 minutes.\n\nIf you did not request this, please ignore this email or contact support@theseeds.com.\n\nBest regards,\nThe Seeds Learning Tuition Centre";
 
                 $mail->send();
                 $response["success"] = true;
