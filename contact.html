@@ -34,11 +34,19 @@
         .map {
             height: 300px;
             border: 0;
+            width: 100%;
         }
 
         .logo {
             width: 50px;
             height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background-color: #28a745; /* 更专业的绿色背景 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 添加阴影 */
         }
 
         .textarea {
@@ -128,6 +136,57 @@
         .navbar-color {
             color: #28a745;
         }
+
+        .page-header {
+            padding-bottom: 0;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .map-container {
+            margin-top: -20px;
+        }
+
+        .contact-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px; /* 增加间距，使布局更宽松 */
+            justify-content: center; /* 居中对齐 */
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa; /* 背景色增加层次感 */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* 轻微阴影 */
+            transition: transform 0.2s ease; /* 添加交互效果 */
+            flex: 1;
+            min-width: 300px; /* 确保每个卡片有最小宽度 */
+            max-width: 350px; /* 限制最大宽度 */
+        }
+
+        .contact-info:hover {
+            transform: translateY(-5px); /* 悬停时轻微上移 */
+        }
+
+        .contact-info h5 {
+            margin-bottom: 5px;
+            font-size: 1.2rem; /* 调整标题字体大小 */
+            color: #28a745; /* 统一颜色 */
+        }
+
+        .contact-info p {
+            margin: 0;
+            font-size: 0.9rem; /* 调整文本字体大小 */
+            color: #555; /* 稍深的灰色，增加对比 */
+        }
+
+        .contact-info .ms-3 {
+            flex-grow: 1;
+        }
     </style>
 </head>
 
@@ -169,7 +228,7 @@
     <!-- Icon Bar End -->
 
     <!-- Header Start -->
-    <div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container-fluid bg-primary py-5 page-header">
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-lg-10 text-center">
@@ -185,62 +244,65 @@
 
     <!-- Contact Start -->
     <div class="container-fluid p-0">
-        <!-- Full-Screen Map -->
-        <iframe 
-            class="map position-relative w-100"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2549.857659110996!2d103.596182!3d1.6501033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7974ad97a0d1%3A0x59e8bcb06dcece99!2sThe%20Seeds%20Learning%20Centre!5e0!3m2!1sen!2smy!4v1700000000000"
-            frameborder="0"
-            allowfullscreen=""
-            aria-hidden="false"
-            tabindex="0">
-        </iframe>
+        <div class="map-container">
+            <!-- Full-Screen Map -->
+            <iframe 
+                class="map position-relative w-100"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2549.857659110996!2d103.596182!3d1.6501033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da7974ad97a0d1%3A0x59e8bcb06dcece99!2sThe%20Seeds%20Learning%20Centre!5e0!3m2!1sen!2smy!4v1700000000000"
+                frameborder="0"
+                allowfullscreen=""
+                aria-hidden="false"
+                tabindex="0">
+            </iframe>
+        </div>
     </div>
 
     <div class="container py-5">
         <div class="row g-5">
-            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-                        <i class="fa fa-map-marker-alt text-white"></i>
+            <div class="col-12 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="contact-row">
+                    <div class="contact-info">
+                        <div class="logo">
+                            <i class="fa fa-map-marker-alt text-white"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Office</h5>
+                            <p>5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                        </div>
                     </div>
-                    <div class="ms-3">
-                        <h5 class="text-primary">Office</h5>
-                        <p class="mb-0">5262A, Jalan Matahari, Bandar Indahpura, 81000 Kulai, Johor Darul Ta'zim</p>
+                    <div class="contact-info">
+                        <div class="logo">
+                            <i class="fa fa-phone-alt text-white"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Mobile</h5>
+                            <p>
+                                <a href="https://wa.me/60117758990" class="text-decoration-none text-dark" title="Chat on WhatsApp">
+                                    +011 775 8990
+                                    <small><i class="fab fa-whatsapp ms-1 text-success"></i></small>
+                                </a>
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-                        <i class="fa fa-phone-alt text-white"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h5 class="text-primary">Mobile</h5>
-                        <p class="mb-0">
-                            <a href="https://wa.me/60117758990" class="text-decoration-none text-dark" title="Chat on WhatsApp">
-                                +011 775 8990
-                                <small><i class="fab fa-whatsapp ms-1 text-success"></i></small>
-                            </a>
-                        </p>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center">
-                    <div class="logo d-flex align-items-center justify-content-center flex-shrink-0 bg-primary">
-                        <i class="fa fa-envelope-open text-white"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h5 class="text-primary">Email</h5>
-                        <p class="mb-0">
-                            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry%20about%20Courses&body=Dear%20The%20Seeds%20Team,%0A%0AI%20would%20like%20to%20inquire%20about..."
-                               class="text-decoration-none text-dark"
-                               target="_blank"
-                               title="Open in Gmail">
-                               TheSeeds@gmail.com
-                               <small><i class="fas fa-envelope ms-1 text-primary"></i></small>
-                            </a>
-                        </p>
+                    <div class="contact-info">
+                        <div class="logo">
+                            <i class="fa fa-envelope-open text-white"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h5>Email</h5>
+                            <p>
+                                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=TheSeeds@gmail.com&su=Enquiry%20about%20Courses&body=Dear%20The%20Seeds%20Team,%0A%0AI%20would%20like%20to%20inquire%20about..."
+                                   class="text-decoration-none text-dark"
+                                   target="_blank"
+                                   title="Open in Gmail">
+                                    TheSeeds@gmail.com
+                                    <small><i class="fas fa-envelope ms-1 text-primary"></i></small>
+                                </a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <!-- 其他内容可以根据需要添加，例如联系表单 -->
         </div>
     </div>
     <!-- Contact End -->
@@ -251,7 +313,7 @@
         <a href="notification.php" class="inbox-link">View Notifications</a>
     </div>
 
-     <!-- Footer Start -->
+    <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
