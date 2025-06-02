@@ -1055,7 +1055,7 @@ $conn->close();
                     setTimeout(() => {
                         modal.style.display = "none";
                         window.location.href = "subject.html";
-                    }, 2000);
+                    }, 5000);
                 } else {
                     paymentIcon.src = "img/payment_ns.png";
                     paymentIcon.onerror = () => { paymentIcon.src = "https://via.placeholder.com/80"; };
