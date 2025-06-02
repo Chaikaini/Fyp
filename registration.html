@@ -76,7 +76,7 @@
         .registration-form input {
             width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
@@ -128,6 +128,26 @@
             text-decoration: underline;
         }
 
+        .username-container, .password-container {
+            position: relative;
+        }
+
+        .username-feedback, .password-feedback {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: left;
+            color: #777;
+        }
+
+        .username-feedback.valid, .password-feedback.valid {
+            color: #4caf50;
+        }
+
+        .username-feedback.invalid, .password-feedback.invalid {
+            color: #ff4d4d;
+        }
+
         .password-strength {
             margin-top: 5px;
             margin-bottom: 5px;
@@ -159,44 +179,14 @@
             background-color: #4caf50;
         }
 
-        .password-container {
-            position: relative;
-        }
-
-        .password-requirements-toggle {
-            position: absolute;
-            top: 5px;
-            right: 40px;
-            width: 20px;
-            height: 20px;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            background-color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .password-requirements-toggle:hover {
-            background-color: #f0f0f0;
-        }
-
-        .password-requirements-toggle i {
-            font-size: 12px;
-            color: #777;
-        }
-
-        /* 对话框样式 */
         .modal {
-            display: none; /* 默认隐藏 */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+            background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -218,14 +208,6 @@
             color: #333;
         }
 
-        .modal-content ul {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-        }
-
         .modal-content .close-btn {
             position: absolute;
             top: 10px;
@@ -241,18 +223,19 @@
         }
 
         .password-container input {
-            padding-right: 70px;
+            padding-right: 40px;
         }
 
         .toggle-password {
             position: absolute;
-            right: 10px;
             top: 50%;
             transform: translateY(-50%);
+            right: 10px;
             cursor: pointer;
             color: #777;
             font-size: 16px;
             transition: color 0.3s ease, transform 0.2s ease;
+            z-index: 2;
         }
 
         .toggle-password:hover {
@@ -272,11 +255,27 @@
             border: 1px solid #17a2b8;
         }
 
-        .error-message {
-            color: red;
-            font-size: 12px;
-            margin-bottom: 15px;
-            text-align: left;
+        /* Toast Notification Styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ff4d4d;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(-20px);
+            max-width: 300px;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         @media (max-width: 768px) {
@@ -294,25 +293,25 @@
                 height: auto;
                 padding: 20px;
             }
-            .password-strength {
+            .password-strength, .username-feedback, .password-feedback {
                 font-size: 12px;
             }
             .strength-bar {
                 height: 6px;
             }
-            .password-requirements-toggle {
-                width: 18px;
-                height: 18px;
-                right: 35px;
-            }
-            .password-requirements-toggle i {
-                font-size: 10px;
-            }
             .password-container input {
-                padding-right: 60px;
+                padding-right: 35px;
+            }
+            .toggle-password {
+                right: 10px;
             }
             .modal-content {
                 width: 90%;
+            }
+            .toast {
+                right: 10px;
+                top: 10px;
+                width: 80%;
             }
         }
     </style>
@@ -329,10 +328,13 @@
                 <p>Fill in the details below to create your account.</p>
 
                 <form id="registerForm">
-                    <input type="text" name="username" placeholder="Username" required>
+                    <div class="username-container">
+                        <input type="text" name="username" id="username" placeholder="Username" required>
+                    </div>
+                    <div class="username-feedback" id="usernameFeedback">Username: Enter 3-30 characters</div>
                     <input type="email" name="email" placeholder="Email" required>
-                    <input type="text" name="address" placeholder="Address" required>
-                    <input type="tel" name="phone_number" placeholder="Phone Number" required>
+                    <input type="text" name="address" id="address" placeholder="Address" required>
+                    <input type="tel" name="phone_number" id="phone_number" placeholder="Phone Number " required>
                     <select name="gender" required>
                         <option value="" disabled selected hidden>Gender</option>
                         <option value="Male">Male</option>
@@ -347,35 +349,18 @@
                     <div class="password-container">
                         <input type="password" id="password" name="password" placeholder="Password" required>
                         <i class="fa fa-eye-slash toggle-password" id="togglePassword" title="Toggle password visibility" aria-label="Hide password" role="button"></i>
-                        <div class="password-requirements-toggle" title="Show password requirements" role="button">
-                            <i class="fas fa-info"></i>
-                        </div>
                     </div>
+                    <div class="password-feedback" id="passwordFeedback">Password: Enter at least 8 characters</div>
                     <div class="password-strength" id="strengthText">Password Strength: None</div>
                     <div class="strength-bar" id="strengthBar" aria-live="polite" aria-label="Password strength: none"></div>
                     <div class="password-container">
                         <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
                         <i class="fa fa-eye-slash toggle-password" id="toggleConfirmPassword" title="Toggle password visibility" aria-label="Hide confirm password" role="button"></i>
                     </div>
-                    <div class="error-message" id="errorMessage" style="display: none;"></div>
                     <button type="submit">Register</button>
                     <p>Already have an account? <a href="login.html">Login here</a></p>
                 </form>
             </div>
-        </div>
-    </div>
-
-    <!-- 对话框 HTML -->
-    <div class="modal" id="passwordRequirementsModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeModal">&times;</span>
-            <h3>Password Requirements</h3>
-            <ul>
-                <li>At least 8 characters long</li>
-                <li>Contains at least one uppercase letter (A-Z)</li>
-                <li>Contains at least one lowercase letter (a-z)</li>
-                <li>Contains at least one special character (!@#$%^&*)</li>
-            </ul>
         </div>
     </div>
 
@@ -389,114 +374,140 @@
         </div>
     </div>
 
-
     <script>
-    document.getElementById("registerForm").addEventListener("submit", function(event) {
-        event.preventDefault();
+    // Toast notification function
+    function showToast(message) {
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add("show");
+        }, 100);
+        setTimeout(() => {
+            toast.classList.remove("show");
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
 
-        let form = this;
-        let formData = new FormData(form);
-        let parent_password = document.getElementById("password").value;
-        let confirm_password = document.getElementById("confirm_password").value;
-        let errorMessage = document.getElementById("errorMessage");
+    // Username validation rules
+    const reservedUsernames = ["admin", "root", "null", "system"];
 
-        errorMessage.style.display = "none";
-        errorMessage.innerText = "";
+    function validateUsername(username) {
+        const feedback = document.getElementById("usernameFeedback");
+        let message = "Username: ";
+        let isValid = true;
 
-        // Client-side password validation
+        if (username.length === 0) {
+            message += "Enter 3-30 characters";
+            feedback.className = "username-feedback";
+        } else if (username.length < 3 || username.length > 30) {
+            message += "Must be 3-30 characters long";
+            feedback.className = "username-feedback invalid";
+            isValid = false;
+        } else if (!/^[a-zA-Z][a-zA-Z\s]*$/.test(username)) {
+            message += "Must start with a letter and contain only letters or spaces";
+            feedback.className = "username-feedback invalid";
+            isValid = false;
+        } else if (/([a-zA-Z])\1{2,}/.test(username.replace(/\s/g, ''))) {
+            message += "Cannot contain more than two identical consecutive letters (e.g., 'aaa')";
+            feedback.className = "username-feedback invalid";
+            isValid = false;
+        } else if (reservedUsernames.includes(username.toLowerCase().replace(/\s/g, ''))) {
+            message += "Cannot be a reserved word (e.g., admin, root)";
+            feedback.className = "username-feedback invalid";
+            isValid = false;
+        } else {
+            // Check for duplicate username via AJAX
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "check_username.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.exists) {
+                        message += "Username is already taken";
+                        feedback.className = "username-feedback invalid";
+                        isValid = false;
+                    } else {
+                        message += "Valid";
+                        feedback.className = "username-feedback valid";
+                    }
+                    feedback.innerText = message;
+                }
+            };
+            xhr.send("username=" + encodeURIComponent(username));
+        }
+
+        feedback.innerText = message;
+        return isValid;
+    }
+
+    // Password validation function
+    function validatePassword(password) {
+        const feedback = document.getElementById("passwordFeedback");
+        let message = "Password: ";
         let missingRequirements = [];
-        if (parent_password.length < 8) {
+
+        if (password.length < 8) {
             missingRequirements.push("be at least 8 characters long");
         }
-        if (!/[A-Z]/.test(parent_password)) {
+        if (!/[A-Z]/.test(password)) {
             missingRequirements.push("contain at least one uppercase letter");
         }
-        if (!/[a-z]/.test(parent_password)) {
+        if (!/[a-z]/.test(password)) {
             missingRequirements.push("contain at least one lowercase letter");
         }
-        if (!/[!@#$%^&*]/.test(parent_password)) {
+        if (!/[!@#$%^&*]/.test(password)) {
             missingRequirements.push("contain at least one special character (!@#$%^&*)");
         }
 
-        if (missingRequirements.length > 0) {
-            let errorText = "Password must ";
-            if (missingRequirements.length === 1) {
-                errorText += missingRequirements[0] + ".";
-            } else if (missingRequirements.length === 2) {
-                errorText += missingRequirements.join(" and ") + ".";
-            } else {
-                errorText += missingRequirements.slice(0, -1).join(", ") + ", and " + missingRequirements.slice(-1) + ".";
-            }
-            errorMessage.innerText = errorText;
-            errorMessage.style.display = "block";
-            return;
+        if (password.length === 0) {
+            message += "Enter at least 8 characters";
+            feedback.className = "password-feedback";
+        } else if (missingRequirements.length > 0) {
+            message += missingRequirements.join(", ");
+            feedback.className = "password-feedback invalid";
+        } else {
+            message += "Valid";
+            feedback.className = "password-feedback valid";
         }
 
-        if (parent_password !== confirm_password) {
-            errorMessage.innerText = "Passwords do not match!";
-            errorMessage.style.display = "block";
-            return;
-        }
-
-                // Show confirmation modal
-        document.getElementById("confirmRegisterModal").style.display = "flex";
-    });
-
-    // Handle confirmation modal
-    document.getElementById("confirmRegister").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        let formData = new FormData(document.getElementById("registerForm"));
-        submitForm(formData);
-    });
-
-    document.getElementById("cancelRegister").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        document.getElementById("address").value = "";
-        document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-        document.getElementById("errorMessage").style.display = "block";
-    });
-
-    document.getElementById("closeConfirmModal").addEventListener("click", function() {
-        document.getElementById("confirmRegisterModal").style.display = "none";
-        document.getElementById("address").value = "";
-        document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-        document.getElementById("errorMessage").style.display = "block";
-    });
-
-    document.getElementById("confirmRegisterModal").addEventListener("click", function(event) {
-        if (event.target === this) {
-            this.style.display = "none";
-            document.getElementById("address").value = "";
-            document.getElementById("errorMessage").innerText = "Registration cancelled. Please enter a valid Kulai address.";
-            document.getElementById("errorMessage").style.display = "block";
-        }
-    });
-
-    function submitForm(formData) {
-        fetch("register.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = "login.html";
-            } else {
-                document.getElementById("errorMessage").innerText = data.message || "An error occurred. Please try again.";
-                document.getElementById("errorMessage").style.display = "block";
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            document.getElementById("errorMessage").innerText = "An error occurred. Please try again.";
-            document.getElementById("errorMessage").style.display = "block";
-        });
+        feedback.innerText = message;
+        return missingRequirements.length === 0;
     }
 
+    // Real-time username input handling with debounce
+    let usernameDebounceTimer;
+    document.getElementById("username").addEventListener("input", function(e) {
+        let input = e.target.value;
+        const originalLength = input.length;
+        // 只移除除空格外的特殊字符
+        input = input.replace(/[^a-zA-Z\s]/g, "");
+        if (input.length !== originalLength) {
+            showToast("Username can only contain letters and spaces. Special characters are not allowed.");
+        }
+        if (input.length > 0 && !/^[a-zA-Z]/.test(input)) {
+            showToast("Username must start with a letter.");
+            input = input.replace(/^[^a-zA-Z]+/, "");
+        }
+        e.target.value = input;
+
+        clearTimeout(usernameDebounceTimer);
+        usernameDebounceTimer = setTimeout(() => {
+            validateUsername(input);
+        }, 500);
+    });
+
+    // Real-time password input handling
     document.getElementById("password").addEventListener("input", function() {
         const password = this.value;
         const strengthText = document.getElementById("strengthText");
         const strengthBar = document.getElementById("strengthBar");
+
+        validatePassword(password);
 
         let strength = 0;
         if (password.length >= 8) strength++;
@@ -527,6 +538,101 @@
         }
     });
 
+    document.getElementById("registerForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let form = this;
+        let formData = new FormData(form);
+        let username = document.getElementById("username").value;
+        let phoneNumber = document.getElementById("phone_number").value;
+        let parent_password = document.getElementById("password").value;
+        let confirm_password = document.getElementById("confirm_password").value;
+
+        // Username validation
+        if (!validateUsername(username)) {
+            return;
+        }
+
+        // Phone number validation
+        if (!/^0\d{2}-\d{3}\s\d{4,5}$/.test(phoneNumber)) {
+            showToast("Phone number must be in the format 0xx-xxx xxxx or 0xx-xxx xxxxx.");
+            return;
+        }
+
+        // Password validation
+        if (!validatePassword(parent_password)) {
+            return;
+        }
+
+        if (parent_password !== confirm_password) {
+            showToast("Passwords do not match!");
+            return;
+        }
+
+        document.getElementById("confirmRegisterModal").style.display = "flex";
+    });
+
+    // Auto-format phone number
+    document.getElementById("phone_number").addEventListener("input", function(e) {
+        let input = e.target.value.replace(/\D/g, "");
+        let formatted = "";
+        if (input.length > 0) {
+            formatted = input.substring(0, 3);
+            if (input.length >= 4) {
+                formatted += "-" + input.substring(3, 6);
+            }
+            if (input.length >= 7) {
+                formatted += " " + input.substring(6, Math.min(11, input.length));
+            }
+        }
+        e.target.value = formatted;
+    });
+
+    document.getElementById("confirmRegister").addEventListener("click", function() {
+        document.getElementById("confirmRegisterModal").style.display = "none";
+        let formData = new FormData(document.getElementById("registerForm"));
+        submitForm(formData);
+    });
+
+    document.getElementById("cancelRegister").addEventListener("click", function() {
+        document.getElementById("confirmRegisterModal").style.display = "none";
+        document.getElementById("address").value = "";
+        showToast("Registration cancelled. Please enter a valid Kulai address.");
+    });
+
+    document.getElementById("closeConfirmModal").addEventListener("click", function() {
+        document.getElementById("confirmRegisterModal").style.display = "none";
+        document.getElementById("address").value = "";
+        showToast("Registration cancelled. Please enter a valid Kulai address.");
+    });
+
+    document.getElementById("confirmRegisterModal").addEventListener("click", function(event) {
+        if (event.target === this) {
+            this.style.display = "none";
+            document.getElementById("address").value = "";
+            showToast("Registration cancelled. Please enter a valid Kulai address.");
+        }
+    });
+
+    function submitForm(formData) {
+        fetch("register.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = "login.html";
+            } else {
+                showToast(data.message || "An error occurred. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            showToast("An error occurred. Please try again.");
+        });
+    }
+
     document.getElementById("togglePassword").addEventListener("click", function() {
         const passwordInput = document.getElementById("password");
         const isHidden = passwordInput.getAttribute("type") === "password";
@@ -543,28 +649,6 @@
         this.classList.toggle("fa-eye", isHidden);
         this.classList.toggle("fa-eye-slash", !isHidden);
         this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
-    });
-
-    // 对话框控制
-    const toggleButton = document.querySelector('.password-requirements-toggle');
-    const modal = document.getElementById('passwordRequirementsModal');
-    const closeModal = document.getElementById('closeModal');
-
-    // 点击“i”图标显示对话框
-    toggleButton.addEventListener('click', function() {
-        modal.style.display = 'flex';
-    });
-
-    // 点击关闭按钮关闭对话框
-    closeModal.addEventListener('click', function() {
-        modal.style.display = 'none';
-    });
-
-    // 点击遮罩层关闭对话框
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
     });
     </script>
 </body>

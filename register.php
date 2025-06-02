@@ -27,26 +27,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Initialize error messages array
     $errors = [];
 
-    // Validate required fields
+    // Username validation
     if (empty($parent_name)) {
         $errors[] = "Username is required.";
+    } elseif (!preg_match("/^[a-zA-Z][a-zA-Z\s]{2,29}$/", $parent_name)) {
+        $errors[] = "Username must be 3-30 characters long, start with a letter, and contain only English letters or spaces.";
+    } elseif (preg_match("/([a-zA-Z])\1{2,}/", str_replace(' ', '', $parent_name))) {
+        $errors[] = "Username cannot contain more than two identical consecutive letters (e.g., 'aaa').";
+    } else {
+        // Check for reserved words
+        $reserved_words = ['admin', 'root', 'null', 'system'];
+        if (in_array(strtolower(str_replace(' ', '', $parent_name)), $reserved_words)) {
+            $errors[] = "Username cannot be a reserved word (e.g., admin, root, null, system).";
+        }
+        // Check for duplicate username
+        $stmt = $conn->prepare("SELECT parent_name FROM parent WHERE parent_name = ?");
+        $stmt->bind_param("s", $parent_name);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $errors[] = "Username is already taken. Please choose another.";
+        }
+        $stmt->close();
     }
+
+    // Validate email
     if (empty($parent_email)) {
         $errors[] = "Email is required.";
     } elseif (!filter_var($parent_email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Invalid email format.";
+    } else {
+        // Check for duplicate email
+        $stmt = $conn->prepare("SELECT parent_email FROM parent WHERE parent_email = ?");
+        $stmt->bind_param("s", $parent_email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $errors[] = "Email is already registered.";
+        }
+        $stmt->close();
     }
+
+    // Validate address
     if (empty($parent_address)) {
         $errors[] = "Address is required.";
     }
+
+    // Validate phone number
     if (empty($phone_number)) {
         $errors[] = "Phone number is required.";
-    } elseif (!preg_match("/^\d{3}-\d{3} \d{4}$/", $phone_number)) {
-        $errors[] = "Invalid phone number format. Use XXX-XXX XXXX (e.g., 012-234 1234).";
+    } elseif (!preg_match("/^0\d{2}-\d{3}\s\d{4,5}$/", $phone_number)) {
+        $errors[] = "Phone number must be in the format 0xx-xxx xxxx or 0xx-xxx xxxxx.";
     }
+
+    // Validate gender
     if (empty($parent_gender) || !in_array($parent_gender, ['Male', 'Female'])) {
         $errors[] = "Valid gender is required.";
     }
+
+    // Validate relationship
     if (empty($parent_relationship) || !in_array($parent_relationship, ['Mother', 'Father', 'Guardian'])) {
         $errors[] = "Valid relationship is required.";
     }
@@ -85,18 +124,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if passwords match
     if ($parent_password !== $confirm_password) {
         $errors[] = "Passwords do not match.";
-    }
-
-    // Check for duplicate email
-    if (empty($errors)) {
-        $stmt = $conn->prepare("SELECT parent_email FROM parent WHERE parent_email = ?");
-        $stmt->bind_param("s", $parent_email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $errors[] = "Email is already registered.";
-        }
-        $stmt->close();
     }
 
     // If there are errors, return them

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome for eye, info, and toast icons -->
+    <!-- Font Awesome for eye and toast icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -148,7 +148,7 @@
         }
 
         .password-container input {
-            padding-right: 70px; /* Space for eye and info icons */
+            padding-right: 40px; /* Space for eye icon */
         }
 
         .toggle-password {
@@ -179,37 +179,27 @@
             border: 1px solid #17a2b8;
         }
 
-        .password-requirements-toggle {
-            position: absolute;
-            top: 50%;
-            right: 40px;
-            transform: translateY(-50%);
-            width: 20px;
-            height: 20px;
-            border: 1px solid #ddd;
-            border-radius: 50%;
-            background-color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s ease;
-        }
-
-        .password-requirements-toggle:hover {
-            background-color: #f0f0f0;
-        }
-
-        .password-requirements-toggle i {
-            font-size: 12px;
-            color: #777;
-        }
-
         .password-strength {
             margin-top: 5px;
             margin-bottom: 5px;
             font-size: 14px;
             text-align: left;
+        }
+
+        .password-feedback {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-align: left;
+            color: #777;
+        }
+
+        .password-feedback.valid {
+            color: #4caf50;
+        }
+
+        .password-feedback.invalid {
+            color: #ff4d4d;
         }
 
         .strength-bar {
@@ -234,57 +224,6 @@
         .strong {
             width: 100%;
             background-color: #4caf50;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            max-width: 300px;
-            width: 80%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        .modal-content h3 {
-            margin: 0 0 10px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .modal-content ul {
-            list-style-type: disc;
-            padding-left: 20px;
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .modal-content .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            color: #777;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .modal-content .close-btn:hover {
-            color: #ff4d4d;
         }
 
         /* Toast Notification Styles */
@@ -369,10 +308,8 @@
             <div class="password-container">
                 <input type="password" id="newPassword" name="new_password" placeholder="New Password" required>
                 <i class="fa fa-eye-slash toggle-password" id="toggleNewPassword" title="Toggle password visibility" aria-label="Hide password" role="button"></i>
-                <div class="password-requirements-toggle" title="Show password requirements" role="button">
-                    <i class="fas fa-info"></i>
-                </div>
             </div>
+            <div class="password-feedback" id="passwordFeedback">Password: Enter at least 8 characters</div>
             <div class="password-strength" id="strengthText">Password Strength: None</div>
             <div class="strength-bar" id="strengthBar" aria-live="polite" aria-label="Password strength: none"></div>
             <div class="password-container">
@@ -382,20 +319,6 @@
             <div class="error" id="resetErrorMessage" style="display: none;"></div>
             <button type="submit" name="reset_password">Reset Password</button>
         </form>
-    </div>
-
-    <!-- Password Requirements Modal -->
-    <div class="modal" id="passwordRequirementsModal">
-        <div class="modal-content">
-            <span class="close-btn" id="closeModal">×</span>
-            <h3>Password Requirements</h3>
-            <ul>
-                <li>At least 8 characters long</li>
-                <li>Contains at least one uppercase letter (A-Z)</li>
-                <li>Contains at least one lowercase letter (a-z)</li>
-                <li>Contains at least one special character (!@#$%^&*)</li>
-            </ul>
-        </div>
     </div>
 
     <!-- Toast Notification -->
@@ -428,6 +351,40 @@
                     window.location.href = "login.html"; // Redirect after toast hides
                 }, 400); // Match transition duration
             }, 3000);
+        }
+
+        // Password validation function
+        function validatePassword(password) {
+            const feedback = document.getElementById("passwordFeedback");
+            let message = "Password: ";
+            let missingRequirements = [];
+
+            if (password.length < 8) {
+                missingRequirements.push("be at least 8 characters long");
+            }
+            if (!/[A-Z]/.test(password)) {
+                missingRequirements.push("contain at least one uppercase letter");
+            }
+            if (!/[a-z]/.test(password)) {
+                missingRequirements.push("contain at least one lowercase letter");
+            }
+            if (!/[!@#$%^&*]/.test(password)) {
+                missingRequirements.push("contain at least one special character (!@#$%^&*)");
+            }
+
+            if (password.length === 0) {
+                message += "Enter at least 8 characters";
+                feedback.className = "password-feedback";
+            } else if (missingRequirements.length > 0) {
+                message += missingRequirements.join(", ");
+                feedback.className = "password-feedback invalid";
+            } else {
+                message += "Valid";
+                feedback.className = "password-feedback valid";
+            }
+
+            feedback.innerText = message;
+            return missingRequirements.length === 0;
         }
 
         // Handle Forgot Password Form Submission
@@ -554,31 +511,7 @@
             errorMessage.innerText = "";
 
             // Client-side password validation
-            let missingRequirements = [];
-            if (newPassword.length < 8) {
-                missingRequirements.push("be at least 8 characters long");
-            }
-            if (!/[A-Z]/.test(newPassword)) {
-                missingRequirements.push("contain at least one uppercase letter");
-            }
-            if (!/[a-z]/.test(newPassword)) {
-                missingRequirements.push("contain at least one lowercase letter");
-            }
-            if (!/[!@#$%^&*]/.test(newPassword)) {
-                missingRequirements.push("contain at least one special character (!@#$%^&*)");
-            }
-
-            if (missingRequirements.length > 0) {
-                let errorText = "Password must ";
-                if (missingRequirements.length === 1) {
-                    errorText += missingRequirements[0] + ".";
-                } else if (missingRequirements.length === 2) {
-                    errorText += missingRequirements.join(" and ") + ".";
-                } else {
-                    errorText += missingRequirements.slice(0, -1).join(", ") + ", and " + missingRequirements.slice(-1) + ".";
-                }
-                errorMessage.innerText = errorText;
-                errorMessage.style.display = "block";
+            if (!validatePassword(newPassword)) {
                 return;
             }
 
@@ -644,12 +577,16 @@
             this.setAttribute("aria-label", isHidden ? "Show confirm password" : "Hide confirm password");
         });
 
-        // Password Strength Indicator
+        // Password Strength Indicator and Real-time Feedback
         document.getElementById("newPassword").addEventListener("input", function() {
             const password = this.value;
             const strengthText = document.getElementById("strengthText");
             const strengthBar = document.getElementById("strengthBar");
 
+            // Validate password and update feedback
+            validatePassword(password);
+
+            // Update strength bar
             let strength = 0;
             if (password.length >= 8) strength++;
             if (/[A-Z]/.test(password)) strength++;
@@ -676,25 +613,6 @@
                 strengthText.innerText = "Password Strength: Strong";
                 strengthBar.classList.add("strong");
                 strengthBar.setAttribute("aria-label", "Password strength: strong, 100%");
-            }
-        });
-
-        // Password Requirements Modal Control
-        const toggleButton = document.querySelector('.password-requirements-toggle');
-        const modal = document.getElementById('passwordRequirementsModal');
-        const closeModal = document.getElementById('closeModal');
-
-        toggleButton.addEventListener('click', function() {
-            modal.style.display = 'flex';
-        });
-
-        closeModal.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.style.display = 'none';
             }
         });
     </script>
