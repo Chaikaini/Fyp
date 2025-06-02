@@ -58,9 +58,15 @@ function renderForm($content, $error = '') {
                 width: 95%;
                 padding: 10px;
                 margin-bottom: 15px;
-                border: 1px solid #ddd;
+                border: 1px solid #b3d9ff;
                 border-radius: 5px;
                 font-size: 14px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                outline: none;
+            }
+            form input:focus {
+                border-color: #80bdff;
+                box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
             }
             form button {
                 width: 100%;
@@ -78,6 +84,29 @@ function renderForm($content, $error = '') {
             a {
                 color: #17a2b8;
             }
+            .strength-bar {
+                width: 100%;
+                height: 10px;
+                background-color: #e6f0fa;
+                border-radius: 5px;
+                margin-bottom: 10px;
+                overflow: hidden;
+            }
+            .strength-fill {
+                height: 100%;
+                border-radius: 5px;
+                transition: width 0.3s ease, background-color 0.3s ease;
+            }
+            .strength-text {
+                font-size: 14px;
+                color: #666;
+                text-align: left;
+                margin-bottom: 15px;
+            }
+            .weak { background-color: #ff4d4d; }
+            .medium { background-color: #ffd700; }
+            .strong { background-color: #28a745; }
+            .very-strong { background-color:rgb(21, 143, 127); }
         </style>
     </head>
     <body>
@@ -125,7 +154,6 @@ if (isset($_POST['send_otp'])) {
             $mail->isHTML(true);
             $mail->Subject = 'Your OTP Code for Password Reset';
 
-            // Load and populate email template
             $template = file_get_contents('otp_email_template.html');
             $emailBody = str_replace(
                 ['{{recipient_name}}', '{{otp_code}}'],
@@ -170,10 +198,80 @@ elseif (isset($_POST['verify_otp'])) {
         renderForm("
             <form method='post'>
                 <h2>Reset Password</h2>
-                <input type='password' name='new_password' placeholder='New Password' required>
+                <input type='password' name='new_password' id='new_password' placeholder='New Password' required>
+                <div class='strength-bar'>
+                    <div class='strength-fill' id='strength-fill'></div>
+                </div>
+                <div class='strength-text' id='strength-text'>Enter a password</div>
                 <input type='password' name='confirm_password' placeholder='Confirm Password' required>
                 <button type='submit' name='reset_password'>Reset Password</button>
             </form>
+            <script>
+                function evaluatePasswordStrength(password) {
+                    let strength = 0;
+                    const hasLower = /[a-z]/.test(password);
+                    const hasUpper = /[A-Z]/.test(password);
+                    const hasNumber = /\d/.test(password);
+                    const hasSpecial = /[!@#$%^&*(),.?\":{}|<>]/.test(password);
+                    const length = password.length;
+
+                    if (hasLower) strength++;
+                    if (hasUpper) strength++;
+                    if (hasNumber) strength++;
+                    if (hasSpecial) strength++;
+
+                    if (length >= 12) strength += 1;
+                    else if (length < 8) strength = Math.min(strength, 1);
+
+                    let strengthLevel = 'weak';
+                    let strengthText = '';
+                    let progressWidth = 0;
+                    let progressClass = 'weak';
+
+                    if (length === 0) {
+                        strengthLevel = 'none';
+                        strengthText = 'Enter a password';
+                        progressWidth = 0;
+                    } else if (length < 8) {
+                        strengthLevel = 'weak';
+                        strengthText = 'Weak: Must be at least 8 characters';
+                        progressWidth = 25;
+                    } else if (strength <= 2) {
+                        strengthLevel = 'weak';
+                        strengthText = 'Weak: Add uppercase, numbers, or special characters';
+                        progressWidth = 25;
+                    } else if (strength === 3) {
+                        strengthLevel = 'medium';
+                        strengthText = 'Medium: Add special characters for stronger password';
+                        progressWidth = 50;
+                        progressClass = 'medium';
+                    } else if (strength === 4) {
+                        strengthLevel = 'strong';
+                        strengthText = 'Strong: Good password!';
+                        progressWidth = 75;
+                        progressClass = 'strong';
+                    } else {
+                        strengthLevel = 'very-strong';
+                        strengthText = 'Very Strong: Excellent password!';
+                        progressWidth = 100;
+                        progressClass = 'very-strong';
+                    }
+
+                    return { strengthLevel, strengthText, progressWidth, progressClass };
+                }
+
+                const passwordInput = document.getElementById('new_password');
+                const strengthFill = document.getElementById('strength-fill');
+                const strengthText = document.getElementById('strength-text');
+
+                passwordInput.addEventListener('input', function() {
+                    const result = evaluatePasswordStrength(this.value);
+                    strengthFill.style.width = result.progressWidth + '%';
+                    strengthFill.className = 'strength-fill ' + result.progressClass;
+                    strengthText.textContent = result.strengthText;
+                    strengthText.style.color = result.progressClass === 'weak' ? '#ff4d4d' : result.progressClass === 'medium' ? '#ffd700' : '#28a745';
+                });
+            </script>
         ");
     } else {
         renderForm("
@@ -206,16 +304,163 @@ elseif (isset($_POST['reset_password'])) {
             header("Location: admin login.html");
             exit();
         } else {
-            renderForm("", "Error updating password.");
+            renderForm("
+                <form method='post'>
+                    <h2>Reset Password</h2>
+                    <input type='password' name='new_password' id='new_password' placeholder='New Password' required>
+                    <div class='strength-bar'>
+                        <div class='strength-fill' id='strength-fill'></div>
+                    </div>
+                    <div class='strength-text' id='strength-text'>Enter a password</div>
+                    <input type='password' name='confirm_password' placeholder='Confirm Password' required>
+                    <button type='submit' name='reset_password'>Reset Password</button>
+                </form>
+                <script>
+                    function evaluatePasswordStrength(password) {
+                        let strength = 0;
+                        const hasLower = /[a-z]/.test(password);
+                        const hasUpper = /[A-Z]/.test(password);
+                        const hasNumber = /\d/.test(password);
+                        const hasSpecial = /[!@#$%^&*(),.?\":{}|<>]/.test(password);
+                        const length = password.length;
+
+                        if (hasLower) strength++;
+                        if (hasUpper) strength++;
+                        if (hasNumber) strength++;
+                        if (hasSpecial) strength++;
+
+                        if (length >= 12) strength += 1;
+                        else if (length < 8) strength = Math.min(strength, 1);
+
+                        let strengthLevel = 'weak';
+                        let strengthText = '';
+                        let progressWidth = 0;
+                        let progressClass = 'weak';
+
+                        if (length === 0) {
+                            strengthLevel = 'none';
+                            strengthText = 'Enter a password';
+                            progressWidth = 0;
+                        } else if (length < 8) {
+                            strengthLevel = 'weak';
+                            strengthText = 'Weak: Must be at least 8 characters';
+                            progressWidth = 25;
+                        } else if (strength <= 2) {
+                            strengthLevel = 'weak';
+                            strengthText = 'Weak: Add uppercase, numbers, or special characters';
+                            progressWidth = 25;
+                        } else if (strength === 3) {
+                            strengthLevel = 'medium';
+                            strengthText = 'Medium: Add special characters for stronger password';
+                            progressWidth = 50;
+                            progressClass = 'medium';
+                        } else if (strength === 4) {
+                            strengthLevel = 'strong';
+                            strengthText = 'Strong: Good password!';
+                            progressWidth = 75;
+                            progressClass = 'strong';
+                        } else {
+                            strengthLevel = 'very-strong';
+                            strengthText = 'Very Strong: Excellent password!';
+                            progressWidth = 100;
+                            progressClass = 'very-strong';
+                        }
+
+                        return { strengthLevel, strengthText, progressWidth, progressClass };
+                    }
+
+                    const passwordInput = document.getElementById('new_password');
+                    const strengthFill = document.getElementById('strength-fill');
+                    const strengthText = document.getElementById('strength-text');
+
+                    passwordInput.addEventListener('input', function() {
+                        const result = evaluatePasswordStrength(this.value);
+                        strengthFill.style.width = result.progressWidth + '%';
+                        strengthFill.className = 'strength-fill ' + result.progressClass;
+                        strengthText.textContent = result.strengthText;
+                        strengthText.style.color = result.progressClass === 'weak' ? '#ff4d4d' : result.progressClass === 'medium' ? '#ffd700' : '#28a745';
+                    });
+                </script>
+            ", "Error updating password.");
         }
     } else {
         renderForm("
             <form method='post'>
                 <h2>Reset Password</h2>
-                <input type='password' name='new_password' placeholder='New Password' required>
+                <input type='password' name='new_password' id='new_password' placeholder='New Password' required>
+                <div class='strength-bar'>
+                    <div class='strength-fill' id='strength-fill'></div>
+                </div>
+                <div class='strength-text' id='strength-text'>Enter a password</div>
                 <input type='password' name='confirm_password' placeholder='Confirm Password' required>
                 <button type='submit' name='reset_password'>Reset Password</button>
             </form>
+            <script>
+                function evaluatePasswordStrength(password) {
+                    let strength = 0;
+                    const hasLower = /[a-z]/.test(password);
+                    const hasUpper = /[A-Z]/.test(password);
+                    const hasNumber = /\d/.test(password);
+                    const hasSpecial = /[!@#$%^&*(),.?\":{}|<>]/.test(password);
+                    const length = password.length;
+
+                    if (hasLower) strength++;
+                    if (hasUpper) strength++;
+                    if (hasNumber) strength++;
+                    if (hasSpecial) strength++;
+
+                    if (length >= 12) strength += 1;
+                    else if (length < 8) strength = Math.min(strength, 1);
+
+                    let strengthLevel = 'weak';
+                    let strengthText = '';
+                    let progressWidth = 0;
+                    let progressClass = 'weak';
+
+                    if (length === 0) {
+                        strengthLevel = 'none';
+                        strengthText = 'Enter a password';
+                        progressWidth = 0;
+                    } else if (length < 8) {
+                        strengthLevel = 'weak';
+                        strengthText = 'Weak: Must be at least 8 characters';
+                        progressWidth = 25;
+                    } else if (strength <= 2) {
+                        strengthLevel = 'weak';
+                        strengthText = 'Weak: Add uppercase, numbers, or special characters';
+                        progressWidth = 25;
+                    } else if (strength === 3) {
+                        strengthLevel = 'medium';
+                        strengthText = 'Medium: Add special characters for stronger password';
+                        progressWidth = 50;
+                        progressClass = 'medium';
+                    } else if (strength === 4) {
+                        strengthLevel = 'strong';
+                        strengthText = 'Strong: Good password!';
+                        progressWidth = 75;
+                        progressClass = 'strong';
+                    } else {
+                        strengthLevel = 'very-strong';
+                        strengthText = 'Very Strong: Excellent password!';
+                        progressWidth = 100;
+                        progressClass = 'very-strong';
+                    }
+
+                    return { strengthLevel, strengthText, progressWidth, progressClass };
+                }
+
+                const passwordInput = document.getElementById('new_password');
+                const strengthFill = document.getElementById('strength-fill');
+                const strengthText = document.getElementById('strength-text');
+
+                passwordInput.addEventListener('input', function() {
+                    const result = evaluatePasswordStrength(this.value);
+                    strengthFill.style.width = result.progressWidth + '%';
+                    strengthFill.className = 'strength-fill ' + result.progressClass;
+                    strengthText.textContent = result.strengthText;
+                    strengthText.style.color = result.progressClass === 'weak' ? '#ff4d4d' : result.progressClass === 'medium' ? '#ffd700' : '#28a745';
+                });
+            </script>
         ", "Passwords do not match.");
     }
 }
