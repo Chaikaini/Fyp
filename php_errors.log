@@ -305,3 +305,14 @@ Stack trace:
 [2025-06-02 14:41:27] Successfully updated teacher_id: 12353
 [2025-06-02 14:41:30] Delete request received for teacher_id: 12353
 [2025-06-02 14:41:30] Delete teacher error for teacher_id 12353: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'teacher_id' in 'where clause'
+[2025-06-02 14:42:50] Delete request received for teacher_id: 12353
+[2025-06-02 14:42:50] Delete teacher error for teacher_id 12353: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'teacher_id' in 'where clause'
+[2025-06-02 14:53:05] Delete request received for teacher_id: 12353
+[2025-06-02 14:53:05] teacher_id column not found in exam_result table, skipping exam_result check for teacher_id: 12353
+[2025-06-02 14:53:05] Successfully deleted teacher_id: 12353
+[2025-06-02 14:53:58] Successfully added teacher: 1111@gmail.com
+[2025-06-02 14:54:02] Delete request received for teacher_id: 12354
+[2025-06-02 14:54:02] teacher_id column not found in exam_result table, skipping exam_result check for teacher_id: 12354
+[2025-06-02 14:54:02] Successfully deleted teacher_id: 12354
+[2025-06-02 14:55:20] Successfully updated parent_id: 1
+[2025-06-02 14:55:29] Successfully updated parent_id: 1
