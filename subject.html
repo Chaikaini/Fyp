@@ -4,12 +4,8 @@
     <meta charset="utf-8">
     <title>Subject</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="The Seeds Learning Centre, subject" name="keywords">
+    <meta content="The Seeds Learning Centre, Subject" name="keywords">
     <meta content="The Seeds Learning Centre | Subject" name="description">
-    <!-- 禁用缓存 -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
 
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -201,16 +197,10 @@
         .navbar-color {
             color: #28a745;
         }
-        .fa-arrow-right {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .fa-arrow-right {
-            opacity: 1;
-        }
     </style>
 </head>
 <body>
+    <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="member.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="navbar-color"><i class="fa fa-book me-3"></i>The Seeds</h2>
@@ -219,12 +209,16 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
-                <!-- Navigation links will be dynamically inserted here -->
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a href="member.html" class="nav-item nav-link">Home</a>
+                <a href="subject.html" class="nav-item nav-link">Subject</a>
+                <a href="about.html" class="nav-item nav-link">About us</a>
+                <a href="contact.html" class="nav-item nav-link">Contact us</a>
             </div>
-            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Log out</a>
         </div>
     </nav>
+    <!-- Navbar End -->
 
     <div class="icon-bar">
         <a href="notification.php" class="notification-icon">
@@ -362,52 +356,60 @@
         }
     }
 
-    // Load navigation
+  // Load navigation dynamically
     async function loadNavigation() {
-        console.log('loadNavigation called');
         try {
-            const navLinks = document.getElementById('navLinks');
-            const authButton = document.getElementById('authButton');
-            if (!navLinks || !authButton) {
-                throw new Error('Navigation elements not found');
-            }
-
-            const response = await fetch('check_login.php?_=' + new Date().getTime(), {
-                credentials: 'include',
-                cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
-            });
+            const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
             if (!response.ok) throw new Error(`Failed to fetch login status: ${response.status}`);
             const data = await response.json();
             console.log('Navigation login check response:', data);
 
-            // 无论响应如何，强制显示完整的导航（第二张图的状态）
-            navLinks.innerHTML = `
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-            `;
-            authButton.textContent = 'Log out';
-            authButton.href = 'logout.php';
+            const navLinks = document.getElementById('navbarCollapse').querySelector('.navbar-nav');
+            const authButton = document.querySelector('.btn-primary');
+
+            if (!navLinks || !authButton) {
+                throw new Error('navLinks or authButton element not found');
+            }
+
+            if (data.isLoggedIn) {
+                console.log('Setting navigation for logged-in user');
+                navLinks.innerHTML = `
+                    <a href="member.html" class="nav-item nav-link">Home</a>
+                    <a href="subject.html" class="nav-item nav-link">Subject</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                `;
+                authButton.textContent = 'Log out';
+                authButton.href = 'logout.php';
+                console.log('authButton set to Log out, href:', authButton.href);
+            } else {
+                console.log('Setting navigation for logged-out user');
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                `;
+                authButton.textContent = 'Log In';
+                authButton.href = 'login.html';
+                console.log('authButton set to Log in, href:', authButton.href);
+            }
         } catch (error) {
             console.error('Error loading navigation:', error);
-            showToast('Failed to load navigation. Displaying default navigation.', true);
-            // 回退到默认导航（第二张图的状态）
-            const navLinks = document.getElementById('navLinks');
-            const authButton = document.getElementById('authButton');
-            navLinks.innerHTML = `
-                <a href="member.html" class="nav-item nav-link">Home</a>
-                <a href="subject.html" class="nav-item nav-link active">Subject</a>
-                <a href="about.html" class="nav-item nav-link">About us</a>
-                <a href="contact.html" class="nav-item nav-link">Contact us</a>
-            `;
-            authButton.textContent = 'Log out';
-            authButton.href = 'logout.php';
+            const navLinks = document.getElementById('navbarCollapse').querySelector('.navbar-nav');
+            const authButton = document.querySelector('.btn-primary');
+            if (navLinks && authButton) {
+                navLinks.innerHTML = `
+                    <a href="888.html" class="nav-item nav-link">Home</a>
+                    <a href="about.html" class="nav-item nav-link">About Us</a>
+                    <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                `;
+                authButton.textContent = 'Log In';
+                authButton.href = 'login.html';
+            }
+            showToast('Failed to load navigation. Please try again!', true);
         }
     }
+
 
     // Load notifications
     async function loadNotifications() {
