@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 01, 2025 at 04:15 PM
+-- Generation Time: Jun 02, 2025 at 05:31 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -66,7 +66,25 @@ CREATE TABLE `cart` (
 
 INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `deleted`) VALUES
 (1, 1, 'Mat0001', 1, 0),
-(2, 3, 'Eng2001', 3, 1);
+(2, 3, 'Eng2001', 3, 1),
+(3, 12, 'Mat0001', 4, 1),
+(4, 12, 'Eng0001', 4, 1),
+(5, 12, 'Mly0001', 4, 1),
+(6, 12, 'Mat2001', 5, 1),
+(7, 12, 'Mly2001', 5, 1),
+(8, 12, 'Eng2001', 5, 1),
+(9, 4, 'Mat0001', 6, 1),
+(10, 4, 'Eng0001', 6, 1),
+(11, 4, 'Mly0001', 6, 1),
+(12, 4, 'Mat2001', 7, 1),
+(13, 4, 'Mly2001', 7, 1),
+(14, 4, 'Eng2001', 7, 1),
+(15, 5, 'Mat0001', 8, 1),
+(16, 5, 'Eng0001', 8, 1),
+(17, 5, 'Mly0001', 8, 1),
+(18, 5, 'Mat2001', 9, 1),
+(19, 5, 'Mly2001', 9, 1),
+(20, 5, 'Eng2001', 9, 1);
 
 -- --------------------------------------------------------
 
@@ -94,7 +112,13 @@ CREATE TABLE `child` (
 INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_image`, `child_register_date`) VALUES
 (1, 1, 'Yuna', 'Female', '180909-01-7788', '2018-09-09', 'SJK(C) Kulai 1', 1, 'uploads/child_images/68353bc32a6fd-100087514_708500463057448_7612975320529895424_o-1-e1591159367508.jpg', '2025-01-01 12:26:05'),
 (2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'SJK(C) Kulai 2', 1, 'uploads/child_images/683c5cde04e1d-images.jpg', '2025-01-01 12:26:05'),
-(3, 3, 'Chen Shu Hui', 'Female', '170909-01-6655', '2017-09-09', 'SJK(C) Kulai 2', 2, 'uploads/child_images/683c59b16a202-center.png', '2025-01-01 21:23:36');
+(3, 3, 'Chen Shu Hui', 'Female', '170909-01-6655', '2017-09-09', 'SJK(C) Kulai 2', 2, 'uploads/child_images/683c59b16a202-center.png', '2025-01-01 21:23:36'),
+(4, 12, 'Sasa', 'Female', '180123-01-7654', '2018-01-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dbfe4d3a563.40233732.jpg', '2025-06-02 23:14:44'),
+(5, 12, 'Chloe', 'Female', '170112-01-1234', '2017-01-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc04598ffe7.15380968.jpg', '2025-06-02 23:16:21'),
+(6, 4, 'Hanna', 'Female', '180523-01-1531', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc1e707a000.04566244.jpg', '2025-06-02 23:23:19'),
+(7, 4, 'Jasmine', 'Female', '170923-01-1465', '2017-09-23', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc2193787a7.47157231.jpg', '2025-06-02 23:24:09'),
+(8, 5, 'Emily', 'Female', '180523-01-1603', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc30fac1df7.31994522.jpg', '2025-06-02 23:28:15'),
+(9, 5, 'Nichole', 'Male', '170912-01-1123', '2017-09-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc350bd4443.07862724.jpg', '2025-06-02 23:29:20');
 
 -- --------------------------------------------------------
 
@@ -121,17 +145,17 @@ CREATE TABLE `class` (
 --
 
 INSERT INTO `class` (`class_id`, `admin_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', 11112, '11245', 1, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 1, 'Available'),
-('Eng0002', 11111, '11245', 2, '12233', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Eng2001', 11111, '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 1, 'Available'),
+('Eng0001', 11112, '11245', 1, '12233', '2025', 'Monday 2:30pm - 4:30pm', 'Room 1', 30, 3, 'Available'),
+('Eng0002', 11111, '11245', 2, '12233', '2025', 'Monday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
+('Eng2001', 11111, '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 3, 'Available'),
 ('Eng2002', 11111, '22534', 2, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat0001', 11111, '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
+('Mat0001', 11111, '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 3, 'Available'),
 ('Mat0002', 11111, '11132', 2, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Mat2001', 11111, '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mat2001', 11111, '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 3, 'Available'),
 ('Mat2002', 11111, '22134', 2, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly0001', 11111, '11351', 1, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 1, 'Available'),
-('Mly0002', 11111, '11351', 2, '12345', '2025', 'Thursday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly2001', 11111, '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Available'),
+('Mly0001', 11111, '11351', 1, '12345', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 3, 'Available'),
+('Mly0002', 11111, '11351', 2, '12345', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
+('Mly2001', 11111, '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 3, 'Available'),
 ('Mly2002', 11111, '22345', 2, '12347', '2025', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
 
 -- --------------------------------------------------------
@@ -156,7 +180,10 @@ CREATE TABLE `credit_cards` (
 INSERT INTO `credit_cards` (`credit_card_id`, `parent_id`, `card_number`, `expiry_date`, `last_four`, `created_at`) VALUES
 (1, 1, '4111111111111111', '12/25', '1122', '2025-04-17 07:25:04'),
 (2, 2, '5111111111111111', '12/25', '9988', '2025-04-17 11:56:09'),
-(5, 3, '$2y$10$XsvTk3VMgWIPFwUNGUvCrOgld2a225pONVkqQ6jtVa31kICOlGbcO', '08/25', '5555', '2025-06-01 13:26:16');
+(5, 3, '$2y$10$XsvTk3VMgWIPFwUNGUvCrOgld2a225pONVkqQ6jtVa31kICOlGbcO', '08/25', '5555', '2025-06-01 13:26:16'),
+(6, 12, '$2y$10$kF48Ui6FouWPAnClTz06oO1eTTDHHQyROa7c4W/JJ1oP9iuuxx62O', '12/25', '4567', '2025-06-02 15:18:31'),
+(7, 4, '$2y$10$IPXIr0zf.pR2IYFNBfFlTekpf8hEH5i6OmKgOJzLgqG8Wh7bFL9BS', '12/25', '5678', '2025-06-02 15:25:31'),
+(8, 5, '$2y$10$LJNE6wB35fg0v6BhL98uhu/UrhD/OktYKa2PRBdh1raEBAmiOtE4W', '12/25', '3045', '2025-06-02 15:30:35');
 
 -- --------------------------------------------------------
 
@@ -248,7 +275,16 @@ CREATE TABLE `parent` (
 INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_image`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
 (1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'uploads/parent_images/68353bb8d6ca2-3887158569.jpg', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
 (2, 'Ali', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'uploads/parent_images/683c5df6c126a-images (1).jpg', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm'),
-(3, 'Goh Wei Ting', '', 'weiting@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-666 8877', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$29775lWe1LKaF1Pu4op2n.sP0bwJ4ttLJuFouiIn3hmZJf9Fpwtfy');
+(3, 'Goh Wei Ting', '', 'weiting@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-666 8877', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$29775lWe1LKaF1Pu4op2n.sP0bwJ4ttLJuFouiIn3hmZJf9Fpwtfy'),
+(4, 'Awe', '', 'awe123@gmail.com', 'alan Anggerik, No. 12, 81000 Kulai, Johor', '012-345 6789', NULL, 'Mother', 'Male', '', '', 'Mother', '', '$2y$10$cS8DywzTfbUPN/wT8EdB6.Gu0YtWQz6sFewmzuv6x9rGXSRu4CPr6'),
+(5, 'MICHAEL TAN WEI MING', '', 'michael.tan@example.com', 'Jalan Mawar 5, Taman Indah, 81000 Kulai, Johor', '013-456 7890', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$jJQX/pyGNB/hoETfMRg1NOfZMaHTTP2LreTqBAJSvyFoXihbGdzoe'),
+(6, 'Tan Ling Wei', '', 'lingwei@gmail.com', 'Jalan Kenanga 8, Taman Bahagia, 81000 Kulai, Johor', '017-234 5678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$Ay2hVNNnTpvTKakKeO5iCOpHExnLCilMT5PhEDHpRqdBzY8rzyEKG'),
+(7, 'Chen Wei TIng', '', 'weiting@gmaail.com', 'Jalan Cempaka 3, Taman Sentosa, 81000 Kulai, Johor', '019-876 5432', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$URMRGRmgGetGqaV0ZyZC3Oa6c.t62imJA9aaw3Thd6zMbtMnHlTmy'),
+(8, 'JESSICA LIM SIEW LING', '', 'jessica.lim@gmail.com', 'Jalan Dahlia 10, Taman Permai, 81000 Kulai, Johor', '011-123 45678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$iYLVHUqkDHaKg5cgw/bxQOSpLUN7QjUG6LQRrP7z/QmULAHBYrjDy'),
+(9, 'WONG KAI JUN', '', 'wong.kai@gmail.com', 'Jalan Teratai 7, Taman Jaya, 81000 Kulai, Johor', '014-567 8901', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$k54hoVaI1lP7beBr4D55uuBt.l6bhzQDFvXbJsKQ21jtoV/5.95JW'),
+(10, 'DAVID LEE KOK WAI', '', 'david.lee@gmail.com', 'Jalan Orkid 9, Taman Sinar, 81000 Kulai, Johor', '018-321 6547', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$nt19jlLHdqa5F4w4./Caz.WU1fq/m2QoVXyQZhOHEbI8lepSERUha'),
+(11, 'CHEN WEI SHENG', '', 'chen.wei@gmail.com', 'Jalan Bunga Raya 1, Taman Mewah, 81000 Kulai, Johor', '010-987 6543', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$TAmokQdr3tO9wFV9gf2VW.X.YZmsTqAdcP8zE4p6wSYf2oZhyTHTS'),
+(12, 'Lim En Xi', '', 'enxi6387@gmail.com', 'Jalan Kemboja 4, Taman Damai, 81000 Kulai, Johor', '015-654 3210', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$a17AQLaFZJByOoSncsZ5w.pULjEN9U1Jar3o1o71wZJDMxMxaeHwi');
 
 -- --------------------------------------------------------
 
@@ -289,12 +325,9 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`payment_id`, `payment_total_amount`, `payment_method`, `credit_card_id`, `payment_time`) VALUES
-(1, 510.00, 'Credit Card', 1, '2025-04-17 07:25:04'),
-(2, 510.00, 'Credit Card', 2, '2025-04-17 11:56:09'),
-(3, 510.00, 'Credit Card', 1, '2025-04-20 08:47:33'),
-(4, 610.00, 'Credit Card', 1, '2025-05-25 02:10:56'),
-(5, 610.00, 'Credit Card', 1, '2025-05-25 02:29:43'),
-(6, 610.00, 'Credit Card', 5, '2025-06-01 13:26:16');
+(7, 3160.00, 'Credit Card', 6, '2025-06-02 15:18:31'),
+(8, 3160.00, 'Credit Card', 7, '2025-06-02 15:25:31'),
+(9, 3160.00, 'Credit Card', 8, '2025-06-02 15:30:35');
 
 -- --------------------------------------------------------
 
@@ -315,10 +348,24 @@ CREATE TABLE `registration_class` (
 --
 
 INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `child_id`, `payment_id`) VALUES
-(1, 1, 'Mly0001', 1, 1),
-(2, 1, 'Eng0001', 1, 2),
-(3, 2, 'Mat0001', 2, 3),
-(6, 3, 'Eng2001', 3, 6);
+(7, 12, 'Mat0001', 4, 7),
+(8, 12, 'Eng0001', 4, 7),
+(9, 12, 'Mly0001', 4, 7),
+(10, 12, 'Mat2001', 5, 7),
+(11, 12, 'Mly2001', 5, 7),
+(12, 12, 'Eng2001', 5, 7),
+(13, 4, 'Mat0001', 6, 8),
+(14, 4, 'Eng0001', 6, 8),
+(15, 4, 'Mly0001', 6, 8),
+(16, 4, 'Mat2001', 7, 8),
+(17, 4, 'Mly2001', 7, 8),
+(18, 4, 'Eng2001', 7, 8),
+(19, 5, 'Eng0001', 8, 9),
+(20, 5, 'Mat0001', 8, 9),
+(21, 5, 'Mly0001', 8, 9),
+(22, 5, 'Eng2001', 9, 9),
+(23, 5, 'Mat2001', 9, 9),
+(24, 5, 'Mly2001', 9, 9);
 
 -- --------------------------------------------------------
 
@@ -341,12 +388,12 @@ CREATE TABLE `subject` (
 --
 
 INSERT INTO `subject` (`subject_id`, `admin_id`, `subject_name`, `year`, `subject_price`, `subject_description`, `subject_image`) VALUES
-('11132', 11111, 'Math', 'Year 1', 510.00, '-', 'img/math.jpg'),
-('11245', 11111, 'English', 'Year 1', 510.00, '-', 'img/english.jpg'),
-('11351', 11112, 'Melayu', 'Year 1', 510.00, '-\r\n', 'img/malay1.jpg'),
-('22134', 11111, 'Math', 'Year 2', 510.00, '-', 'img/math.jpg'),
-('22345', 11111, 'Melayu', 'Year 2', 510.00, '-', 'img/malay1.jpg'),
-('22534', 11111, 'English', 'Year 2', 510.00, '-', 'img/english.jpg');
+('11132', 11111, 'Math', 'Year 1', 510.00, 'This Math subject introduces Year 1 students to numbers, counting, shapes, and simple addition. Fun activities help children learn and enjoy basic math skills.', 'img/math.jpg'),
+('11245', 11111, 'English', 'Year 1', 510.00, 'This English subject helps Year 1 students build strong reading, writing, and speaking skills. Fun lessons and simple grammar make learning easy and enjoyable!', 'img/english.jpg'),
+('11351', 11112, 'Melayu', 'Year 1', 510.00, 'This Bahasa Melayu subject helps Year 1 students learn basic words, sentences, and pronunciation through fun stories and songs. Great for building confidence!', 'img/malay1.jpg'),
+('22134', 11111, 'Math', 'Year 2', 510.00, 'This Math subject helps Year 2 students learn addition, subtraction, measurements, and problem-solving with fun exercises and real-life examples.', 'img/math.jpg'),
+('22345', 11111, 'Melayu', 'Year 2', 510.00, 'In Year 2 Bahasa Melayu, students improve reading, speaking, and writing skills. Lessons include short texts, grammar practice, and fun language activities.', 'img/malay1.jpg'),
+('22534', 11111, 'English', 'Year 2', 510.00, 'Year 2 English builds on reading and writing skills with more vocabulary, grammar, and short stories. Students learn to speak and write with confidence.', 'img/english.jpg');
 
 -- --------------------------------------------------------
 
@@ -534,19 +581,19 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `child`
 --
 ALTER TABLE `child`
-  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `child_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `credit_cards`
 --
 ALTER TABLE `credit_cards`
-  MODIFY `credit_card_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `credit_card_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `exam_result`
@@ -570,7 +617,7 @@ ALTER TABLE `notification_receiver`
 -- AUTO_INCREMENT for table `parent`
 --
 ALTER TABLE `parent`
-  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `parent_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `part`
@@ -582,13 +629,13 @@ ALTER TABLE `part`
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `teacher`
