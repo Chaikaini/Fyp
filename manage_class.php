@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if ($subjectId) {
             try {
                 $stmt = $pdo->prepare("
-                    SELECT c.child_id, c.child_name, c.child_gender, c.child_birthday, c.child_school, c.child_year
+                    SELECT c.child_name, c.child_gender, c.child_birthday, c.child_school, c.child_year
                     FROM class cl
                     JOIN registration_class rc ON cl.class_id = rc.class_id
                     JOIN child c ON rc.child_id = c.child_id
