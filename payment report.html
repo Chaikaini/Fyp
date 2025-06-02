@@ -98,6 +98,7 @@
       justify-content: flex-start;
       width: 100%;
       align-items: center;
+      gap: 10px;
     }
     .card-header .form-select {
       width: 200px;
@@ -171,7 +172,10 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <form class="d-flex align-items-center">
-          <select id="monthSelect" class="form-select">
+          <select id="yearSelect" class="form-select">
+            <option value="" disabled selected>Select Year</option>
+          </select>
+          <select id="monthSelect" class="form-select" disabled>
             <option value="" disabled selected>Select Month</option>
           </select>
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
@@ -217,32 +221,64 @@
         }, 5000);
       }
 
-      // Populate month select options (last 12 months)
-      function populateMonthSelect() {
+      // Fetch and populate year select options from database
+      function populateYearSelect() {
+        fetch('fetch_report.php?action=getYears')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '<option value="" disabled selected>Select Year</option>';
+            if (data.success && Array.isArray(data.years) && data.years.length > 0) {
+              data.years.forEach(year => {
+                yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+              });
+            } else {
+              yearSelect.innerHTML += '<option value="" disabled>No years available</option>';
+              showNotification('No payment years found in the database', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching years:', error);
+            showNotification('Failed to fetch years: ' + error.message, 'error');
+            document.getElementById('yearSelect').innerHTML = '<option value="" disabled>Error loading years</option>';
+          });
+      }
+
+      // Populate month select options based on selected year
+      function populateMonthSelect(year) {
         const monthSelect = document.getElementById('monthSelect');
-        const today = new Date();
         monthSelect.innerHTML = '<option value="" disabled selected>Select Month</option>';
-        for (let i = 0; i < 12; i++) {
-          const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          const monthIndex = date.getMonth(); // 0-11
-          const year = date.getFullYear();
-          // Adjust month to 1-12 for correct yearMonth format
-          const yearMonth = `${year}-${String(monthIndex + 1).padStart(2, '0')}`; // e.g., "2025-04" for April
-          const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-          monthSelect.innerHTML += `<option value="${yearMonth}">${monthName}</option>`;
-        }
+        const months = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        months.forEach((month, index) => {
+          const monthValue = String(index + 1).padStart(2, '0'); // e.g., "01" for January
+          monthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
+        });
+        monthSelect.disabled = false; // Enable month dropdown after year is selected
       }
 
       // Fetch report data
-      function fetchReportData(month = null) {
-        console.log("Fetching data for month:", month); // Debug log
-        const url = month ? `fetch_report.php?month=${month}` : 'fetch_report.php';
+      function fetchReportData(year, month) {
+        console.log("Fetching data for year:", year, "month:", month); // Debug log
+        const url = year && month ? `fetch_report.php?year=${year}&month=${month}` : 'fetch_report.php';
         fetch(url)
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
           .then(data => {
             paymentData = data; // Store data for export
             updateTable(data);
-            updateDateRange(month); // Update the date range display
+            updateDateRange(year, month); // Update the date range display
           })
           .catch(error => {
             console.error("Error fetching report data:", error);
@@ -254,28 +290,28 @@
         let tableBody = document.querySelector("tbody");
         tableBody.innerHTML = "";
 
-        if (data.length === 0) {
+        if (!Array.isArray(data) || data.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="5" class="text-center">No records found</td></tr>`;
           return;
         }
 
         data.forEach((payment, index) => {
           let row = `<tr>
-              <td>${payment.payment_id}</td>
-              <td>${payment.parent_name}</td>
-              <td>${payment.payment_method}</td>
-              <td>${payment.payment_time}</td>
-              <td>RM${payment.payment_total_amount}</td>
+              <td>${payment.payment_id || 'N/A'}</td>
+              <td>${payment.parent_name || 'N/A'}</td>
+              <td>${payment.payment_method || 'N/A'}</td>
+              <td>${payment.payment_time || 'N/A'}</td>
+              <td>RM${payment.payment_total_amount || '0.00'}</td>
           </tr>`;
           tableBody.innerHTML += row;
         });
       }
 
-      function updateDateRange(month = null) {
+      function updateDateRange(year, month) {
         let startDate, endDate;
-        if (month) {
-          startDate = new Date(`${month}-01`);
-          endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0); // Last day of the month
+        if (year && month) {
+          startDate = new Date(`${year}-${month}-01`);
+          endDate = new Date(year, parseInt(month), 0); // Last day of the month
         } else {
           startDate = new Date();
           startDate.setDate(1); // First day of the current month
@@ -290,18 +326,18 @@
 
       // Export to Excel
       document.getElementById('exportExcel').addEventListener('click', () => {
-        if (paymentData.length === 0) {
+        if (!Array.isArray(paymentData) || paymentData.length === 0) {
           showNotification("No data to export", "error");
           return;
         }
 
         // Prepare data for Excel
         const excelData = paymentData.map(payment => ({
-          'Payment ID': payment.payment_id,
-          'Parent Name': payment.parent_name,
-          'Payment Method': payment.payment_method,
-          'Payment Time': payment.payment_time,
-          'Total Amount': `RM${payment.payment_total_amount}`
+          'Payment ID': payment.payment_id || 'N/A',
+          'Parent Name': payment.parent_name || 'N/A',
+          'Payment Method': payment.payment_method || 'N/A',
+          'Payment Time': payment.payment_time || 'N/A',
+          'Total Amount': `RM${payment.payment_total_amount || '0.00'}`
         }));
 
         // Create worksheet
@@ -312,23 +348,36 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Payment Report');
 
         // Generate Excel file and trigger download
-        const selectedMonth = document.getElementById('monthSelect').value || new Date().toISOString().slice(0, 7);
-        XLSX.writeFile(workbook, `Payment_Report_${selectedMonth}.xlsx`);
+        const selectedYear = document.getElementById('yearSelect').value || new Date().getFullYear();
+        const selectedMonth = document.getElementById('monthSelect').value || new Date().toISOString().slice(5, 7);
+        XLSX.writeFile(workbook, `Payment_Report_${selectedYear}-${selectedMonth}.xlsx`);
+      });
+
+      // Year selection event listener
+      document.getElementById('yearSelect').addEventListener('change', (event) => {
+        const selectedYear = event.target.value;
+        if (selectedYear) {
+          populateMonthSelect(selectedYear);
+        } else {
+          document.getElementById('monthSelect').innerHTML = '<option value="" disabled selected>Select Month</option>';
+          document.getElementById('monthSelect').disabled = true;
+        }
       });
 
       // Search button event listener
       document.getElementById('search-btn').addEventListener('click', () => {
+        const selectedYear = document.getElementById('yearSelect').value;
         const selectedMonth = document.getElementById('monthSelect').value;
-        if (selectedMonth) {
-          fetchReportData(selectedMonth);
+        if (selectedYear && selectedMonth) {
+          fetchReportData(selectedYear, selectedMonth);
         } else {
-          showNotification("Please select a month", "error");
+          showNotification("Please select both year and month", "error");
         }
       });
 
       // Initialize page
-      populateMonthSelect();
-      // Do not fetch data initially; wait for user to select a month
+      populateYearSelect();
+      // Do not fetch data initially; wait for user to select year and month
     });
   </script>
 </body>

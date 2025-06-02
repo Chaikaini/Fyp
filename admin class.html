@@ -142,7 +142,7 @@
       background-color: transparent;
     }
   </style>
-</head>
+</head> 
 <body>
   <!-- Sidebar -->
   <nav id="sidebar" class="d-flex flex-column p-3">
@@ -391,11 +391,11 @@
           <div class="row mb-3">
             <div class="col-md-6"><strong>Last Modified By:</strong> <span id="view_admin_name"></span></div>
           </div>
+          <hr class="my-4">
           <h5>Registered Students</h5>
           <table class="table table-striped">
             <thead>
               <tr>
-                <th>Child ID</th>
                 <th>Name</th>
                 <th>Gender</th>
                 <th>Birthday</th>
@@ -765,7 +765,6 @@
                   studentData.students.forEach(student => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                      <td>${student.child_id}</td>
                       <td>${student.child_name}</td>
                       <td>${student.child_gender}</td>
                       <td>${student.child_birthday}</td>
@@ -775,7 +774,7 @@
                     studentTable.appendChild(row);
                   });
                 } else {
-                  studentTable.innerHTML = '<tr><td colspan="6" class="text-center">No students registered</td></tr>';
+                  studentTable.innerHTML = '<tr><td colspan="5" class="text-center">No students registered</td></tr>';
                 }
                 const modal = new bootstrap.Modal(document.getElementById('viewClassModal'));
                 modal.show();

@@ -98,6 +98,7 @@
       justify-content: flex-start;
       width: 100%;
       align-items: center;
+      gap: 10px;
     }
     .card-header .form-select {
       width: 200px;
@@ -172,7 +173,10 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <form class="d-flex align-items-center">
-          <select id="monthSelect" class="form-select">
+          <select id="yearSelect" class="form-select">
+            <option value="" disabled selected>Select Year</option>
+          </select>
+          <select id="monthSelect" class="form-select" disabled>
             <option value="" disabled selected>Select Month</option>
           </select>
           <button class="btn btn-outline-success" type="button" id="search-btn">Search</button>
@@ -186,9 +190,9 @@
               <th>Child ID</th>
               <th>Child Name</th>
               <th>Child Gender</th>
-              <th>KidNumber</th>
+              <th>Child KidNumber</th>
               <th>Child Birthday</th>
-              <th>Join Date</th>
+              <th>Register Date</th>
             </tr>
           </thead>
           <tbody>
@@ -215,25 +219,53 @@
         }, 5000);
       }
 
-      // Populate month select options (last 12 months)
-      function populateMonthSelect() {
-        const monthSelect = document.getElementById('monthSelect');
-        const today = new Date('2025-05-20T21:02:00+08:00'); // Set to current date and time
-        monthSelect.innerHTML = '<option value="" disabled selected>Select Month</option>';
-        for (let i = 0; i < 12; i++) {
-          const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-          const monthIndex = date.getMonth(); // 0-11
-          const year = date.getFullYear();
-          const yearMonth = `${year}-${String(monthIndex + 1).padStart(2, '0')}`; // e.g., "2025-05"
-          const monthName = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-          monthSelect.innerHTML += `<option value="${yearMonth}">${monthName}</option>`;
-        }
+      // Fetch and populate year select options from database
+      function populateYearSelect() {
+        fetch('fetch_new_children_report.php?action=getYears')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
+          })
+          .then(data => {
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '<option value="" disabled selected>Select Year</option>';
+            if (data.success && Array.isArray(data.years) && data.years.length > 0) {
+              data.years.forEach(year => {
+                yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+              });
+            } else {
+              yearSelect.innerHTML += '<option value="" disabled>No years available</option>';
+              showNotification('No registration years found in the database', 'error');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching years:', error);
+            showNotification('Failed to fetch years: ' + error.message, 'error');
+            document.getElementById('yearSelect').innerHTML = '<option value="" disabled>Error loading years</option>';
+          });
       }
 
-      // Fetch report data for a specific month
-      function fetchReportData(month = null) {
-        console.log("Fetching data for month:", month); // Debug log
-        const url = month ? `fetch_new_children_report.php?month=${month}` : 'fetch_new_children_report.php';
+      // Populate month select options based on selected year
+      function populateMonthSelect(year) {
+        const monthSelect = document.getElementById('monthSelect');
+        monthSelect.innerHTML = '<option value="" disabled selected>Select Month</option>';
+        const months = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        months.forEach((month, index) => {
+          const monthValue = String(index + 1).padStart(2, '0'); // e.g., "01" for January
+          monthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
+        });
+        monthSelect.disabled = false; // Enable month dropdown after year is selected
+      }
+
+      // Fetch report data for a specific year and month
+      function fetchReportData(year, month) {
+        console.log("Fetching data for year:", year, "month:", month); // Debug log
+        const url = year && month ? `fetch_new_children_report.php?year=${year}&month=${month}` : 'fetch_new_children_report.php';
         fetch(url)
           .then(response => {
             if (!response.ok) {
@@ -247,7 +279,7 @@
             }
             originalData = data; // Store data for export
             renderTable(data);
-            updateDateRange(month);
+            updateDateRange(year, month);
           })
           .catch(error => {
             console.error("Error fetching report data:", error);
@@ -259,35 +291,37 @@
         const tableBody = document.querySelector("tbody");
         tableBody.innerHTML = "";
 
-        if (data.length === 0) {
+        if (!Array.isArray(data) || data.length === 0) {
           tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No records found</td></tr>`;
           return;
         }
 
         data.forEach(child => {
+          // Format child_register_date to show only date (YYYY-MM-DD)
+          const registerDate = child.child_register_date ? child.child_register_date.split(' ')[0] : 'N/A';
           const row = `
             <tr>
-              <td>${child.id}</td>
-              <td>${child.name}</td>
-              <td>${child.gender}</td>
-              <td>${child.kidNumber}</td>
-              <td>${child.birthday}</td>
-              <td>${child.join_date}</td>
+              <td>${child.child_id || 'N/A'}</td>
+              <td>${child.child_name || 'N/A'}</td>
+              <td>${child.child_gender || 'N/A'}</td>
+              <td>${child.child_kidNumber || 'N/A'}</td>
+              <td>${child.child_birthday || 'N/A'}</td>
+              <td>${registerDate}</td>
             </tr>
           `;
           tableBody.innerHTML += row;
         });
       }
 
-      function updateDateRange(month = null) {
+      function updateDateRange(year, month) {
         let startDate, endDate;
-        if (month) {
-          startDate = new Date(`${month}-01`);
-          endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0); // Last day of the month
+        if (year && month) {
+          startDate = new Date(`${year}-${month}-01`);
+          endDate = new Date(year, parseInt(month), 0); // Last day of the month
         } else {
-          startDate = new Date('2025-05-20T21:02:00+08:00');
-          startDate.setDate(1); // First day of the current month (May 2025)
-          endDate = new Date('2025-05-20T21:02:00+08:00');
+          startDate = new Date();
+          startDate.setDate(1); // First day of the current month
+          endDate = new Date();
         }
         let formattedStart = startDate.toISOString().split('T')[0];
         let formattedEnd = endDate.toISOString().split('T')[0];
@@ -303,19 +337,19 @@
 
       // Export to Excel
       document.getElementById('exportExcel').addEventListener('click', () => {
-        if (originalData.length === 0) {
+        if (!Array.isArray(originalData) || originalData.length === 0) {
           showNotification("No data to export", "error");
           return;
         }
 
         // Prepare data for Excel
         const excelData = originalData.map(child => ({
-          'ID': child.id,
-          'Name': child.name,
-          'Gender': child.gender,
-          'MyKid Number': child.kidNumber,
-          'Date of Birth': child.birthday,
-          'Join Date': child.join_date
+          'Child ID': child.child_id || 'N/A',
+          'Child Name': child.child_name || 'N/A',
+          'Child Gender': child.child_gender || 'N/A',
+          'Child KidNumber': child.child_kidNumber || 'N/A',
+          'Child Birthday': child.child_birthday || 'N/A',
+          'Register Date': child.child_register_date ? child.child_register_date.split(' ')[0] : 'N/A'
         }));
 
         // Create worksheet
@@ -326,17 +360,30 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'New Children Report');
 
         // Generate Excel file and trigger download
-        const selectedMonth = document.getElementById('monthSelect').value || new Date('2025-05-20T21:02:00+08:00').toISOString().slice(0, 7);
-        XLSX.writeFile(workbook, `New_Children_Report_${selectedMonth}.xlsx`);
+        const selectedYear = document.getElementById('yearSelect').value || new Date().getFullYear();
+        const selectedMonth = document.getElementById('monthSelect').value || new Date().toISOString().slice(5, 7);
+        XLSX.writeFile(workbook, `New_Children_Report_${selectedYear}-${selectedMonth}.xlsx`);
+      });
+
+      // Year selection event listener
+      document.getElementById('yearSelect').addEventListener('change', (event) => {
+        const selectedYear = event.target.value;
+        if (selectedYear) {
+          populateMonthSelect(selectedYear);
+        } else {
+          document.getElementById('monthSelect').innerHTML = '<option value="" disabled selected>Select Month</option>';
+          document.getElementById('monthSelect').disabled = true;
+        }
       });
 
       // Search button event listener
       document.getElementById('search-btn').addEventListener('click', () => {
+        const selectedYear = document.getElementById('yearSelect').value;
         const selectedMonth = document.getElementById('monthSelect').value;
-        if (selectedMonth) {
-          fetchReportData(selectedMonth);
+        if (selectedYear && selectedMonth) {
+          fetchReportData(selectedYear, selectedMonth);
         } else {
-          showNotification("Please select a month", "error");
+          showNotification("Please select both year and month", "error");
         }
       });
 
@@ -353,8 +400,8 @@
       });
 
       // Initialize page
-      populateMonthSelect();
-      // Do not fetch data initially; wait for user to select a month
+      populateYearSelect();
+      // Do not fetch data initially; wait for user to select year and month
     });
   </script>
 </body>
