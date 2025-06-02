@@ -315,7 +315,7 @@ unset($_SESSION['message']);
             <div class="navbar-nav ms-auto p-4 p-lg-0" id="navLinks">
                 <!-- Navigation links will be dynamically inserted here -->
             </div>
-            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out<i class="fa fa-arrow-right ms-3"></i></a>
+            <a href="logout.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block" id="authButton">Log out</a>
         </div>
     </nav>
     <div class="icon-bar">
