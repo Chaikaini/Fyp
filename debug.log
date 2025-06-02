@@ -8251,3 +8251,356 @@ get_cart.php: Fetched cart items: Array
 (
 )
 
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 11132
+    [subject_name] => Math
+    [price] => 510
+    [child_name] => Sasa
+    [class_id] => Mat0001
+    [teacher_id] => 12123
+)
+
+save_cart.php: Validated input: subject_id=11132, class_id=Mat0001, teacher_id=12123
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => Math
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Mat0001
+    [subject_id] => 11132
+    [teacher_id] => 12123
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=4
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 11245
+    [subject_name] => English
+    [price] => 510
+    [child_name] => Sasa
+    [class_id] => Eng0001
+    [teacher_id] => 12233
+)
+
+save_cart.php: Validated input: subject_id=11245, class_id=Eng0001, teacher_id=12233
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => English
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Eng0001
+    [subject_id] => 11245
+    [teacher_id] => 12233
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=4
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 11351
+    [subject_name] => Melayu
+    [price] => 510
+    [child_name] => Sasa
+    [class_id] => Mly0001
+    [teacher_id] => 12345
+)
+
+save_cart.php: Validated input: subject_id=11351, class_id=Mly0001, teacher_id=12345
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => Melayu
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Mly0001
+    [subject_id] => 11351
+    [teacher_id] => 12345
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=4
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 22134
+    [subject_name] => Math
+    [price] => 510
+    [child_name] => Chloe
+    [class_id] => Mat2001
+    [teacher_id] => 12347
+)
+
+save_cart.php: Validated input: subject_id=22134, class_id=Mat2001, teacher_id=12347
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => Math
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Mat2001
+    [subject_id] => 22134
+    [teacher_id] => 12347
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=5
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 22345
+    [subject_name] => Melayu
+    [price] => 510
+    [child_name] => Chloe
+    [class_id] => Mly2001
+    [teacher_id] => 12347
+)
+
+save_cart.php: Validated input: subject_id=22345, class_id=Mly2001, teacher_id=12347
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => Melayu
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Mly2001
+    [subject_id] => 22345
+    [teacher_id] => 12347
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=5
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 22534
+    [subject_name] => English
+    [price] => 510
+    [child_name] => Chloe
+    [class_id] => Eng2001
+    [teacher_id] => 12345
+)
+
+save_cart.php: Validated input: subject_id=22534, class_id=Eng2001, teacher_id=12345
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => English
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Eng2001
+    [subject_id] => 22534
+    [teacher_id] => 12345
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=5
+save_cart.php: Registration checked
+save_cart.php: Cart checked: 
+save_cart.php: Inserted into cart
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 3
+            [parent_id] => 12
+            [child_id] => 4
+            [class_id] => Mat0001
+            [deleted] => 0
+            [child_name] => Sasa
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Wednesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11132
+            [teacher_id] => 12123
+            [subject_name] => Math
+            [subject_image] => img/math.jpg
+            [price] => 510.00
+            [teacher_name] => Mr. David
+        )
+
+    [1] => Array
+        (
+            [cart_id] => 4
+            [parent_id] => 12
+            [child_id] => 4
+            [class_id] => Eng0001
+            [deleted] => 0
+            [child_name] => Sasa
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Monday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11245
+            [teacher_id] => 12233
+            [subject_name] => English
+            [subject_image] => img/english.jpg
+            [price] => 510.00
+            [teacher_name] => Mr. John
+        )
+
+    [2] => Array
+        (
+            [cart_id] => 5
+            [parent_id] => 12
+            [child_id] => 4
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Sasa
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+    [3] => Array
+        (
+            [cart_id] => 6
+            [parent_id] => 12
+            [child_id] => 5
+            [class_id] => Mat2001
+            [deleted] => 0
+            [child_name] => Chloe
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Wednesday 5:00pm - 7:00pm
+            [year] => Year 2
+            [subject_id] => 22134
+            [teacher_id] => 12347
+            [subject_name] => Math
+            [subject_image] => img/math.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Enxi
+        )
+
+    [4] => Array
+        (
+            [cart_id] => 7
+            [parent_id] => 12
+            [child_id] => 5
+            [class_id] => Mly2001
+            [deleted] => 0
+            [child_name] => Chloe
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Tuesday 5:00pm - 7:00pm
+            [year] => Year 2
+            [subject_id] => 22345
+            [teacher_id] => 12347
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Enxi
+        )
+
+    [5] => Array
+        (
+            [cart_id] => 8
+            [parent_id] => 12
+            [child_id] => 5
+            [class_id] => Eng2001
+            [deleted] => 0
+            [child_name] => Chloe
+            [class_capacity] => 30
+            [class_enrolled] => 0
+            [part_id] => 1
+            [class_time] => Monday 5:00pm - 7:00pm
+            [year] => Year 2
+            [subject_id] => 22534
+            [teacher_id] => 12345
+            [subject_name] => English
+            [subject_image] => img/english.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+
+save_cart.php: Starting
+save_cart.php: Connected to DB
+save_cart.php: Session verified, Parent ID: 12
+save_cart.php: JSON decoded: Array
+(
+    [subject_id] => 11132
+    [subject_name] => Math
+    [price] => 510
+    [child_name] => Sasa
+    [class_id] => Mat0001
+    [teacher_id] => 12123
+)
+
+save_cart.php: Validated input: subject_id=11132, class_id=Mat0001, teacher_id=12123
+save_cart.php: Subject verified: Array
+(
+    [subject_name] => Math
+    [subject_price] => 510.00
+)
+
+save_cart.php: Class verified: Array
+(
+    [class_id] => Mat0001
+    [subject_id] => 11132
+    [teacher_id] => 12123
+)
+
+save_cart.php: Teacher verified
+save_cart.php: Child verified: child_id=4
+save_cart.php: Error: Child already registered for this subject
