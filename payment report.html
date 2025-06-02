@@ -27,7 +27,14 @@
       color: white;
       transition: width 0.3s;
       white-space: nowrap;
-      overflow: hidden;
+      overflow-y: auto; 
+      height: 100vh; 
+      display: flex;
+      flex-direction: column;
+      position: fixed; 
+      top: 0;
+      left: 0;
+      z-index: 1000; 
     }
     #sidebar a {
       color: white;
@@ -48,7 +55,11 @@
     #main-content {
       flex-grow: 1;
       padding: 20px;
+      margin-left: 250px; 
       transition: margin-left 0.3s;
+    }
+    #sidebar.collapsed + #main-content {
+      margin-left: 80px; 
     }
     .sidebar-header {
       display: flex;

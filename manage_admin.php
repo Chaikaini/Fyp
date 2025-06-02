@@ -304,27 +304,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $teacher_id = $postData['id'];
             logError("Delete request received for teacher_id: $teacher_id");
 
-            // Check for associated exam results
+            // Check if exam_result table exists and has teacher_id column
             $stmt = $pdo->query("SHOW TABLES LIKE 'exam_result'");
             if ($stmt->fetch()) {
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM exam_result WHERE teacher_id = ?");
-                $stmt->execute([$teacher_id]);
-                if ($stmt->fetchColumn() > 0) {
-                    logError("Cannot delete teacher_id $teacher_id: Associated exam results exist");
-                    echo json_encode(['success' => false, 'message' => 'Cannot delete teacher with associated exam results']);
-                    exit;
+                // Check if teacher_id column exists in exam_result
+                $stmt = $pdo->query("SHOW COLUMNS FROM exam_result LIKE 'teacher_id'");
+                if ($stmt->fetch()) {
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM exam_result WHERE teacher_id = ?");
+                    $stmt->execute([$teacher_id]);
+                    if ($stmt->fetchColumn() > 0) {
+                        logError("Cannot delete teacher_id $teacher_id: Associated exam results exist");
+                        echo json_encode(['success' => false, 'message' => 'Cannot delete teacher with associated exam results']);
+                        exit;
+                    }
+                } else {
+                    logError("teacher_id column not found in exam_result table, skipping exam_result check for teacher_id: $teacher_id");
                 }
+            } else {
+                logError("exam_result table not found, skipping exam_result check for teacher_id: $teacher_id");
             }
 
-            // Check for associated classes
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE teacher_id = ?");
-            $stmt->execute([$teacher_id]);
-            if ($stmt->fetchColumn() > 0) {
-                logError("Cannot delete teacher_id $teacher_id: Associated classes exist");
-                echo json_encode(['success' => false, 'message' => 'Cannot delete teacher with associated classes']);
-                exit;
+            // Check if class table exists and has teacher_id column
+            $stmt = $pdo->query("SHOW TABLES LIKE 'class'");
+            if ($stmt->fetch()) {
+                // Check if teacher_id column exists in class
+                $stmt = $pdo->query("SHOW COLUMNS FROM class LIKE 'teacher_id'");
+                if ($stmt->fetch()) {
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM class WHERE teacher_id = ?");
+                    $stmt->execute([$teacher_id]);
+                    if ($stmt->fetchColumn() > 0) {
+                        logError("Cannot delete teacher_id $teacher_id: Associated classes exist");
+                        echo json_encode(['success' => false, 'message' => 'Cannot delete teacher with associated classes']);
+                        exit;
+                    }
+                } else {
+                    logError("teacher_id column not found in class table, skipping class check for teacher_id: $teacher_id");
+                }
+            } else {
+                logError("class table not found, skipping class check for teacher_id: $teacher_id");
             }
 
+            // Proceed with deletion
             $stmt = $pdo->prepare("DELETE FROM teacher WHERE teacher_id = ?");
             $stmt->execute([$teacher_id]);
 
@@ -336,7 +356,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode(['success' => false, 'message' => 'No teacher found with the provided ID']);
             }
         } catch (Exception $e) {
-            logError("Delete teacher error for teacher_id $teacher_id: " . $e->getMessage());
+            logError("Delete teacher error for teacher_id $teacher_id: " . $e->getMessage() . " in query: " . (isset($stmt) ? $stmt->queryString : 'unknown query'));
             echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
         }
         exit;

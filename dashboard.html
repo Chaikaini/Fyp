@@ -23,7 +23,14 @@
       color: white;
       transition: width 0.3s;
       white-space: nowrap;
-      overflow: hidden;
+      overflow-y: auto; 
+      height: 100vh; 
+      display: flex;
+      flex-direction: column;
+      position: fixed; 
+      top: 0;
+      left: 0;
+      z-index: 1000; 
     }
     #sidebar a {
       color: white;
@@ -44,7 +51,11 @@
     #main-content {
       flex-grow: 1;
       padding: 20px;
+      margin-left: 250px; 
       transition: margin-left 0.3s;
+    }
+    #sidebar.collapsed + #main-content {
+      margin-left: 80px; 
     }
     .sidebar-header {
       display: flex;
@@ -69,12 +80,12 @@
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       text-align: center;
-      cursor: pointer; /* 添加鼠标指针样式 */
-      text-decoration: none; /* 移除下划线 */
-      color: inherit; /* 保持颜色不变 */
+      cursor: pointer; 
+      text-decoration: none; 
+      color: inherit; 
     }
     .card:hover {
-      opacity: 0.8; /* 鼠标悬停时稍微透明 */
+      opacity: 0.8; 
     }
     .card h3 {
       margin: 0;
@@ -101,7 +112,7 @@
     }
     .chart-container {
       margin-top: 50px;
-      cursor: pointer; /* 图表区域添加鼠标指针样式 */
+      cursor: pointer; 
     }
     canvas {
       max-width: 100%;
