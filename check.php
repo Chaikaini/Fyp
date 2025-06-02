@@ -17,9 +17,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get phone number and saved credit card using parent_id
+// Get phone number and saved credit cards using parent_id
 $userPhoneNumber = "";
-$savedCard = null;
+$savedCards = [];
 $parent_id = $_SESSION['parent_id'];
 
 // Debug: Log parent_id
@@ -36,13 +36,13 @@ if ($result->num_rows > 0) {
 }
 $stmt->close();
 
-// Check for saved credit card
-$stmt = $conn->prepare("SELECT last_four, expiry_date FROM credit_cards WHERE parent_id = ? ORDER BY created_at DESC LIMIT 1");
+// Get all saved credit cards
+$stmt = $conn->prepare("SELECT credit_card_id, last_four, expiry_date FROM credit_cards WHERE parent_id = ? ORDER BY created_at DESC");
 $stmt->bind_param("i", $parent_id);
 $stmt->execute();
 $result = $stmt->get_result();
-if ($result->num_rows > 0) {
-    $savedCard = $result->fetch_assoc();
+while ($row = $result->fetch_assoc()) {
+    $savedCards[] = $row;
 }
 $stmt->close();
 
@@ -58,12 +58,12 @@ $conn->close();
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre, Check Out" name="keywords">
     <meta content="The Seeds Learning Centre | Check Out" name="description">
-    <!-- 禁用缓存 -->
+    <!-- Disable cache -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
 
-    <link href="img/the seeds.jpg" rel="icon" type="image/png">
+    <link href="img/the_seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
@@ -484,24 +484,35 @@ $conn->close();
                             <i class="fas fa-credit-card"></i>
                             Credit Card
                         </div>
-                        <input type="radio" id="creditcard" name="payment" value="Credit Card">
+                        <input type="radio" id="creditcard" name="payment" value="Credit Card" checked>
                     </label>
                 </div>
-                <div id="credit-card-field">
-                    <label>Step 2: Enter Credit Card Details</label>
-                    <?php if ($savedCard): ?>
+                <div id="credit-card-field" style="display: block;">
+                    <label>Step 2: Select or Enter Credit Card Details</label>
+                    <?php if ($savedCards): ?>
+                        <?php foreach ($savedCards as $index => $card): ?>
+                            <div class="saved-card">
+                                <label>
+                                    <input type="radio" name="card-option" value="<?php echo htmlspecialchars($card['credit_card_id']); ?>" <?php echo $index === 0 ? 'checked' : ''; ?>>
+                                    Use Saved Card: **** **** **** <?php echo htmlspecialchars($card['last_four']); ?> (Expires: <?php echo htmlspecialchars($card['expiry_date']); ?>)
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
                         <div class="saved-card">
                             <label>
-                                <input type="radio" name="card-option" value="saved" checked>
-                                Use Saved Card: **** **** **** <?php echo htmlspecialchars($savedCard['last_four']); ?> (Expires: <?php echo htmlspecialchars($savedCard['expiry_date']); ?>)
+                                <input type="radio" name="card-option" value="new">
+                                Use New Card
                             </label>
                         </div>
-                        <label>
-                            <input type="radio" name="card-option" value="new">
-                            Use New Card
-                        </label>
+                    <?php else: ?>
+                        <div class="saved-card">
+                            <label>
+                                <input type="radio" name="card-option" value="new" checked>
+                                Use New Card
+                            </label>
+                        </div>
                     <?php endif; ?>
-                    <div class="credit-card-input" id="new-card-input" style="<?php echo $savedCard ? 'display: none;' : ''; ?>">
+                    <div class="credit-card-input" id="new-card-input" style="<?php echo $savedCards ? 'display: none;' : 'display: block;'; ?>">
                         <input type="text" id="card-number" placeholder="Card Number (e.g., 1234 5678 9012 3456)" maxlength="19">
                         <input type="text" id="expiry-date" placeholder="MM/YY" maxlength="5">
                         <input type="text" id="cvv" placeholder="CVV" maxlength="3">
@@ -601,24 +612,19 @@ $conn->close();
             const creditCardRadio = document.getElementById("creditcard");
             const creditCardField = document.getElementById("credit-card-field");
             const newCardInput = document.getElementById("new-card-input");
-            const savedCardOption = document.querySelector('input[name="card-option"][value="saved"]');
-            const newCardOption = document.querySelector('input[name="card-option"][value="new"]');
+            const cardOptions = document.querySelectorAll('input[name="card-option"]');
             const paymentButton = document.querySelector('.payment button');
 
-            creditCardField.style.display = "none";
-
-            creditCardRadio.addEventListener("change", function() {
-                creditCardField.style.display = creditCardRadio.checked ? "block" : "none";
+            // Toggle new card input based on card option
+            cardOptions.forEach(option => {
+                option.addEventListener("change", function() {
+                    newCardInput.style.display = option.value === "new" ? "block" : "none";
+                });
             });
 
-            if (newCardOption) {
-                newCardOption.addEventListener("change", function() {
-                    newCardInput.style.display = newCardOption.checked ? "block" : "none";
-                });
-                savedCardOption.addEventListener("change", function() {
-                    newCardInput.style.display = savedCardOption.checked ? "none" : "block";
-                });
-            }
+            // Default to showing credit card field since it's the only option
+            creditCardRadio.checked = true;
+            creditCardField.style.display = "block";
 
             if (paymentButton) {
                 paymentButton.addEventListener('click', validateForm);
@@ -856,53 +862,48 @@ $conn->close();
                 paymentButton.disabled = true;
 
                 const creditCardRadio = document.getElementById('creditcard');
-                if (!creditCardRadio) {
-                    showPaymentModal(false, "Payment option unavailable. Please try again later.");
-                    paymentButton.disabled = false;
-                    return;
-                }
-                const creditCardSelected = creditCardRadio.checked;
-                const paymentMethod = creditCardSelected ? "Credit Card" : "";
-
-                console.log("creditCardSelected:", creditCardSelected);
-                console.log("Payment Method:", paymentMethod);
-
-                if (!paymentMethod) {
+                if (!creditCardRadio || !creditCardRadio.checked) {
                     showPaymentModal(false, "Please select a payment method.");
                     paymentButton.disabled = false;
                     return;
                 }
 
                 let cardDetails = null;
-                if (creditCardSelected) {
-                    const useSavedCard = document.querySelector('input[name="card-option"][value="saved"]')?.checked;
-                    if (!useSavedCard) {
-                        const cardNumber = document.getElementById('card-number').value.replace(/\D/g, '');
-                        const expiryDate = document.getElementById('expiry-date').value;
-                        const cvv = document.getElementById('cvv').value;
+                const selectedCardOption = document.querySelector('input[name="card-option"]:checked');
+                if (!selectedCardOption) {
+                    showPaymentModal(false, "Please select a credit card or enter new card details.");
+                    paymentButton.disabled = false;
+                    return;
+                }
 
-                        if (!cardNumber) {
-                            showPaymentModal(false, "Please enter a card number.");
-                            paymentButton.disabled = false;
-                            return;
-                        }
-                        if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
-                            showPaymentModal(false, "Please enter a valid expiry date (MM/YY).");
-                            paymentButton.disabled = false;
-                            return;
-                        }
-                        if (!cvv || !/^\d{3}$/.test(cvv)) {
-                            showPaymentModal(false, "Please enter a valid 3-digit CVV code.");
-                            paymentButton.disabled = false;
-                            return;
-                        }
-                        cardDetails = {
-                            card_number: cardNumber,
-                            expiry_date: expiryDate,
-                            cvv: cvv,
-                            save_card: document.getElementById('save-card').checked
-                        };
+                if (selectedCardOption.value !== "new") {
+                    cardDetails = { credit_card_id: parseInt(selectedCardOption.value) };
+                } else {
+                    const cardNumber = document.getElementById('card-number').value.replace(/\D/g, '');
+                    const expiryDate = document.getElementById('expiry-date').value;
+                    const cvv = document.getElementById('cvv').value;
+
+                    if (!cardNumber || cardNumber.length !== 16) {
+                        showPaymentModal(false, "Please enter a valid 16-digit card number.");
+                        paymentButton.disabled = false;
+                        return;
                     }
+                    if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
+                        showPaymentModal(false, "Please enter a valid expiry date (MM/YY).");
+                        paymentButton.disabled = false;
+                        return;
+                    }
+                    if (!cvv || !/^\d{3}$/.test(cvv)) {
+                        showPaymentModal(false, "Please enter a valid 3-digit CVV code.");
+                        paymentButton.disabled = false;
+                        return;
+                    }
+                    cardDetails = {
+                        card_number: cardNumber,
+                        expiry_date: expiryDate,
+                        cvv: cvv,
+                        save_card: document.getElementById('save-card').checked
+                    };
                 }
 
                 let cartItems = Array.from(document.querySelectorAll(".course-item")).map(item => ({
@@ -994,7 +995,7 @@ $conn->close();
                     subject_total: subjectTotal,
                     enrollment_fee: enrollmentFee,
                     total_amount: totalAmount,
-                    payment_method: paymentMethod,
+                    payment_method: "Credit Card",
                     phone: "<?php echo htmlspecialchars($userPhoneNumber); ?>",
                     cart_ids: cartIds,
                     card_details: cardDetails
@@ -1082,7 +1083,7 @@ $conn->close();
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
             <div class="row g-5">
-                <!-- 品牌标语 -->
+                <!-- Brand Slogan -->
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">The Seeds Learning Tuition Centre</h4>
                     <p>Every child is a different kind of flower. We nurture their growth.</p>
@@ -1096,7 +1097,7 @@ $conn->close();
                 <div class="col-lg-4 col-md-6">
                     <h4 class="text-white mb-4">Contact</h4>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>TheSeeds@gmail.com</p>
-                    <!-- 社交媒体 -->
+                    <!-- Social Media -->
                     <div class="d-flex pt-2">
                         <a class="btn btn-outline-light btn-social" href="https://www.facebook.com/people/The-Seeds-Learning-Centre/100063525220441/#"><i class="fab fa-facebook-f"></i></a>
                         <a class="btn btn-outline-light btn-social" href="https://www.instagram.com/theseeds_kulai?igsh=dGt4YWpiOWJiem44"><i class="fab fa-instagram"></i></a>

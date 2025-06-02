@@ -270,9 +270,9 @@ unset($_SESSION['message']);
             background-color: #dc3545 !important;
         }
         .error {
-            color: #dc3545;
+            color:rgb(250, 247, 247);
             padding: 10px;
-            background-color: #f8d7da;
+            background-color: #dc3545;
             border-radius: 5px;
             position: fixed;
             top: 50px;
