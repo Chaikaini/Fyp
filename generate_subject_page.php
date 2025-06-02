@@ -55,11 +55,7 @@ unset($_SESSION['message']);
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="The Seeds Learning Centre, Class" name="keywords">
     <meta content="The Seeds Learning Centre | Class" name="description">
-    <!-- 禁用缓存 -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-
+    
     <link href="img/the seeds.jpg" rel="icon" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,19 +68,22 @@ unset($_SESSION['message']);
         .icon-bar {
             display: flex;
             justify-content: flex-end;
-            padding: 10px 0;
+            padding: 10px 15px;
             background-color: #f8f9fa;
-            border-bottom: 1px solid #caccce;
+            border-top: 1px solid #caccce;
         }
+
         .icon-bar a {
             margin: 0 15px;
             color: #000000;
             font-size: 24px;
             transition: color 0.3s ease;
         }
+
         .icon-bar a:hover {
             color: #73cf67;
         }
+
         .breadcrumb-container {
             padding: 20px;
             background-color: #f8f9fa;
