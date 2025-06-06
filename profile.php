@@ -2080,7 +2080,7 @@ function addKidNumberValidation(inputId, birthdayId) {
 
             // Show error messages
             if (!isValidYear) {
-                errorDiv.textContent = `Invalid year. Must be between 20${validStartYear} and 20${validEndYear}`;
+                errorDiv.textContent =  "Invalid age: Child must be between 7 and 12 years old.";
                 birthdayInput.value = "";
                 return;
             }
