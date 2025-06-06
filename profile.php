@@ -838,8 +838,6 @@
                 <label for="year">Year</label>
                 <select id="year" name="child_year">
                     <option value="" disabled selected>Year</option>
-                    <option value="1">Year 1</option>
-                    <option value="2">Year 2</option>   
                 </select>
             </div>
             <div class="form-group">
@@ -900,8 +898,7 @@
             <div class="form-group">
                 <label for="childYear">Year</label>
                 <select id="childYear" name="child_year">
-                    <option value="1">Year 1</option>
-                    <option value="2">Year 2</option>
+                    <option value="" disabled selected>Year</option>
                 </select>
             </div>
             <div class="form-group">
@@ -1505,7 +1502,8 @@ function openEditModal(name, gender, kidNumber, birthday, school, year, childId,
 
     let yearSelect = document.getElementById("childYear");
     for (let i = 0; i < yearSelect.options.length; i++) {
-        if (yearSelect.options[i].value == year) {
+        // Ensure numeric comparison
+        if (parseInt(yearSelect.options[i].value) === parseInt(year)) {
             yearSelect.options[i].selected = true;
             break;
         }
@@ -1602,6 +1600,38 @@ document.getElementById("addChildForm").addEventListener("submit", function (eve
     });
 });
 
+
+
+function populateYearSelect(selectId) {
+    fetch('profile_subject_year.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const yearSelect = document.getElementById(selectId);
+               
+                yearSelect.innerHTML = '<option value="" disabled selected>Year</option>';
+                data.years.forEach(function (year) {
+                    const option = document.createElement('option');
+                    // value is the year as a number
+                    option.value = year; 
+                    
+                    option.textContent = 'Year ' + year;
+                    yearSelect.appendChild(option);
+                });
+            } else {
+                console.error('Error loading years: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+}
+
+// Add and Edit Child Modal year options based on subject
+document.addEventListener('DOMContentLoaded', function () {
+    populateYearSelect('year');       // For Add Child Modal
+    populateYearSelect('childYear');  // For Edit Child Modal
+});
 
 
 

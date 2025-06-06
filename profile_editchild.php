@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $child_kidNumber = $_POST['child_kidNumber'] ?? '';
     $child_birthday = $_POST['child_birthday'] ?? '';
     $child_school = $_POST['child_school'] ?? '';
-    $child_year = isset($_POST['child_year']) && is_numeric($_POST['child_year']) ? intval($_POST['child_year']) : null;
+    $child_year = isset($_POST['child_year']) ? intval($_POST['child_year']) : null;
     $child_id = isset($_POST['child_id']) ? intval($_POST['child_id']) : null;
 
     if (empty($child_id)) {

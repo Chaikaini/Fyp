@@ -33,7 +33,7 @@ try {
         $child_kidNumber = $_POST['child_kidNumber'];
         $child_birthday  = $_POST['child_birthday'];
         $child_school    = $_POST['child_school'];
-        $child_year      = $_POST['child_year'];
+        $child_year = intval($_POST['child_year']);
         
         // Handle image upload
         $child_image = 'img/user.jpg'; // Default image
