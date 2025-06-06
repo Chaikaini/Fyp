@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 02, 2025 at 05:31 PM
+-- Generation Time: Jun 06, 2025 at 09:36 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- PHP Version: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -65,7 +65,7 @@ CREATE TABLE `cart` (
 --
 
 INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `deleted`) VALUES
-(1, 1, 'Mat0001', 1, 0),
+(1, 1, 'Mat0001', 1, 1),
 (2, 3, 'Eng2001', 3, 1),
 (3, 12, 'Mat0001', 4, 1),
 (4, 12, 'Eng0001', 4, 1),
@@ -84,7 +84,9 @@ INSERT INTO `cart` (`cart_id`, `parent_id`, `class_id`, `child_id`, `deleted`) V
 (17, 5, 'Mly0001', 8, 1),
 (18, 5, 'Mat2001', 9, 1),
 (19, 5, 'Mly2001', 9, 1),
-(20, 5, 'Eng2001', 9, 1);
+(20, 5, 'Eng2001', 9, 1),
+(21, 1, 'Mly0001', 1, 1),
+(22, 1, 'Eng0001', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -110,15 +112,15 @@ CREATE TABLE `child` (
 --
 
 INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_image`, `child_register_date`) VALUES
-(1, 1, 'Yuna', 'Female', '180909-01-7788', '2018-09-09', 'SJK(C) Kulai 1', 1, 'uploads/child_images/68353bc32a6fd-100087514_708500463057448_7612975320529895424_o-1-e1591159367508.jpg', '2025-01-01 12:26:05'),
-(2, 2, 'John', 'Male', '180101-04-5533', '2018-01-01', 'SJK(C) Kulai 2', 1, 'uploads/child_images/683c5cde04e1d-images.jpg', '2025-01-01 12:26:05'),
+(1, 1, 'Yuna Lim Xi Yue', 'Female', '180909-01-7788', '2018-09-09', 'SJK(C) Kulai 1', 1, 'uploads/child_images/68353bc32a6fd-100087514_708500463057448_7612975320529895424_o-1-e1591159367508.jpg', '2025-01-01 12:26:05'),
+(2, 2, 'John Lim Wu Le', 'Male', '180101-04-5533', '2018-01-01', 'SJK(C) Kulai 2', 1, 'uploads/child_images/683c5cde04e1d-images.jpg', '2025-01-01 12:26:05'),
 (3, 3, 'Chen Shu Hui', 'Female', '170909-01-6655', '2017-09-09', 'SJK(C) Kulai 2', 2, 'uploads/child_images/683c59b16a202-center.png', '2025-01-01 21:23:36'),
-(4, 12, 'Sasa', 'Female', '180123-01-7654', '2018-01-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dbfe4d3a563.40233732.jpg', '2025-06-02 23:14:44'),
-(5, 12, 'Chloe', 'Female', '170112-01-1234', '2017-01-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc04598ffe7.15380968.jpg', '2025-06-02 23:16:21'),
-(6, 4, 'Hanna', 'Female', '180523-01-1531', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc1e707a000.04566244.jpg', '2025-06-02 23:23:19'),
-(7, 4, 'Jasmine', 'Female', '170923-01-1465', '2017-09-23', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc2193787a7.47157231.jpg', '2025-06-02 23:24:09'),
-(8, 5, 'Emily', 'Female', '180523-01-1603', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc30fac1df7.31994522.jpg', '2025-06-02 23:28:15'),
-(9, 5, 'Nichole', 'Male', '170912-01-1123', '2017-09-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc350bd4443.07862724.jpg', '2025-06-02 23:29:20');
+(4, 12, 'Soh Yi Yi', 'Female', '180123-01-7654', '2018-01-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dbfe4d3a563.40233732.jpg', '2025-01-01 23:14:44'),
+(5, 12, 'Soh Yi En', 'Female', '170112-01-1234', '2017-01-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc04598ffe7.15380968.jpg', '2025-01-01 23:16:21'),
+(6, 4, 'Hong Ti Xing', 'Female', '180523-01-1531', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc1e707a000.04566244.jpg', '2025-01-01 23:23:19'),
+(7, 4, 'Lim En Rui', 'Female', '170923-01-1465', '2017-09-23', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc2193787a7.47157231.jpg', '2025-01-01 23:24:09'),
+(8, 5, 'Koh Ming Le ', 'Female', '180523-01-1603', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc30fac1df7.31994522.jpg', '2025-01-01 23:28:15'),
+(9, 5, 'Tan Kang Fu', 'Male', '170912-01-1123', '2017-09-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc350bd4443.07862724.jpg', '2025-01-01 23:29:20');
 
 -- --------------------------------------------------------
 
@@ -145,15 +147,15 @@ CREATE TABLE `class` (
 --
 
 INSERT INTO `class` (`class_id`, `admin_id`, `subject_id`, `part_id`, `teacher_id`, `class_term`, `class_time`, `class_venue`, `class_capacity`, `class_enrolled`, `class_status`) VALUES
-('Eng0001', 11112, '11245', 1, '12233', '2025', 'Monday 2:30pm - 4:30pm', 'Room 1', 30, 3, 'Available'),
+('Eng0001', 11112, '11245', 1, '12233', '2025', 'Monday 2:30pm - 4:30pm', 'Room 1', 30, 4, 'Available'),
 ('Eng0002', 11111, '11245', 2, '12233', '2025', 'Monday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
-('Eng2001', 11111, '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 3, 'Available'),
+('Eng2001', 11111, '22534', 1, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 4, 'Available'),
 ('Eng2002', 11111, '22534', 2, '12345', '2025', 'Monday 5:00pm - 7:00pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Mat0001', 11111, '11132', 1, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 3, 'Available'),
 ('Mat0002', 11111, '11132', 2, '12123', '2025', 'Wednesday 2:30pm - 4:30pm', 'Room 1', 30, 0, 'Unavailable'),
 ('Mat2001', 11111, '22134', 1, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 3, 'Available'),
 ('Mat2002', 11111, '22134', 2, '12347', '2025', 'Wednesday 5:00pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable'),
-('Mly0001', 11111, '11351', 1, '12345', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 3, 'Available'),
+('Mly0001', 11111, '11351', 1, '12345', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 4, 'Available'),
 ('Mly0002', 11111, '11351', 2, '12345', '2025', 'Tuesday 2:30pm - 4:30pm', 'Room 2', 30, 0, 'Unavailable'),
 ('Mly2001', 11111, '22345', 1, '12347', '2025', 'Tuesday 5:00pm - 7:00pm', 'Room 2', 30, 3, 'Available'),
 ('Mly2002', 11111, '22345', 2, '12347', '2025', 'Tuesday 5:30pm - 7:00pm', 'Room 2', 30, 0, 'Unavailable');
@@ -198,6 +200,16 @@ CREATE TABLE `exam_result` (
   `exam_result_midterm` decimal(5,2) DEFAULT NULL,
   `exam_result_final` decimal(5,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `exam_result`
+--
+
+INSERT INTO `exam_result` (`exam_result_id`, `child_id`, `class_id`, `exam_result_midterm`, `exam_result_final`) VALUES
+(1, 4, 'Mly0001', 77.00, 88.00),
+(2, 6, 'Mly0001', 88.00, 85.00),
+(3, 8, 'Mly0001', 79.00, 67.00),
+(4, 1, 'Mly0001', 67.00, 88.00);
 
 -- --------------------------------------------------------
 
@@ -273,17 +285,17 @@ CREATE TABLE `parent` (
 --
 
 INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_image`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
-(1, 'Aini', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'uploads/parent_images/68353bb8d6ca2-3887158569.jpg', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
-(2, 'Ali', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'uploads/parent_images/683c5df6c126a-images (1).jpg', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm'),
+(1, 'Aini Li Yu Xi', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'uploads/parent_images/68353bb8d6ca2-3887158569.jpg', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
+(2, 'Choo Fu Kang', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'uploads/parent_images/683c5df6c126a-images (1).jpg', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm'),
 (3, 'Goh Wei Ting', '', 'weiting@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-666 8877', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$29775lWe1LKaF1Pu4op2n.sP0bwJ4ttLJuFouiIn3hmZJf9Fpwtfy'),
-(4, 'Awe', '', 'awe123@gmail.com', 'alan Anggerik, No. 12, 81000 Kulai, Johor', '012-345 6789', NULL, 'Mother', 'Male', '', '', 'Mother', '', '$2y$10$cS8DywzTfbUPN/wT8EdB6.Gu0YtWQz6sFewmzuv6x9rGXSRu4CPr6'),
-(5, 'MICHAEL TAN WEI MING', '', 'michael.tan@example.com', 'Jalan Mawar 5, Taman Indah, 81000 Kulai, Johor', '013-456 7890', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$jJQX/pyGNB/hoETfMRg1NOfZMaHTTP2LreTqBAJSvyFoXihbGdzoe'),
+(4, 'Awe Chong Ting', '', 'awe123@gmail.com', 'alan Anggerik, No. 12, 81000 Kulai, Johor', '012-345 6789', NULL, 'Mother', 'Male', '', '', 'Mother', '', '$2y$10$cS8DywzTfbUPN/wT8EdB6.Gu0YtWQz6sFewmzuv6x9rGXSRu4CPr6'),
+(5, 'Michael Tan Wei Ming', '', 'michael.tan@example.com', 'Jalan Mawar 5, Taman Indah, 81000 Kulai, Johor', '013-456 7890', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$jJQX/pyGNB/hoETfMRg1NOfZMaHTTP2LreTqBAJSvyFoXihbGdzoe'),
 (6, 'Tan Ling Wei', '', 'lingwei@gmail.com', 'Jalan Kenanga 8, Taman Bahagia, 81000 Kulai, Johor', '017-234 5678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$Ay2hVNNnTpvTKakKeO5iCOpHExnLCilMT5PhEDHpRqdBzY8rzyEKG'),
 (7, 'Chen Wei TIng', '', 'weiting@gmaail.com', 'Jalan Cempaka 3, Taman Sentosa, 81000 Kulai, Johor', '019-876 5432', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$URMRGRmgGetGqaV0ZyZC3Oa6c.t62imJA9aaw3Thd6zMbtMnHlTmy'),
-(8, 'JESSICA LIM SIEW LING', '', 'jessica.lim@gmail.com', 'Jalan Dahlia 10, Taman Permai, 81000 Kulai, Johor', '011-123 45678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$iYLVHUqkDHaKg5cgw/bxQOSpLUN7QjUG6LQRrP7z/QmULAHBYrjDy'),
-(9, 'WONG KAI JUN', '', 'wong.kai@gmail.com', 'Jalan Teratai 7, Taman Jaya, 81000 Kulai, Johor', '014-567 8901', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$k54hoVaI1lP7beBr4D55uuBt.l6bhzQDFvXbJsKQ21jtoV/5.95JW'),
-(10, 'DAVID LEE KOK WAI', '', 'david.lee@gmail.com', 'Jalan Orkid 9, Taman Sinar, 81000 Kulai, Johor', '018-321 6547', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$nt19jlLHdqa5F4w4./Caz.WU1fq/m2QoVXyQZhOHEbI8lepSERUha'),
-(11, 'CHEN WEI SHENG', '', 'chen.wei@gmail.com', 'Jalan Bunga Raya 1, Taman Mewah, 81000 Kulai, Johor', '010-987 6543', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$TAmokQdr3tO9wFV9gf2VW.X.YZmsTqAdcP8zE4p6wSYf2oZhyTHTS'),
+(8, 'Jessica Lim Siew Ling', '', 'jessica.lim@gmail.com', 'Jalan Dahlia 10, Taman Permai, 81000 Kulai, Johor', '011-123 45678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$iYLVHUqkDHaKg5cgw/bxQOSpLUN7QjUG6LQRrP7z/QmULAHBYrjDy'),
+(9, 'Wong Kai Jun', '', 'wong.kai@gmail.com', 'Jalan Teratai 7, Taman Jaya, 81000 Kulai, Johor', '014-567 8901', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$k54hoVaI1lP7beBr4D55uuBt.l6bhzQDFvXbJsKQ21jtoV/5.95JW'),
+(10, 'David Lee Kok Wai', '', 'david.lee@gmail.com', 'Jalan Orkid 9, Taman Sinar, 81000 Kulai, Johor', '018-321 6547', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$nt19jlLHdqa5F4w4./Caz.WU1fq/m2QoVXyQZhOHEbI8lepSERUha'),
+(11, 'Chen Wei Sheng', '', 'chen.wei@gmail.com', 'Jalan Bunga Raya 1, Taman Mewah, 81000 Kulai, Johor', '010-987 6543', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$TAmokQdr3tO9wFV9gf2VW.X.YZmsTqAdcP8zE4p6wSYf2oZhyTHTS'),
 (12, 'Lim En Xi', '', 'enxi6387@gmail.com', 'Jalan Kemboja 4, Taman Damai, 81000 Kulai, Johor', '015-654 3210', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$a17AQLaFZJByOoSncsZ5w.pULjEN9U1Jar3o1o71wZJDMxMxaeHwi');
 
 -- --------------------------------------------------------
@@ -325,9 +337,12 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`payment_id`, `payment_total_amount`, `payment_method`, `credit_card_id`, `payment_time`) VALUES
-(7, 3160.00, 'Credit Card', 6, '2025-06-02 15:18:31'),
-(8, 3160.00, 'Credit Card', 7, '2025-06-02 15:25:31'),
-(9, 3160.00, 'Credit Card', 8, '2025-06-02 15:30:35');
+(7, 3160.00, 'Credit Card', 6, '2025-01-01 15:18:31'),
+(8, 3160.00, 'Credit Card', 7, '2025-01-01 15:25:31'),
+(9, 3160.00, 'Credit Card', 8, '2025-01-01 15:30:35'),
+(10, 610.00, 'Credit Card', 1, '2025-01-01 06:22:48'),
+(11, 610.00, 'Credit Card', 5, '2025-01-01 06:37:44'),
+(12, 610.00, 'Credit Card', 1, '2025-01-01 06:49:11');
 
 -- --------------------------------------------------------
 
@@ -365,7 +380,10 @@ INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `c
 (21, 5, 'Mly0001', 8, 9),
 (22, 5, 'Eng2001', 9, 9),
 (23, 5, 'Mat2001', 9, 9),
-(24, 5, 'Mly2001', 9, 9);
+(24, 5, 'Mly2001', 9, 9),
+(25, 1, 'Mly0001', 1, 10),
+(26, 3, 'Eng2001', 3, 11),
+(27, 1, 'Eng0001', 1, 12);
 
 -- --------------------------------------------------------
 
@@ -423,7 +441,7 @@ CREATE TABLE `teacher` (
 INSERT INTO `teacher` (`teacher_id`, `admin_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
 (12123, 11111, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', 'uploads/teacher_images/683c5a4be6398-avatar_kj2umdknm2b.jpg', '0117098524', '7036 Jalan Sena 35/7 Taman Indahpura 81000 Kulai Johor.', '2023-01-01', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
 (12233, 11111, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', 'uploads/teacher_images/683c5bcc0b11f-19080812073933.jpg', '0168208964', '7188 Jalan Seri 37/5 Taman Indahpura 81000 Kulai Johor', '2023-01-02', 'Active', '$2y$10$JXS.0RC3gXjTaanRUyv8Vuo2NKDA1J5O/jtGWv73QPL96/IbbsxdO'),
-(12345, 11112, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$yU/0trNc3sZ2RQZSIBgIRuxAtX6ZmCjXmBJdCmBRI/AIN2NiI2DwC'),
+(12345, 11112, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$IYSV2rC83rR6w62WYDuSDeOxRDnY7YHh.qUT0Ps.Ztp0dU8dhE91K'),
 (12347, 11111, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', 'uploads/teacher_images/683c605396c54-center.png', '0111827834', '8277 Jalan Sena 35/34 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$BJS3O/xa/atfMJ0rf1FobOgkHVXbpc/lO3Tu5u5MlEv2VtrkkjXse');
 
 -- --------------------------------------------------------
@@ -581,7 +599,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `child`
@@ -599,7 +617,7 @@ ALTER TABLE `credit_cards`
 -- AUTO_INCREMENT for table `exam_result`
 --
 ALTER TABLE `exam_result`
-  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `exam_result_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `notification`
@@ -629,13 +647,13 @@ ALTER TABLE `part`
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `payment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `teacher`
