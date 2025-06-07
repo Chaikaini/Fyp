@@ -9760,3 +9760,81 @@ get_cart.php: Fetched cart items: Array
 
 )
 
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 23
+            [parent_id] => 11
+            [child_id] => 10
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Edwin Chen Wei Sheng
+            [class_capacity] => 30
+            [class_enrolled] => 4
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 23
+            [parent_id] => 11
+            [child_id] => 10
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Edwin Chen Wei Sheng
+            [class_capacity] => 30
+            [class_enrolled] => 4
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 23
+            [parent_id] => 11
+            [child_id] => 10
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Edwin Chen Wei Sheng
+            [class_capacity] => 30
+            [class_enrolled] => 4
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+

@@ -425,55 +425,59 @@
             .catch(error => console.error('Fetch error:', error));
     });
 
-    // Load children, excluding those already registered for the subject
-    async function loadChildren(year, subjectId) {
-        console.log('Loading children for year:', year, 'subjectId:', subjectId);
-        const childrenSelect = document.getElementById('childrenSelect');
-        if (!year || isNaN(year)) {
-            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
-            showToast('Invalid year for loading children.', true);
+// Load children, excluding those already registered for the subject
+async function loadChildren(year, subjectId, childId) {
+    console.log('Loading children for year:', year, 'subjectId:', subjectId, 'childId:', childId);
+    const childrenSelect = document.getElementById('childrenSelect');
+    if (!year || isNaN(year)) {
+        childrenSelect.innerHTML = '<option value="" disabled hidden selected>Invalid year</option>';
+        showToast('Invalid year for loading children.', true);
+        return;
+    }
+
+    try {
+        // Get all children for the year
+        const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log('Children data received:', data);
+
+        availableChildren = Array.isArray(data) ? data : [];
+        childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
+
+        // Get registered children via POST with the correct childId
+        const registeredResponse = await fetch('check_registration.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cart_items: [{ child_id: childId || 0, subject_id: subjectId }] })
+        });
+        console.log('Fetch response status (check_registration):', registeredResponse.status);
+        if (!registeredResponse.ok) throw new Error(`HTTP error! status: ${registeredResponse.status}`);
+        const registeredData = await registeredResponse.json();
+        console.log('Registered children data:', registeredData);
+        const registeredChildIds = registeredData.conflicts?.map(conflict => conflict.child_id) || [];
+
+        if (availableChildren.length === 0) {
+            childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
+            showToast('No children available for this year.', true);
             return;
         }
 
-        try {
-            // 获取所有符合年级的孩子
-            const response = await fetch(`get_child.php?subject_year=${encodeURIComponent(year)}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            console.log('Children data received:', data);
-
-            availableChildren = Array.isArray(data) ? data : [];
-            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Select a child</option>';
-
-            // 获取已经注册该科目的孩子
-            const registeredResponse = await fetch(`check_registration.php?cart_items=[{"child_id":0,"subject_id":"${subjectId}"}]`);
-            if (!registeredResponse.ok) throw new Error(`HTTP error! status: ${registeredResponse.status}`);
-            const registeredData = await registeredResponse.json();
-            console.log('Registered children data:', registeredData);
-            const registeredChildIds = registeredData.conflicts.map(conflict => conflict.child_id) || [];
-
-            if (availableChildren.length === 0) {
-                childrenSelect.innerHTML += '<option value="" disabled>No children available</option>';
-                showToast('No children available for this year.', true);
+        availableChildren.forEach(child => {
+            if (registeredChildIds.includes(child.child_id)) {
                 return;
             }
-
-            availableChildren.forEach(child => {
-                // 排除已经注册的孩子
-                if (registeredChildIds.includes(child.child_id)) {
-                    return;
-                }
-                const option = document.createElement('option');
-                option.value = child.child_id;
-                option.textContent = `${child.child_name} (Year ${year})`;
-                childrenSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading children:', error);
-            childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
-            showToast('Failed to load children.', true);
-        }
+            const option = document.createElement('option');
+            option.value = child.child_id;
+            option.textContent = `${child.child_name} (Year ${year})`;
+            childrenSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading children:', error);
+        childrenSelect.innerHTML = '<option value="" disabled hidden selected>Error loading children</option>';
+        showToast('Failed to load children.', true);
     }
+}
 
     async function loadCartData() {
         fetch('get_cart.php')
@@ -549,7 +553,7 @@
         document.getElementById('popupMonth').textContent = monthText;
         document.getElementById('popupTime').textContent = classTime;
         document.getElementById('popupCapacity').textContent = capacity;
-        await loadChildren(year, subjectId);
+        await loadChildren(year, subjectId, childId); // Pass childId here
         document.getElementById('childrenSelect').value = childId || '';
         document.querySelector('.popup-info').style.display = 'block';
     }
