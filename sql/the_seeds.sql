@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 06, 2025 at 09:36 AM
+-- Generation Time: Jun 07, 2025 at 04:36 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -112,9 +112,9 @@ CREATE TABLE `child` (
 --
 
 INSERT INTO `child` (`child_id`, `parent_id`, `child_name`, `child_gender`, `child_kidNumber`, `child_birthday`, `child_school`, `child_year`, `child_image`, `child_register_date`) VALUES
-(1, 1, 'Yuna Lim Xi Yue', 'Female', '180909-01-7788', '2018-09-09', 'SJK(C) Kulai 1', 1, 'uploads/child_images/68353bc32a6fd-100087514_708500463057448_7612975320529895424_o-1-e1591159367508.jpg', '2025-01-01 12:26:05'),
-(2, 2, 'John Lim Wu Le', 'Male', '180101-04-5533', '2018-01-01', 'SJK(C) Kulai 2', 1, 'uploads/child_images/683c5cde04e1d-images.jpg', '2025-01-01 12:26:05'),
-(3, 3, 'Chen Shu Hui', 'Female', '170909-01-6655', '2017-09-09', 'SJK(C) Kulai 2', 2, 'uploads/child_images/683c59b16a202-center.png', '2025-01-01 21:23:36'),
+(1, 1, 'Yuna Lim Xi Yue', 'Female', '180909-01-7788', '2018-09-09', 'SJKC Kulai 1', 1, 'uploads/child_images/68353bc32a6fd-100087514_708500463057448_7612975320529895424_o-1-e1591159367508.jpg', '2025-01-01 12:26:05'),
+(2, 2, 'John Lim Wu Le', 'Male', '180101-04-5533', '2018-01-01', 'SJKC Kulai 2', 1, 'uploads/child_images/683c5cde04e1d-images.jpg', '2025-01-01 12:26:05'),
+(3, 3, 'Chen Shu Hui', 'Female', '170909-01-6655', '2017-09-09', 'SJKC Kulai 2', 2, 'uploads/child_images/683c59b16a202-center.png', '2025-01-01 21:23:36'),
 (4, 12, 'Soh Yi Yi', 'Female', '180123-01-7654', '2018-01-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dbfe4d3a563.40233732.jpg', '2025-01-01 23:14:44'),
 (5, 12, 'Soh Yi En', 'Female', '170112-01-1234', '2017-01-12', 'SJKC Kulai 1', 2, 'uploads/child_images/child_683dc04598ffe7.15380968.jpg', '2025-01-01 23:16:21'),
 (6, 4, 'Hong Ti Xing', 'Female', '180523-01-1531', '2018-05-23', 'SJKC Kulai 1', 1, 'uploads/child_images/child_683dc1e707a000.04566244.jpg', '2025-01-01 23:23:19'),
@@ -270,7 +270,7 @@ CREATE TABLE `parent` (
   `parent_email` varchar(100) NOT NULL,
   `parent_address` text NOT NULL,
   `phone_number` varchar(20) NOT NULL,
-  `phone_number2` varchar(20) DEFAULT NULL,
+  `phone_number2` varchar(20) NOT NULL,
   `parent_relationship` enum('Mother','Father','Guardian') NOT NULL,
   `parent_gender` enum('Male','Female') NOT NULL,
   `parent_image` varchar(255) NOT NULL,
@@ -287,16 +287,16 @@ CREATE TABLE `parent` (
 INSERT INTO `parent` (`parent_id`, `parent_name`, `ic_number`, `parent_email`, `parent_address`, `phone_number`, `phone_number2`, `parent_relationship`, `parent_gender`, `parent_image`, `parent_name2`, `parent_relationship2`, `parent_num2`, `parent_password`) VALUES
 (1, 'Aini Li Yu Xi', '900123-01-8899', '12345@gmail.com', '1122 Jalan 555', '012-8278590', '', 'Mother', 'Female', 'uploads/parent_images/68353bb8d6ca2-3887158569.jpg', 'Kewen', 'Guardian', '010-2324567', '$2y$10$1ziIP7HagY0m9.2KfhAONulxSqDEJplMptJze.1KeiMIRu8/l5Mvm'),
 (2, 'Choo Fu Kang', '930123-05-8899', '123@gmail.com', '2222 Jalan Gemilang', '012-3334455', '', 'Guardian', 'Female', 'uploads/parent_images/683c5df6c126a-images (1).jpg', 'Nini', 'Mother', '016-7282049', '$2y$10$AQU/DCCmeW9Ce6S90.RUYejCFAFTxfAk0J05I02WFyleDRhh9HsPm'),
-(3, 'Goh Wei Ting', '', 'weiting@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-666 8877', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$29775lWe1LKaF1Pu4op2n.sP0bwJ4ttLJuFouiIn3hmZJf9Fpwtfy'),
-(4, 'Awe Chong Ting', '', 'awe123@gmail.com', 'alan Anggerik, No. 12, 81000 Kulai, Johor', '012-345 6789', NULL, 'Mother', 'Male', '', '', 'Mother', '', '$2y$10$cS8DywzTfbUPN/wT8EdB6.Gu0YtWQz6sFewmzuv6x9rGXSRu4CPr6'),
-(5, 'Michael Tan Wei Ming', '', 'michael.tan@example.com', 'Jalan Mawar 5, Taman Indah, 81000 Kulai, Johor', '013-456 7890', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$jJQX/pyGNB/hoETfMRg1NOfZMaHTTP2LreTqBAJSvyFoXihbGdzoe'),
-(6, 'Tan Ling Wei', '', 'lingwei@gmail.com', 'Jalan Kenanga 8, Taman Bahagia, 81000 Kulai, Johor', '017-234 5678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$Ay2hVNNnTpvTKakKeO5iCOpHExnLCilMT5PhEDHpRqdBzY8rzyEKG'),
-(7, 'Chen Wei TIng', '', 'weiting@gmaail.com', 'Jalan Cempaka 3, Taman Sentosa, 81000 Kulai, Johor', '019-876 5432', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$URMRGRmgGetGqaV0ZyZC3Oa6c.t62imJA9aaw3Thd6zMbtMnHlTmy'),
-(8, 'Jessica Lim Siew Ling', '', 'jessica.lim@gmail.com', 'Jalan Dahlia 10, Taman Permai, 81000 Kulai, Johor', '011-123 45678', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$iYLVHUqkDHaKg5cgw/bxQOSpLUN7QjUG6LQRrP7z/QmULAHBYrjDy'),
-(9, 'Wong Kai Jun', '', 'wong.kai@gmail.com', 'Jalan Teratai 7, Taman Jaya, 81000 Kulai, Johor', '014-567 8901', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$k54hoVaI1lP7beBr4D55uuBt.l6bhzQDFvXbJsKQ21jtoV/5.95JW'),
-(10, 'David Lee Kok Wai', '', 'david.lee@gmail.com', 'Jalan Orkid 9, Taman Sinar, 81000 Kulai, Johor', '018-321 6547', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$nt19jlLHdqa5F4w4./Caz.WU1fq/m2QoVXyQZhOHEbI8lepSERUha'),
-(11, 'Chen Wei Sheng', '', 'chen.wei@gmail.com', 'Jalan Bunga Raya 1, Taman Mewah, 81000 Kulai, Johor', '010-987 6543', NULL, 'Father', 'Male', '', '', 'Mother', '', '$2y$10$TAmokQdr3tO9wFV9gf2VW.X.YZmsTqAdcP8zE4p6wSYf2oZhyTHTS'),
-(12, 'Lim En Xi', '', 'enxi6387@gmail.com', 'Jalan Kemboja 4, Taman Damai, 81000 Kulai, Johor', '015-654 3210', NULL, 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$a17AQLaFZJByOoSncsZ5w.pULjEN9U1Jar3o1o71wZJDMxMxaeHwi');
+(3, 'Goh Wei Ting', '', 'weiting@gmail.com', '1122 Jalan 555, Taman Indahpura 81000 Kulai Johor', '012-666 8877', '', 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$29775lWe1LKaF1Pu4op2n.sP0bwJ4ttLJuFouiIn3hmZJf9Fpwtfy'),
+(4, 'Awe Chong Ting', '', 'awe123@gmail.com', 'alan Anggerik, No. 12, 81000 Kulai, Johor', '012-345 6789', '', 'Mother', 'Male', '', '', 'Mother', '', '$2y$10$cS8DywzTfbUPN/wT8EdB6.Gu0YtWQz6sFewmzuv6x9rGXSRu4CPr6'),
+(5, 'Michael Tan Wei Ming', '', 'michael.tan@example.com', 'Jalan Mawar 5, Taman Indah, 81000 Kulai, Johor', '013-456 7890', '', 'Father', 'Male', '', '', 'Mother', '', '$2y$10$jJQX/pyGNB/hoETfMRg1NOfZMaHTTP2LreTqBAJSvyFoXihbGdzoe'),
+(6, 'Tan Ling Wei', '', 'lingwei@gmail.com', 'Jalan Kenanga 8, Taman Bahagia, 81000 Kulai, Johor', '017-234 5678', '', 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$Ay2hVNNnTpvTKakKeO5iCOpHExnLCilMT5PhEDHpRqdBzY8rzyEKG'),
+(7, 'Chen Wei TIng', '', 'weiting@gmaail.com', 'Jalan Cempaka 3, Taman Sentosa, 81000 Kulai, Johor', '019-876 5432', '', 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$URMRGRmgGetGqaV0ZyZC3Oa6c.t62imJA9aaw3Thd6zMbtMnHlTmy'),
+(8, 'Jessica Lim Siew Ling', '', 'jessica.lim@gmail.com', 'Jalan Dahlia 10, Taman Permai, 81000 Kulai, Johor', '011-123 45678', '', 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$iYLVHUqkDHaKg5cgw/bxQOSpLUN7QjUG6LQRrP7z/QmULAHBYrjDy'),
+(9, 'Wong Kai Jun', '', 'wong.kai@gmail.com', 'Jalan Teratai 7, Taman Jaya, 81000 Kulai, Johor', '014-567 8901', '', 'Father', 'Male', '', '', 'Mother', '', '$2y$10$k54hoVaI1lP7beBr4D55uuBt.l6bhzQDFvXbJsKQ21jtoV/5.95JW'),
+(10, 'David Lee Kok Wai', '', 'david.lee@gmail.com', 'Jalan Orkid 9, Taman Sinar, 81000 Kulai, Johor', '018-321 6547', '', 'Father', 'Male', '', '', 'Mother', '', '$2y$10$nt19jlLHdqa5F4w4./Caz.WU1fq/m2QoVXyQZhOHEbI8lepSERUha'),
+(11, 'Chen Wei Sheng', '', 'chen.wei@gmail.com', 'Jalan Bunga Raya 1, Taman Mewah, 81000 Kulai, Johor', '010-987 6543', '', 'Father', 'Male', '', '', 'Mother', '', '$2y$10$TAmokQdr3tO9wFV9gf2VW.X.YZmsTqAdcP8zE4p6wSYf2oZhyTHTS'),
+(12, 'Lim En Xi', '', 'enxi6387@gmail.com', 'Jalan Kemboja 4, Taman Damai, 81000 Kulai, Johor', '015-654 3210', '', 'Mother', 'Female', '', '', 'Mother', '', '$2y$10$a17AQLaFZJByOoSncsZ5w.pULjEN9U1Jar3o1o71wZJDMxMxaeHwi');
 
 -- --------------------------------------------------------
 
@@ -363,27 +363,27 @@ CREATE TABLE `registration_class` (
 --
 
 INSERT INTO `registration_class` (`registration_id`, `parent_id`, `class_id`, `child_id`, `payment_id`) VALUES
-(7, 12, 'Mat0001', 4, 7),
-(8, 12, 'Eng0001', 4, 7),
-(9, 12, 'Mly0001', 4, 7),
-(10, 12, 'Mat2001', 5, 7),
-(11, 12, 'Mly2001', 5, 7),
-(12, 12, 'Eng2001', 5, 7),
-(13, 4, 'Mat0001', 6, 8),
-(14, 4, 'Eng0001', 6, 8),
-(15, 4, 'Mly0001', 6, 8),
-(16, 4, 'Mat2001', 7, 8),
-(17, 4, 'Mly2001', 7, 8),
-(18, 4, 'Eng2001', 7, 8),
-(19, 5, 'Eng0001', 8, 9),
-(20, 5, 'Mat0001', 8, 9),
-(21, 5, 'Mly0001', 8, 9),
-(22, 5, 'Eng2001', 9, 9),
-(23, 5, 'Mat2001', 9, 9),
-(24, 5, 'Mly2001', 9, 9),
-(25, 1, 'Mly0001', 1, 10),
-(26, 3, 'Eng2001', 3, 11),
-(27, 1, 'Eng0001', 1, 12);
+(1, 12, 'Mat0001', 4, 7),
+(2, 12, 'Eng0001', 4, 7),
+(3, 12, 'Mly0001', 4, 7),
+(4, 12, 'Mat2001', 5, 7),
+(5, 12, 'Mly2001', 5, 7),
+(6, 12, 'Eng2001', 5, 7),
+(7, 4, 'Mat0001', 6, 8),
+(8, 4, 'Eng0001', 6, 8),
+(9, 4, 'Mly0001', 6, 8),
+(10, 4, 'Mat2001', 7, 8),
+(11, 4, 'Mly2001', 7, 8),
+(12, 4, 'Eng2001', 7, 8),
+(13, 5, 'Eng0001', 8, 9),
+(14, 5, 'Mat0001', 8, 9),
+(15, 5, 'Mly0001', 8, 9),
+(16, 5, 'Eng2001', 9, 9),
+(17, 5, 'Mat2001', 9, 9),
+(18, 5, 'Mly2001', 9, 9),
+(19, 1, 'Mly0001', 1, 10),
+(20, 3, 'Eng2001', 3, 11),
+(21, 1, 'Eng0001', 1, 12);
 
 -- --------------------------------------------------------
 
@@ -653,7 +653,7 @@ ALTER TABLE `payment`
 -- AUTO_INCREMENT for table `registration_class`
 --
 ALTER TABLE `registration_class`
-  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `registration_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `teacher`
@@ -676,85 +676,3 @@ ALTER TABLE `teacher_comment`
 --
 ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `cart_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`);
-
---
--- Constraints for table `child`
---
-ALTER TABLE `child`
-  ADD CONSTRAINT `child_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `class`
---
-ALTER TABLE `class`
-  ADD CONSTRAINT `class_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `subject` (`subject_id`),
-  ADD CONSTRAINT `class_ibfk_2` FOREIGN KEY (`part_id`) REFERENCES `part` (`part_id`),
-  ADD CONSTRAINT `fk_class_admin_id` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
-
---
--- Constraints for table `credit_cards`
---
-ALTER TABLE `credit_cards`
-  ADD CONSTRAINT `credit_cards_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`);
-
---
--- Constraints for table `exam_result`
---
-ALTER TABLE `exam_result`
-  ADD CONSTRAINT `exam_result_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `exam_result_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
-
---
--- Constraints for table `notification`
---
-ALTER TABLE `notification`
-  ADD CONSTRAINT `fk_class` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Constraints for table `notification_receiver`
---
-ALTER TABLE `notification_receiver`
-  ADD CONSTRAINT `notification_receiver_ibfk_1` FOREIGN KEY (`notification_id`) REFERENCES `notification` (`notification_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `notification_receiver_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `notification_receiver_ibfk_3` FOREIGN KEY (`teacher_id`) REFERENCES `teacher` (`teacher_id`) ON DELETE CASCADE;
-
---
--- Constraints for table `payment`
---
-ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`credit_card_id`) REFERENCES `credit_cards` (`credit_card_id`);
-
---
--- Constraints for table `registration_class`
---
-ALTER TABLE `registration_class`
-  ADD CONSTRAINT `registration_class_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `parent` (`parent_id`),
-  ADD CONSTRAINT `registration_class_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`),
-  ADD CONSTRAINT `registration_class_ibfk_3` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `registration_class_ibfk_6` FOREIGN KEY (`payment_id`) REFERENCES `payment` (`payment_id`);
-
---
--- Constraints for table `subject`
---
-ALTER TABLE `subject`
-  ADD CONSTRAINT `fk_subject_admin` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`) ON UPDATE CASCADE;
-
---
--- Constraints for table `teacher`
---
-ALTER TABLE `teacher`
-  ADD CONSTRAINT `fk_teacher_admin_id` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`admin_id`);
-
---
--- Constraints for table `teacher_comment`
---
-ALTER TABLE `teacher_comment`
-  ADD CONSTRAINT `teacher_comment_ibfk_1` FOREIGN KEY (`child_id`) REFERENCES `child` (`child_id`),
-  ADD CONSTRAINT `teacher_comment_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `class` (`class_id`);
-COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
