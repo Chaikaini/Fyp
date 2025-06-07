@@ -254,7 +254,7 @@
             </div>
         </div>
         <div class="subject-grid" id="subjectGrid">
-            <p>Please select a year to view subjects</p> <!-- 修改初始内容，移除“Loading...” -->
+            <p>Please select a year to view subjects</p>
         </div>
         <div id="resultsContainer"></div>
         <div id="successToast" class="toast-message" style="display: none;"></div>
@@ -307,7 +307,6 @@
     // Force cache busting for the HTML page itself
     document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM fully loaded, initializing page...');
-        // Add cache-busting meta refresh as a fallback
         const meta = document.createElement('meta');
         meta.httpEquiv = 'refresh';
         meta.content = '0;url=subject.html?_=' + new Date().getTime();
@@ -317,15 +316,29 @@
         checkLoginStatus();
         loadNotifications();
         bindSearchEvents();
+        // Initialize with URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const year = urlParams.get('year');
+        if (year) {
+            const yearSelect = document.getElementById('yearSelect');
+            if (yearSelect) {
+                yearSelect.value = year;
+                showSubjects(year);
+            }
+        } else {
+            showSubjects('');
+        }
     });
 
     // Handle browser back/forward navigation
     window.addEventListener('popstate', function() {
-        console.log('Popstate event triggered, resetting to Select Year');
+        console.log('Popstate event triggered, checking URL parameters');
+        const urlParams = new URLSearchParams(window.location.search);
+        const year = urlParams.get('year');
         const yearSelect = document.getElementById('yearSelect');
         if (yearSelect) {
-            yearSelect.value = '';
-            showSubjects('');
+            yearSelect.value = year || '';
+            showSubjects(year || '');
         }
     });
 
@@ -335,9 +348,7 @@
             const response = await fetch('check_login.php?_=' + new Date().getTime(), {
                 credentials: 'include',
                 cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
+                headers: {'Cache-Control': 'no-cache'}
             });
             if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
             const data = await response.json();
@@ -348,7 +359,7 @@
                 window.location.href = 'login.html';
             } else {
                 console.log('User logged in, loading navigation and years');
-                loadNavigation(); // 确保导航加载
+                loadNavigation();
                 loadYears();
             }
         } catch (error) {
@@ -358,10 +369,10 @@
         }
     }
 
-  // Load navigation dynamically
+    // Load navigation dynamically
     async function loadNavigation() {
         try {
-            const response = await fetch('check_login.php', { credentials: 'include', cache: 'no-store' });
+            const response = await fetch('check_login.php', {credentials: 'include', cache: 'no-store'});
             if (!response.ok) throw new Error(`Failed to fetch login status: ${response.status}`);
             const data = await response.json();
             console.log('Navigation login check response:', data);
@@ -412,15 +423,12 @@
         }
     }
 
-
     // Load notifications
     async function loadNotifications() {
         try {
             const response = await fetch('get_notification.php?_=' + new Date().getTime(), {
                 cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
+                headers: {'Cache-Control': 'no-cache'}
             });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
@@ -446,9 +454,7 @@
         try {
             const response = await fetch(`get_years.php?_=${new Date().getTime()}`, {
                 cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
+                headers: {'Cache-Control': 'no-cache'}
             });
             if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
             const data = await response.json();
@@ -468,16 +474,24 @@
                 yearSelect.appendChild(option);
             });
 
-            // Bind year change event
             yearSelect.onchange = () => {
                 console.log('Year selected:', yearSelect.value);
-                showSubjects(yearSelect.value);
+                if (yearSelect.value) {
+                    history.pushState(null, '', `subject.html?year=${encodeURIComponent(yearSelect.value)}&_=${new Date().getTime()}`);
+                    showSubjects(yearSelect.value);
+                } else {
+                    history.pushState(null, '', `subject.html?_=${new Date().getTime()}`);
+                    showSubjects('');
+                }
             };
 
-            // Always reset to "Select Year" on page load
-            yearSelect.value = '';
-            history.pushState(null, '', `subject.html?_=${new Date().getTime()}`);
-            // showSubjects(''); // 不需要再次调用，因为初始内容已设置
+            // Set initial value based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const year = urlParams.get('year');
+            if (year && data.includes(year)) {
+                yearSelect.value = year;
+                showSubjects(year);
+            }
         } catch (error) {
             console.error('Error loading years:', error);
             yearSelect.innerHTML = '<option value="">Error loading years</option>';
@@ -499,20 +513,17 @@
         subjectGrid.style.display = 'flex';
         document.body.classList.remove('search-active');
 
-        history.pushState(null, '', `subject.html?year=${encodeURIComponent(year || '')}&_=${new Date().getTime()}`);
-
         if (!year) {
             subjectGrid.innerHTML = '<p>Please select a year to view subjects</p>';
+            history.pushState(null, '', `subject.html?_=${new Date().getTime()}`);
             return;
         }
 
         try {
-            subjectGrid.innerHTML = '<p>Loading subjects...</p>'; // 仅在加载科目时显示
+            subjectGrid.innerHTML = '<p>Loading subjects...</p>';
             const response = await fetch(`subject.php?year=${encodeURIComponent(year)}&_=${new Date().getTime()}`, {
                 cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
+                headers: {'Cache-Control': 'no-cache'}
             });
             const rawResponse = await response.text();
             console.log('Raw response from subject.php:', rawResponse);
@@ -540,6 +551,7 @@
                 };
                 subjectGrid.appendChild(card);
             });
+            history.pushState(null, '', `subject.html?year=${encodeURIComponent(year)}&_=${new Date().getTime()}`);
         } catch (error) {
             console.error('Error fetching subjects:', error);
             subjectGrid.innerHTML = '<p>Error loading subjects. Please try again later.</p>';
@@ -551,10 +563,26 @@
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
 
+        if (searchInput) {
+            searchInput.oninput = function() {
+                // 只允许字母（a-z, A-Z）
+                this.value = this.value.replace(/[^a-zA-Z]/g, '');
+                if (this.value && !/^[a-zA-Z]+$/.test(this.value)) {
+                    showToast('Please enter letters only!', true);
+                    this.value = this.value.replace(/[^a-zA-Z]/g, '');
+                }
+            };
+        }
+
         if (searchButton) {
             searchButton.onclick = (e) => {
                 e.preventDefault();
-                performSearch(searchInput.value.trim());
+                const query = searchInput.value.trim();
+                if (!/^[a-zA-Z]+$/.test(query)) {
+                    showToast('Please enter letters only!', true);
+                    return;
+                }
+                performSearch(query);
             };
         }
 
@@ -562,7 +590,12 @@
             searchInput.onkeypress = (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    performSearch(searchInput.value.trim());
+                    const query = searchInput.value.trim();
+                    if (!/^[a-zA-Z]+$/.test(query)) {
+                        showToast('Please enter letters only!', true);
+                        return;
+                    }
+                    performSearch(query);
                 }
             };
         }
@@ -581,11 +614,14 @@
 
         const subjectGrid = document.getElementById('subjectGrid');
         const resultsContainer = document.getElementById('resultsContainer');
-        if (!subjectGrid || !resultsContainer) {
-            console.error('Subject grid or results container not found');
+        const yearSelect = document.getElementById('yearSelect');
+        if (!subjectGrid || !resultsContainer || !yearSelect) {
+            console.error('Subject grid, results container, or year select not found');
             return;
         }
 
+        // Reset year selection to "Select Year"
+        yearSelect.value = '';
         subjectGrid.style.display = 'none';
         resultsContainer.style.display = 'flex';
         document.body.classList.add('search-active');
@@ -594,9 +630,7 @@
         try {
             const response = await fetch(`search.php?query=${encodeURIComponent(query)}&_=${new Date().getTime()}`, {
                 cache: 'no-store',
-                headers: {
-                    'Cache-Control': 'no-cache'
-                }
+                headers: {'Cache-Control': 'no-cache'}
             });
             const rawResponse = await response.text();
             console.log('Raw response from search.php:', rawResponse);
@@ -623,11 +657,10 @@
                     resultsContainer.appendChild(card);
                 });
             }
-            document.getElementById('searchInput').value = '';
+            history.pushState(null, '', `subject.html?search=${encodeURIComponent(query)}&_=${new Date().getTime()}`);
         } catch (error) {
             console.error('Error performing search:', error);
             resultsContainer.innerHTML = `<p>Error performing search: ${error.message}</p>`;
-            document.getElementById('searchInput').value = '';
         }
     }
 
@@ -645,8 +678,11 @@
         }
         if (subjectGrid) subjectGrid.style.display = 'flex';
         document.body.classList.remove('search-active');
-        const selectedYear = yearSelect ? yearSelect.value || '' : '';
-        showSubjects(selectedYear);
+        const urlParams = new URLSearchParams(window.location.search);
+        const year = urlParams.get('year');
+        if (yearSelect) yearSelect.value = year || '';
+        showSubjects(year || '');
+        history.pushState(null, '', `subject.html?year=${encodeURIComponent(year || '')}&_=${new Date().getTime()}`);
     }
 
     // Toast function
