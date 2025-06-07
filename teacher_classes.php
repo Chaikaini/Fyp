@@ -390,7 +390,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
   const keyword = document.getElementById("search").value.trim();
 
   if (!keyword) {
-    alert("Please enter a valid search value.");
+    
     return;
   }
 
@@ -464,7 +464,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
   const keyword = document.getElementById("search").value.trim();
 
   if (!keyword) {
-    alert("Please enter a valid search value.");
+    
     return;
   }
 
