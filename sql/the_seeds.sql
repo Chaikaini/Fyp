@@ -439,10 +439,10 @@ CREATE TABLE `teacher` (
 --
 
 INSERT INTO `teacher` (`teacher_id`, `admin_id`, `teacher_name`, `teacher_ic_number`, `teacher_gender`, `teacher_email`, `teacher_image`, `teacher_phone_number`, `teacher_address`, `teacher_join_date`, `teacher_status`, `teacher_password`) VALUES
-(12123, 11111, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', 'uploads/teacher_images/683c5a4be6398-avatar_kj2umdknm2b.jpg', '0117098524', '7036 Jalan Sena 35/7 Taman Indahpura 81000 Kulai Johor.', '2023-01-01', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
-(12233, 11111, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', 'uploads/teacher_images/683c5bcc0b11f-19080812073933.jpg', '0168208964', '7188 Jalan Seri 37/5 Taman Indahpura 81000 Kulai Johor', '2023-01-02', 'Active', '$2y$10$JXS.0RC3gXjTaanRUyv8Vuo2NKDA1J5O/jtGWv73QPL96/IbbsxdO'),
-(12345, 11112, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '0178238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$IYSV2rC83rR6w62WYDuSDeOxRDnY7YHh.qUT0Ps.Ztp0dU8dhE91K'),
-(12347, 11111, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', 'uploads/teacher_images/683c605396c54-center.png', '0111827834', '8277 Jalan Sena 35/34 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$BJS3O/xa/atfMJ0rf1FobOgkHVXbpc/lO3Tu5u5MlEv2VtrkkjXse');
+(12123, 11111, 'Mr. David', '001123-01-7824', 'Male', '12123@gmail.com', 'uploads/teacher_images/683c5a4be6398-avatar_kj2umdknm2b.jpg', '011-7098524', '7036 Jalan Sena 35/7 Taman Indahpura 81000 Kulai Johor.', '2023-01-01', 'Active', '$2y$10$WFTN2ROURBX07pDHXxO9F.yfb4HgM.rY514NQp9p/6PclzGRi5/ny'),
+(12233, 11111, 'Mr. John', '920408-01-1572', 'Male', '12233@gmail.com', 'uploads/teacher_images/683c5bcc0b11f-19080812073933.jpg', '016-8208964', '7188 Jalan Seri 37/5 Taman Indahpura 81000 Kulai Johor', '2023-01-02', 'Active', '$2y$10$JXS.0RC3gXjTaanRUyv8Vuo2NKDA1J5O/jtGWv73QPL96/IbbsxdO'),
+(12345, 11112, 'Ms. Lily', '971203-01-8065', 'Female', 'lily@gmail.com', 'uploads/teacher_images/68219532d4b99-WhatsApp Image 2025-05-05 at 22.06.09_f8489a52.jpg', '017-8238204', '7019 Jalan Sena 35/3 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$IYSV2rC83rR6w62WYDuSDeOxRDnY7YHh.qUT0Ps.Ztp0dU8dhE91K'),
+(12347, 11111, 'Ms. Enxi', '950718-01-4258', 'Female', 'enxi6387@gmail.com', 'uploads/teacher_images/683c605396c54-center.png', '011-827834', '8277 Jalan Sena 35/34 Taman Indahpura 81000 Kulai Johor', '2023-01-01', 'Active', '$2y$10$BJS3O/xa/atfMJ0rf1FobOgkHVXbpc/lO3Tu5u5MlEv2VtrkkjXse');
 
 -- --------------------------------------------------------
 
