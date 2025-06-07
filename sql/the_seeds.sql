@@ -43,8 +43,8 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_gender`, `admin_email`, `admin_address`, `admin_phone_number`, `admin_password`, `role`) VALUES
-(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '0167827196', '$2y$10$lQlGrowkkRVMDwrfxWOTveKgHOLxPIdZgaz/qrMs6lJkCIvPEaM/e', 'Super Admin'),
-(11112, 'jiaxin', 'Female', 'jiaxin@gmail.com', 'Jalan Putra 1', '0127818656', '$2y$10$TJwacQClqzn00.t5QwJpoOUo/RjVZQAYUdtK22DKoAcKuqdTc2.ja', 'Admin');
+(11111, 'kaini', 'Female', 'chaikaini@gmail.com', 'Jalan 1', '016-7827196', '$2y$10$lQlGrowkkRVMDwrfxWOTveKgHOLxPIdZgaz/qrMs6lJkCIvPEaM/e', 'Super Admin'),
+(11112, 'jiaxin', 'Female', 'jiaxin@gmail.com', 'Jalan Putra 1', '012-7818656', '$2y$10$TJwacQClqzn00.t5QwJpoOUo/RjVZQAYUdtK22DKoAcKuqdTc2.ja', 'Admin');
 
 -- --------------------------------------------------------
 
