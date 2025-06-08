@@ -385,32 +385,7 @@ window.addEventListener("DOMContentLoaded", function () {
   loadTeacherData();
 });
 
-document.getElementById("search-btn").addEventListener("click", function () {
-  const category = document.getElementById("search-category").value;
-  const keyword = document.getElementById("search").value.trim();
 
-  if (!keyword) {
-    
-    return;
-  }
-
-  const bodyData = new URLSearchParams();
-  bodyData.append(category, keyword);
-
-  fetch("teacher_classes_info.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: bodyData.toString(),
-  })
-  .then(res => res.json())
-  .then(data => {
-    populateTable(data);
-  })
-  .catch(error => {
-    console.error("Error loading attendance:", error);
-    document.getElementById("schedule-table-body").innerHTML = "<tr><td colspan='8'>Error loading data.</td></tr>";
-  });
-});
 
 // function to load teacher's data
 function loadTeacherData() {
@@ -458,7 +433,7 @@ function populateTable(data) {
   }
 }
 
-   
+  // Search function with subject ID or subject name
 document.getElementById("search-btn").addEventListener("click", function () {
   const category = document.getElementById("search-category").value;
   const keyword = document.getElementById("search").value.trim();
@@ -723,9 +698,6 @@ function submitComment() {
         showToast("Error saving comment.", true);
     });
 }
-
-
-
 
 
 
@@ -1005,10 +977,6 @@ function exportExamResultsToExcel() {
 
 
 </script>
-
-    
-
-   
-      
+     
 </body>
 </html>

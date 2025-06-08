@@ -52,7 +52,7 @@ if (!empty($subject_id)) {
             FROM subject s
             JOIN class c ON s.subject_id = c.subject_id
             JOIN part p ON c.part_id = p.part_id
-            WHERE s.subject_name LIKE ? AND c.teacher_id = ?";
+            WHERE LOWER(s.subject_name) LIKE LOWER(?) AND c.teacher_id = ?";
     $stmt = $conn->prepare($sql);
     $subject_name = '%' . $subject_name . '%';
     $stmt->bind_param("ss", $subject_name, $teacher_id);

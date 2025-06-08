@@ -238,7 +238,7 @@ document.getElementById("search-btn").addEventListener("click", function () {
   const category = document.getElementById("search-category").value;
 
   if (!keyword) {
-    alert("Please enter a valid search keyword.");
+    
     return;
   }
 

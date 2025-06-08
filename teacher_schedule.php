@@ -62,7 +62,7 @@ if (!empty($category) && !empty($keyword)) {
         $params[] = intval($keyword);
         $types .= "i";
     } else if ($category === 'subject_name') {
-        $sql .= " AND s.subject_name LIKE ?";
+        $sql .= " AND LOWER(s.subject_name) LIKE LOWER(?)";
         $params[] = "%$keyword%";
         $types .= "s";
     }
