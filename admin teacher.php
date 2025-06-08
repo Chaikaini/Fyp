@@ -279,6 +279,7 @@ function loadTeacherSchedule() {
     });
 }
 
+//Calculates class status based on current date and classes duration
 function renderSchedule(data) {
   const tbody = document.getElementById("schedule-table-body");
   tbody.innerHTML = "";
@@ -348,7 +349,7 @@ document.getElementById("view-timetable-btn").addEventListener("click", function
   const timetableData = [];
 
   allRows.forEach(row => {
-    const status = row.cells[7].textContent.trim();  // Updated index since status is now in column 8
+    const status = row.cells[7].textContent.trim();  
     if (status === "Ongoing") {
       const subject_id = row.cells[0].textContent.trim();
       const subject_name = row.cells[1].textContent.trim();
