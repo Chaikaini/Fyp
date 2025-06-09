@@ -9896,3 +9896,97 @@ get_cart.php: Fetched cart items: Array
 
 )
 
+update_cart.php: Starting
+update_cart.php: Connected to DB
+update_cart.php: Session verified, Parent ID: 11
+update_cart.php: JSON decoded: Array
+(
+    [cart_id] => 23
+    [action] => update_child
+    [child_id] => 11
+)
+
+update_cart.php: Action: update_child, cart_id: 23
+update_cart.php: Cart item verified: Array
+(
+    [cart_id] => 23
+    [child_id] => 10
+    [class_id] => Mly0001
+    [subject_id] => 11351
+)
+
+update_cart.php: Child verified: child_id=11
+update_cart.php: Updated child_id to 11
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 23
+            [parent_id] => 11
+            [child_id] => 11
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Andrew Chen Wei Quan
+            [class_capacity] => 30
+            [class_enrolled] => 4
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+
+update_cart.php: Starting
+update_cart.php: Connected to DB
+update_cart.php: Session verified, Parent ID: 11
+update_cart.php: JSON decoded: Array
+(
+    [cart_id] => 23
+    [action] => update_child
+    [child_id] => 10
+)
+
+update_cart.php: Action: update_child, cart_id: 23
+update_cart.php: Cart item verified: Array
+(
+    [cart_id] => 23
+    [child_id] => 11
+    [class_id] => Mly0001
+    [subject_id] => 11351
+)
+
+update_cart.php: Child verified: child_id=10
+update_cart.php: Updated child_id to 10
+get_cart.php: Connected to DB
+get_cart.php: Fetched cart items: Array
+(
+    [0] => Array
+        (
+            [cart_id] => 23
+            [parent_id] => 11
+            [child_id] => 10
+            [class_id] => Mly0001
+            [deleted] => 0
+            [child_name] => Edwin Chen Wei Sheng
+            [class_capacity] => 30
+            [class_enrolled] => 4
+            [part_id] => 1
+            [class_time] => Tuesday 2:30pm - 4:30pm
+            [year] => Year 1
+            [subject_id] => 11351
+            [teacher_id] => 12345
+            [subject_name] => Melayu
+            [subject_image] => img/malay1.jpg
+            [price] => 510.00
+            [teacher_name] => Ms. Lily
+        )
+
+)
+
