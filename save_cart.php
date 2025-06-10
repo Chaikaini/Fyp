@@ -114,7 +114,7 @@ try {
         } else {
             $stmt = $pdo->prepare("UPDATE cart SET deleted = 0 WHERE cart_id = ?");
             $stmt->execute([$cartItem['cart_id']]);
-            // 统一消息为 "Added to cart successfully"
+            // message  "Added to cart successfully"
             echo json_encode(['status' => 'success', 'message' => 'Added to cart successfully']);
             exit;
         }

@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 session_start();
 
-// 获取当前用户的 parent_id
+// get now  parent_id
 $parent_id = $_SESSION['parent_id'] ?? '';
 
 if (empty($parent_id)) {
@@ -10,16 +10,16 @@ if (empty($parent_id)) {
     exit();
 }
 
-// 获取请求中的年级参数
+// get subject_year
 $subject_year = isset($_GET['subject_year']) ? (int)$_GET['subject_year'] : null;
 
-// 引入数据库连接
+// connection to the database
 include 'db.php';
 
-// 基础SQL查询
+
 $sql = "SELECT child_id,child_name, child_year FROM child WHERE parent_id = ?";
 
-// 如果有年级参数，添加年级筛选条件
+
 if ($subject_year !== null) {
     $sql .= " AND child_year = ?";
 }
@@ -31,7 +31,7 @@ if (!$stmt) {
     exit();
 }
 
-// 根据是否有年级参数绑定参数
+
 if ($subject_year !== null) {
     $stmt->bind_param("ii", $parent_id, $subject_year);
 } else {

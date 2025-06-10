@@ -81,8 +81,8 @@ while ($row = $result->fetch_assoc()) {
         'comment_rating' => (int)$row['comment_rating'],
         'comment_text' => $row['comment_text'],
         'comment_created_at' => $row['comment_created_at'],
-        'subject_name' => $row['subject_name'], // 新增 subject_name
-        'year' => $row['year'] // 新增 year
+        'subject_name' => $row['subject_name'], // add subject_name
+        'year' => $row['year'] // add year
     ];
 }
 

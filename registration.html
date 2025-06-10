@@ -484,7 +484,7 @@
     document.getElementById("username").addEventListener("input", function(e) {
         let input = e.target.value;
         const originalLength = input.length;
-        // 只移除除空格外的特殊字符
+        // Remove only special characters except spaces
         input = input.replace(/[^a-zA-Z\s]/g, "");
         if (input.length !== originalLength) {
             showToast("Username can only contain letters and spaces. Special characters are not allowed.");

@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 
 try {
-    // 正确的PDO连接方式
+    // correct connection
     $pdo = new PDO("mysql:host=localhost;dbname=the seeds", "root", "");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     

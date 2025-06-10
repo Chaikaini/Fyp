@@ -17,7 +17,7 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 使用 JOIN 查询 teacher_name，同时仍然只取 part_id = 1 或 2
+// use JOIN check teacher_name，and get part_id = 1 or 2
 $sql = "
     SELECT 
         c.*,
