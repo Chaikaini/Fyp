@@ -565,7 +565,7 @@
 
         if (searchInput) {
             searchInput.oninput = function() {
-                // 只允许字母（a-z, A-Z）
+                // （a-z, A-Z）
                 this.value = this.value.replace(/[^a-zA-Z]/g, '');
                 if (this.value && !/^[a-zA-Z]+$/.test(this.value)) {
                     showToast('Please enter letters only!', true);
