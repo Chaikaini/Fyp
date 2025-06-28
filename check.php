@@ -539,7 +539,11 @@ $conn->close();
         </div>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast">
+        <img class="toast-image" src="" alt="Toast Status">
+        <p class="toast-message"></p>
+        <button class="toast-close">OK</button>
+    </div>
 
     <script>
         // Check login status and load content
@@ -668,7 +672,7 @@ $conn->close();
                 console.log('Card number blur event triggered. Value:', this.value);
                 const digits = this.value.replace(/\D/g, '');
                 if (digits.length > 0 && digits.length < 16) {
-                    showPaymentModal(false, "Please enter a valid 16-digit card number.");
+                    showToast('error', 'Please enter a valid 16-digit card number.');
                     this.value = '';
                     this.setCustomValidity('Invalid card number');
                 } else {
@@ -681,6 +685,7 @@ $conn->close();
             const currentDate = new Date();
             const currentMonth = currentDate.getMonth() + 1;
             const currentYear = currentDate.getFullYear() % 100;
+            const maxYear = 36; // Restrict to 2036
 
             let expiryTimeout = null;
             expiryDateInput.addEventListener('input', function(e) {
@@ -713,14 +718,14 @@ $conn->close();
                         console.log('Validating:', { inputMonth, inputYear });
                         if (isNaN(inputMonth) || isNaN(inputYear)) {
                             e.target.setCustomValidity('Invalid date format (MM/YY).');
-                            showPaymentModal(false, 'Invalid date format (MM/YY).');
+                            showToast('error', 'Invalid date format (MM/YY).');
                             e.target.value = '';
                             return;
                         }
                         const isValid = validateExpiryDate(inputMonth, inputYear);
                         if (!isValid) {
-                            e.target.setCustomValidity('Please enter a future date (MM/YY).');
-                            showPaymentModal(false, 'Expiry date must be in the future (MM/YY).');
+                            e.target.setCustomValidity('Please enter a valid future date (MM/YY) not exceeding 12/36.');
+                            showToast('error', 'Expiry date must be in the future and not exceed 12/36 (MM/YY).');
                             e.target.value = '';
                         } else {
                             e.target.setCustomValidity('');
@@ -736,31 +741,29 @@ $conn->close();
                     const [inputMonth, inputYear] = value.split('/').map(num => parseInt(num));
                     if (isNaN(inputMonth) || isNaN(inputYear)) {
                         this.setCustomValidity('Invalid date format (MM/YY).');
-                        showPaymentModal(false, 'Invalid date format (MM/YY).');
+                        showToast('error', 'Invalid date format (MM/YY).');
                         this.value = '';
                         return;
                     }
                     const isValid = validateExpiryDate(inputMonth, inputYear);
                     if (!isValid) {
-                        this.setCustomValidity('Please enter a future date (MM/YY).');
-                        showPaymentModal(false, 'Expiry date must be in the future (MM/YY).');
+                        this.setCustomValidity('Please enter a valid future date (MM/YY) not exceeding 12/36.');
+                        showToast('error', 'Expiry date must be in the future and not exceed 12/36 (MM/YY).');
                         this.value = '';
                     } else {
                         this.setCustomValidity('');
                     }
                 } else if (value.length > 0) {
-                    showPaymentModal(false, 'Please enter a complete date in MM/YY format.');
+                    showToast('error', 'Please enter a complete date in MM/YY format.');
                     this.value = '';
                     this.setCustomValidity('');
                 }
             });
 
             function validateExpiryDate(month, year) {
-                console.log('validateExpiryDate:', { month, year, currentMonth, currentYear });
+                console.log('validateExpiryDate:', { month, year, currentMonth, currentYear, maxYear });
                 if (month < 1 || month > 12) return false;
-                const minYear = currentYear;
-                const maxYear = currentYear + 10;
-                if (year < minYear || year > maxYear) return false;
+                if (year < currentYear || year > maxYear) return false;
                 const inputDate = new Date(`20${year}-${month}-01`);
                 const isFuture = inputDate > currentDate;
                 console.log('Date comparison:', { inputDate, currentDate, isFuture });
@@ -863,7 +866,7 @@ $conn->close();
 
                 const creditCardRadio = document.getElementById('creditcard');
                 if (!creditCardRadio || !creditCardRadio.checked) {
-                    showPaymentModal(false, "Please select a payment method.");
+                    showToast('error', "Please select a payment method.");
                     paymentButton.disabled = false;
                     return;
                 }
@@ -871,7 +874,7 @@ $conn->close();
                 let cardDetails = null;
                 const selectedCardOption = document.querySelector('input[name="card-option"]:checked');
                 if (!selectedCardOption) {
-                    showPaymentModal(false, "Please select a credit card or enter new card details.");
+                    showToast('error', "Please select a credit card or enter new card details.");
                     paymentButton.disabled = false;
                     return;
                 }
@@ -884,17 +887,17 @@ $conn->close();
                     const cvv = document.getElementById('cvv').value;
 
                     if (!cardNumber || cardNumber.length !== 16) {
-                        showPaymentModal(false, "Please enter a valid 16-digit card number.");
+                        showToast('error', "Please enter a valid 16-digit card number.");
                         paymentButton.disabled = false;
                         return;
                     }
                     if (!expiryDate || !/^\d{2}\/\d{2}$/.test(expiryDate)) {
-                        showPaymentModal(false, "Please enter a valid expiry date (MM/YY).");
+                        showToast('error', "Please enter a valid expiry date (MM/YY).");
                         paymentButton.disabled = false;
                         return;
                     }
                     if (!cvv || !/^\d{3}$/.test(cvv)) {
-                        showPaymentModal(false, "Please enter a valid 3-digit CVV code.");
+                        showToast('error', "Please enter a valid 3-digit CVV code.");
                         paymentButton.disabled = false;
                         return;
                     }
@@ -926,14 +929,14 @@ $conn->close();
                     console.log("Registration check response:", result);
 
                     if (!result.success) {
-                        showPaymentModal(false, result.message || "Some subjects are already registered for the selected child.");
+                        showToast('error', result.message || "Some subjects are already registered for the selected child.");
                         paymentButton.disabled = false;
                         return;
                     }
 
                     if (result.conflicts && result.conflicts.length > 0) {
                         const conflictMessage = result.conflicts.map(conflict => conflict.message).join("\n");
-                        showPaymentModal(false, conflictMessage);
+                        showToast('error', conflictMessage);
 
                         result.conflicts.forEach(conflict => {
                             const itemToRemove = document.querySelector(
@@ -960,13 +963,13 @@ $conn->close();
 
                     cartItems = result.valid_items || cartItems;
                     if (cartItems.length === 0) {
-                        showPaymentModal(false, "No valid items to process after checking registrations.");
+                        showToast('error', "No valid items to process after checking registrations.");
                         paymentButton.disabled = false;
                         return;
                     }
                 } catch (error) {
                     console.error("Error checking registration:", error);
-                    showPaymentModal(false, "Unable to check registration status: " + error.message);
+                    showToast('error', "Unable to check registration status: " + error.message);
                     paymentButton.disabled = false;
                     return;
                 }
@@ -981,7 +984,7 @@ $conn->close();
                         subjectTotal += parseFloat(priceData.price);
                     } catch (error) {
                         console.error("Error fetching subject price:", error);
-                        showPaymentModal(false, "Unable to fetch subject price: " + error.message);
+                        showToast('error', "Unable to fetch subject price: " + error.message);
                         paymentButton.disabled = false;
                         return;
                     }
@@ -1025,18 +1028,39 @@ $conn->close();
                     if (data.success) {
                         showPaymentModal(true, data.payment_id);
                     } else {
-                        showPaymentModal(false, data.message || "Payment failed.");
+                        showToast('error', data.message || "Payment failed.");
                     }
                 } catch (error) {
                     console.error("Payment processing failed:", error);
-                    showPaymentModal(false, "Payment processing failed: " + error.message);
+                    showToast('error', "Payment processing failed: " + error.message);
                 } finally {
                     paymentButton.disabled = false;
                 }
             }
 
-            function showToast(message, type) {
-                return; // Disabled per previous implementation
+            function showToast(type, message) {
+                console.log("showToast called:", { type, message });
+                const toast = document.getElementById("toast");
+                const toastImage = toast.querySelector('.toast-image');
+                const toastMessage = toast.querySelector('.toast-message');
+                const toastClose = toast.querySelector('.toast-close');
+
+                toast.className = `toast ${type} show`;
+                toastImage.src = type === 'success' ? 'img/payment_s.png' : type === 'error' ? 'img/payment_ns.png' : 'img/warning.png';
+                toastImage.onerror = () => { toastImage.src = "https://via.placeholder.com/80"; };
+                toastMessage.innerText = message;
+
+                toast.style.display = 'block';
+
+                toastClose.onclick = () => {
+                    toast.className = `toast ${type}`;
+                    setTimeout(() => { toast.style.display = 'none'; }, 300);
+                };
+
+                setTimeout(() => {
+                    toast.className = `toast ${type}`;
+                    setTimeout(() => { toast.style.display = 'none'; }, 300);
+                }, 5000);
             }
 
             function showPaymentModal(isSuccess, message = '') {
