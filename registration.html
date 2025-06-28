@@ -128,11 +128,11 @@
             text-decoration: underline;
         }
 
-        .username-container, .password-container {
+        .username-container, .password-container, .email-container {
             position: relative;
         }
 
-        .username-feedback, .password-feedback {
+        .username-feedback, .password-feedback, .email-feedback {
             margin-top: 5px;
             margin-bottom: 10px;
             font-size: 14px;
@@ -140,11 +140,11 @@
             color: #777;
         }
 
-        .username-feedback.valid, .password-feedback.valid {
+        .username-feedback.valid, .password-feedback.valid, .email-feedback.valid {
             color: #4caf50;
         }
 
-        .username-feedback.invalid, .password-feedback.invalid {
+        .username-feedback.invalid, .password-feedback.invalid, .email-feedback.invalid {
             color: #ff4d4d;
         }
 
@@ -293,7 +293,7 @@
                 height: auto;
                 padding: 20px;
             }
-            .password-strength, .username-feedback, .password-feedback {
+            .password-strength, .username-feedback, .password-feedback, .email-feedback {
                 font-size: 12px;
             }
             .strength-bar {
@@ -332,9 +332,12 @@
                         <input type="text" name="username" id="username" placeholder="Username" required>
                     </div>
                     <div class="username-feedback" id="usernameFeedback">Username: Enter 3-30 characters</div>
-                    <input type="email" name="email" placeholder="Email" required>
+                    <div class="email-container">
+                        <input type="email" name="email" id="email" placeholder="Email (Gmail only)" required>
+                    </div>
+                    <div class="email-feedback" id="emailFeedback">Email: Must be a valid Gmail address</div>
                     <input type="text" name="address" id="address" placeholder="Address" required>
-                    <input type="tel" name="phone_number" id="phone_number" placeholder="Phone Number " required>
+                    <input type="tel" name="phone_number" id="phone_number" placeholder="Phone Number" required>
                     <select name="gender" required>
                         <option value="" disabled selected hidden>Gender</option>
                         <option value="Male">Male</option>
@@ -445,6 +448,29 @@
         return isValid;
     }
 
+    // Email validation function
+    function validateEmail(email) {
+        const feedback = document.getElementById("emailFeedback");
+        let message = "Email: ";
+        let isValid = true;
+
+        if (email.length === 0) {
+            message += "Must be a valid Gmail address";
+            feedback.className = "email-feedback";
+            isValid = false;
+        } else if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
+            message += "Must be a valid Gmail address (e.g., example@gmail.com)";
+            feedback.className = "email-feedback invalid";
+            isValid = false;
+        } else {
+            message += "Valid";
+            feedback.className = "email-feedback valid";
+        }
+
+        feedback.innerText = message;
+        return isValid;
+    }
+
     // Password validation function
     function validatePassword(password) {
         const feedback = document.getElementById("passwordFeedback");
@@ -501,6 +527,16 @@
         }, 500);
     });
 
+    // Real-time email input handling with debounce
+    let emailDebounceTimer;
+    document.getElementById("email").addEventListener(" Alban", function(e) {
+        let input = e.target.value;
+        clearTimeout(emailDebounceTimer);
+        emailDebounceTimer = setTimeout(() => {
+            validateEmail(input);
+        }, 500);
+    });
+
     // Real-time password input handling
     document.getElementById("password").addEventListener("input", function() {
         const password = this.value;
@@ -544,12 +580,18 @@
         let form = this;
         let formData = new FormData(form);
         let username = document.getElementById("username").value;
+        let email = document.getElementById("email").value;
         let phoneNumber = document.getElementById("phone_number").value;
         let parent_password = document.getElementById("password").value;
         let confirm_password = document.getElementById("confirm_password").value;
 
         // Username validation
         if (!validateUsername(username)) {
+            return;
+        }
+
+        // Email validation
+        if (!validateEmail(email)) {
             return;
         }
 
